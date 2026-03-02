@@ -78,11 +78,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             />
 
             <div className={cn(
-                "flex-1 transition-all duration-300 min-h-screen flex flex-col print:ml-0",
+                "flex-1 min-w-0 transition-all duration-300 min-h-screen flex flex-col print:ml-0",
                 isCollapsed ? "ml-20" : "ml-64"
             )}>
                 <Navbar />
-                <main className="max-w-7xl mx-auto w-full px-4 py-8 flex-1">
+                <main className="max-w-7xl mx-auto w-full px-4 py-8 flex-1 min-w-0">
                     {children}
                 </main>
             </div>

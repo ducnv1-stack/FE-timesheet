@@ -36,7 +36,7 @@ export default function NewOrderPage() {
         giftAmount: 0,
         items: [{ productId: '', quantity: 1, unitPrice: 0 }],
         splits: [], // Start with empty splits as requested
-        payments: [{ paymentMethod: 'TRANSFER', amount: 0, paidAt: new Date().toISOString().split('T')[0] }],
+        payments: [{ paymentMethod: 'CASH', amount: 0, paidAt: new Date().toISOString().split('T')[0] }],
         driverId: '',
         driverType: 'internal'
     });
@@ -163,16 +163,23 @@ export default function NewOrderPage() {
             // Calculate total again from valid items for safety
             const finalTotal = validItems.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
 
-            // Auto-calculate equal splits
-            const totalPeople = order.splits.length + 1;
-            const splitPercent = 100 / totalPeople;
-            const splitAmount = finalTotal / totalPeople;
+            // Method 2: Manual amounts for splits, rest for creator
+            const othersTotalAmount = order.splits.reduce((sum, s) => sum + s.splitAmount, 0);
+
+            if (othersTotalAmount > finalTotal) {
+                toastError('Tổng số tiền chia phối hợp vượt quá tổng đơn hàng.');
+                setLoading(false);
+                return;
+            }
+
+            const creatorAmount = finalTotal - othersTotalAmount;
+            const creatorPercent = finalTotal > 0 ? (creatorAmount / finalTotal) * 100 : 100;
 
             const creatorSplit = {
                 employeeId: order.staffCode || '',
                 branchId: order.branchId,
-                splitPercent,
-                splitAmount
+                splitPercent: Number(creatorPercent.toFixed(2)),
+                splitAmount: creatorAmount
             };
 
             // Ensure creatorSplit has valid IDs before proceeding
@@ -182,11 +189,8 @@ export default function NewOrderPage() {
                 return;
             }
 
-            const otherSplits = order.splits.map(s => ({
-                ...s,
-                splitPercent,
-                splitAmount
-            }));
+            // Other splits are already cleaned in SplitManager, just ensure they are sent as is
+            const otherSplits = order.splits;
 
             // Add createdBy from logged-in user
             const storedUser = localStorage.getItem('user');
@@ -486,7 +490,7 @@ export default function NewOrderPage() {
                                                     <span className="text-[10px] text-slate-500 uppercase">{branch?.name || 'N/A'}</span>
                                                 </div>
                                                 <span className="text-sm font-medium italic text-slate-600">
-                                                    Doanh số: {formatCurrency(totalAmount / (order.splits.length + 1))}
+                                                    Doanh số: {formatCurrency(s.splitAmount)}
                                                 </span>
                                             </div>
                                         );
@@ -518,7 +522,7 @@ export default function NewOrderPage() {
                             <div className="flex justify-between items-center pb-3 border-b border-slate-100">
                                 <span className="text-slate-500 font-bold text-[11px] uppercase tracking-tight">Doanh số ghi nhận</span>
                                 <span className="font-black text-lg text-slate-700">
-                                    {formatCurrency(totalAmount / (order.splits.length + 1))}
+                                    {formatCurrency(totalAmount - order.splits.reduce((sum, s) => sum + s.splitAmount, 0))}
                                 </span>
                             </div>
                             {/* Commission Row */}
@@ -529,8 +533,11 @@ export default function NewOrderPage() {
                                         const p = products.find(prod => prod.id === item.productId);
                                         if (!p) return sum;
                                         const rate = item.unitPrice < p.minPrice ? 0.01 : 0.018;
-                                        return sum + (item.quantity * item.unitPrice * rate);
-                                    }, 0) / (order.splits.length + 1))}
+                                        const itemTotal = item.quantity * item.unitPrice;
+                                        // Calculate share of this item for creator
+                                        const creatorShare = totalAmount > 0 ? (totalAmount - order.splits.reduce((sSum, s) => sSum + s.splitAmount, 0)) / totalAmount : 1;
+                                        return sum + (itemTotal * rate * creatorShare);
+                                    }, 0))}
                                 </span>
                             </div>
 
@@ -557,7 +564,8 @@ export default function NewOrderPage() {
                                     </div>
                                 );
 
-                                const sharedBonus = totalBonus / (order.splits.length + 1);
+                                const creatorShare = totalAmount > 0 ? (totalAmount - order.splits.reduce((sSum, s) => sSum + s.splitAmount, 0)) / totalAmount : 1;
+                                const sharedBonus = totalBonus * creatorShare;
 
                                 return (
                                     <div className="space-y-3">

@@ -99,6 +99,9 @@ export default function EditOrderPage() {
                             amount: Number(p.amount),
                             paidAt: p.paidAt.split('T')[0],
                         })),
+                        isPaymentConfirmed: orderData.isPaymentConfirmed,
+                        confirmedAt: orderData.confirmedAt,
+                        confirmer: orderData.confirmer,
                         note: orderData.note || ''
                     };
                     setOrder(formattedOrder);
@@ -137,6 +140,7 @@ export default function EditOrderPage() {
     const totalAmount = order.items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
     const paidAmount = order.payments.reduce((sum, p) => sum + p.amount, 0);
     const remainingAmount = totalAmount - paidAmount;
+    const isInstallment = order.payments?.some((p: any) => p.paymentMethod === 'INSTALLMENT');
 
     // Calculate dynamic commission label
     let commissionLabel = "Hoa hồng (1.8%)";
@@ -175,6 +179,10 @@ export default function EditOrderPage() {
 
         setLoading(true);
         try {
+            const storedUser = localStorage.getItem('user');
+            const currentUser = storedUser ? JSON.parse(storedUser) : null;
+            const currentUserId = currentUser?.id || '00000000-0000-0000-0000-000000000000';
+
             const payload: any = { ...order, items: validItems };
 
             // Clean up
@@ -182,19 +190,38 @@ export default function EditOrderPage() {
             if (!payload.note) delete payload.note;
             if (!payload.customerAddress) delete payload.customerAddress;
             if (!payload.customerCardNumber) delete payload.customerCardNumber;
-            if (!payload.customerCardIssueDate) delete payload.customerCardIssueDate;
+            if (payload.customerCardIssueDate === "") {
+                payload.customerCardIssueDate = null;
+            } else if (!payload.customerCardIssueDate) {
+                delete payload.customerCardIssueDate;
+            }
             if (!payload.driverId) delete payload.driverId;
 
+            // Remove confirmation fields as they are handled by separate API
+            delete payload.isPaymentConfirmed;
+            delete payload.confirmedAt;
+            delete payload.confirmer;
+            delete payload.id; // Also remove id if present in state
+
             const finalTotal = validItems.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
-            const totalPeople = (order.splits?.length || 0) + 1;
-            const splitPercent = 100 / totalPeople;
-            const splitAmount = finalTotal / totalPeople;
+
+            // Method 2: Manual amounts for splits, rest for creator
+            const othersTotalAmount = (order.splits || []).reduce((sum, s) => sum + s.splitAmount, 0);
+
+            if (othersTotalAmount > finalTotal) {
+                toastError('Tổng số tiền chia phối hợp vượt quá tổng đơn hàng.');
+                setLoading(false);
+                return;
+            }
+
+            const creatorAmount = finalTotal - othersTotalAmount;
+            const creatorPercent = finalTotal > 0 ? (creatorAmount / finalTotal) * 100 : 100;
 
             const creatorSplit = {
-                employeeId: order.staffCode || '',
+                employeeId: order.staffCode || currentUserId,
                 branchId: order.branchId,
-                splitPercent,
-                splitAmount
+                splitPercent: Number(creatorPercent.toFixed(2)),
+                splitAmount: creatorAmount
             };
 
             if (!creatorSplit.employeeId) {
@@ -202,19 +229,19 @@ export default function EditOrderPage() {
                 setLoading(false); return;
             }
 
-            const otherSplits = (order.splits || []).map(s => ({ ...s, splitPercent, splitAmount }));
-            payload.splits = [creatorSplit, ...otherSplits];
+            payload.splits = [creatorSplit, ...(order.splits || [])];
 
-            const storedUser = localStorage.getItem('user');
-            const currentUser = storedUser ? JSON.parse(storedUser) : null;
-
-            const res = await fetch(`${apiUrl}/orders/${orderId}?userId=${currentUser?.id}`, {
+            const res = await fetch(`${apiUrl}/orders/${orderId}?userId=${currentUserId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
-            if (!res.ok) throw new Error('Failed to update order');
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                console.error('Update Order Error:', errorData);
+                throw new Error(errorData.message || 'Failed to update order');
+            }
 
             success('Cập nhật hóa đơn thành công!');
             router.push('/orders');
@@ -275,7 +302,12 @@ export default function EditOrderPage() {
                         </div>
                         <div className="text-right">
                             <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-1">Ohari</h1>
-                            <p className="text-emerald-600 font-black text-sm uppercase tracking-widest">Hệ thống ERP</p>
+                            <p className={cn(
+                                "font-black text-sm uppercase tracking-widest",
+                                isInstallment ? (order.isPaymentConfirmed ? "text-emerald-600" : "text-amber-500") : "text-emerald-600"
+                            )}>
+                                {isInstallment ? (order.isPaymentConfirmed ? "Đã khớp tiền" : "Chờ thu tiền") : "Ghi nhận DS"}
+                            </p>
                         </div>
                     </div>
 
@@ -474,12 +506,32 @@ export default function EditOrderPage() {
                                     {order.payments.map((p, i) => (
                                         <div key={i} className="flex justify-between border-b border-slate-100 pb-1">
                                             <span className="text-sm font-medium text-slate-600">
-                                                {p.paymentMethod === 'CASH' ? '💰 Tiền mặt' : p.paymentMethod === 'TRANSFER' ? '🏦 Chuyển khoản' : '💳 Quẹt thẻ'} ({p.paidAt})
+                                                {p.paymentMethod === 'CASH' ? '💰 Tiền mặt' :
+                                                    p.paymentMethod === 'TRANSFER_COMPANY' ? '🏦 CK Công ty' :
+                                                        p.paymentMethod === 'TRANSFER_PERSONAL' ? '🏠 CK Cá nhân' :
+                                                            p.paymentMethod === 'CREDIT' ? '💳 Quẹt thẻ' :
+                                                                p.paymentMethod === 'INSTALLMENT' ? '📈 Trả góp' : '🏦 Chuyển khoản'} ({p.paidAt})
                                             </span>
                                             <span className="text-sm font-black">{formatCurrency(p.amount)}</span>
                                         </div>
                                     ))}
                                 </div>
+                                {isInstallment && order.isPaymentConfirmed && (
+                                    <div className="mt-2 p-2 bg-emerald-50 border border-emerald-100 rounded flex justify-between items-center">
+                                        <span className="text-[10px] font-black text-emerald-600 uppercase">✓ Kế toán xác nhận:</span>
+                                        <span className="text-[10px] font-bold text-emerald-800 italic">
+                                            {order.confirmer?.fullName || 'Hệ thống'} - {order.confirmedAt ? new Date(order.confirmedAt).toLocaleDateString('vi-VN') : '---'}
+                                        </span>
+                                    </div>
+                                )}
+                                {!isInstallment && (
+                                    <div className="mt-2 p-2 bg-slate-50 border border-slate-100 rounded flex justify-between items-center">
+                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Hệ thống ghi nhận:</span>
+                                        <span className="text-[10px] font-bold text-slate-500 italic">
+                                            Tự động (Ngày tạo {new Date(order.orderDate).toLocaleDateString('vi-VN')})
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                         )}
 
@@ -498,7 +550,7 @@ export default function EditOrderPage() {
                                                     <span className="text-[10px] text-slate-500 uppercase">{branch?.name || 'N/A'}</span>
                                                 </div>
                                                 <span className="text-sm font-medium italic text-slate-600">
-                                                    Doanh số: {formatCurrency(totalAmount / (order.splits.length + 1))}
+                                                    Doanh số: {formatCurrency(s.splitAmount)}
                                                 </span>
                                             </div>
                                         );
@@ -529,19 +581,27 @@ export default function EditOrderPage() {
                             <div className="flex justify-between items-center pb-3 border-b border-slate-100">
                                 <span className="text-slate-500 font-bold text-[11px] uppercase tracking-tight">Doanh số ghi nhận</span>
                                 <span className="font-black text-lg text-slate-700">
-                                    {formatCurrency(totalAmount / (order.splits.length + 1))}
+                                    {(() => {
+                                        const othersTotal = order.splits.reduce((sum, s) => sum + s.splitAmount, 0);
+                                        return formatCurrency(totalAmount - othersTotal);
+                                    })()}
                                 </span>
                             </div>
                             {/* Commission Row */}
                             <div className="flex justify-between items-center pb-3 border-b border-slate-100">
                                 <span className="text-slate-500 font-bold text-[11px] uppercase tracking-tight">{commissionLabel}</span>
                                 <span className="font-black text-lg text-emerald-600">
-                                    {formatCurrency(order.items.reduce((sum, item) => {
-                                        const p = products.find(prod => prod.id === item.productId);
-                                        if (!p) return sum;
-                                        const rate = item.unitPrice < Number(p.minPrice) ? 0.01 : 0.018;
-                                        return sum + (item.quantity * item.unitPrice * rate);
-                                    }, 0) / (order.splits.length + 1))}
+                                    {(() => {
+                                        const totalComm = order.items.reduce((sum, item) => {
+                                            const p = products.find(prod => prod.id === item.productId);
+                                            if (!p) return sum;
+                                            const rate = item.unitPrice < Number(p.minPrice) ? 0.01 : 0.018;
+                                            return sum + (item.quantity * item.unitPrice * rate);
+                                        }, 0);
+                                        const othersTotal = order.splits.reduce((sum, s) => sum + s.splitAmount, 0);
+                                        const myPercent = totalAmount > 0 ? (totalAmount - othersTotal) / totalAmount : 1;
+                                        return formatCurrency(totalComm * myPercent);
+                                    })()}
                                 </span>
                             </div>
 
@@ -574,17 +634,35 @@ export default function EditOrderPage() {
                                     <div className="space-y-3">
                                         <div className="flex justify-between items-center bg-indigo-50 p-2 rounded border border-indigo-100">
                                             <span className="text-indigo-700 font-black uppercase text-[11px] tracking-tight">Thưởng nóng</span>
-                                            <span className="font-black text-xl text-indigo-800">{formatCurrency(sharedBonus)}</span>
+                                            <span className="font-black text-xl text-indigo-800">
+                                                {(() => {
+                                                    const othersTotal = order.splits.reduce((sum, s) => sum + s.splitAmount, 0);
+                                                    const myPercent = totalAmount > 0 ? (totalAmount - othersTotal) / totalAmount : 1;
+                                                    return formatCurrency(totalBonus * myPercent);
+                                                })()}
+                                            </span>
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-2">
                                             <div className="bg-slate-50 p-2 rounded border border-slate-200">
                                                 <div className="text-[10px] text-slate-500 uppercase font-black mb-0.5 text-center">Sale (70%)</div>
-                                                <div className="text-sm font-black text-slate-800 text-center">{formatCurrency(sharedBonus * 0.7)}</div>
+                                                <div className="text-sm font-black text-slate-800 text-center">
+                                                    {(() => {
+                                                        const othersTotal = order.splits.reduce((sum, s) => sum + s.splitAmount, 0);
+                                                        const myPercent = totalAmount > 0 ? (totalAmount - othersTotal) / totalAmount : 1;
+                                                        return formatCurrency(totalBonus * myPercent * 0.7);
+                                                    })()}
+                                                </div>
                                             </div>
                                             <div className="bg-slate-50 p-2 rounded border border-slate-200">
                                                 <div className="text-[10px] text-slate-500 uppercase font-black mb-0.5 text-center">Quản lý (30%)</div>
-                                                <div className="text-sm font-black text-slate-800 text-center">{formatCurrency(sharedBonus * 0.3)}</div>
+                                                <div className="text-sm font-black text-slate-800 text-center">
+                                                    {(() => {
+                                                        const othersTotal = order.splits.reduce((sum, s) => sum + s.splitAmount, 0);
+                                                        const myPercent = totalAmount > 0 ? (totalAmount - othersTotal) / totalAmount : 1;
+                                                        return formatCurrency(totalBonus * myPercent * 0.3);
+                                                    })()}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

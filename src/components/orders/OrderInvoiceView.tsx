@@ -19,6 +19,7 @@ export default function OrderInvoiceView({ order, onBack }: OrderInvoiceViewProp
     }, []);
 
     const totalAmount = Number(order.totalAmount);
+    const isInstallment = order.payments?.some((p: any) => p.paymentMethod === 'INSTALLMENT');
 
     return (
         <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-300">
@@ -82,7 +83,12 @@ export default function OrderInvoiceView({ order, onBack }: OrderInvoiceViewProp
                         </div>
                         <div className="text-right">
                             <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-1">Hóa đơn</h1>
-                            <p className="text-emerald-600 font-black text-sm uppercase tracking-widest">Đã thanh toán</p>
+                            <p className={cn(
+                                "font-black text-sm uppercase tracking-widest",
+                                isInstallment ? (order.isPaymentConfirmed ? "text-emerald-600" : "text-amber-500") : "text-emerald-600"
+                            )}>
+                                {isInstallment ? (order.isPaymentConfirmed ? "Đã khớp tiền" : "Chờ thu tiền") : "Đã ghi nhận DS"}
+                            </p>
                         </div>
                     </div>
 
@@ -191,12 +197,38 @@ export default function OrderInvoiceView({ order, onBack }: OrderInvoiceViewProp
                                     {order.payments.map((p: any, i: number) => (
                                         <div key={i} className="flex justify-between border-b border-slate-50 py-1">
                                             <span className="text-xs font-medium text-slate-600 italic">
-                                                {p.paymentMethod === 'CASH' ? '💰 Tiền mặt' : p.paymentMethod === 'TRANSFER' ? '🏦 Chuyển khoản' : '💳 Quẹt thẻ'}
+                                                {(() => {
+                                                    switch (p.paymentMethod) {
+                                                        case 'CASH': return '💰 Tiền mặt';
+                                                        case 'TRANSFER_COMPANY': return '🏦 Chuyển khoản (C.Ty)';
+                                                        case 'TRANSFER_PERSONAL': return '🏠 Chuyển khoản (C.Nhân)';
+                                                        case 'CREDIT': return '💳 Quẹt thẻ';
+                                                        case 'INSTALLMENT': return '📈 Trả góp';
+                                                        default: return '🏦 Chuyển khoản';
+                                                    }
+                                                })()}
                                                 ({new Date(p.paidAt).toLocaleDateString('vi-VN')})
                                             </span>
                                             <span className="text-xs font-black text-slate-800">{formatCurrency(Number(p.amount))}</span>
                                         </div>
                                     ))}
+                                    {/* Accountant confirmation - Only show for installment */}
+                                    {isInstallment && order.isPaymentConfirmed && (
+                                        <div className="flex justify-between border-b border-emerald-50 py-1 bg-emerald-50/50 px-2 rounded mt-1">
+                                            <span className="text-[10px] font-black text-emerald-600 uppercase">✓ Kế toán xác nhận:</span>
+                                            <span className="text-[10px] font-bold text-emerald-800 italic">
+                                                {order.confirmer?.fullName || 'Hệ thống'} - {order.confirmedAt ? new Date(order.confirmedAt).toLocaleDateString('vi-VN') : '---'}
+                                            </span>
+                                        </div>
+                                    )}
+                                    {!isInstallment && (
+                                        <div className="flex justify-between border-b border-slate-50 py-1 bg-slate-50/50 px-2 rounded mt-1">
+                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Hệ thống ghi nhận:</span>
+                                            <span className="text-[10px] font-bold text-slate-500 italic">
+                                                Tự động (Ngày tạo {new Date(order.orderDate).toLocaleDateString('vi-VN')})
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}

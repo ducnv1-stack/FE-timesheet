@@ -12,7 +12,7 @@ interface PaymentFormProps {
 
 export default function PaymentForm({ payments, totalOrderAmount, onChange }: PaymentFormProps) {
     const addPayment = () => {
-        onChange([...payments, { paymentMethod: 'TRANSFER', amount: 0, paidAt: new Date().toISOString().split('T')[0] }]);
+        onChange([...payments, { paymentMethod: 'CASH', amount: 0, paidAt: new Date().toISOString().split('T')[0] }]);
     };
 
     const removePayment = (index: number) => {
@@ -53,9 +53,11 @@ export default function PaymentForm({ payments, totalOrderAmount, onChange }: Pa
                                 onChange={(e) => updatePayment(index, 'paymentMethod', e.target.value)}
                                 className="flex-1 bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-rose-500 rounded-lg p-2 text-sm font-medium"
                             >
-                                <option value="CASH">Tiền mặt (CASH)</option>
-                                <option value="TRANSFER">Chuyển khoản (TRANSFER)</option>
-                                <option value="CREDIT">Quẹt thẻ (CREDIT)</option>
+                                <option value="CASH">💵 Tiền mặt (CASH)</option>
+                                <option value="TRANSFER_COMPANY">🏢 Chuyển khoản Công ty (CORP)</option>
+                                <option value="TRANSFER_PERSONAL">👤 Chuyển khoản Cá nhân (PERSONAL)</option>
+                                <option value="CARD">💳 Quẹt thẻ (CARD/CREDIT)</option>
+                                <option value="INSTALLMENT">🏦 Trả góp (INSTALLMENT)</option>
                             </select>
                             <button
                                 onClick={() => removePayment(index)}

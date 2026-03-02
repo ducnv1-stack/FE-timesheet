@@ -71,4 +71,16 @@ export interface FullOrder {
     items: OrderItem[];
     splits: OrderSplit[];
     payments: OrderPayment[];
+    isPaymentConfirmed?: boolean;
+    confirmedAt?: string;
+    confirmer?: {
+        fullName: string;
+        employee?: Employee;
+    };
+    isInvoiceIssued?: boolean;
+    invoiceIssuedAt?: string;
+    invoiceIssuer?: {
+        fullName: string;
+        employee?: Employee;
+    };
 }
