@@ -60,6 +60,8 @@ export default function OrdersPage() {
     const [timeFilter, setTimeFilter] = useState<'all' | 'today' | 'week' | 'month' | 'custom'>('all');
     const [startDate, setStartDate] = useState<string>('');
     const [endDate, setEndDate] = useState<string>('');
+    const [excludeInstallment, setExcludeInstallment] = useState(false);
+    const [deliveryTypeFilter, setDeliveryTypeFilter] = useState<'all' | 'company' | 'external'>('all');
 
     // Pagination States
     const [page, setPage] = useState(1);
@@ -82,16 +84,37 @@ export default function OrdersPage() {
         const tabParam = searchParams.get('tab');
         const startParam = searchParams.get('startDate');
         const endParam = searchParams.get('endDate');
+        const excludeInstallmentParam = searchParams.get('excludeInstallment');
 
         if (paymentParam) setPaymentStatusFilter(paymentParam === 'pending' ? 'pending' : 'all');
         if (invoiceParam) setInvoiceStatusFilter(invoiceParam === 'pending' ? 'pending' : 'all');
         if (branchParam) setSelectedBranchId(branchParam || 'all');
         if (tabParam) setActiveTab(tabParam as any);
+        if (excludeInstallmentParam === 'true') {
+            setExcludeInstallment(true);
+            setPaymentMethodFilter('all');
+        }
 
         if (startParam && endParam) {
             setStartDate(startParam);
             setEndDate(endParam);
             setTimeFilter('custom');
+        }
+
+        // Logic for Manager: Auto-select branch
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            const userData = JSON.parse(storedUser);
+            const userRole = typeof userData.role === 'object' ? (userData.role.code || userData.role.name) : userData.role;
+            const userBranchId = userData.employee?.branchId;
+            if (userRole === 'MANAGER' && userBranchId && !branchParam) {
+                setSelectedBranchId(userBranchId);
+            }
+        }
+
+        // Clean up URL parameters after consuming them to avoid "stuck" filters when switching tabs
+        if (paymentParam || invoiceParam || branchParam || tabParam || startParam || endParam || excludeInstallmentParam) {
+            router.replace('/orders');
         }
     }, [searchParams]);
 
@@ -165,42 +188,42 @@ export default function OrdersPage() {
 
             const userRole = typeof userData.role === 'object' ? (userData.role.code || userData.role.name) : userData.role;
             const userBranchId = userData.employee?.branchId;
-            const GLOBAL_ROLES = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MARKETING'];
+            const GLOBAL_ROLES = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MARKETING'];
 
             const orderParams = new URLSearchParams();
             orderParams.append('userId', userData.id);
             if (userRole) orderParams.append('roleCode', userRole);
 
-            // Only send default branch if restricted
-            if (userBranchId && !GLOBAL_ROLES.includes(userRole)) {
-                orderParams.append('branchId', userBranchId);
-            }
-
-            // Read filters: prefer URL params on first load (to avoid race condition with state)
-            const urlPaymentStatus = searchParams.get('paymentStatus');
-            const urlInvoiceStatus = searchParams.get('invoiceStatus');
-            const urlTab = searchParams.get('tab');
-            const urlBranch = searchParams.get('branchId');
-            const urlStartDate = searchParams.get('startDate');
-            const urlEndDate = searchParams.get('endDate');
-
-            const effectivePaymentStatus = urlPaymentStatus || paymentStatusFilter;
-            const effectiveInvoiceStatus = urlInvoiceStatus || invoiceStatusFilter;
-            const effectiveTab = urlTab || activeTab;
-            const effectiveBranchId = urlBranch || selectedBranchId;
-            const effectiveStartDate = urlStartDate || startDate;
-            const effectiveEndDate = urlEndDate || endDate;
+            // Read filters: use states directly (URL params are consumed by useEffect)
+            const effectivePaymentStatus = paymentStatusFilter;
+            const effectiveInvoiceStatus = invoiceStatusFilter;
+            const effectiveTab = activeTab;
+            const effectiveBranchId = selectedBranchId;
+            const effectiveStartDate = startDate;
+            const effectiveEndDate = endDate;
 
             // Scalability: Add Pagination & Filter Params
             orderParams.append('page', page.toString());
             orderParams.append('limit', limit.toString());
             if (debouncedSearch) orderParams.append('search', debouncedSearch);
-            if (effectiveBranchId !== 'all') orderParams.append('branchId', effectiveBranchId);
+
+            // Consolidate branchId: Prioritize effectiveBranchId, fallback to user's branch if restricted
+            if (effectiveBranchId !== 'all') {
+                orderParams.append('branchId', effectiveBranchId);
+            } else if (userBranchId && !GLOBAL_ROLES.includes(userRole)) {
+                orderParams.append('branchId', userBranchId);
+            }
+
             if (selectedEmployeeId !== 'all') orderParams.append('employeeId', selectedEmployeeId);
             if (statusFilter !== 'all') orderParams.append('status', statusFilter);
             if (effectivePaymentStatus && effectivePaymentStatus !== 'all') orderParams.append('paymentStatus', effectivePaymentStatus);
             if (paymentMethodFilter !== 'all') orderParams.append('paymentMethod', paymentMethodFilter);
             if (effectiveInvoiceStatus && effectiveInvoiceStatus !== 'all') orderParams.append('invoiceStatus', effectiveInvoiceStatus);
+
+            // Pass excludeInstallment if active
+            if (excludeInstallment) {
+                orderParams.append('excludeInstallment', 'true');
+            }
 
             // Date / time filter
             if (effectiveStartDate && effectiveEndDate) {
@@ -212,6 +235,7 @@ export default function OrdersPage() {
 
             if (effectiveTab !== 'all') orderParams.append('tab', effectiveTab);
             if (showLowPriceOnly) orderParams.append('lowPrice', 'true');
+            if (deliveryTypeFilter !== 'all') orderParams.append('deliveryType', deliveryTypeFilter);
 
             const orderUrl = `${apiUrl}/orders?${orderParams.toString()}`;
 
@@ -227,7 +251,7 @@ export default function OrdersPage() {
                 setTabCounts(result.meta.counts);
             }
 
-            if (GLOBAL_ROLES.includes(userRole) && branches.length === 0) {
+            if ((GLOBAL_ROLES.includes(userRole) || userRole === 'MANAGER') && branches.length === 0) {
                 const [branchRes, employeeRes] = await Promise.all([
                     fetch(`${apiUrl}/branches`),
                     fetch(`${apiUrl}/employees`)
@@ -275,6 +299,8 @@ export default function OrdersPage() {
         startDate,
         endDate,
         showLowPriceOnly,
+        excludeInstallment,
+        deliveryTypeFilter,
         searchParams  // Re-fetch when URL params change (drill-down from dashboard)
     ]);
 
@@ -311,10 +337,19 @@ export default function OrdersPage() {
         setTimeFilter('all');
         setStartDate('');
         setEndDate('');
-        setSelectedBranchId('all');
+
+        const userBranchId = user?.employee?.branchId;
+        if (isManager && userBranchId) {
+            setSelectedBranchId(userBranchId);
+        } else {
+            setSelectedBranchId('all');
+        }
+
         setSelectedEmployeeId('all');
         setActiveTab('all');
         setShowLowPriceOnly(false);
+        setExcludeInstallment(false);
+        setDeliveryTypeFilter('all');
         setPage(1);
         router.push('/orders');
     };
@@ -340,8 +375,9 @@ export default function OrdersPage() {
     };
 
     const userRole = user ? (typeof user.role === 'object' ? (user.role.code || user.role.name) : user.role) : '';
-    const GLOBAL_ROLES = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'MARKETING'];
+    const GLOBAL_ROLES = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MARKETING'];
     const isGlobalRole = GLOBAL_ROLES.includes(userRole);
+    const isManager = userRole === 'MANAGER';
     const isDirector = userRole === 'DIRECTOR';
     const isAccountant = userRole === 'ACCOUNTANT' || userRole === 'CHIEF_ACCOUNTANT';
     const isSale = userRole === 'SALE' || userRole === 'TELESALE';
@@ -360,13 +396,20 @@ export default function OrdersPage() {
 
         if (mySplit) {
             const totalAmount = Number(order.totalAmount);
+            const giftAmount = Number(order.giftAmount || 0);
+            const netRevenueForCommission = totalAmount - giftAmount;
+
+            // Commission factor ensures that commission is calculated on (Gross - Gift) 
+            // even though it's calculated item by item.
+            const commissionFactor = totalAmount > 0 ? netRevenueForCommission / totalAmount : 0;
+
             const splitRatio = totalAmount > 0 ? Number(mySplit.splitAmount) / totalAmount : 0;
             revenue = Number(mySplit.splitAmount);
 
             for (const item of order.items) {
                 const itemTotal = Number(item.totalPrice);
                 const rate = item.isBelowMin ? 0.01 : 0.018;
-                commission += itemTotal * rate;
+                commission += itemTotal * rate * commissionFactor;
                 bonus += Number(item.saleBonusAmount) * item.quantity;
             }
 
@@ -374,13 +417,12 @@ export default function OrdersPage() {
             bonus *= splitRatio;
         }
 
-        // Delivery fee: if I am the assigned driver in ANY delivery for this order
-        const myDelivery = order.deliveries?.find((d: any) => d.driverId === myId);
-        const deliveryFee = myDelivery ? Number(myDelivery.deliveryFee) : 0;
+        // Delivery fee: sum of all deliveries where I am assigned for this order
+        const myDeliveries = order.deliveries?.filter((d: any) => d.driverId === myId) || [];
+        const deliveryFee = myDeliveries.reduce((sum: number, d: any) => sum + Number(d.deliveryFee), 0);
 
-        // Revenue recognition logic
-        const isInstallment = order.payments?.some((p: any) => p.paymentMethod === 'INSTALLMENT');
-        const isRecognized = !isInstallment || order.isPaymentConfirmed;
+        // Revenue recognition logic (Now all orders must be confirmed)
+        const isRecognized = !!order.isPaymentConfirmed;
 
         return {
             revenue,
@@ -390,7 +432,7 @@ export default function OrdersPage() {
             total: commission + bonus + deliveryFee,
             recognizedTotal: isRecognized ? (commission + bonus + deliveryFee) : 0,
             isRecognized,
-            isInstallment
+            isInstallment: order.payments?.some((p: any) => p.paymentMethod === 'INSTALLMENT')
         };
     };
 
@@ -514,7 +556,10 @@ export default function OrdersPage() {
                         <CreditCard className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${paymentMethodFilter !== 'all' ? 'text-rose-500' : 'text-slate-400'}`} size={14} />
                         <select
                             value={paymentMethodFilter}
-                            onChange={(e: any) => setPaymentMethodFilter(e.target.value)}
+                            onChange={(e: any) => {
+                                setPaymentMethodFilter(e.target.value);
+                                setExcludeInstallment(false);
+                            }}
                             className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium ${paymentMethodFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
                         >
                             <option value="all">PTTT: Tất cả</option>
@@ -531,7 +576,10 @@ export default function OrdersPage() {
                         <ShieldCheck className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${paymentStatusFilter !== 'all' ? 'text-rose-500' : 'text-slate-400'}`} size={14} />
                         <select
                             value={paymentStatusFilter}
-                            onChange={(e: any) => setPaymentStatusFilter(e.target.value)}
+                            onChange={(e: any) => {
+                                setPaymentStatusFilter(e.target.value);
+                                setExcludeInstallment(false);
+                            }}
                             className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium ${paymentStatusFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
                         >
                             <option value="all">Giao dịch: Tất cả</option>
@@ -554,16 +602,31 @@ export default function OrdersPage() {
                         </select>
                     </div>
 
-                    {/* Branch Filter (Director Only) */}
-                    {isGlobalRole ? (
+                    {/* Delivery Type Filter */}
+                    <div className="relative">
+                        <Truck className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${deliveryTypeFilter !== 'all' ? 'text-rose-500' : 'text-slate-400'}`} size={14} />
+                        <select
+                            value={deliveryTypeFilter}
+                            onChange={(e: any) => setDeliveryTypeFilter(e.target.value)}
+                            className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium ${deliveryTypeFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                        >
+                            <option value="all">Lái xe: Tất cả</option>
+                            <option value="company">🏢 Xe công ty</option>
+                            <option value="external">🚚 Xe ngoài</option>
+                        </select>
+                    </div>
+
+                    {/* Branch Filter (Director & Manager) */}
+                    {(isGlobalRole || isManager) ? (
                         <div className="relative">
                             <MapPin className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${selectedBranchId !== 'all' ? 'text-rose-500' : 'text-slate-400'}`} size={14} />
                             <select
                                 value={selectedBranchId}
                                 onChange={(e) => setSelectedBranchId(e.target.value)}
-                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium ${selectedBranchId !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                                disabled={isManager}
+                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium ${selectedBranchId !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'} ${isManager ? 'opacity-70 cursor-not-allowed bg-slate-100' : ''}`}
                             >
-                                <option value="all">Tất cả chi nhánh</option>
+                                {isGlobalRole && <option value="all">Tất cả chi nhánh</option>}
                                 {branches.map(b => (
                                     <option key={b.id} value={b.id}>{b.name}</option>
                                 ))}
@@ -585,8 +648,8 @@ export default function OrdersPage() {
                         </div>
                     )}
 
-                    {/* Employee Filter (Global Roles) */}
-                    {isGlobalRole ? (
+                    {/* Employee Filter (Global Roles & Manager) */}
+                    {(isGlobalRole || isManager) ? (
                         <div className="relative">
                             <UserIcon className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${selectedEmployeeId !== 'all' ? 'text-rose-500' : 'text-slate-400'}`} size={14} />
                             <select
@@ -639,7 +702,7 @@ export default function OrdersPage() {
             <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
                 <div className="flex border-b border-slate-200 w-full overflow-x-auto scrollbar-hide">
                     <button
-                        onClick={() => setActiveTab('all')}
+                        onClick={() => { setActiveTab('all'); setExcludeInstallment(false); }}
                         className={cn(
                             "flex-1 min-w-0 px-2 py-1.5 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1",
                             activeTab === 'all'
@@ -659,7 +722,7 @@ export default function OrdersPage() {
                         )}
                     </button>
                     <button
-                        onClick={() => setActiveTab('created')}
+                        onClick={() => { setActiveTab('created'); setExcludeInstallment(false); }}
                         className={cn(
                             "flex-1 min-w-0 px-2 py-1.5 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1",
                             activeTab === 'created'
@@ -679,7 +742,7 @@ export default function OrdersPage() {
                         )}
                     </button>
                     <button
-                        onClick={() => setActiveTab('assigned')}
+                        onClick={() => { setActiveTab('assigned'); setExcludeInstallment(false); }}
                         className={cn(
                             "flex-1 min-w-0 px-2 py-1.5 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1",
                             activeTab === 'assigned'
@@ -698,10 +761,10 @@ export default function OrdersPage() {
                             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"></div>
                         )}
                     </button>
-                    {isGlobalRole && (
+                    {(isGlobalRole || isManager) && (
                         <>
                             <button
-                                onClick={() => setActiveTab('installment')}
+                                onClick={() => { setActiveTab('installment'); setExcludeInstallment(false); }}
                                 className={cn(
                                     "flex-1 min-w-0 px-2 py-1.5 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1",
                                     activeTab === 'installment'
@@ -721,7 +784,7 @@ export default function OrdersPage() {
                                 )}
                             </button>
                             <button
-                                onClick={() => setActiveTab('invoice')}
+                                onClick={() => { setActiveTab('invoice'); setExcludeInstallment(false); }}
                                 className={cn(
                                     "flex-1 min-w-0 px-2 py-1.5 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1",
                                     activeTab === 'invoice'
@@ -757,14 +820,14 @@ export default function OrdersPage() {
                     <table className="w-full min-w-[1200px] text-left border-collapse">
                         <thead>
                             <tr className="bg-slate-50/50 border-b border-slate-100">
-                                <th className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Ngày tạo</th>
-                                <th className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Khách hàng</th>
-                                {isGlobalRole && <th className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Chi nhánh</th>}
-                                {isGlobalRole && <th className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Nhân viên</th>}
-                                <th className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Sản phẩm</th>
-                                <th className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right leading-none">Tổng tiền</th>
-                                {(isGlobalRole || isSale) ? <th className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center leading-none">PTTT</th> : null}
-                                {isGlobalRole && <th className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center leading-none">Xuất HĐ</th>}
+                                <th className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none whitespace-nowrap">Ngày tạo</th>
+                                <th className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none whitespace-nowrap">Khách hàng</th>
+                                {isGlobalRole && <th className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none whitespace-nowrap">Chi nhánh</th>}
+                                {(isGlobalRole || isManager) && <th className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none whitespace-nowrap">Nhân viên</th>}
+                                <th className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none whitespace-nowrap">Sản phẩm</th>
+                                <th className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right leading-none whitespace-nowrap">Tổng tiền</th>
+                                {(isGlobalRole || isManager || isSale) ? <th className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center leading-none whitespace-nowrap">PTTT</th> : null}
+                                {(isGlobalRole || isManager) && <th className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center leading-none whitespace-nowrap">Xuất HĐ</th>}
                                 {isSale && (
                                     <>
                                         <th className="px-1.5 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right whitespace-nowrap leading-none">Hoa hồng</th>
@@ -792,302 +855,326 @@ export default function OrdersPage() {
                                     </td>
                                 </tr>
                             ) : (
-                                tabFilteredOrders.map((order) => (
-                                    <tr key={order.id} className="hover:bg-slate-50/50 transition-colors group">
-                                        <td className="px-2 py-1.5">
-                                            <div className="flex flex-col">
-                                                <span className="text-[12px] font-black text-slate-700 leading-tight">
-                                                    {new Date(order.createdAt).toLocaleDateString('vi-VN')}
-                                                </span>
-                                                <div className="flex items-center gap-1">
-                                                    <span className="text-[9px] text-slate-400 font-bold whitespace-nowrap">
-                                                        {new Date(order.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                                tabFilteredOrders.map((order) => {
+                                    const created = new Date(order.createdAt);
+                                    const updated = order.updatedAt ? new Date(order.updatedAt) : null;
+                                    const isSignificantlyUpdated = updated && (updated.getTime() - created.getTime() > 60000); // 1 minute threshold
+
+                                    return (
+                                        <tr key={order.id} className="hover:bg-slate-50/50 transition-colors group">
+                                            <td className="px-2 py-1.5">
+                                                <div className="flex flex-col">
+                                                    <span className="text-[12px] font-black text-slate-700 leading-tight">
+                                                        {created.toLocaleDateString('vi-VN')}
                                                     </span>
-                                                    <span className="text-[9px] text-blue-500 font-black tracking-tighter bg-blue-50 px-1 rounded uppercase">
-                                                        #{order.id.split('-')[0]}
-                                                    </span>
+                                                    <div className="flex items-center gap-1">
+                                                        <span className="text-[9px] text-slate-400 font-bold whitespace-nowrap">
+                                                            {created.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                                                        </span>
+                                                        <span className="text-[9px] text-blue-500 font-black tracking-tighter bg-blue-50 px-1 rounded uppercase">
+                                                            #{order.id.split('-')[0]}
+                                                        </span>
+                                                    </div>
+                                                    {isSignificantlyUpdated && (
+                                                        <span className="text-[8.5px] font-bold text-slate-400 mt-0.5 whitespace-nowrap italic">
+                                                            🕒Sửa: {updated.toLocaleDateString('vi-VN')} {updated.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                                                        </span>
+                                                    )}
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-2 py-1.5">
-                                            <div className="flex flex-col gap-0.5">
-                                                <div className="flex items-center gap-1.5">
-                                                    <span className="text-[12px] font-black text-slate-800 leading-none whitespace-nowrap">{order.customerName}</span>
-                                                    {/* Badges */}
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {order.items?.some((item: any) => item.isBelowMin) && (
-                                                            <span className="px-1 py-[0.5px] rounded text-[8px] font-black bg-amber-50 text-amber-600 border border-amber-100 whitespace-nowrap" title="Bán dưới giá Min">
-                                                                Min
-                                                            </span>
-                                                        )}
-                                                        {isOrderCreatedByUser(order) && (
-                                                            <span className="px-1 py-[0.5px] rounded text-[8px] font-black bg-emerald-50 text-emerald-600 border border-emerald-100 whitespace-nowrap">
-                                                                Tôi
+                                            </td>
+                                            <td className="px-2 py-1.5">
+                                                <div className="flex flex-col gap-0.5">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="text-[12px] font-black text-slate-800 leading-none whitespace-nowrap">{order.customerName}</span>
+                                                        {/* Badges */}
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {order.items?.some((item: any) => item.isBelowMin) && (
+                                                                <span className="px-1 py-[0.5px] rounded text-[8px] font-black bg-amber-50 text-amber-600 border border-amber-100 whitespace-nowrap" title="Bán dưới giá Min">
+                                                                    Min
+                                                                </span>
+                                                            )}
+                                                            {isOrderCreatedByUser(order) && (
+                                                                <span className="px-1 py-[0.5px] rounded text-[8px] font-black bg-emerald-50 text-emerald-600 border border-emerald-100 whitespace-nowrap">
+                                                                    Tôi
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-1.5 leading-none mt-0.5">
+                                                        <span className="text-[10px] text-slate-500 font-black">{order.customerPhone}</span>
+                                                        {order.customerAddress && (
+                                                            <span className="text-[10px] text-slate-400 font-bold italic" title={order.customerAddress}>
+                                                                - {order.customerAddress}
                                                             </span>
                                                         )}
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-1.5 leading-none mt-0.5">
-                                                    <span className="text-[10px] text-slate-500 font-black">{order.customerPhone}</span>
-                                                    {order.customerAddress && (
-                                                        <span className="text-[10px] text-slate-400 font-bold italic" title={order.customerAddress}>
-                                                            - {order.customerAddress}
+                                            </td>
+
+                                            {isGlobalRole && (
+                                                <td className="px-2 py-1.5">
+                                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-rose-50 text-rose-600 border border-rose-100 leading-tight">
+                                                        {order.branch?.name || 'HQ'}
+                                                    </span>
+                                                </td>
+                                            )}
+
+                                            {(isGlobalRole || isManager) && (
+                                                <td className="px-2 py-1.5">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[11px] font-black text-slate-700 leading-tight whitespace-nowrap">
+                                                            {order.splits?.map((s: any) => s.employee?.fullName).join(', ') || '---'}
                                                         </span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </td>
+                                                        <span className="text-[8px] text-slate-400 uppercase font-black tracking-tighter">
+                                                            {order.splits?.[0]?.employee?.position || '---'}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                            )}
 
-                                        {isGlobalRole && (
                                             <td className="px-2 py-1.5">
-                                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-rose-50 text-rose-600 border border-rose-100 leading-tight">
-                                                    {order.branch?.name || 'HQ'}
-                                                </span>
-                                            </td>
-                                        )}
-
-                                        {isGlobalRole && (
-                                            <td className="px-2 py-1.5">
-                                                <div className="flex flex-col">
-                                                    <span className="text-[11px] font-black text-slate-700 leading-tight">
-                                                        {order.splits?.map((s: any) => s.employee?.fullName).join(', ') || '---'}
-                                                    </span>
-                                                    <span className="text-[8px] text-slate-400 uppercase font-black tracking-tighter">
-                                                        {order.splits?.[0]?.employee?.position || '---'}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                        )}
-
-                                        <td className="px-2 py-1.5">
-                                            <div className="flex flex-wrap gap-1">
-                                                {order.items.map((item: any, idx: number) => (
-                                                    <span key={idx} className="text-[10px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded whitespace-nowrap">
-                                                        {item.product?.name || 'SP'} x{item.quantity}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </td>
-                                        <td className="px-2 py-1.5 text-right">
-                                            <span className="text-[11px] font-black text-rose-600">
-                                                {formatCurrency(Number(order.totalAmount))}
-                                            </span>
-                                        </td>
-                                        {(isGlobalRole || isSale) && (
-                                            <td className="px-2 py-1.5 text-center min-w-[70px]">
-                                                <div className="flex flex-wrap justify-center gap-1">
-                                                    {order.payments?.map((p: any, i: number) => (
-                                                        <span key={i} className={cn(
-                                                            "px-1 py-0.5 rounded text-[8px] font-black uppercase border",
-                                                            (p.paymentMethod === 'CASH' || p.paymentMethod === 'TRANSFER') ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
-                                                                (p.paymentMethod === 'TRANSFER_COMPANY' || p.paymentMethod === 'TRANSFER_PERSONAL') ? "bg-blue-50 text-blue-700 border-blue-100" :
-                                                                    (p.paymentMethod === 'CARD' || p.paymentMethod === 'CREDIT') ? "bg-amber-50 text-amber-700 border-amber-100" :
-                                                                        p.paymentMethod === 'INSTALLMENT' ? "bg-indigo-50 text-indigo-700 border-indigo-100" :
-                                                                            "bg-slate-100 text-slate-600 border-slate-200"
-                                                        )}>
-                                                            {(p.paymentMethod === 'CASH' || p.paymentMethod === 'TRANSFER') ? 'TM' :
-                                                                p.paymentMethod === 'TRANSFER_COMPANY' ? 'CK CT' :
-                                                                    p.paymentMethod === 'TRANSFER_PERSONAL' ? 'CK CN' :
-                                                                        (p.paymentMethod === 'CARD' || p.paymentMethod === 'CREDIT') ? 'Thẻ' :
-                                                                            p.paymentMethod === 'INSTALLMENT' ? 'Góp' : p.paymentMethod}
+                                                <div className="flex flex-wrap gap-1">
+                                                    {order.items?.map((item: any, idx: number) => (
+                                                        <span key={idx} className="text-[10px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded whitespace-nowrap">
+                                                            {item.product?.name || 'SP'} x{item.quantity}
+                                                        </span>
+                                                    ))}
+                                                    {order.gifts?.map((og: any, idx: number) => (
+                                                        <span key={`gift-${idx}`} className="text-[10px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded whitespace-nowrap border border-rose-100">
+                                                            🎁 {og.gift?.name || og.name || 'Quà'} x{og.quantity}
                                                         </span>
                                                     ))}
                                                 </div>
                                             </td>
-                                        )}
-                                        {isGlobalRole && (
-                                            <td className="px-2 py-1.5 text-center">
-                                                <div className="flex flex-col items-center justify-center gap-0.5">
-                                                    {order.isInvoiceIssued ? (
-                                                        <div className="flex flex-col items-center animate-in zoom-in duration-300">
-                                                            <div className="w-5 h-5 rounded bg-blue-500 text-white flex items-center justify-center shadow-sm">
-                                                                <CheckCircle size={12} strokeWidth={4} />
+                                            <td className="px-2 py-1.5 text-right">
+                                                <span className="text-[11px] font-black text-rose-600">
+                                                    {formatCurrency(Number(order.totalAmount))}
+                                                </span>
+                                            </td>
+                                            {(isGlobalRole || isManager || isSale) && (
+                                                <td className="px-2 py-1.5 text-center min-w-[70px]">
+                                                    <div className="flex flex-wrap justify-center gap-1">
+                                                        {order.payments?.map((p: any, i: number) => (
+                                                            <span key={i} className={cn(
+                                                                "px-1 py-0.5 rounded text-[8px] font-black uppercase border",
+                                                                (p.paymentMethod === 'CASH' || p.paymentMethod === 'TRANSFER') ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
+                                                                    (p.paymentMethod === 'TRANSFER_COMPANY' || p.paymentMethod === 'TRANSFER_PERSONAL') ? "bg-blue-50 text-blue-700 border-blue-100" :
+                                                                        (p.paymentMethod === 'CARD' || p.paymentMethod === 'CREDIT') ? "bg-amber-50 text-amber-700 border-amber-100" :
+                                                                            p.paymentMethod === 'INSTALLMENT' ? "bg-indigo-50 text-indigo-700 border-indigo-100" :
+                                                                                "bg-slate-100 text-slate-600 border-slate-200"
+                                                            )}>
+                                                                {(p.paymentMethod === 'CASH' || p.paymentMethod === 'TRANSFER') ? 'TM' :
+                                                                    p.paymentMethod === 'TRANSFER_COMPANY' ? 'CK CT' :
+                                                                        p.paymentMethod === 'TRANSFER_PERSONAL' ? 'CK CN' :
+                                                                            (p.paymentMethod === 'CARD' || p.paymentMethod === 'CREDIT') ? 'Thẻ' :
+                                                                                p.paymentMethod === 'INSTALLMENT' ? 'Góp' : p.paymentMethod}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </td>
+                                            )}
+                                            {(isGlobalRole || isManager) && (
+                                                <td className="px-2 py-1.5 text-center">
+                                                    <div className="flex flex-col items-center justify-center gap-0.5">
+                                                        {order.isInvoiceIssued ? (
+                                                            <div className="flex flex-col items-center animate-in zoom-in duration-300">
+                                                                <div className="w-5 h-5 rounded bg-blue-500 text-white flex items-center justify-center shadow-sm">
+                                                                    <CheckCircle size={12} strokeWidth={4} />
+                                                                </div>
+                                                                <span className="text-[8px] font-black text-blue-600 uppercase tracking-tighter">Đã xuất</span>
                                                             </div>
-                                                            <span className="text-[8px] font-black text-blue-600 uppercase tracking-tighter">Đã xuất</span>
+                                                        ) : (
+                                                            <>
+                                                                {/* Non-cash orders that are not issued yet get a RED warning */}
+                                                                {order.payments?.some((p: any) => p.paymentMethod !== 'CASH' && p.paymentMethod !== 'TRANSFER') ? (
+                                                                    <span className="px-1 py-0.5 rounded text-[8px] font-black bg-rose-50 text-rose-600 border border-rose-100 whitespace-nowrap animate-pulse uppercase">
+                                                                        GẤP
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="px-1 py-0.5 rounded text-[8px] font-black bg-slate-50 text-slate-400 border border-slate-100 whitespace-nowrap italic uppercase">
+                                                                        Chờ
+                                                                    </span>
+                                                                )}
+                                                                {isAccountant && (
+                                                                    <button
+                                                                        onClick={() => handleConfirmInvoice(order.id)}
+                                                                        className="mt-0.5 px-1 py-0.5 bg-blue-600 text-white rounded text-[8px] font-black uppercase hover:bg-blue-700 transition-all active:scale-95 shadow-sm"
+                                                                    >
+                                                                        XN HĐ
+                                                                    </button>
+                                                                )}
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            )}
+                                            {(isSale || isDriver) && (
+                                                // Income Breakdown Cells
+                                                (() => {
+                                                    const inc = calculateOrderIncome(order);
+                                                    return (
+                                                        <>
+                                                            {isSale && (
+                                                                <>
+                                                                    <td className="px-1.5 py-1.5 text-right">
+                                                                        <span className="text-[10px] font-black text-slate-600">
+                                                                            {formatCurrency(inc.commission)}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td className="px-1.5 py-1.5 text-right">
+                                                                        <span className="text-[10px] font-black text-slate-600">
+                                                                            {formatCurrency(inc.bonus)}
+                                                                        </span>
+                                                                    </td>
+                                                                </>
+                                                            )}
+                                                            <td className="px-1.5 py-1.5 text-right">
+                                                                <span className="text-[10px] font-black text-slate-600">
+                                                                    {formatCurrency(inc.deliveryFee)}
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-2 py-1.5 text-right">
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-[11px] font-black text-emerald-600 leading-tight">
+                                                                        {formatCurrency(inc.total)}
+                                                                    </span>
+                                                                    {isSale && (
+                                                                        <span className={cn(
+                                                                            "text-[8px] font-black uppercase tracking-tighter leading-none",
+                                                                            inc.isRecognized ? "text-slate-400" : "text-amber-500 animate-pulse"
+                                                                        )}>
+                                                                            DS: {formatCurrency(inc.revenue)} {inc.isRecognized ? '✓' : ''}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </td>
+                                                        </>
+                                                    );
+                                                })()
+                                            )}
+                                            <td className="px-2 py-1.5 text-center whitespace-nowrap">
+                                                <div className="flex flex-col items-center justify-center gap-1">
+                                                    {order.status === 'delivered' ? (
+                                                        <div className="flex flex-col items-center animate-in zoom-in duration-300 gap-1">
+                                                            <div className="flex flex-col items-center">
+                                                                <div className="w-5 h-5 rounded bg-emerald-500 text-white flex items-center justify-center shadow-sm">
+                                                                    <Check size={12} strokeWidth={4} />
+                                                                </div>
+                                                                <span className="text-[8px] font-black text-emerald-600 uppercase tracking-tighter">Đã giao</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-1">
+                                                                <span className="text-xs leading-none">🚗</span>
+                                                                {(() => {
+                                                                    const delivery = order.deliveries?.find((d: any) => d.category === 'COMPANY_DRIVER' || d.category === 'EXTERNAL_DRIVER');
+                                                                    const isExternal = delivery?.category === 'EXTERNAL_DRIVER';
+                                                                    return (
+                                                                        <span className={cn(
+                                                                            "text-[9px] font-black uppercase leading-none",
+                                                                            isExternal ? "text-slate-400" : "text-blue-600"
+                                                                        )}>
+                                                                            {isExternal ? 'Lái xe ngoài' : (delivery?.driver?.fullName || '---')}
+                                                                        </span>
+                                                                    );
+                                                                })()}
+                                                            </div>
+                                                        </div>
+                                                    ) : (order.status === 'assigned' || (order.deliveries && order.deliveries.length > 0)) ? (
+                                                        <div className="flex flex-col items-center gap-1">
+                                                            {(isGlobalRole || isSale || (isDriver && isOrderAssignedToUser(order))) ? (
+                                                                <button
+                                                                    onClick={() => handleConfirmDelivery(order.id)}
+                                                                    className="px-1 py-0.5 bg-emerald-600 text-white rounded text-[8px] font-black uppercase hover:bg-emerald-700 transition-all active:scale-95 shadow-sm whitespace-nowrap"
+                                                                >
+                                                                    XÁC NHẬN XONG
+                                                                </button>
+                                                            ) : (
+                                                                <span className="px-1 py-0.5 rounded text-[8px] font-black bg-blue-50 text-blue-600 border border-blue-100 whitespace-nowrap uppercase">
+                                                                    ĐANG GIAO
+                                                                </span>
+                                                            )}
+                                                            <div className="flex items-center gap-1">
+                                                                <span className="text-xs leading-none">🚗</span>
+                                                                {(() => {
+                                                                    const delivery = order.deliveries?.find((d: any) => d.category === 'COMPANY_DRIVER' || d.category === 'EXTERNAL_DRIVER');
+                                                                    const isExternal = delivery?.category === 'EXTERNAL_DRIVER';
+                                                                    return (
+                                                                        <span className={cn(
+                                                                            "text-[9px] font-black uppercase leading-none",
+                                                                            isExternal ? "text-slate-400" : "text-blue-600"
+                                                                        )}>
+                                                                            {isExternal ? 'Lái xe ngoài' : (delivery?.driver?.fullName || 'CHỜ XE')}
+                                                                        </span>
+                                                                    );
+                                                                })()}
+                                                            </div>
                                                         </div>
                                                     ) : (
-                                                        <>
-                                                            {/* Non-cash orders that are not issued yet get a RED warning */}
-                                                            {order.payments?.some((p: any) => p.paymentMethod !== 'CASH' && p.paymentMethod !== 'TRANSFER') ? (
-                                                                <span className="px-1 py-0.5 rounded text-[8px] font-black bg-rose-50 text-rose-600 border border-rose-100 whitespace-nowrap animate-pulse uppercase">
-                                                                    GẤP
-                                                                </span>
-                                                            ) : (
-                                                                <span className="px-1 py-0.5 rounded text-[8px] font-black bg-slate-50 text-slate-400 border border-slate-100 whitespace-nowrap italic uppercase">
-                                                                    Chờ
-                                                                </span>
-                                                            )}
-                                                            {isAccountant && (
-                                                                <button
-                                                                    onClick={() => handleConfirmInvoice(order.id)}
-                                                                    className="mt-0.5 px-1 py-0.5 bg-blue-600 text-white rounded text-[8px] font-black uppercase hover:bg-blue-700 transition-all active:scale-95 shadow-sm"
-                                                                >
-                                                                    XN HĐ
-                                                                </button>
-                                                            )}
-                                                        </>
+                                                        <div className="flex flex-col items-center gap-0.5">
+                                                            <Clock size={14} className="text-slate-400" />
+                                                            <span className="px-1 py-0.5 rounded text-[8px] font-black bg-slate-50 text-slate-400 border border-slate-200 whitespace-nowrap uppercase italic">
+                                                                Chờ
+                                                            </span>
+                                                        </div>
                                                     )}
                                                 </div>
                                             </td>
-                                        )}
-                                        {(isSale || isDriver) && (
-                                            // Income Breakdown Cells
-                                            (() => {
-                                                const inc = calculateOrderIncome(order);
-                                                return (
-                                                    <>
-                                                        {isSale && (
-                                                            <>
-                                                                <td className="px-1.5 py-1.5 text-right">
-                                                                    <span className="text-[10px] font-black text-slate-600">
-                                                                        {formatCurrency(inc.commission)}
-                                                                    </span>
-                                                                </td>
-                                                                <td className="px-1.5 py-1.5 text-right">
-                                                                    <span className="text-[10px] font-black text-slate-600">
-                                                                        {formatCurrency(inc.bonus)}
-                                                                    </span>
-                                                                </td>
-                                                            </>
-                                                        )}
-                                                        <td className="px-1.5 py-1.5 text-right">
-                                                            <span className="text-[10px] font-black text-slate-600">
-                                                                {formatCurrency(inc.deliveryFee)}
-                                                            </span>
-                                                        </td>
-                                                        <td className="px-2 py-1.5 text-right">
-                                                            <div className="flex flex-col">
-                                                                <span className="text-[11px] font-black text-emerald-600 leading-tight">
-                                                                    {formatCurrency(inc.total)}
-                                                                </span>
-                                                                {isSale && (
-                                                                    <span className={cn(
-                                                                        "text-[8px] font-black uppercase tracking-tighter leading-none",
-                                                                        inc.isRecognized ? "text-slate-400" : "text-amber-500 animate-pulse"
-                                                                    )}>
-                                                                        DS: {formatCurrency(inc.revenue)} {inc.isRecognized ? '✓' : ''}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                        </td>
-                                                    </>
-                                                );
-                                            })()
-                                        )}
-                                        <td className="px-2 py-1.5 text-center whitespace-nowrap">
-                                            <div className="flex flex-col items-center justify-center gap-1">
-                                                {order.status === 'delivered' ? (
-                                                    <div className="flex flex-col items-center animate-in zoom-in duration-300 gap-1">
-                                                        <div className="flex flex-col items-center">
-                                                            <div className="w-5 h-5 rounded bg-emerald-500 text-white flex items-center justify-center shadow-sm">
-                                                                <Check size={12} strokeWidth={4} />
-                                                            </div>
-                                                            <span className="text-[8px] font-black text-emerald-600 uppercase tracking-tighter">Đã giao</span>
-                                                        </div>
-                                                        <div className="flex items-center gap-1">
-                                                            <span className="text-xs leading-none">🚗</span>
-                                                            <span className="text-[7px] text-slate-400 font-bold max-w-[80px] truncate leading-none">
-                                                                {order.deliveries?.[0]?.employee?.fullName || order.deliveries?.[0]?.driver?.fullName || ''}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                ) : (order.status === 'assigned' || (order.deliveries && order.deliveries.length > 0)) ? (
-                                                    <div className="flex flex-col items-center gap-1">
-                                                        {(isGlobalRole || isSale || (isDriver && isOrderAssignedToUser(order))) ? (
-                                                            <button
-                                                                onClick={() => handleConfirmDelivery(order.id)}
-                                                                className="px-1 py-0.5 bg-emerald-600 text-white rounded text-[8px] font-black uppercase hover:bg-emerald-700 transition-all active:scale-95 shadow-sm whitespace-nowrap"
-                                                            >
-                                                                XÁC NHẬN XONG
-                                                            </button>
-                                                        ) : (
-                                                            <span className="px-1 py-0.5 rounded text-[8px] font-black bg-blue-50 text-blue-600 border border-blue-100 whitespace-nowrap uppercase">
-                                                                ĐANG GIAO
-                                                            </span>
-                                                        )}
-                                                        <div className="flex items-center gap-1">
-                                                            <span className="text-xs leading-none animate-pulse">🚗</span>
-                                                            <span className="text-[7px] text-slate-400 font-black uppercase leading-none">
-                                                                {order.deliveries?.[0]?.employee?.fullName || order.deliveries?.[0]?.driver?.fullName || 'CHỜ XE'}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <div className="flex flex-col items-center gap-0.5">
-                                                        <Clock size={14} className="text-slate-400" />
-                                                        <span className="px-1 py-0.5 rounded text-[8px] font-black bg-slate-50 text-slate-400 border border-slate-200 whitespace-nowrap uppercase italic">
-                                                            Chờ
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="px-2 py-1.5 text-center whitespace-nowrap">
-                                            <div className="flex flex-col items-center justify-center gap-0.5">
-                                                {(() => {
-                                                    const isInstallment = order.payments?.some((p: any) => p.paymentMethod === 'INSTALLMENT');
-                                                    if (!isInstallment) {
-                                                        return (
-                                                            <div className="flex flex-col items-center text-slate-300 opacity-50">
-                                                                <Check size={12} />
-                                                                <span className="text-[7px] font-black uppercase tracking-tighter">Hoàn tất</span>
-                                                            </div>
-                                                        );
-                                                    }
-
-                                                    if (order.isPaymentConfirmed) {
-                                                        return (
-                                                            <div className="flex flex-col items-center animate-in zoom-in duration-300">
-                                                                <div className="w-5 h-5 rounded bg-emerald-100 text-emerald-600 flex items-center justify-center">
-                                                                    <Check size={12} strokeWidth={4} />
+                                            <td className="px-2 py-1.5 text-center whitespace-nowrap">
+                                                <div className="flex flex-col items-center justify-center gap-0.5">
+                                                    {(() => {
+                                                        if (order.isPaymentConfirmed) {
+                                                            return (
+                                                                <div className="flex flex-col items-center animate-in zoom-in duration-300">
+                                                                    <div className="w-5 h-5 rounded bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                                                                        <Check size={12} strokeWidth={4} />
+                                                                    </div>
+                                                                    <span className="text-[8px] font-black text-emerald-600 uppercase tracking-tighter">Đã xác nhận</span>
                                                                 </div>
-                                                                <span className="text-[8px] font-black text-emerald-600 uppercase tracking-tighter">Đã xác nhận</span>
-                                                            </div>
-                                                        );
-                                                    }
+                                                            );
+                                                        }
 
-                                                    if (isGlobalRole) {
+                                                        if (isGlobalRole) {
+                                                            return (
+                                                                <button
+                                                                    onClick={() => handleConfirmPayment(order.id)}
+                                                                    className="px-1 py-0.5 bg-rose-600 text-white rounded text-[8px] font-black hover:bg-rose-700 transition-all active:scale-95 shadow-sm whitespace-nowrap"
+                                                                >
+                                                                    XÁC NHẬN
+                                                                </button>
+                                                            );
+                                                        }
+
                                                         return (
-                                                            <button
-                                                                onClick={() => handleConfirmPayment(order.id)}
-                                                                className="px-1 py-0.5 bg-rose-600 text-white rounded text-[8px] font-black hover:bg-rose-700 transition-all active:scale-95 shadow-sm whitespace-nowrap"
-                                                            >
-                                                                XÁC NHẬN
-                                                            </button>
+                                                            <span className="px-1 py-0.5 rounded text-[8px] font-black bg-amber-50 text-amber-600 border border-amber-100 whitespace-nowrap italic uppercase">
+                                                                Chờ xác nhận
+                                                            </span>
                                                         );
-                                                    }
-
-                                                    return (
-                                                        <span className="px-1 py-0.5 rounded text-[8px] font-black bg-amber-50 text-amber-600 border border-amber-100 whitespace-nowrap italic uppercase">
-                                                            Chờ thanh toán
-                                                        </span>
-                                                    );
-                                                })()}
-                                            </div>
-                                        </td>
-                                        <td className="px-2 py-1.5 text-center whitespace-nowrap">
-                                            <div className="flex items-center justify-center gap-1 flex-nowrap">
-                                                <button
-                                                    onClick={() => setSelectedOrder(order)}
-                                                    className="inline-flex items-center gap-1 px-1.5 py-1 bg-slate-800 text-white rounded text-[10px] font-black hover:bg-slate-700 transition-all active:scale-95 shadow-sm whitespace-nowrap"
-                                                >
-                                                    <FileText size={12} /> XEM
-                                                </button>
-                                                {isGlobalRole && (
+                                                    })()}
+                                                </div>
+                                            </td>
+                                            <td className="px-2 py-1.5 text-center whitespace-nowrap">
+                                                <div className="flex items-center justify-center gap-1 flex-nowrap">
                                                     <button
-                                                        onClick={() => {
-                                                            setDeleteOrderId(order.id);
-                                                            setShowDeleteConfirm(true);
-                                                        }}
-                                                        className="p-1 text-rose-500 hover:bg-rose-50 rounded transition-colors whitespace-nowrap"
+                                                        onClick={() => setSelectedOrder(order)}
+                                                        className="inline-flex items-center gap-1 px-1.5 py-1 bg-slate-800 text-white rounded text-[10px] font-black hover:bg-slate-700 transition-all active:scale-95 shadow-sm whitespace-nowrap"
                                                     >
-                                                        <Trash2 size={13} />
+                                                        <FileText size={12} /> XEM
                                                     </button>
-                                                )}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
+                                                    {isGlobalRole && (
+                                                        <button
+                                                            onClick={() => {
+                                                                setDeleteOrderId(order.id);
+                                                                setShowDeleteConfirm(true);
+                                                            }}
+                                                            className="p-1 text-rose-500 hover:bg-rose-50 rounded transition-colors whitespace-nowrap"
+                                                        >
+                                                            <Trash2 size={13} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
                             )}
                         </tbody>
                     </table>

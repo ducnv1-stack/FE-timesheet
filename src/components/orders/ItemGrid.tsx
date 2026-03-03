@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Plus, Trash2, AlertCircle } from 'lucide-react';
 import { Product, OrderItem } from '@/types/order';
-import { formatCurrency, cn } from '@/lib/utils';
+import { formatCurrency, formatNumber, parseNumber, cn } from '@/lib/utils';
 
 interface ItemGridProps {
     items: OrderItem[];
@@ -35,15 +35,15 @@ export default function ItemGrid({ items, products, onChange }: ItemGridProps) {
             </div>
 
             <div className="overflow-x-auto">
-                <table className="w-full text-sm border-collapse">
+                <table className="w-full text-xs border-collapse">
                     <thead>
                         <tr className="bg-rose-50 border-b-2 border-slate-800">
-                            <th className="px-2 py-2 border-r-2 border-slate-800 text-center w-[60px]">STT</th>
-                            <th className="px-4 py-2 border-r-2 border-slate-800 text-left min-w-[300px]">Tên hàng hóa</th>
-                            <th className="px-2 py-2 border-r-2 border-slate-800 text-center w-[100px]">Số lượng</th>
-                            <th className="px-4 py-2 border-r-2 border-slate-800 text-right w-[180px]">Đơn giá</th>
-                            <th className="px-4 py-2 text-right w-[180px]">Thành tiền</th>
-                            <th className="px-2 py-2 w-[50px] print:hidden"></th>
+                            <th className="px-2 py-2 border-r-2 border-slate-800 text-center w-[40px]">STT</th>
+                            <th className="px-4 py-2 border-r-2 border-slate-800 text-left min-w-[200px]">Tên hàng hóa</th>
+                            <th className="px-2 py-2 border-r-2 border-slate-800 text-center w-[80px]">Số lượng</th>
+                            <th className="px-4 py-2 border-r-2 border-slate-800 text-right w-[140px]">Đơn giá</th>
+                            <th className="px-4 py-2 text-right w-[140px]">Thành tiền</th>
+                            <th className="px-2 py-2 w-[40px] print:hidden"></th>
                         </tr>
                     </thead>
                     <tbody className="divide-y-2 divide-slate-800">
@@ -93,23 +93,24 @@ export default function ItemGrid({ items, products, onChange }: ItemGridProps) {
                                     </td>
                                     <td className="px-2 py-2 border-r-2 border-slate-800">
                                         <input
-                                            type="number"
-                                            min="1"
-                                            value={item.quantity}
-                                            onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 0)}
+                                            type="text"
+                                            value={formatNumber(item.quantity)}
+                                            onChange={(e) => updateItem(index, 'quantity', parseNumber(e.target.value))}
                                             className="w-full bg-transparent border-none focus:ring-0 p-1 text-center font-bold"
+                                            placeholder="1"
                                         />
                                     </td>
                                     <td className="px-2 py-2 border-r-2 border-slate-800">
                                         <div className="relative">
                                             <input
-                                                type="number"
-                                                value={item.unitPrice === 0 ? '' : item.unitPrice}
-                                                onChange={(e) => updateItem(index, 'unitPrice', e.target.value === '' ? 0 : parseInt(e.target.value) || 0)}
+                                                type="text"
+                                                value={formatNumber(item.unitPrice)}
+                                                onChange={(e) => updateItem(index, 'unitPrice', parseNumber(e.target.value))}
                                                 className={cn(
                                                     "w-full bg-transparent border-none focus:ring-0 p-1 text-right font-bold",
                                                     isBelowMin && "text-amber-600"
                                                 )}
+                                                placeholder="0"
                                             />
                                             {isBelowMin && (
                                                 <div className="absolute -top-7 right-0 scale-90 bg-amber-600 text-white text-[10px] px-1.5 py-0.5 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
@@ -126,7 +127,7 @@ export default function ItemGrid({ items, products, onChange }: ItemGridProps) {
                                             onClick={() => removeItem(index)}
                                             className="p-1 text-slate-300 hover:text-red-600 transition-colors cursor-pointer"
                                         >
-                                            <Trash2 size={16} />
+                                            <Trash2 size={14} />
                                         </button>
                                     </td>
                                 </tr>
@@ -147,9 +148,9 @@ export default function ItemGrid({ items, products, onChange }: ItemGridProps) {
                 <button
                     onClick={addItem}
                     type="button"
-                    className="flex items-center gap-1.5 px-4 py-1.5 bg-rose-700 hover:bg-rose-800 text-white rounded font-bold text-xs uppercase tracking-wider transition-all cursor-pointer"
+                    className="flex items-center gap-1.5 px-3 py-1 bg-rose-700 hover:bg-rose-800 text-white rounded font-bold text-[10px] uppercase tracking-wider transition-all cursor-pointer"
                 >
-                    <Plus size={14} /> Thêm sản phẩm
+                    <Plus size={12} /> Thêm sản phẩm
                 </button>
             </div>
         </div>

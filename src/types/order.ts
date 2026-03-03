@@ -15,6 +15,12 @@ export interface Product {
     bonusRules?: ProductBonusRule[];
 }
 
+export interface Gift {
+    id: string;
+    name: string;
+    price: number;
+}
+
 export interface Employee {
     id: string;
     fullName: string;
@@ -54,6 +60,28 @@ export interface OrderPayment {
     paidAt: string;
 }
 
+export interface OrderGift {
+    giftId: string;
+    quantity: number;
+    // Local UI helpers
+    name?: string;
+    price?: number;
+    gift?: {
+        name: string;
+        price: number;
+    };
+}
+
+export interface Delivery {
+    id?: string;
+    driverId?: string | null;
+    role?: 'DRIVER' | 'STAFF';
+    category: 'COMPANY_DRIVER' | 'EXTERNAL_DRIVER' | 'STAFF_DELIVERER' | 'SELLING_SALE' | 'OTHER_SALE';
+    deliveryFee?: number;
+    employee?: Employee;
+    driver?: Employee;
+}
+
 export interface FullOrder {
     branchId: string;
     customerName: string;
@@ -62,12 +90,12 @@ export interface FullOrder {
     customerCardNumber?: string;
     customerCardIssueDate?: string;
     staffCode?: string;
-    driverId?: string;
-    driverType?: 'internal' | 'sale';
+    deliveries?: Delivery[];
     orderDate: string;
     orderSource: string;
     note?: string;
     giftAmount: number;
+    gifts: OrderGift[];
     items: OrderItem[];
     splits: OrderSplit[];
     payments: OrderPayment[];

@@ -48,34 +48,42 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             icon: PlusCircle,
             href: '/orders/new',
             active: pathname === '/orders/new',
-            roleAccess: ['DIRECTOR', 'MANAGER', 'ACCOUNTANT', 'SALE']
+            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'SALE']
         },
         {
             label: 'Lịch sử đơn',
             icon: History,
             href: '/orders',
-            active: pathname === '/orders'
+            active: pathname === '/orders',
+            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'SALE', 'DRIVER']
         },
         {
             label: 'Báo cáo doanh số',
             icon: ScrollText,
             href: '/performance',
             active: pathname === '/performance',
-            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER']
+            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT']
         },
         {
             label: 'Log hệ thống',
             icon: ScrollText,
             href: '/logs',
             active: pathname === '/logs',
-            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'DRIVER', 'SALE']
+            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'DRIVER', 'SALE']
         },
         {
             label: 'Quản lý nhân viên',
             icon: Users,
             href: '/employees',
             active: pathname.startsWith('/employees'),
-            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT']
+            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT']
+        },
+        {
+            label: 'Quản lý sản phẩm',
+            icon: ShoppingBag,
+            href: '/products',
+            active: pathname === '/products',
+            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT']
         },
         {
             label: 'Cài đặt',

@@ -360,33 +360,33 @@ export default function EmployeeDetailPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
-            <div className="max-w-5xl mx-auto">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-3">
+            <div className="max-w-4xl mx-auto">
                 {/* Header */}
-                <div className="flex items-center gap-4 mb-6">
+                <div className="flex items-center gap-2 mb-3">
                     <button
                         onClick={() => router.push('/employees')}
-                        className="p-2 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+                        className="p-1.5 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
                     >
-                        <ArrowLeft className="w-6 h-6 text-slate-700" />
+                        <ArrowLeft className="w-5 h-5 text-slate-700" />
                     </button>
                     <div>
-                        <h1 className="text-3xl font-black text-slate-900">{employee.fullName}</h1>
-                        <p className="text-slate-500">Chi tiết nhân viên</p>
+                        <h1 className="text-xl font-black text-slate-900">{employee.fullName}</h1>
+                        <p className="text-[10px] text-slate-500">Chi tiết nhân viên</p>
                     </div>
                 </div>
 
                 {/* Employee Info */}
-                <div className="bg-white rounded-lg shadow-md p-6 mb-6 border border-slate-200">
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl font-bold text-slate-900">Thông Tin Cơ Bản</h2>
-                        <div className="flex gap-2">
+                <div className="bg-white rounded-lg shadow-md p-4 mb-3 border border-slate-200">
+                    <div className="flex items-center justify-between mb-3">
+                        <h2 className="text-sm font-bold text-slate-900">Thông Tin Cơ Bản</h2>
+                        <div className="flex gap-1.5">
                             {!isEditing ? (
                                 <button
                                     onClick={handleStartEdit}
-                                    className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 font-bold text-sm rounded-lg hover:bg-slate-200 transition-colors"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-200 transition-colors"
                                 >
-                                    <Edit className="w-4 h-4" />
+                                    <Edit className="w-3.5 h-3.5" />
                                     Chỉnh sửa
                                 </button>
                             ) : (
@@ -394,16 +394,16 @@ export default function EmployeeDetailPage() {
                                     <button
                                         onClick={handleSaveEmployee}
                                         disabled={saving}
-                                        className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white font-bold text-sm rounded-lg hover:bg-emerald-700 transition-all disabled:opacity-50"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white font-bold text-xs rounded-lg hover:bg-emerald-700 transition-all disabled:opacity-50"
                                     >
-                                        <Save className="w-4 h-4" />
+                                        <Save className="w-3.5 h-3.5" />
                                         {saving ? 'Đang lưu...' : 'Lưu'}
                                     </button>
                                     <button
                                         onClick={handleCancelEdit}
-                                        className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-500 font-bold text-sm rounded-lg hover:bg-slate-200 transition-colors"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-500 font-bold text-xs rounded-lg hover:bg-slate-200 transition-colors"
                                     >
-                                        <X className="w-4 h-4" />
+                                        <X className="w-3.5 h-3.5" />
                                         Hủy
                                     </button>
                                 </>
@@ -411,7 +411,7 @@ export default function EmployeeDetailPage() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
                         <InfoField
                             label="Họ tên"
                             value={employee.fullName}
@@ -539,27 +539,27 @@ export default function EmployeeDetailPage() {
 
                 {/* Performance Stats Section (Authorized Only) */}
                 {['DIRECTOR', 'CHIEF_ACCOUNTANT'].includes(currentUser?.role?.code) && (
-                    <div className="bg-white rounded-lg shadow-md p-6 mb-6 border border-slate-200 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                                <TrendingUp className="text-rose-500" />
+                    <div className="bg-white rounded-lg shadow-md p-4 mb-3 border border-slate-200 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                                <TrendingUp className="text-rose-500 w-4 h-4" />
                                 Hiệu Suất & Thưởng
                             </h2>
-                            <div className="flex bg-slate-100 p-1 rounded-xl text-sm font-bold border border-slate-200 shadow-inner">
+                            <div className="flex bg-slate-100 p-0.5 rounded-lg text-[10px] font-bold border border-slate-200 shadow-inner">
                                 <select
                                     value={perfMonth}
                                     onChange={(e) => setPerfMonth(parseInt(e.target.value))}
-                                    className="bg-transparent px-3 py-1.5 outline-none cursor-pointer hover:text-rose-600 transition-colors"
+                                    className="bg-transparent px-2 py-1 outline-none cursor-pointer hover:text-rose-600 transition-colors"
                                 >
                                     {Array.from({ length: 12 }, (_, i) => (
                                         <option key={i + 1} value={i + 1}>Tháng {i + 1}</option>
                                     ))}
                                 </select>
-                                <div className="w-[1px] bg-slate-200 my-1 mx-1"></div>
+                                <div className="w-[1px] bg-slate-200 my-1 mx-0.5"></div>
                                 <select
                                     value={perfYear}
                                     onChange={(e) => setPerfYear(parseInt(e.target.value))}
-                                    className="bg-transparent px-3 py-1.5 outline-none cursor-pointer hover:text-rose-600 transition-colors"
+                                    className="bg-transparent px-2 py-1 outline-none cursor-pointer hover:text-rose-600 transition-colors"
                                 >
                                     <option value={2025}>2025</option>
                                     <option value={2026}>2026</option>
@@ -568,48 +568,48 @@ export default function EmployeeDetailPage() {
                         </div>
 
                         {performanceDetail ? (
-                            <div className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div className="group bg-rose-50/30 p-5 rounded-2xl border border-rose-100/50 hover:bg-rose-50/50 transition-all duration-300">
-                                        <p className="text-[10px] font-black text-rose-500 uppercase tracking-wider mb-2">Doanh số tháng</p>
-                                        <p className="text-2xl font-black text-slate-900 group-hover:scale-105 transition-transform origin-left">{formatCurrency(performanceDetail.totalRevenue)}</p>
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                    <div className="group bg-rose-50/30 p-3 rounded-xl border border-rose-100/50 hover:bg-rose-50/50 transition-all duration-300">
+                                        <p className="text-[9px] font-black text-rose-500 uppercase tracking-wider mb-1">Doanh số tháng</p>
+                                        <p className="text-lg font-black text-slate-900 group-hover:scale-105 transition-transform origin-left">{formatCurrency(performanceDetail.totalRevenue)}</p>
                                     </div>
-                                    <div className="group bg-slate-50/50 p-5 rounded-2xl border border-slate-200/50 hover:bg-slate-50 transition-all duration-300">
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Tỷ lệ đơn dưới Min</p>
-                                        <div className="flex items-center gap-3">
+                                    <div className="group bg-slate-50/50 p-3 rounded-xl border border-slate-200/50 hover:bg-slate-50 transition-all duration-300">
+                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">Tỷ lệ đơn dưới Min</p>
+                                        <div className="flex items-center gap-2">
                                             <p className={cn(
-                                                "text-2xl font-black",
+                                                "text-lg font-black",
                                                 performanceDetail.isPenalty ? "text-red-600" : "text-emerald-600"
                                             )}>
                                                 {performanceDetail.lowPriceRatio.toFixed(1)}%
                                             </p>
                                             {performanceDetail.isPenalty && !performanceDetail.isClemency && (
-                                                <span className="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-black uppercase ring-2 ring-red-50">Bị phạt</span>
+                                                <span className="text-[8px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full font-black uppercase ring-2 ring-red-50">Bị phạt</span>
                                             )}
                                         </div>
                                     </div>
-                                    <div className="group bg-emerald-50/30 p-5 rounded-2xl border border-emerald-100/50 hover:bg-emerald-50/50 transition-all duration-300">
-                                        <p className="text-[10px] font-black text-emerald-500 uppercase tracking-wider mb-2">Thưởng thực nhận</p>
-                                        <div className="flex items-center gap-3">
-                                            <p className="text-2xl font-black text-emerald-700 group-hover:scale-105 transition-transform origin-left">{formatCurrency(performanceDetail.actualReward)}</p>
+                                    <div className="group bg-emerald-50/30 p-3 rounded-xl border border-emerald-100/50 hover:bg-emerald-50/50 transition-all duration-300">
+                                        <p className="text-[9px] font-black text-emerald-500 uppercase tracking-wider mb-1">Thưởng thực nhận</p>
+                                        <div className="flex items-center gap-2">
+                                            <p className="text-lg font-black text-emerald-700 group-hover:scale-105 transition-transform origin-left">{formatCurrency(performanceDetail.actualReward)}</p>
                                             {performanceDetail.isClemency && (
-                                                <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-black uppercase ring-2 ring-amber-50">Khoan hồng</span>
+                                                <span className="text-[8px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-black uppercase ring-2 ring-amber-50">Khoan hồng</span>
                                             )}
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-100 text-sm overflow-hidden relative">
-                                    <div className="flex justify-between items-center mb-3 relative z-10">
-                                        <span className="text-slate-500 font-bold">Mốc thưởng đạt được:</span>
-                                        <span className="font-black text-slate-900 bg-white px-3 py-1 rounded-lg border border-slate-100 shadow-sm">{formatCurrency(performanceDetail.milestone)}</span>
+                                <div className="bg-slate-50/50 p-3 rounded-xl border border-slate-100 text-xs overflow-hidden relative">
+                                    <div className="flex justify-between items-center mb-2 relative z-10">
+                                        <span className="text-slate-500 font-bold text-[11px]">Mốc thưởng đạt được:</span>
+                                        <span className="font-black text-slate-900 bg-white px-2 py-0.5 rounded-lg border border-slate-100 shadow-sm">{formatCurrency(performanceDetail.milestone)}</span>
                                     </div>
                                     <div className="flex justify-between items-center relative z-10">
-                                        <span className="text-slate-500 font-bold">Thưởng mốc tối đa:</span>
-                                        <span className="font-black text-slate-500 line-through decoration-slate-300 decoration-2">{formatCurrency(performanceDetail.baseReward)}</span>
+                                        <span className="text-slate-500 font-bold text-[11px]">Thưởng mốc tối đa:</span>
+                                        <span className="font-black text-slate-500 line-through decoration-slate-300 decoration-1">{formatCurrency(performanceDetail.baseReward)}</span>
                                     </div>
                                     <div className="absolute -right-4 -bottom-4 text-slate-100/50 rotate-12">
-                                        <TrendingUp size={80} />
+                                        <TrendingUp size={60} />
                                     </div>
                                 </div>
                             </div>
@@ -623,50 +623,50 @@ export default function EmployeeDetailPage() {
                 )}
 
                 {/* Account Management */}
-                <div className="bg-white rounded-lg shadow-md p-6 border border-slate-200">
-                    <h2 className="text-xl font-bold text-slate-900 mb-4">Quản Lý Tài Khoản</h2>
+                <div className="bg-white rounded-lg shadow-md p-4 border border-slate-200">
+                    <h2 className="text-sm font-bold text-slate-900 mb-3">Quản Lý Tài Khoản</h2>
                     {employee.user ? (
                         <div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                                 <InfoField label="Username" value={employee.user.username} />
                                 <InfoField label="Vai trò" value={employee.user.role.name} />
                                 <InfoField label="Trạng thái" value={employee.user.isActive ? '✓ Hoạt động' : '✗ Bị khóa'} />
                             </div>
-                            <div className="flex gap-3">
+                            <div className="flex gap-2">
                                 <button
                                     onClick={() => setShowResetPassword(true)}
-                                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xs font-bold"
                                 >
-                                    <Key className="w-4 h-4" />
+                                    <Key className="w-3.5 h-3.5" />
                                     Reset Mật Khẩu
                                 </button>
                                 <button
                                     onClick={handleToggleAccount}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-white ${employee.user.isActive
+                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white text-xs font-bold ${employee.user.isActive
                                         ? 'bg-red-600 hover:bg-red-700'
                                         : 'bg-green-600 hover:bg-green-700'
                                         }`}
                                 >
-                                    {employee.user.isActive ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
-                                    {employee.user.isActive ? 'Khóa Tài Khoản' : 'Mở Khóa Tài Khoản'}
+                                    {employee.user.isActive ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                                    {employee.user.isActive ? 'Khóa' : 'Mở Khóa'}
                                 </button>
                                 <button
                                     onClick={handleEditAccount}
-                                    className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-900"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 text-white rounded-lg hover:bg-slate-900 text-xs font-bold"
                                 >
-                                    <Save className="w-4 h-4" />
+                                    <Save className="w-3.5 h-3.5" />
                                     Sửa Thông Tin
                                 </button>
                             </div>
                         </div>
                     ) : (
                         <div>
-                            <p className="text-slate-600 mb-4">Nhân viên này chưa có tài khoản đăng nhập</p>
+                            <p className="text-[11px] text-slate-600 mb-3">Nhân viên này chưa có tài khoản đăng nhập</p>
                             <button
                                 onClick={() => setShowCreateAccount(true)}
-                                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-600 to-rose-600 text-white font-bold rounded-lg hover:shadow-lg"
+                                className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-pink-600 to-rose-600 text-white font-bold rounded-lg hover:shadow-lg text-xs"
                             >
-                                <UserPlus className="w-5 h-5" />
+                                <UserPlus className="w-4 h-4" />
                                 Tạo Tài Khoản
                             </button>
                         </div>
@@ -860,10 +860,10 @@ function InfoField({
     onChange?: (val: string) => void
 }) {
     return (
-        <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-black text-slate-400 uppercase tracking-widest">{label}</label>
+        <div className="flex flex-col gap-0.5">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</label>
             {!isEditing ? (
-                <p className="text-slate-900 font-bold">{value || '-'}</p>
+                <p className="text-slate-900 font-bold text-[13px]">{value || '-'}</p>
             ) : (
                 <div className="relative group">
                     {type === 'text' && (
@@ -871,7 +871,7 @@ function InfoField({
                             type="text"
                             value={editValue || ''}
                             onChange={(e) => onChange?.(e.target.value)}
-                            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-all font-bold text-slate-900"
+                            className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-all font-bold text-slate-900 text-[11px]"
                         />
                     )}
                     {type === 'select' && (
@@ -879,7 +879,7 @@ function InfoField({
                             <select
                                 value={editValue || ''}
                                 onChange={(e) => onChange?.(e.target.value)}
-                                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-all font-bold text-slate-900 appearance-none bg-no-repeat bg-[right_1rem_center]"
+                                className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-all font-bold text-slate-900 text-[11px] appearance-none bg-no-repeat bg-[right_1rem_center]"
                                 style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7' /%3E%3C/svg%3E")`, backgroundSize: '1.2em' }}
                             >
                                 <option value="">- Chọn -</option>
@@ -895,7 +895,7 @@ function InfoField({
                                 type="date"
                                 value={editValue || ''}
                                 onChange={(e) => onChange?.(e.target.value)}
-                                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-all font-bold text-slate-900"
+                                className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-all font-bold text-slate-900 text-[11px]"
                             />
                         </div>
                     )}

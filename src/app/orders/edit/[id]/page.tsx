@@ -7,6 +7,7 @@ import { useToast } from '@/components/ui/toast';
 
 import { formatCurrency, cn } from '@/lib/utils';
 import ItemGrid from '@/components/orders/ItemGrid';
+import GiftGrid from '@/components/orders/GiftGrid';
 import SplitManager from '@/components/orders/SplitManager';
 import PaymentForm from '@/components/orders/PaymentForm';
 import { FullOrder, Product, Employee, Branch } from '@/types/order';
@@ -23,6 +24,7 @@ export default function EditOrderPage() {
     const [branches, setBranches] = useState<Branch[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
     const [allEmployees, setAllEmployees] = useState<Employee[]>([]);
+    const [allGifts, setAllGifts] = useState<any[]>([]);
     const [driverTab, setDriverTab] = useState<'staff' | 'driver'>('driver');
 
     const [order, setOrder] = useState<FullOrder>({
@@ -36,11 +38,11 @@ export default function EditOrderPage() {
         orderDate: new Date().toISOString().split('T')[0],
         orderSource: 'HOTLINE',
         giftAmount: 0,
+        gifts: [],
         items: [],
         splits: [],
         payments: [],
-        driverId: '',
-        driverType: 'internal',
+        deliveries: []
     });
 
     // Fetch initial data and order details
@@ -49,21 +51,24 @@ export default function EditOrderPage() {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
             try {
                 // 1. Fetch reference data
-                const [branchesRes, productsRes, employeesRes, orderRes] = await Promise.all([
+                const [branchesRes, productsRes, employeesRes, giftsRes, orderRes] = await Promise.all([
                     fetch(`${apiUrl}/branches`),
                     fetch(`${apiUrl}/products`),
                     fetch(`${apiUrl}/employees`),
+                    fetch(`${apiUrl}/gifts`),
                     fetch(`${apiUrl}/orders/${orderId}`)
                 ]);
 
                 const branchesData = await branchesRes.json();
                 const productsData = await productsRes.json();
                 const employeesData = await employeesRes.json();
+                const giftsData = await giftsRes.json();
                 const orderData = await orderRes.json();
 
                 setBranches(branchesData);
                 setProducts(productsData);
                 setAllEmployees(employeesData);
+                setAllGifts(giftsData);
 
                 // 2. Map order data to state
                 if (orderData) {
@@ -78,9 +83,16 @@ export default function EditOrderPage() {
                         customerCardIssueDate: orderData.customerCardIssueDate ? orderData.customerCardIssueDate.split('T')[0] : '',
                         orderDate: orderData.orderDate.split('T')[0],
                         orderSource: orderData.orderSource,
-                        driverId: orderData.deliveries?.[0]?.driverId || '',
-                        driverType: orderData.deliveries?.[0]?.driverType || 'internal',
+                        deliveries: orderData.deliveries || [],
                         giftAmount: Number(orderData.giftAmount || 0),
+                        gifts: (orderData.gifts || []).map((og: any) => {
+                            const giftInfo = giftsData.find((g: any) => g.id === og.giftId);
+                            return {
+                                ...og,
+                                name: giftInfo?.name || og.name || '',
+                                price: giftInfo?.price || og.price || 0
+                            };
+                        }),
                         items: orderData.items.map((i: any) => ({
                             productId: i.productId,
                             quantity: i.quantity,
@@ -105,11 +117,6 @@ export default function EditOrderPage() {
                         note: orderData.note || ''
                     };
                     setOrder(formattedOrder);
-                    if (orderData.deliveries?.[0]?.driverType === 'sale') {
-                        setDriverTab('staff');
-                    } else {
-                        setDriverTab('driver');
-                    }
                 }
 
                 // Check auth
@@ -138,6 +145,7 @@ export default function EditOrderPage() {
 
     const headerEmployees = allEmployees.filter(e => e.branchId === order.branchId);
     const totalAmount = order.items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+    const totalGiftAmount = order.gifts.reduce((sum, g) => sum + (g.quantity * (g.price || 0)), 0);
     const paidAmount = order.payments.reduce((sum, p) => sum + p.amount, 0);
     const remainingAmount = totalAmount - paidAmount;
     const isInstallment = order.payments?.some((p: any) => p.paymentMethod === 'INSTALLMENT');
@@ -195,7 +203,29 @@ export default function EditOrderPage() {
             } else if (!payload.customerCardIssueDate) {
                 delete payload.customerCardIssueDate;
             }
-            if (!payload.driverId) delete payload.driverId;
+            // Clean deliveries to only send DTO-compatible fields
+            if (payload.deliveries && payload.deliveries.length > 0) {
+                payload.deliveries = payload.deliveries.map((d: any) => ({
+                    category: d.category,
+                    ...(d.driverId ? { driverId: d.driverId } : {}),
+                }));
+            } else {
+                delete payload.deliveries;
+            }
+
+            // Clean and recalculate gifts
+            const finalGiftAmount = (order.gifts || [])
+                .filter(g => g.giftId)
+                .reduce((sum, g) => sum + (g.quantity * (g.price || 0)), 0);
+
+            payload.gifts = (order.gifts || [])
+                .filter(g => g.giftId)
+                .map(g => ({
+                    giftId: g.giftId,
+                    quantity: g.quantity
+                }));
+
+            payload.giftAmount = finalGiftAmount;
 
             // Remove confirmation fields as they are handled by separate API
             delete payload.isPaymentConfirmed;
@@ -262,7 +292,7 @@ export default function EditOrderPage() {
     }
 
     return (
-        <div className="max-w-[1320px] mx-auto px-4 md:px-6 pb-24 print:pb-0 print:px-0 print:max-w-none">
+        <div className="max-w-[1000px] mx-auto px-2 md:px-4 pb-20 print:pb-0 print:px-0 print:max-w-none">
             <div className="flex items-center justify-between mb-6">
                 <button
                     onClick={() => router.back()}
@@ -274,15 +304,15 @@ export default function EditOrderPage() {
                     <button
                         onClick={handleSave}
                         disabled={loading}
-                        className="flex items-center gap-2 px-8 py-2.5 bg-rose-700 hover:bg-rose-800 disabled:bg-slate-300 text-white rounded-lg font-bold shadow-lg shadow-rose-200 transition-all active:scale-95 cursor-pointer"
+                        className="flex items-center gap-2 px-6 py-2 bg-rose-700 hover:bg-rose-800 disabled:bg-slate-300 text-white rounded-lg font-bold shadow-md shadow-rose-200 transition-all active:scale-95 cursor-pointer text-sm"
                     >
-                        {loading ? 'Đang cập nhật...' : <><Save size={18} /> Lưu Thay Đổi</>}
+                        {loading ? 'Đang cập nhật...' : <><Save size={16} /> Lưu Thay Đổi</>}
                     </button>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-6 xl:gap-8 print:block">
-                <div id="invoice-paper" className="bg-white border-2 border-slate-800 p-5 md:p-8 shadow-2xl relative print:p-0 print:border-none print:shadow-none print:w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-3 xl:gap-4 print:block">
+                <div id="invoice-paper" className="bg-white border-2 border-slate-800 p-4 md:p-6 shadow-2xl relative print:p-0 print:border-none print:shadow-none print:w-full">
                     <div className="absolute top-0 left-0 w-full h-1.5 bg-rose-700 print:hidden"></div>
                     <div className="hidden print:block w-full h-3 bg-rose-700 mb-8"></div>
 
@@ -302,22 +332,17 @@ export default function EditOrderPage() {
                         </div>
                         <div className="text-right">
                             <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-1">Ohari</h1>
-                            <p className={cn(
-                                "font-black text-sm uppercase tracking-widest",
-                                isInstallment ? (order.isPaymentConfirmed ? "text-emerald-600" : "text-amber-500") : "text-emerald-600"
-                            )}>
-                                {isInstallment ? (order.isPaymentConfirmed ? "Đã khớp tiền" : "Chờ thu tiền") : "Ghi nhận DS"}
-                            </p>
+                            <p className="text-emerald-600 font-black text-sm uppercase tracking-widest">Hệ thống ERP</p>
                         </div>
                     </div>
 
-                    <div className="w-full h-0.5 bg-slate-100 mb-8"></div>
+                    <div className="w-full h-0.5 bg-slate-100 mb-6"></div>
 
-                    <h1 className="text-xl md:text-2xl font-black text-center text-slate-900 border-b-2 border-slate-800 pb-3 mb-6 md:mb-8 uppercase tracking-[0.2em] print:mt-4">
+                    <h1 className="text-lg md:text-xl font-black text-center text-slate-900 border-b-2 border-slate-800 pb-2.5 mb-5 md:mb-6 uppercase tracking-[0.2em] print:mt-4">
                         Sửa hóa đơn bán hàng
                     </h1>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2 mb-8 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 mb-6 text-xs">
                         <div className="grid grid-cols-[120px_1fr] items-center border-b border-slate-100 py-1">
                             <span className="font-bold text-slate-600">Chi nhánh:</span>
                             <select
@@ -354,7 +379,7 @@ export default function EditOrderPage() {
                                 type="text"
                                 value={order.customerName}
                                 onChange={(e) => setOrder({ ...order, customerName: e.target.value })}
-                                className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 font-bold uppercase"
+                                className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900"
                             />
                         </div>
                         <div className="grid grid-cols-[120px_1fr] items-center border-b border-slate-100 py-1 md:col-span-2">
@@ -393,68 +418,106 @@ export default function EditOrderPage() {
                                 className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900"
                             />
                         </div>
-                        <div className="grid grid-cols-[120px_1fr] items-center border-b border-slate-100 py-1">
-                            <span className="font-bold text-slate-600">Nguồn đơn:</span>
-                            <select
-                                value={order.orderSource}
-                                onChange={(e) => setOrder({ ...order, orderSource: e.target.value })}
-                                className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900"
-                            >
-                                <option value="HOTLINE">HOTLINE</option>
-                                <option value="FACEBOOK">FACEBOOK</option>
-                                <option value="WEBSITE">WEBSITE</option>
-                                <option value="ZALO">ZALO</option>
-                                <option value="WALKIN">Vãng lai</option>
-                                <option value="REFERRAL">Giới thiệu</option>
-                                <option value="OTHER">Khác</option>
-                            </select>
-                        </div>
                         <div className="grid grid-cols-[120px_1fr] items-start border-b border-slate-100 py-2">
-                            <span className="font-bold text-slate-600 mt-1">Giao hàng:</span>
-                            <div className="space-y-2">
-                                <div className="flex gap-1 p-0.5 bg-slate-100 rounded-md w-fit">
-                                    <button
-                                        type="button"
-                                        onClick={() => setDriverTab('driver')}
-                                        className={cn(
-                                            "px-3 py-1 text-[10px] font-bold rounded transition-all",
-                                            driverTab === 'driver' ? "bg-white text-rose-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
-                                        )}
-                                    >
-                                        Lái xe (+50k)
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setDriverTab('staff')}
-                                        className={cn(
-                                            "px-3 py-1 text-[10px] font-bold rounded transition-all",
-                                            driverTab === 'staff' ? "bg-white text-blue-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
-                                        )}
-                                    >
-                                        Nhân viên (+100k)
-                                    </button>
-                                </div>
+                            <span className="font-bold text-slate-600 mt-1">Lái xe:</span>
+                            <div className="space-y-1.5">
                                 <select
-                                    value={order.driverId || ''}
+                                    value={(() => {
+                                        const d = order.deliveries?.find(d => d.category === 'COMPANY_DRIVER' || d.category === 'EXTERNAL_DRIVER');
+                                        if (!d) return 'none';
+                                        return d.category === 'EXTERNAL_DRIVER' ? 'external' : 'company';
+                                    })()}
                                     onChange={(e) => {
                                         const val = e.target.value;
+                                        const otherDeliveries = order.deliveries?.filter(d => d.category !== 'COMPANY_DRIVER' && d.category !== 'EXTERNAL_DRIVER') || [];
+
+                                        if (val === 'none') {
+                                            setOrder({ ...order, deliveries: otherDeliveries });
+                                        } else if (val === 'external') {
+                                            setOrder({
+                                                ...order,
+                                                deliveries: [...otherDeliveries, { category: 'EXTERNAL_DRIVER', driverId: null, role: 'DRIVER' }]
+                                            });
+                                        } else {
+                                            setOrder({
+                                                ...order,
+                                                deliveries: [...otherDeliveries, { category: 'COMPANY_DRIVER', driverId: '', role: 'DRIVER' }]
+                                            });
+                                        }
+                                    }}
+                                    className="bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[10px] font-bold text-slate-700 w-full outline-none focus:ring-1 focus:ring-rose-200"
+                                >
+                                    <option value="none">-- Không --</option>
+                                    <option value="external">🚚 Lái xe ngoài (+0k)</option>
+                                    <option value="company">🏢 Lái xe công ty (+50k)</option>
+                                </select>
+
+                                {order.deliveries?.some(d => d.category === 'COMPANY_DRIVER') && (
+                                    <select
+                                        value={order.deliveries?.find(d => d.category === 'COMPANY_DRIVER')?.driverId || ''}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            const newDeliveries = order.deliveries?.map(d =>
+                                                d.category === 'COMPANY_DRIVER' ? { ...d, driverId: val } : d
+                                            ) || [];
+                                            setOrder({ ...order, deliveries: newDeliveries });
+                                        }}
+                                        className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 w-full text-[11px]"
+                                    >
+                                        <option value="">-- Chọn lái xe --</option>
+                                        {allEmployees
+                                            .filter(e => e.department === 'Lái xe' || e.position === 'driver' || e.isInternalDriver)
+                                            .map(emp => (
+                                                <option key={emp.id} value={emp.id}>{emp.fullName}</option>
+                                            ))
+                                        }
+                                    </select>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-[120px_1fr] items-start border-b border-slate-100 py-2">
+                            <span className="font-bold text-slate-600 mt-1">Người giao:</span>
+                            <div className="space-y-1.5">
+                                <select
+                                    value={order.deliveries?.find(d => d.role === 'STAFF')?.driverId || ''}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        const otherDeliveries = order.deliveries?.filter(d => d.role !== 'STAFF') || [];
+
+                                        if (!val) {
+                                            setOrder({ ...order, deliveries: otherDeliveries });
+                                            return;
+                                        }
+
+                                        const emp = allEmployees.find(e => e.id === val);
+                                        let category: any = 'STAFF_DELIVERER';
+
+                                        if (emp) {
+                                            if (val === order.staffCode) {
+                                                category = 'SELLING_SALE';
+                                            } else if (emp.position === 'sale' || emp.position === 'NVBH' || emp.department === 'Phòng KD') {
+                                                category = 'OTHER_SALE';
+                                            }
+                                        }
+
                                         setOrder({
                                             ...order,
-                                            driverId: val,
-                                            driverType: driverTab === 'staff' ? 'sale' : 'internal'
+                                            deliveries: [...otherDeliveries, { category, driverId: val, role: 'STAFF' }]
                                         });
                                     }}
-                                    className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 w-full"
+                                    className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 w-full text-[11px]"
                                 >
-                                    <option value="">-- Chọn người giao --</option>
+                                    <option value="">-- Không --</option>
                                     {allEmployees
-                                        .filter(e => {
-                                            const isDriver = e.department === 'Lái xe' || e.position === 'driver' || e.isInternalDriver;
-                                            return driverTab === 'driver' ? isDriver : !isDriver;
+                                        .filter(e => e.department !== 'Lái xe' && e.position !== 'driver' && !e.isInternalDriver)
+                                        .map(emp => {
+                                            let feeLabel = "(+70k)";
+                                            if (emp.id === order.staffCode) feeLabel = "(+100k)";
+                                            else if (emp.position === 'sale' || emp.position === 'NVBH' || emp.department === 'Phòng KD') feeLabel = "(+200k)";
+
+                                            return <option key={emp.id} value={emp.id}>{emp.fullName} {feeLabel}</option>;
                                         })
-                                        .map(emp => (
-                                            <option key={emp.id} value={emp.id}>{emp.fullName}</option>
-                                        ))
                                     }
                                 </select>
                             </div>
@@ -467,20 +530,34 @@ export default function EditOrderPage() {
                             products={products}
                             onChange={(items) => setOrder({ ...order, items })}
                         />
+
+                        <div className="mt-4 no-print print:hidden">
+                            <GiftGrid
+                                orderGifts={order.gifts}
+                                allGifts={allGifts}
+                                onChange={(gifts) => setOrder({ ...order, gifts })}
+                            />
+                        </div>
                     </div>
 
-                    <div className="flex flex-col items-end space-y-2 text-sm">
-                        <div className="grid grid-cols-[150px_200px] border-b border-slate-200 py-1">
+                    <div className="flex flex-col items-end space-y-1 text-xs">
+                        <div className="grid grid-cols-[120px_160px] border-b border-slate-200 py-1">
                             <span className="font-bold text-slate-600">Tổng cộng:</span>
-                            <span className="text-right font-black text-lg text-slate-900">{formatCurrency(totalAmount)}</span>
+                            <span className="text-right font-black text-sm text-slate-900">{formatCurrency(totalAmount)}</span>
                         </div>
-                        <div className="grid grid-cols-[150px_200px] border-b border-slate-200 py-1 text-emerald-600">
+                        {totalGiftAmount > 0 && (
+                            <div className="grid grid-cols-[120px_160px] border-b border-slate-200 py-1 text-rose-600 font-bold italic">
+                                <span className="text-slate-600">Quà tặng:</span>
+                                <span className="text-right">{formatCurrency(totalGiftAmount)}</span>
+                            </div>
+                        )}
+                        <div className="grid grid-cols-[120px_160px] border-b border-slate-200 py-1 text-emerald-600">
                             <span className="font-bold">Đã thanh toán:</span>
                             <span className="text-right font-bold">{formatCurrency(paidAmount)}</span>
                         </div>
-                        <div className="grid grid-cols-[150px_200px] py-1 text-red-600">
+                        <div className="grid grid-cols-[120px_160px] py-1 text-red-600">
                             <span className="font-bold">Còn lại:</span>
-                            <span className="text-right font-bold">{formatCurrency(remainingAmount)}</span>
+                            <span className="text-right font-bold">{formatCurrency(totalAmount - paidAmount)}</span>
                         </div>
                     </div>
 
@@ -489,6 +566,7 @@ export default function EditOrderPage() {
                         <textarea
                             value={order.note || ''}
                             onChange={(e) => setOrder({ ...order, note: e.target.value })}
+                            placeholder="Nhập ghi chú chi tiết về đơn hàng, vận chuyển..."
                             className="w-full bg-slate-50 border-none rounded-lg p-3 text-sm min-h-[100px] focus:ring-0 print:hidden"
                         />
                         <div className="hidden print:block text-sm text-slate-800 italic p-3 bg-slate-50 rounded-lg">
@@ -632,9 +710,9 @@ export default function EditOrderPage() {
 
                                 return (
                                     <div className="space-y-3">
-                                        <div className="flex justify-between items-center bg-indigo-50 p-2 rounded border border-indigo-100">
-                                            <span className="text-indigo-700 font-black uppercase text-[11px] tracking-tight">Thưởng nóng</span>
-                                            <span className="font-black text-xl text-indigo-800">
+                                        <div className="flex justify-between items-center bg-rose-50 p-1.5 rounded border border-rose-100">
+                                            <span className="text-rose-700 font-black uppercase text-[9px] tracking-tight">Thưởng nóng</span>
+                                            <span className="font-black text-base text-rose-800">
                                                 {(() => {
                                                     const othersTotal = order.splits.reduce((sum, s) => sum + s.splitAmount, 0);
                                                     const myPercent = totalAmount > 0 ? (totalAmount - othersTotal) / totalAmount : 1;
@@ -644,9 +722,9 @@ export default function EditOrderPage() {
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-2">
-                                            <div className="bg-slate-50 p-2 rounded border border-slate-200">
-                                                <div className="text-[10px] text-slate-500 uppercase font-black mb-0.5 text-center">Sale (70%)</div>
-                                                <div className="text-sm font-black text-slate-800 text-center">
+                                            <div className="bg-slate-50 p-1.5 rounded border border-slate-200">
+                                                <div className="text-[8px] text-slate-500 uppercase font-black mb-0.5 text-center">Sale (70%)</div>
+                                                <div className="text-xs font-black text-slate-800 text-center">
                                                     {(() => {
                                                         const othersTotal = order.splits.reduce((sum, s) => sum + s.splitAmount, 0);
                                                         const myPercent = totalAmount > 0 ? (totalAmount - othersTotal) / totalAmount : 1;
@@ -654,9 +732,9 @@ export default function EditOrderPage() {
                                                     })()}
                                                 </div>
                                             </div>
-                                            <div className="bg-slate-50 p-2 rounded border border-slate-200">
-                                                <div className="text-[10px] text-slate-500 uppercase font-black mb-0.5 text-center">Quản lý (30%)</div>
-                                                <div className="text-sm font-black text-slate-800 text-center">
+                                            <div className="bg-slate-50 p-1.5 rounded border border-slate-200">
+                                                <div className="text-[8px] text-slate-500 uppercase font-black mb-0.5 text-center">Quản lý (30%)</div>
+                                                <div className="text-xs font-black text-slate-800 text-center">
                                                     {(() => {
                                                         const othersTotal = order.splits.reduce((sum, s) => sum + s.splitAmount, 0);
                                                         const myPercent = totalAmount > 0 ? (totalAmount - othersTotal) / totalAmount : 1;
@@ -683,6 +761,17 @@ export default function EditOrderPage() {
                         totalOrderAmount={totalAmount}
                         onChange={(payments) => setOrder({ ...order, payments })}
                     />
+
+                    {/* Instructions Section */}
+                    <div className="bg-rose-50 border border-rose-100 rounded-xl p-4">
+                        <h4 className="font-bold text-rose-900 text-sm mb-2 flex items-center gap-2">
+                            <Info size={16} /> Hướng dẫn
+                        </h4>
+                        <p className="text-xs text-rose-800 leading-relaxed">
+                            Nhập thông tin khách hàng và sản phẩm vào hóa đơn.
+                            Sử dụng các mục Chia doanh số và Thanh toán để hoàn tất nghiệp vụ.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>

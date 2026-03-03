@@ -54,7 +54,7 @@ export default function PerformancePage() {
             return;
         }
         const parsedUser = JSON.parse(user);
-        const allowedRoles = ['DIRECTOR', 'CHIEF_ACCOUNTANT'];
+        const allowedRoles = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'];
         if (!allowedRoles.includes(parsedUser.role?.code)) {
             router.push('/dashboard');
             return;
@@ -146,24 +146,24 @@ export default function PerformancePage() {
     );
 
     return (
-        <div className="min-h-screen bg-slate-50/50 p-6">
-            <div className="max-w-[1600px] mx-auto space-y-6">
+        <div className="min-h-screen bg-slate-50/50 pt-1 px-3 pb-3">
+            <div className="max-w-[1600px] mx-auto space-y-3">
                 {/* Header Section */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
                     <div>
-                        <h1 className="text-2xl font-black text-slate-900 flex items-center gap-2">
-                            <TrendingUp className="text-rose-500" />
+                        <h1 className="text-xl font-black text-slate-900 flex items-center gap-2">
+                            <TrendingUp className="text-rose-500" size={20} />
                             Báo Cáo Doanh Số & Thưởng
                         </h1>
-                        <p className="text-slate-500 font-medium">Theo dõi hiệu suất và chính sách thưởng cá nhân</p>
+                        <p className="text-slate-400 font-medium text-xs">Theo dõi hiệu suất và chính sách thưởng cá nhân</p>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <div className="flex bg-slate-100 p-1 rounded-xl">
+                        <div className="flex bg-slate-100 p-0.5 rounded-lg">
                             <select
                                 value={month}
                                 onChange={(e) => setMonth(parseInt(e.target.value))}
-                                className="bg-transparent px-3 py-2 text-sm font-bold text-slate-700 outline-none"
+                                className="bg-transparent px-2 py-1.5 text-xs font-bold text-slate-700 outline-none"
                             >
                                 {Array.from({ length: 12 }, (_, i) => (
                                     <option key={i + 1} value={i + 1}>Tháng {i + 1}</option>
@@ -172,9 +172,9 @@ export default function PerformancePage() {
                             <select
                                 value={year}
                                 onChange={(e) => setYear(parseInt(e.target.value))}
-                                className="bg-transparent px-3 py-2 text-sm font-bold text-slate-700 outline-none"
+                                className="bg-transparent px-2 py-1.5 text-xs font-bold text-slate-700 outline-none"
                             >
-                                {[2025, 2026].map(y => (
+                                {Array.from({ length: new Date().getFullYear() - 2025 + 2 }, (_, i) => 2025 + i).map(y => (
                                     <option key={y} value={y}>Năm {y}</option>
                                 ))}
                             </select>
@@ -182,9 +182,9 @@ export default function PerformancePage() {
 
                         <button
                             onClick={handleExportExcel}
-                            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-emerald-100 active:scale-95 whitespace-nowrap"
+                            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-bold transition-all shadow-lg shadow-emerald-100 active:scale-95 whitespace-nowrap"
                         >
-                            <FileSpreadsheet size={18} />
+                            <FileSpreadsheet size={16} />
                             Xuất Excel
                         </button>
                     </div>
@@ -192,13 +192,13 @@ export default function PerformancePage() {
 
                 {/* Filters & Search */}
                 <div className="relative group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-rose-500 transition-colors" size={20} />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-rose-500 transition-colors" size={18} />
                     <input
                         type="text"
                         placeholder="Tìm theo tên nhân viên hoặc chi nhánh..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl shadow-sm outline-none focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 transition-all font-medium"
+                        className="w-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl shadow-sm outline-none focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 transition-all text-sm font-medium"
                     />
                 </div>
 
@@ -208,19 +208,19 @@ export default function PerformancePage() {
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-gradient-to-r from-slate-100 to-slate-50 border-b-2 border-slate-300 whitespace-nowrap">
-                                    <th className="px-2 py-3 text-[11px] font-black text-slate-600 uppercase border-r border-slate-200">Nhân viên</th>
-                                    <th className="px-2 py-3 text-[11px] font-black text-slate-600 uppercase border-r border-slate-200">Chi nhánh</th>
-                                    <th className="px-2 py-3 text-[11px] font-black text-slate-600 uppercase text-center border-r border-slate-200">Tổng đơn</th>
-                                    <th className="px-2 py-3 text-[11px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Doanh số</th>
-                                    <th className="px-2 py-3 text-[11px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Hoa hồng</th>
-                                    <th className="px-2 py-3 text-[11px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Thưởng nóng</th>
-                                    <th className="px-2 py-3 text-[11px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Tiền ship</th>
-                                    <th className="px-2 py-3 text-[11px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Đơn dưới Min</th>
-                                    <th className="px-2 py-3 text-[11px] font-black text-slate-600 uppercase text-center border-r border-slate-200">Tỷ lệ</th>
-                                    <th className="px-2 py-3 text-[11px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Mốc thưởng</th>
-                                    <th className="px-2 py-3 text-[11px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Lương CB</th>
-                                    <th className="px-2 py-3 text-[11px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Thực nhận</th>
-                                    <th className="px-2 py-3 text-[11px] font-black text-slate-600 uppercase text-center">Trạng thái</th>
+                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase border-r border-slate-200">Nhân viên</th>
+                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase border-r border-slate-200">Chi nhánh</th>
+                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-center border-r border-slate-200">Tổng đơn</th>
+                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Doanh số</th>
+                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Hoa hồng</th>
+                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Thưởng nóng</th>
+                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Tiền ship</th>
+                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Đơn dưới Min</th>
+                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-center border-r border-slate-200">Tỷ lệ</th>
+                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Mốc thưởng</th>
+                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Lương CB</th>
+                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Thực nhận</th>
+                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-center">Trạng thái</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-200">
@@ -232,58 +232,58 @@ export default function PerformancePage() {
                                     ))
                                 ) : filteredRecords.length > 0 ? (
                                     filteredRecords.map((r) => (
-                                        <tr key={r.employeeId} className="hover:bg-slate-50 transition-colors group text-[13px] border-b border-slate-100">
-                                            <td className="px-2 py-3 whitespace-nowrap font-bold text-slate-900 border-r border-slate-100">{r.fullName}</td>
-                                            <td className="px-2 py-3 whitespace-nowrap text-slate-600 border-r border-slate-100">{r.branchName || '-'}</td>
-                                            <td className="px-2 py-3 text-center font-bold text-slate-700 border-r border-slate-100">{r.totalOrders}</td>
-                                            <td className="px-2 py-3 text-right font-bold text-indigo-600 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.totalRevenue)}</td>
-                                            <td className="px-2 py-3 text-right font-medium text-slate-600 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.commission)}</td>
-                                            <td className="px-2 py-3 text-right font-medium text-amber-600 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.hotBonus)}</td>
-                                            <td className="px-2 py-3 text-right font-medium text-blue-600 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.shippingFee)}</td>
-                                            <td className="px-2 py-3 text-right text-slate-500 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.lowPriceValue)}</td>
-                                            <td className="px-2 py-3 text-center border-r border-slate-100">
+                                        <tr key={r.employeeId} className="hover:bg-slate-50 transition-colors group text-[12px] border-b border-slate-100">
+                                            <td className="px-2 py-2 whitespace-nowrap font-bold text-slate-900 border-r border-slate-100">{r.fullName}</td>
+                                            <td className="px-2 py-2 whitespace-nowrap text-slate-600 border-r border-slate-100">{r.branchName || '-'}</td>
+                                            <td className="px-2 py-2 text-center font-bold text-slate-700 border-r border-slate-100">{r.totalOrders}</td>
+                                            <td className="px-2 py-2 text-right font-bold text-indigo-600 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.totalRevenue)}</td>
+                                            <td className="px-2 py-2 text-right font-medium text-slate-600 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.commission)}</td>
+                                            <td className="px-2 py-2 text-right font-medium text-amber-600 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.hotBonus)}</td>
+                                            <td className="px-2 py-2 text-right font-medium text-blue-600 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.shippingFee)}</td>
+                                            <td className="px-2 py-2 text-right text-slate-500 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.lowPriceValue)}</td>
+                                            <td className="px-2 py-2 text-center border-r border-slate-100">
                                                 <span className={cn(
-                                                    "px-1.5 py-0.5 rounded text-[10px] font-black",
+                                                    "px-1 py-0.5 rounded text-[9px] font-black",
                                                     r.lowPriceRatio >= 20 ? "bg-red-50 text-red-600" : "bg-emerald-50 text-emerald-600"
                                                 )}>
                                                     {r.lowPriceRatio.toFixed(1)}%
                                                 </span>
                                             </td>
-                                            <td className="px-2 py-3 text-right border-r border-slate-100">
+                                            <td className="px-2 py-2 text-right border-r border-slate-100">
                                                 <div className="font-bold text-slate-700 whitespace-nowrap">{formatCurrency(r.milestone)}</div>
                                                 <div className={cn(
-                                                    "text-[10px] font-bold uppercase mt-0.5",
+                                                    "text-[9px] font-bold uppercase mt-0.5",
                                                     (r.isPenalty && !r.isClemency) ? "text-slate-400 line-through" : "text-slate-500"
                                                 )}>
                                                     Thưởng: {formatCurrency(r.baseReward)}
                                                 </div>
                                                 {(r.isPenalty && !r.isClemency) && (
-                                                    <div className="text-[11px] font-black text-red-600 mt-0.5">
+                                                    <div className="text-[10px] font-black text-red-600 mt-0.5">
                                                         {formatCurrency(r.actualReward)}
                                                     </div>
                                                 )}
                                             </td>
-                                            <td className="px-2 py-3 text-right font-bold text-slate-700 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.baseSalary)}</td>
-                                            <td className="px-2 py-3 text-right border-r border-slate-100">
+                                            <td className="px-2 py-2 text-right font-bold text-slate-700 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.baseSalary)}</td>
+                                            <td className="px-2 py-2 text-right border-r border-slate-100">
                                                 <div className={cn(
-                                                    "font-black whitespace-nowrap text-[13px]",
+                                                    "font-black whitespace-nowrap text-[12px]",
                                                     r.isPenalty && !r.isClemency ? "text-red-600" : "text-emerald-600"
                                                 )}>
                                                     {formatCurrency(r.netIncome)}
                                                 </div>
                                             </td>
-                                            <td className="px-2 py-3 text-center">
+                                            <td className="px-2 py-2 text-center">
                                                 <div className="flex justify-center">
                                                     {r.isClemency ? (
-                                                        <div className="flex items-center gap-1 bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full text-[10px] font-black whitespace-nowrap border border-amber-200">
+                                                        <div className="flex items-center gap-1 bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded-full text-[9px] font-black whitespace-nowrap border border-amber-200">
                                                             <CheckCircle2 size={10} /> Khoan hồng
                                                         </div>
                                                     ) : r.isPenalty ? (
-                                                        <div className="flex items-center gap-1 bg-red-50 text-red-600 px-2 py-0.5 rounded-full text-[10px] font-black whitespace-nowrap border border-red-200">
+                                                        <div className="flex items-center gap-1 bg-red-50 text-red-600 px-1.5 py-0.5 rounded-full text-[9px] font-black whitespace-nowrap border border-red-200">
                                                             <AlertTriangle size={10} /> Bị phạt
                                                         </div>
                                                     ) : r.totalRevenue > 0 ? (
-                                                        <div className="flex items-center gap-1 bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full text-[10px] font-black whitespace-nowrap border border-emerald-200">
+                                                        <div className="flex items-center gap-1 bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded-full text-[9px] font-black whitespace-nowrap border border-emerald-200">
                                                             <CheckCircle2 size={10} /> Hợp lệ
                                                         </div>
                                                     ) : (

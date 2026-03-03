@@ -11,3 +11,12 @@ export function formatCurrency(value: number) {
         currency: 'VND',
     }).format(value);
 }
+
+export const formatNumber = (val: number | null | undefined) => {
+    if (!val && val !== 0) return '';
+    return new Intl.NumberFormat('vi-VN').format(val);
+};
+
+export const parseNumber = (val: string) => {
+    return Number(val.replace(/\D/g, '')) || 0;
+};

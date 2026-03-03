@@ -7,7 +7,7 @@ import {
     LineChart, Line, PieChart, Pie, Cell
 } from 'recharts';
 import {
-    LogOut, TrendingUp, Users, ShoppingBag,
+    LogOut, TrendingUp, Users, ShoppingBag, Truck,
     CreditCard, Calendar, ArrowRight, DollarSign, Info, Clock,
     FileText, CheckCircle, AlertCircle, Wallet, LucideIcon,
     PieChart as PieChartIcon, X
@@ -103,13 +103,13 @@ export default function DashboardPage() {
 
     return (
         <div className="bg-transparent space-y-6">
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-4 rounded-3xl border border-slate-100 shadow-sm transition-all duration-300">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-2 md:gap-4 bg-white p-3 md:p-4 rounded-3xl border border-slate-100 shadow-sm transition-all duration-300">
                 <div className="flex items-center gap-3">
                     <div className="p-2.5 bg-rose-50 rounded-2xl text-rose-600">
                         <Calendar size={20} />
                     </div>
                     <div>
-                        <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Thống kê hoạt động</h2>
+                        <h2 className="text-lg font-black text-slate-800 uppercase tracking-tight">Thống kê hoạt động</h2>
                         <div className="flex items-center gap-2 mt-0.5">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                             <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
@@ -119,7 +119,7 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                <div className="flex flex-wrap items-center gap-2 md:gap-3 w-full lg:w-auto">
                     {/* Quick Ranges */}
                     <div className="flex items-center bg-slate-100/50 p-1 rounded-2xl border border-slate-100 h-10 overflow-hidden">
                         {[
@@ -131,7 +131,7 @@ export default function DashboardPage() {
                             <button
                                 key={btn.val}
                                 onClick={() => setQuickRange(btn.val as any)}
-                                className="px-3 py-1.5 text-[10px] font-black uppercase tracking-tight rounded-xl transition-all hover:bg-white hover:shadow-sm text-slate-500 hover:text-rose-600"
+                                className="px-2 md:px-3 py-1.5 text-[10px] font-black uppercase tracking-tight rounded-xl transition-all hover:bg-white hover:shadow-sm text-slate-500 hover:text-rose-600"
                             >
                                 {btn.label}
                             </button>
@@ -169,7 +169,7 @@ export default function DashboardPage() {
 
             <main className="max-w-7xl mx-auto space-y-6">
                 {/* Role Based Content */}
-                {['DIRECTOR', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT'].includes(data.role) && (
+                {['DIRECTOR', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT', 'BRANCH_ACCOUNTANT'].includes(data.role) && (
                     <DirectorDashboard
                         data={data}
                         userId={user.id}
@@ -181,6 +181,7 @@ export default function DashboardPage() {
                 {data.role === 'SALE' && <SaleDashboard data={data} startDate={startDate} endDate={endDate} />}
                 {data.role === 'TELESALE' && <TelesaleDashboard data={data} startDate={startDate} endDate={endDate} />}
                 {data.role === 'MARKETING' && <MarketingDashboard data={data} startDate={startDate} endDate={endDate} />}
+                {data.role === 'DRIVER' && <DriverDashboard data={data} startDate={startDate} endDate={endDate} />}
             </main>
         </div>
     );
@@ -239,9 +240,9 @@ function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, us
             </div>
 
             {/* Financial Alerts & Status */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div
-                    onClick={() => router.push(`/orders?tab=installment&paymentStatus=pending&startDate=${startDate}&endDate=${endDate}`)}
+                    onClick={() => router.push(`/orders?paymentStatus=pending&excludeInstallment=true&startDate=${startDate}&endDate=${endDate}`)}
                     className="p-4 bg-amber-50 rounded-2xl border border-amber-100 flex items-center gap-4 cursor-pointer hover:bg-amber-100 transition-colors group"
                 >
                     <div className="w-12 h-12 bg-amber-100 group-hover:bg-amber-200 rounded-xl flex items-center justify-center text-amber-600">
@@ -251,6 +252,20 @@ function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, us
                         <p className="text-[10px] font-black text-amber-800 uppercase">Chờ khớp tiền</p>
                         <p className="text-xl font-black text-amber-900">{data.unconfirmedCount || 0} <span className="text-xs font-medium">đơn hàng</span></p>
                         <p className="text-[10px] text-amber-700 font-bold">~ {formatCurrency(data.unconfirmedRevenue || 0)}</p>
+                    </div>
+                </div>
+
+                <div
+                    onClick={() => router.push(`/orders?tab=installment&paymentStatus=pending&startDate=${startDate}&endDate=${endDate}`)}
+                    className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100 flex items-center gap-4 cursor-pointer hover:bg-indigo-100 transition-colors group"
+                >
+                    <div className="w-12 h-12 bg-indigo-100 group-hover:bg-indigo-200 rounded-xl flex items-center justify-center text-indigo-600">
+                        <CreditCard size={24} />
+                    </div>
+                    <div>
+                        <p className="text-[10px] font-black text-indigo-800 uppercase">Chờ duyệt trả góp</p>
+                        <p className="text-xl font-black text-indigo-900">{data.pendingInstallmentCount || 0} <span className="text-xs font-medium">đơn hàng</span></p>
+                        <p className="text-[10px] text-indigo-700 font-bold">~ {formatCurrency(data.pendingInstallmentRevenue || 0)}</p>
                     </div>
                 </div>
 
@@ -304,39 +319,64 @@ function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, us
                     </div>
                 </div>
 
-                {/* Payment Methods Pie Chart */}
-                <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
                     <h3 className="font-black text-slate-800 mb-6 flex items-center gap-2 uppercase tracking-wider text-sm">
                         <PieChartIcon size={18} className="text-violet-600" />
                         Cơ cấu Thanh toán
                     </h3>
-                    <div className="h-[250px]">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={pieData}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius={60}
-                                    outerRadius={80}
-                                    paddingAngle={5}
-                                    dataKey="value"
-                                >
-                                    {pieData.map((entry: any, index: number) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                    ))}
-                                </Pie>
-                                <Tooltip formatter={(value: any) => formatCurrency(value)} />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 mt-4">
-                        {pieData.map((p: any, i: number) => (
-                            <div key={i} className="flex items-center gap-2">
-                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }}></div>
-                                <span className="text-[10px] font-bold text-slate-500 uppercase">{p.name}</span>
-                            </div>
-                        ))}
+                    <div className="flex flex-col xl:flex-row items-center gap-6">
+                        <div className="h-[200px] w-full xl:w-1/2">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={pieData}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={50}
+                                        outerRadius={75}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                    >
+                                        {pieData.map((entry: any, index: number) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip
+                                        formatter={(value: any) => formatCurrency(value)}
+                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                        <div className="w-full xl:w-1/2 space-y-2.5">
+                            {pieData.map((p: any, i: number) => {
+                                const total = pieData.reduce((acc: number, curr: any) => acc + curr.value, 0);
+                                const percent = total > 0 ? (p.value / total) * 100 : 0;
+                                return (
+                                    <div key={i} className="flex flex-col gap-0.5">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: COLORS[i % COLORS.length] }}></div>
+                                                <span className="text-[10px] font-black text-slate-500 uppercase truncate">{p.name}</span>
+                                            </div>
+                                            <span className="text-[10px] font-black text-slate-800">{percent.toFixed(1)}%</span>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden mr-2">
+                                                <div
+                                                    className="h-full transition-all duration-1000"
+                                                    style={{ width: `${percent}%`, backgroundColor: COLORS[i % COLORS.length] }}
+                                                ></div>
+                                            </div>
+                                            <span className="text-[10px] font-bold text-slate-400 whitespace-nowrap">{formatCurrency(p.value)}</span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                            {pieData.length === 0 && (
+                                <p className="text-center py-10 text-[10px] font-bold text-slate-300 uppercase tracking-widest">Chưa có dữ liệu</p>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -383,6 +423,7 @@ function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, us
                                     <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Đơn hàng</th>
                                     <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Tỷ lệ giá thấp</th>
                                     <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Chờ khớp tiền</th>
+                                    <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Chờ trả góp</th>
                                     <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Hóa đơn</th>
                                 </tr>
                             </thead>
@@ -400,10 +441,22 @@ function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, us
                                         <td className="py-3 text-center">
                                             {branch.unconfirmedOrders > 0 ? (
                                                 <span
-                                                    onClick={() => router.push(`/orders?tab=installment&paymentStatus=pending&branchId=${branch.id}&startDate=${startDate}&endDate=${endDate}`)}
+                                                    onClick={() => router.push(`/orders?paymentStatus=pending&excludeInstallment=true&branchId=${branch.id}&startDate=${startDate}&endDate=${endDate}`)}
                                                     className="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100 cursor-pointer hover:bg-amber-600 hover:text-white transition-colors"
                                                 >
                                                     {branch.unconfirmedOrders} đơn
+                                                </span>
+                                            ) : (
+                                                <CheckCircle size={14} className="text-emerald-500 mx-auto" />
+                                            )}
+                                        </td>
+                                        <td className="py-3 text-center">
+                                            {branch.pendingInstallmentOrders > 0 ? (
+                                                <span
+                                                    onClick={() => router.push(`/orders?tab=installment&paymentStatus=pending&branchId=${branch.id}&startDate=${startDate}&endDate=${endDate}`)}
+                                                    className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 cursor-pointer hover:bg-indigo-600 hover:text-white transition-colors"
+                                                >
+                                                    {branch.pendingInstallmentOrders} đơn
                                                 </span>
                                             ) : (
                                                 <CheckCircle size={14} className="text-emerald-500 mx-auto" />
@@ -443,6 +496,7 @@ function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, us
 }
 
 function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: string, endDate: string }) {
+    const router = useRouter();
     const branchRevenue = data.branchRevenue || 0;
     const milestones = data.milestones || []; // Dynamic milestones from backend
     const currentPercent = data.performance?.milestonePercent || 0;
@@ -450,20 +504,18 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
     const isClemency = data.performance?.isClemency || false;
     const lowPriceRatio = data.lowPriceStats?.ratio || 0;
 
-    // Determine the max scale for the progress bar based on milestones
-    const maxMilestone = milestones.length > 0 ? Math.max(...milestones.map((m: any) => m.percent)) : 100;
-    const maxScale = Math.max(maxMilestone, 150);
+    // Determine the max scale for the progress bar based on revenue
+    const maxMilestoneRevenue = milestones.length > 0 ? Math.max(...milestones.map((m: any) => Number(m.targetRevenue))) : 1;
+    // Buffer to ensure the last dot isn't cut off and progress can exceed last milestone
+    const maxRevenueScale = Math.max(maxMilestoneRevenue * 1.1, branchRevenue * 1.05);
 
-    const targetAt100 = milestones.find((m: any) => m.percent === 100)?.targetRevenue || milestones[milestones.length - 1]?.targetRevenue || 1;
-    const currentRevenuePercent = (branchRevenue / targetAt100) * 100;
-
-    const nextMilestone = milestones.find((m: any) => m.targetRevenue > branchRevenue) || milestones[milestones.length - 1];
+    const nextMilestone = milestones.find((m: any) => Number(m.targetRevenue) > branchRevenue) || milestones[milestones.length - 1];
     const missingAmount = nextMilestone ? Math.max(0, Number(nextMilestone.targetRevenue) - branchRevenue) : 0;
 
     return (
         <div className="space-y-4">
             {/* Dark Red KPI Card */}
-            <div className="bg-gradient-to-br from-rose-700 to-rose-900 rounded-3xl p-5 md:p-6 text-white shadow-xl relative overflow-hidden">
+            <div className="bg-gradient-to-br from-rose-700 to-rose-900 rounded-3xl p-4 md:p-5 text-white shadow-xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
 
                 <div className="relative z-10">
@@ -472,22 +524,21 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
                             <p className="text-rose-100 text-sm font-medium mb-0.5 flex items-center gap-2">
                                 <TrendingUp size={14} /> Doanh số chi nhánh tháng này
                             </p>
-                            <h2 className="text-3xl md:text-4xl font-black tracking-tight drop-shadow-lg leading-tight">
+                            <h2 className="text-2xl md:text-3xl font-black tracking-tight drop-shadow-lg leading-tight">
                                 {formatCurrency(branchRevenue)}
                             </h2>
                             <div className="flex flex-wrap items-center gap-3 mt-2">
                                 <div className="text-rose-200 text-xs bg-black/20 px-2.5 py-1 rounded-full backdrop-blur-sm border border-white/10">
-                                    Mốc hiện tại: {currentPercent}%
+                                    Mốc hiện tại: {formatCurrency(branchRevenue)}
                                 </div>
-                                <div className="text-rose-100 text-[10px] font-bold opacity-80">
-                                    KPI: {currentRevenuePercent.toFixed(1)}%
-                                </div>
+                                {/* Removed Tỉ lệ đạt % */}
                                 {isPenalty && (
                                     <div className={`text-xs px-2.5 py-1 rounded-full backdrop-blur-sm border flex items-center gap-1 ${isClemency
                                         ? 'text-emerald-300 bg-emerald-900/30 border-emerald-500/30'
                                         : 'text-amber-300 bg-amber-900/30 border-amber-500/30 animate-pulse'
                                         }`}>
-                                        <Info size={12} /> {isClemency ? 'Đã được khoan hồng' : `Tỷ lệ giá thấp: ${lowPriceRatio.toFixed(1)}%`}
+                                        <div className="w-1.5 h-1.5 rounded-full bg-current"></div>
+                                        {isClemency ? 'Đã được khoan hồng' : `Tỷ lệ giá thấp: ${lowPriceRatio.toFixed(1)}%`}
                                     </div>
                                 )}
                             </div>
@@ -501,25 +552,25 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
                             ) : (
                                 <div className="bg-white/10 p-3 rounded-2xl backdrop-blur-md border border-white/10">
                                     <p className="text-[10px] text-rose-200 uppercase font-bold tracking-wider mb-0.5">Mục tiêu tiếp theo</p>
-                                    <p className="text-lg font-bold text-white leading-none">{nextMilestone?.percent}%</p>
+                                    <p className="text-lg font-bold text-white leading-none">{formatCurrency(nextMilestone?.targetRevenue || 0)}</p>
                                 </div>
                             )}
                         </div>
                     </div>
 
-                    {/* Timeline Progress Bar */}
+                    {/* Timeline Progress Bar (Linear Revenue Scale) */}
                     <div className="space-y-3">
                         <div className="relative h-10 mt-6 select-none">
                             <div className="absolute top-1/2 left-0 w-full h-2 bg-black/30 rounded-full -translate-y-1/2"></div>
                             <div
                                 className="absolute top-1/2 left-0 h-2 bg-gradient-to-r from-emerald-400 to-emerald-300 rounded-full -translate-y-1/2 shadow-[0_0_12px_rgba(52,211,153,0.5)] transition-all duration-1000"
-                                style={{ width: `${Math.min((currentRevenuePercent / maxScale) * 100, 100)}%` }}
+                                style={{ width: `${Math.min((branchRevenue / maxRevenueScale) * 100, 100)}%` }}
                             ></div>
 
-                            {milestones.map((m: any, index: number) => {
-                                const position = (m.percent / maxScale) * 100;
+                            {milestones.filter((m: any) => Number(m.targetRevenue) > 0).map((m: any, index: number) => {
+                                const position = (Number(m.targetRevenue) / maxRevenueScale) * 100;
                                 const reached = branchRevenue >= Number(m.targetRevenue);
-                                const isNext = m.percent === nextMilestone?.percent;
+                                const isNext = Number(m.targetRevenue) === Number(nextMilestone?.targetRevenue);
 
                                 return (
                                     <div
@@ -534,9 +585,7 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
                                         `}></div>
                                         {isNext && <div className="absolute top-0 w-3.5 h-3.5 rounded-full bg-white border-[3px] border-rose-600 z-10"></div>}
 
-                                        <div className={`absolute top-5 text-[9px] font-bold whitespace-nowrap transition-colors ${reached ? 'text-emerald-300' : 'text-rose-200/50'}`}>
-                                            {m.percent}%
-                                        </div>
+                                        {/* Removed % label under dot to avoid clutter */}
 
                                         <div className="absolute bottom-5 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-20 pointer-events-none mb-1 border border-white/10">
                                             Doanh số: {formatCurrency(m.targetRevenue)}
@@ -552,7 +601,7 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
                                 <div className="flex justify-between items-center text-xs">
                                     <span className="text-rose-100 flex items-center gap-1.5">
                                         <ArrowRight size={12} className="text-emerald-400" />
-                                        Mục tiêu: <strong className="text-white">{nextMilestone?.percent}%</strong> ({formatCurrency(nextMilestone?.targetRevenue || 0)})
+                                        Mục tiêu: <strong className="text-white">{formatCurrency(nextMilestone?.targetRevenue || 0)}</strong>
                                     </span>
                                     <span className="text-white font-bold bg-white/10 px-2 py-0.5 rounded-md">
                                         Còn thiếu: {formatCurrency(missingAmount)}
@@ -560,7 +609,7 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
                                 </div>
                                 {isPenalty && !isClemency && (
                                     <p className="text-[10px] text-amber-300 italic pl-4">
-                                        ⚠️ Đang bị phạt (Thưởng mốc x70%). Đạt 110% mục tiêu mốc ({formatCurrency((nextMilestone?.targetRevenue || 0) * 1.1)}) để được khoan hồng!
+                                        ⚠️ Đang bị phạt (Thưởng mốc x70%). Đạt mốc {formatCurrency((nextMilestone?.targetRevenue || 0) * 1.1)} để được khoan hồng!
                                     </p>
                                 )}
                             </div>
@@ -619,9 +668,12 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
             </div>
 
             {/* Alert Cards + Pie Chart */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                 {/* Chờ khớp tiền */}
-                <div className={`p-4 rounded-2xl border ${(data.unconfirmedCount || 0) > 0 ? 'bg-amber-50 border-amber-200' : 'bg-white border-slate-100'} shadow-sm`}>
+                <div
+                    onClick={() => router.push(`/orders?paymentStatus=pending&startDate=${startDate}&endDate=${endDate}`)}
+                    className={`p-4 rounded-2xl border cursor-pointer hover:shadow-md transition-all ${(data.unconfirmedCount || 0) > 0 ? 'bg-amber-50 border-amber-200' : 'bg-white border-slate-100'} shadow-sm`}
+                >
                     <div className="flex items-center gap-2 mb-2">
                         <Clock size={16} className={(data.unconfirmedCount || 0) > 0 ? 'text-amber-500' : 'text-slate-400'} />
                         <p className="text-[10px] font-black text-slate-500 uppercase">Chờ khớp tiền</p>
@@ -630,12 +682,32 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
                         {data.unconfirmedCount || 0} <span className="text-sm font-normal">đơn hàng</span>
                     </p>
                     {(data.unconfirmedCount || 0) > 0 && (
-                        <p className="text-[10px] text-amber-500 font-bold mt-1">⚠️ Cần xác nhận trả góp</p>
+                        <p className="text-[10px] text-amber-500 font-bold mt-1">⚠️ Cần xác nhận thanh toán</p>
+                    )}
+                </div>
+
+                {/* Chờ duyệt trả góp */}
+                <div
+                    onClick={() => router.push(`/orders?tab=installment&paymentStatus=pending&startDate=${startDate}&endDate=${endDate}`)}
+                    className={`p-4 rounded-2xl border cursor-pointer hover:shadow-md transition-all ${(data.pendingInstallmentCount || 0) > 0 ? 'bg-indigo-50 border-indigo-200' : 'bg-white border-slate-100'} shadow-sm`}
+                >
+                    <div className="flex items-center gap-2 mb-2">
+                        <CreditCard size={16} className={(data.pendingInstallmentCount || 0) > 0 ? 'text-indigo-500' : 'text-slate-400'} />
+                        <p className="text-[10px] font-black text-slate-500 uppercase">Chờ duyệt trả góp</p>
+                    </div>
+                    <p className={`text-2xl font-black ${(data.pendingInstallmentCount || 0) > 0 ? 'text-indigo-600' : 'text-slate-700'}`}>
+                        {data.pendingInstallmentCount || 0} <span className="text-sm font-normal">đơn hàng</span>
+                    </p>
+                    {(data.pendingInstallmentCount || 0) > 0 && (
+                        <p className="text-[10px] text-indigo-500 font-bold mt-1">⚠️ Cần xác nhận trả góp</p>
                     )}
                 </div>
 
                 {/* Chờ xuất hóa đơn */}
-                <div className={`p-4 rounded-2xl border ${(data.unissuedInvoiceCount || 0) > 0 ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-100'} shadow-sm`}>
+                <div
+                    onClick={() => router.push(`/orders?tab=invoice&invoiceStatus=pending&startDate=${startDate}&endDate=${endDate}`)}
+                    className={`p-4 rounded-2xl border cursor-pointer hover:shadow-md transition-all ${(data.unissuedInvoiceCount || 0) > 0 ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-100'} shadow-sm`}
+                >
                     <div className="flex items-center gap-2 mb-2">
                         <FileText size={16} className={(data.unissuedInvoiceCount || 0) > 0 ? 'text-blue-500' : 'text-slate-400'} />
                         <p className="text-[10px] font-black text-slate-500 uppercase">Chờ xuất hóa đơn</p>
@@ -662,14 +734,14 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
             </div>
 
             {/* Cơ cấu Thanh toán (Pie Chart) */}
-            {data.paymentMethodBreakdown && data.paymentMethodBreakdown.some((p: any) => p.amount > 0) && (
+            {data.paymentMethodBreakdown && (
                 <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
                     <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider mb-4 flex items-center gap-2">
                         <PieChartIcon size={14} className="text-violet-500" />
                         Cơ cấu Thanh toán Chi nhánh
                     </h4>
-                    <div className="flex items-center gap-6">
-                        <div className="h-[160px] flex-1">
+                    <div className="flex flex-col xl:flex-row items-center gap-6">
+                        <div className="h-[180px] w-full xl:w-1/2">
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie
@@ -687,20 +759,43 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
                                             <Cell key={index} fill={['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444'][index % 5]} />
                                         ))}
                                     </Pie>
-                                    <Tooltip formatter={(value: any) => formatCurrency(value)} />
+                                    <Tooltip
+                                        formatter={(value: any) => formatCurrency(value)}
+                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                    />
                                 </PieChart>
                             </ResponsiveContainer>
                         </div>
-                        <div className="grid grid-cols-1 gap-2">
-                            {data.paymentMethodBreakdown.filter((p: any) => p.amount > 0).map((p: any, i: number) => (
-                                <div key={i} className="flex items-center gap-2">
-                                    <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444'][i % 5] }} />
-                                    <span className="text-[10px] font-bold text-slate-500 uppercase">
-                                        {p.method === 'CASH' ? 'Tiền mặt' : p.method === 'TRANSFER_COMPANY' ? 'CK Công ty' : p.method === 'TRANSFER_PERSONAL' ? 'CK Cá nhân' : p.method === 'CARD' ? 'Quẹt thẻ' : 'Trả góp'}
-                                    </span>
-                                    <span className="text-[10px] font-black text-slate-700 ml-auto">{formatCurrency(p.amount)}</span>
-                                </div>
-                            ))}
+                        <div className="w-full xl:w-1/2 space-y-2.5">
+                            {data.paymentMethodBreakdown.filter((p: any) => p.amount > 0).map((p: any, i: number) => {
+                                const total = data.paymentMethodBreakdown.reduce((acc: number, curr: any) => acc + curr.amount, 0);
+                                const percent = total > 0 ? (p.amount / total) * 100 : 0;
+                                return (
+                                    <div key={i} className="flex flex-col gap-0.5">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444'][i % 5] }}></div>
+                                                <span className="text-[10px] font-black text-slate-500 uppercase truncate">
+                                                    {p.method === 'CASH' ? 'Tiền mặt' : p.method === 'TRANSFER_COMPANY' ? 'CK Công ty' : p.method === 'TRANSFER_PERSONAL' ? 'CK Cá nhân' : p.method === 'CARD' ? 'Quẹt thẻ' : 'Trả góp'}
+                                                </span>
+                                            </div>
+                                            <span className="text-[10px] font-black text-slate-800">{percent.toFixed(1)}%</span>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden mr-2">
+                                                <div
+                                                    className="h-full transition-all duration-1000"
+                                                    style={{ width: `${percent}%`, backgroundColor: ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444'][i % 5] }}
+                                                ></div>
+                                            </div>
+                                            <span className="text-[10px] font-bold text-slate-400 whitespace-nowrap">{formatCurrency(p.amount)}</span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                            {(!data.paymentMethodBreakdown || data.paymentMethodBreakdown.every((p: any) => p.amount === 0)) && (
+                                <p className="text-center py-10 text-[10px] font-bold text-slate-300 uppercase tracking-widest">Chưa có dữ liệu</p>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -804,6 +899,7 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
     );
 }
 
+
 function ActionButton({ icon, title, href }: { icon: React.ReactNode, title: string, href: string }) {
     return (
         <a
@@ -863,7 +959,7 @@ function SaleDashboard({ data, startDate, endDate }: { data: any, startDate: str
     return (
         <div className="space-y-4">
             {/* KPI Card */}
-            <div className="bg-gradient-to-br from-rose-700 to-rose-900 rounded-3xl p-5 md:p-6 text-white shadow-xl relative overflow-hidden">
+            <div className="bg-gradient-to-br from-rose-700 to-rose-900 rounded-3xl p-4 md:p-5 text-white shadow-xl relative overflow-hidden">
                 {/* Decoration */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
 
@@ -873,7 +969,7 @@ function SaleDashboard({ data, startDate, endDate }: { data: any, startDate: str
                             <p className="text-rose-100 text-sm font-medium mb-0.5 flex items-center gap-2">
                                 <TrendingUp size={14} /> Doanh số tháng này
                             </p>
-                            <h2 className="text-3xl md:text-4xl font-black tracking-tight drop-shadow-lg leading-tight">
+                            <h2 className="text-2xl md:text-3xl font-black tracking-tight drop-shadow-lg leading-tight">
                                 {formatCurrency(currentRevenue)}
                             </h2>
                             <div className="flex flex-wrap items-center gap-3 mt-2">
@@ -1027,25 +1123,25 @@ function SaleDashboard({ data, startDate, endDate }: { data: any, startDate: str
                 <div className="p-5 space-y-6">
                     {/* Key Income Metrics */}
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                        <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
-                            <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Số đơn hàng</p>
-                            <p className="text-xl font-black text-slate-900">{data.orderCount || 0}</p>
+                        <div className="p-3 bg-slate-50/50 rounded-2xl border border-slate-100">
+                            <p className="text-[9px] font-black text-slate-400 uppercase mb-0.5">Số đơn hàng</p>
+                            <p className="text-lg font-black text-slate-900">{data.orderCount || 0}</p>
                         </div>
-                        <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
-                            <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Lương cơ bản</p>
-                            <p className="text-xl font-black text-slate-700">{formatCurrency(data.baseSalary || 0)}</p>
+                        <div className="p-3 bg-slate-50/50 rounded-2xl border border-slate-100">
+                            <p className="text-[9px] font-black text-slate-400 uppercase mb-0.5">Lương cơ bản</p>
+                            <p className="text-lg font-black text-slate-700">{formatCurrency(data.baseSalary || 0)}</p>
                         </div>
-                        <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
-                            <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Tổng hoa hồng</p>
-                            <p className="text-xl font-black text-emerald-600">{formatCurrency(data.totalCommission || 0)}</p>
+                        <div className="p-3 bg-slate-50/50 rounded-2xl border border-slate-100">
+                            <p className="text-[9px] font-black text-slate-400 uppercase mb-0.5">Tổng hoa hồng</p>
+                            <p className="text-lg font-black text-emerald-600">{formatCurrency(data.totalCommission || 0)}</p>
                         </div>
-                        <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
-                            <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Thưởng nóng</p>
-                            <p className="text-xl font-black text-rose-600">{formatCurrency(data.hotBonus || 0)}</p>
+                        <div className="p-3 bg-slate-50/50 rounded-2xl border border-slate-100">
+                            <p className="text-[9px] font-black text-slate-400 uppercase mb-0.5">Thưởng nóng</p>
+                            <p className="text-lg font-black text-rose-600">{formatCurrency(data.hotBonus || 0)}</p>
                         </div>
-                        <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
-                            <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Tiền Ship</p>
-                            <p className="text-xl font-black text-indigo-600">{formatCurrency(data.shippingFees || 0)}</p>
+                        <div className="p-3 bg-slate-50/50 rounded-2xl border border-slate-100">
+                            <p className="text-[9px] font-black text-slate-400 uppercase mb-0.5">Tiền Ship</p>
+                            <p className="text-lg font-black text-indigo-600">{formatCurrency(data.shippingFees || 0)}</p>
                         </div>
                     </div>
 
@@ -1092,7 +1188,7 @@ function SaleDashboard({ data, startDate, endDate }: { data: any, startDate: str
 
                                 <div className="flex items-end justify-between">
                                     <div>
-                                        <p className="text-2xl font-black text-white">{formatCurrency(data.performance?.actualReward || 0)}</p>
+                                        <p className="text-xl font-black text-white">{formatCurrency(data.performance?.actualReward || 0)}</p>
                                         <p className="text-[10px] text-slate-400 mt-1">Mốc thưởng hiện tại: <span className="text-slate-200">
                                             {formatCurrency(data.performance?.milestone || 0)}
                                         </span></p>
@@ -1134,7 +1230,7 @@ function TelesaleDashboard({ data, startDate, endDate }: { data: any, startDate:
                             <TrendingUp size={14} />
                             <h3 className="text-[10px] font-black uppercase tracking-widest">Doanh số Facebook</h3>
                         </div>
-                        <p className="text-4xl md:text-5xl font-black truncate tracking-tight">
+                        <p className="text-3xl md:text-4xl font-black truncate tracking-tight">
                             {formatCurrency(fbRevenue)}
                         </p>
                         <div className="mt-3 flex gap-2">
@@ -1204,7 +1300,7 @@ function MarketingDashboard({ data, startDate, endDate }: { data: any, startDate
             <div className="bg-gradient-to-br from-rose-700 to-rose-900 rounded-3xl p-6 text-white shadow-xl flex justify-between items-center text-left">
                 <div>
                     <p className="text-rose-100 text-sm font-medium mb-1">💰 Tổng thưởng Marketing (Dự kiến)</p>
-                    <h2 className="text-4xl font-black tracking-tight drop-shadow-lg">
+                    <h2 className="text-3xl md:text-4xl font-black tracking-tight drop-shadow-lg">
                         {formatCurrency(data.totalReward)}
                     </h2>
                 </div>
@@ -1267,6 +1363,135 @@ function MarketingDashboard({ data, startDate, endDate }: { data: any, startDate
                     <p className="text-slate-500 font-bold">{data.message || 'Không có dữ liệu chi nhánh'}</p>
                 </div>
             )}
+        </div>
+    );
+}
+
+function DriverDashboard({ data, startDate, endDate }: { data: any, startDate: string, endDate: string }) {
+    return (
+        <div className="space-y-4">
+            {/* Main Stats Card */}
+            <div className="bg-gradient-to-br from-rose-600 to-rose-800 rounded-3xl p-4 md:p-5 text-white shadow-xl relative overflow-hidden group border border-white/10">
+                <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/5 rounded-full blur-3xl"></div>
+
+                <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div className="flex-1 text-left">
+                        <div className="flex items-center gap-2 mb-1.5 opacity-80">
+                            <Truck size={14} />
+                            <h3 className="text-[9px] font-black uppercase tracking-widest text-rose-100">Thu nhập vận chuyển tháng này</h3>
+                        </div>
+                        <p className="text-3xl font-black tracking-tight">
+                            {formatCurrency(data.monthlyStats?.shippingFees || 0)}
+                        </p>
+                        <div className="mt-2 flex gap-2">
+                            <span className="text-[9px] font-bold bg-black/20 px-2.5 py-0.5 rounded-full border border-white/5">
+                                Đã giao: {data.monthlyStats?.deliveredCount || 0} / {data.monthlyStats?.totalTrips || 0} chuyến
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 min-w-[210px] text-left">
+                        <div className="flex items-center gap-2 mb-1">
+                            <TrendingUp size={14} className="text-emerald-400" />
+                            <h4 className="text-[9px] font-black uppercase tracking-widest text-rose-100">Tổng thu nhập tích lũy</h4>
+                        </div>
+                        <p className="text-xl font-black text-emerald-300">
+                            {formatCurrency(data.allTimeStats?.totalShippingFees || 0)}
+                        </p>
+                        <p className="text-[8px] text-rose-200 mt-1 opacity-80">
+                            Tổng cộng {data.allTimeStats?.totalTrips || 0} chuyến hàng
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Quick Stats Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm text-left">
+                    <div className="w-8 h-8 bg-amber-50 rounded-xl flex items-center justify-center mb-2 text-amber-600">
+                        <Clock size={16} />
+                    </div>
+                    <p className="text-[9px] font-black text-slate-400 uppercase mb-0.5">Đang chờ xử lý</p>
+                    <p className="text-xl font-black text-slate-800">{data.monthlyStats?.pendingCount || 0}</p>
+                </div>
+
+                <div className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm text-left">
+                    <div className="w-8 h-8 bg-emerald-50 rounded-xl flex items-center justify-center mb-2 text-emerald-600">
+                        <CheckCircle size={16} />
+                    </div>
+                    <p className="text-[9px] font-black text-slate-400 uppercase mb-0.5">Tỷ lệ hoàn thành</p>
+                    <p className="text-xl font-black text-slate-800">
+                        {data.monthlyStats?.totalTrips > 0
+                            ? ((data.monthlyStats.deliveredCount / data.monthlyStats.totalTrips) * 100).toFixed(0)
+                            : 0}%
+                    </p>
+                </div>
+
+                <div className="hidden md:block bg-white p-4 rounded-3xl border border-slate-100 shadow-sm text-left">
+                    <div className="w-8 h-8 bg-rose-50 rounded-xl flex items-center justify-center mb-2 text-rose-600">
+                        <ShoppingBag size={16} />
+                    </div>
+                    <p className="text-[9px] font-black text-slate-400 uppercase mb-0.5">Tổng chuyến tháng</p>
+                    <p className="text-xl font-black text-slate-800">{data.monthlyStats?.totalTrips || 0}</p>
+                </div>
+            </div>
+
+            {/* Recent Deliveries */}
+            <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden text-left">
+                <div className="p-4 border-b border-slate-50 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-7 h-7 bg-rose-50 rounded-lg flex items-center justify-center text-rose-600">
+                            <Truck size={16} />
+                        </div>
+                        <h3 className="font-black text-slate-800 text-xs uppercase tracking-wider">Chuyến hàng gần đây</h3>
+                    </div>
+                </div>
+
+                <div className="divide-y divide-slate-50">
+                    {data.recentDeliveries?.map((delivery: any) => (
+                        <div key={delivery.id} className="p-4 hover:bg-slate-50 transition-colors flex items-center justify-between group">
+                            <div className="flex items-center gap-4">
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${delivery.status === 'delivered'
+                                    ? 'bg-emerald-50 border-emerald-100 text-emerald-600'
+                                    : 'bg-amber-50 border-amber-100 text-amber-600'
+                                    }`}>
+                                    <ShoppingBag size={18} />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-black text-slate-700">Đơn hàng #{delivery.orderId.slice(0, 8)}</p>
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">
+                                        {new Date(delivery.date).toLocaleDateString('vi-VN')}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-sm font-black text-slate-800">{formatCurrency(delivery.fee)}</p>
+                                <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase ${delivery.status === 'delivered'
+                                    ? 'bg-emerald-100 text-emerald-700'
+                                    : 'bg-amber-100 text-amber-700'
+                                    }`}>
+                                    {delivery.status === 'delivered' ? 'Đã giao' : 'Đang xử lý'}
+                                </span>
+                            </div>
+                        </div>
+                    ))}
+
+                    {(!data.recentDeliveries || data.recentDeliveries.length === 0) && (
+                        <div className="py-12 text-center">
+                            <p className="text-slate-300 font-bold text-xs uppercase tracking-widest">Không có chuyến hàng nào gần đây</p>
+                        </div>
+                    )}
+                </div>
+
+                <div className="p-3 bg-slate-50/50 border-t border-slate-50 text-center">
+                    <button
+                        onClick={() => window.location.href = '/orders'}
+                        className="text-[9px] font-black text-rose-600 uppercase tracking-widest hover:text-rose-700 transition-colors"
+                    >
+                        Xem tất cả đơn hàng
+                    </button>
+                </div>
+            </div>
         </div>
     );
 }
