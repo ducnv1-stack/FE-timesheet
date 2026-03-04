@@ -216,36 +216,36 @@ function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, us
         <div className="space-y-6 text-left">
             {/* Main Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                <div className="p-3 bg-white rounded-2xl border border-slate-100 shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-                            <DollarSign size={20} />
+                        <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                            <DollarSign size={18} />
                         </div>
                         <p className="text-[10px] font-black text-slate-400 uppercase">Doanh số hoàn thành</p>
                     </div>
-                    <p className="text-xl font-black text-slate-800">{formatCurrency(data.totalRevenue)}</p>
-                    <p className="text-[10px] text-slate-400 mt-1">{data.totalOrders || 0} đơn đã xác nhận</p>
+                    <p className="text-lg font-black text-slate-800">{formatCurrency(data.totalRevenue)}</p>
+                    <p className="text-[9px] text-slate-400 mt-0.5">{data.totalOrders || 0} đơn đã xác nhận</p>
                 </div>
-                <div className="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                <div className="p-3 bg-white rounded-2xl border border-slate-100 shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
-                            <ShoppingBag size={20} />
+                        <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                            <ShoppingBag size={18} />
                         </div>
                         <p className="text-[10px] font-black text-slate-400 uppercase">Doanh số bán</p>
                     </div>
-                    <p className="text-xl font-black text-blue-700">{formatCurrency(data.salesRevenue || 0)}</p>
-                    <p className="text-[10px] text-slate-400 mt-1">{data.salesOrderCount || 0} đơn trong kỳ</p>
+                    <p className="text-lg font-black text-blue-700">{formatCurrency(data.salesRevenue || 0)}</p>
+                    <p className="text-[9px] text-slate-400 mt-0.5">{data.salesOrderCount || 0} đơn trong kỳ</p>
                 </div>
                 {(data.pendingRevenueTotal || 0) > 0 ? (
-                    <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200 shadow-sm">
+                    <div className="p-3 bg-amber-50 rounded-2xl border border-amber-200 shadow-sm">
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600">
-                                <Clock size={20} />
+                            <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600">
+                                <Clock size={18} />
                             </div>
                             <p className="text-[10px] font-black text-amber-700 uppercase">Chờ thanh toán</p>
                         </div>
-                        <p className="text-xl font-black text-amber-700">{formatCurrency(data.pendingRevenueTotal)}</p>
-                        <p className="text-[10px] text-amber-600 mt-1">⚠️ Chưa xác nhận đủ tiền</p>
+                        <p className="text-lg font-black text-amber-700">{formatCurrency(data.pendingRevenueTotal)}</p>
+                        <p className="text-[9px] text-amber-600 mt-0.5">⚠️ Chưa xác nhận đủ tiền</p>
                     </div>
                 ) : (
                     <StatCard
@@ -265,54 +265,54 @@ function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, us
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div
                     onClick={() => router.push(`/orders?paymentStatus=pending&excludeInstallment=true&startDate=${startDate}&endDate=${endDate}`)}
-                    className="p-4 bg-amber-50 rounded-2xl border border-amber-100 flex items-center gap-4 cursor-pointer hover:bg-amber-100 transition-colors group"
+                    className="p-3 bg-amber-50 rounded-2xl border border-amber-100 flex items-center gap-3 cursor-pointer hover:bg-amber-100 transition-colors group"
                 >
-                    <div className="w-12 h-12 bg-amber-100 group-hover:bg-amber-200 rounded-xl flex items-center justify-center text-amber-600">
-                        <AlertCircle size={24} />
+                    <div className="w-10 h-10 bg-amber-100 group-hover:bg-amber-200 rounded-xl flex items-center justify-center text-amber-600">
+                        <AlertCircle size={20} />
                     </div>
                     <div>
                         <p className="text-[10px] font-black text-amber-800 uppercase">Chờ khớp tiền</p>
-                        <p className="text-xl font-black text-amber-900">{data.unconfirmedCount || 0} <span className="text-xs font-medium">đơn hàng</span></p>
-                        <p className="text-[10px] text-amber-700 font-bold">~ {formatCurrency(data.unconfirmedRevenue || 0)}</p>
+                        <p className="text-lg font-black text-amber-900">{data.unconfirmedCount || 0} <span className="text-[10px] font-medium">đơn</span></p>
+                        <p className="text-[9px] text-amber-700 font-bold">~ {formatCurrency(data.unconfirmedRevenue || 0)}</p>
                     </div>
                 </div>
 
                 <div
                     onClick={() => router.push(`/orders?tab=installment&paymentStatus=pending&startDate=${startDate}&endDate=${endDate}`)}
-                    className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100 flex items-center gap-4 cursor-pointer hover:bg-indigo-100 transition-colors group"
+                    className="p-3 bg-indigo-50 rounded-2xl border border-indigo-100 flex items-center gap-3 cursor-pointer hover:bg-indigo-100 transition-colors group"
                 >
-                    <div className="w-12 h-12 bg-indigo-100 group-hover:bg-indigo-200 rounded-xl flex items-center justify-center text-indigo-600">
-                        <CreditCard size={24} />
+                    <div className="w-10 h-10 bg-indigo-100 group-hover:bg-indigo-200 rounded-xl flex items-center justify-center text-indigo-600">
+                        <CreditCard size={20} />
                     </div>
                     <div>
                         <p className="text-[10px] font-black text-indigo-800 uppercase">Chờ duyệt trả góp</p>
-                        <p className="text-xl font-black text-indigo-900">{data.pendingInstallmentCount || 0} <span className="text-xs font-medium">đơn hàng</span></p>
-                        <p className="text-[10px] text-indigo-700 font-bold">~ {formatCurrency(data.pendingInstallmentRevenue || 0)}</p>
+                        <p className="text-lg font-black text-indigo-900">{data.pendingInstallmentCount || 0} <span className="text-[10px] font-medium">đơn</span></p>
+                        <p className="text-[9px] text-indigo-700 font-bold">~ {formatCurrency(data.pendingInstallmentRevenue || 0)}</p>
                     </div>
                 </div>
 
                 <div
                     onClick={() => router.push(`/orders?tab=invoice&invoiceStatus=pending&startDate=${startDate}&endDate=${endDate}`)}
-                    className="p-4 bg-blue-50 rounded-2xl border border-blue-100 flex items-center gap-4 cursor-pointer hover:bg-blue-100 transition-colors group"
+                    className="p-3 bg-blue-50 rounded-2xl border border-blue-100 flex items-center gap-3 cursor-pointer hover:bg-blue-100 transition-colors group"
                 >
-                    <div className="w-12 h-12 bg-blue-100 group-hover:bg-blue-200 rounded-xl flex items-center justify-center text-blue-600">
-                        <FileText size={24} />
+                    <div className="w-10 h-10 bg-blue-100 group-hover:bg-blue-200 rounded-xl flex items-center justify-center text-blue-600">
+                        <FileText size={20} />
                     </div>
                     <div>
                         <p className="text-[10px] font-black text-blue-800 uppercase">Chờ xuất hóa đơn</p>
-                        <p className="text-xl font-black text-blue-900">{data.unissuedInvoiceCount || 0} <span className="text-xs font-medium">đơn hàng</span></p>
-                        <p className="text-[10px] text-blue-700 font-bold">Cần xử lý ngay</p>
+                        <p className="text-lg font-black text-blue-900">{data.unissuedInvoiceCount || 0} <span className="text-[10px] font-medium">đơn</span></p>
+                        <p className="text-[9px] text-blue-700 font-bold">Cần xử lý ngay</p>
                     </div>
                 </div>
 
-                <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
-                        <Users size={24} />
+                <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-100 flex items-center gap-3">
+                    <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
+                        <Users size={20} />
                     </div>
                     <div>
                         <p className="text-[10px] font-black text-emerald-800 uppercase">Nhân sự đang làm</p>
-                        <p className="text-xl font-black text-emerald-900">{data.activeEmployees || 0} <span className="text-xs font-medium">nhân sự</span></p>
-                        <p className="text-[10px] text-emerald-700 font-bold">Toàn hệ thống</p>
+                        <p className="text-lg font-black text-emerald-900">{data.activeEmployees || 0} <span className="text-[10px] font-medium">nhân sự</span></p>
+                        <p className="text-[9px] text-emerald-700 font-bold">Toàn hệ thống</p>
                     </div>
                 </div>
             </div>
@@ -399,6 +399,60 @@ function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, us
                                 <p className="text-center py-10 text-[10px] font-bold text-slate-300 uppercase tracking-widest">Chưa có dữ liệu</p>
                             )}
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Revenue Trend & Best Sellers */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                <div className="lg:col-span-8 bg-white p-4 rounded-3xl border border-slate-100 shadow-sm">
+                    <div className="flex items-center gap-2 mb-3">
+                        <div className="w-8 h-8 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600">
+                            <TrendingUp size={16} />
+                        </div>
+                        <div>
+                            <h3 className="font-black text-slate-800 text-xs uppercase tracking-wider">Xu hướng doanh số hệ thống</h3>
+                            <p className="text-[9px] text-slate-400 font-bold uppercase">Biến động theo ngày</p>
+                        </div>
+                    </div>
+                    <div className="h-[200px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={data.revenueTrend || []}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                <XAxis dataKey="date" fontSize={9} tickLine={false} axisLine={false} tickFormatter={(val) => val.split('-').slice(1).reverse().join('/')} />
+                                <YAxis fontSize={9} tickLine={false} axisLine={false} tickFormatter={(val) => `${(val / 1000000).toFixed(0)}tr`} />
+                                <Tooltip formatter={(value: any) => formatCurrency(value)} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
+                                <Line type="monotone" dataKey="revenue" stroke="#e11d48" strokeWidth={2} dot={{ r: 2.5, fill: '#fff', strokeWidth: 2 }} activeDot={{ r: 5 }} />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+                <div className="lg:col-span-4 bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col">
+                    <div className="flex items-center gap-2 mb-3">
+                        <div className="w-8 h-8 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600">
+                            <ShoppingBag size={16} />
+                        </div>
+                        <div>
+                            <h3 className="font-black text-slate-800 text-xs uppercase tracking-wider">Top Sản Phẩm</h3>
+                            <p className="text-[9px] text-slate-400 font-bold uppercase">Bán chạy nhất hệ thống</p>
+                        </div>
+                    </div>
+                    <div className="space-y-2 flex-1">
+                        {data.bestSellers?.map((item: any, idx: number) => (
+                            <div key={idx} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-transparent hover:border-amber-100 transition-colors">
+                                <div className="flex items-center gap-2">
+                                    <span className="w-5 h-5 rounded-md bg-white border border-slate-200 flex items-center justify-center text-[9px] font-black text-slate-500">{idx + 1}</span>
+                                    <div>
+                                        <p className="text-[11px] font-black text-slate-700 truncate max-w-[120px]">{item.name}</p>
+                                        <p className="text-[8px] text-slate-400 font-bold uppercase">SL: {item.quantity}</p>
+                                    </div>
+                                </div>
+                                <p className="text-[11px] font-black text-rose-600">{formatCurrency(item.revenue)}</p>
+                            </div>
+                        ))}
+                        {(!data.bestSellers || data.bestSellers.length === 0) && (
+                            <p className="text-center py-8 text-[9px] font-bold text-slate-300 uppercase tracking-widest">Chưa có dữ liệu</p>
+                        )}
                     </div>
                 </div>
             </div>
@@ -538,16 +592,62 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
 
     return (
         <div className="space-y-4">
+            {/* Main Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="p-3 bg-white rounded-2xl border border-slate-100 shadow-sm hover:border-rose-100 transition-colors">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-9 h-9 rounded-xl bg-rose-50 flex items-center justify-center text-rose-600">
+                            <DollarSign size={18} />
+                        </div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase">Doanh số thực</p>
+                    </div>
+                    <p className="text-lg font-black text-slate-800">{formatCurrency(branchRevenue)}</p>
+                    <p className="text-[9px] text-slate-400 mt-0.5">Đã xác nhận thanh toán</p>
+                </div>
+
+                <div className="p-3 bg-white rounded-2xl border border-slate-100 shadow-sm hover:border-blue-100 transition-colors">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                            <ShoppingBag size={18} />
+                        </div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase">Doanh số bán</p>
+                    </div>
+                    <p className="text-lg font-black text-blue-600">{formatCurrency(branchSalesRevenue)}</p>
+                    <p className="text-[9px] text-slate-400 mt-0.5">Tổng giá trị bán hàng</p>
+                </div>
+
+                <div className="p-3 bg-rose-50 rounded-2xl border border-rose-100 shadow-sm">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-9 h-9 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600">
+                            <Clock size={18} />
+                        </div>
+                        <p className="text-[10px] font-black text-rose-700 uppercase">Chờ xử lý</p>
+                    </div>
+                    <p className="text-lg font-black text-rose-700">{formatCurrency(branchPendingRevenue)}</p>
+                    <p className="text-[9px] text-rose-600 mt-0.5">⚠️ Đơn hàng chờ khớp tiền</p>
+                </div>
+
+                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 shadow-sm">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-9 h-9 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-600">
+                            <TrendingUp size={18} />
+                        </div>
+                        <p className="text-[10px] font-black text-slate-500 uppercase">Tỷ lệ chốt</p>
+                    </div>
+                    <p className="text-lg font-black text-slate-800">{lowPriceRatio}%</p>
+                    <p className="text-[9px] text-slate-400 mt-0.5">Tỷ lệ sản phẩm Min cao</p>
+                </div>
+            </div>
+
             {/* Dark Red KPI Card */}
             <div className="bg-gradient-to-br from-rose-700 to-rose-900 rounded-3xl p-4 md:p-5 text-white shadow-xl relative overflow-hidden">
+                {/* Decoration */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
 
                 <div className="relative z-10">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-4 gap-3">
                         <div>
-                            <p className="text-rose-100 text-sm font-medium mb-0.5 flex items-center gap-2">
-                                <TrendingUp size={14} /> Doanh số hoàn thành CN
-                            </p>
+                            <p className="text-rose-100 text-[10px] font-bold uppercase tracking-wider mb-0.5">Doanh thu hiện tại</p>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight drop-shadow-lg leading-tight">
                                 {formatCurrency(branchRevenue)}
                             </h2>
@@ -767,6 +867,60 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
                 </div>
             </div>
 
+            {/* Revenue Trend & Best Sellers (Branch Specific) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                <div className="lg:col-span-8 bg-white p-4 rounded-3xl border border-slate-100 shadow-sm">
+                    <div className="flex items-center gap-2 mb-3">
+                        <div className="w-8 h-8 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600">
+                            <TrendingUp size={16} />
+                        </div>
+                        <div>
+                            <h3 className="font-black text-slate-800 text-xs uppercase tracking-wider">Xu hướng doanh số chi nhánh</h3>
+                            <p className="text-[9px] text-slate-400 font-bold uppercase">Biến động theo ngày</p>
+                        </div>
+                    </div>
+                    <div className="h-[180px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={data.revenueTrend || []}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                <XAxis dataKey="date" fontSize={9} tickLine={false} axisLine={false} tickFormatter={(val) => val.split('-').slice(1).reverse().join('/')} />
+                                <YAxis fontSize={9} tickLine={false} axisLine={false} tickFormatter={(val) => `${(val / 1000000).toFixed(0)}tr`} />
+                                <Tooltip formatter={(value: any) => formatCurrency(value)} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
+                                <Line type="monotone" dataKey="revenue" stroke="#e11d48" strokeWidth={2} dot={{ r: 2.5, fill: '#fff', strokeWidth: 2 }} activeDot={{ r: 5 }} />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+                <div className="lg:col-span-4 bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col">
+                    <div className="flex items-center gap-2 mb-3">
+                        <div className="w-8 h-8 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600">
+                            <ShoppingBag size={16} />
+                        </div>
+                        <div>
+                            <h3 className="font-black text-slate-800 text-xs uppercase tracking-wider">Top Sản Phẩm CN</h3>
+                            <p className="text-[9px] text-slate-400 font-bold uppercase">Bán chạy nhất chi nhánh</p>
+                        </div>
+                    </div>
+                    <div className="space-y-2 flex-1">
+                        {data.bestSellers?.map((item: any, idx: number) => (
+                            <div key={idx} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-transparent hover:border-amber-100 transition-colors">
+                                <div className="flex items-center gap-2">
+                                    <span className="w-5 h-5 rounded-md bg-white border border-slate-200 flex items-center justify-center text-[9px] font-black text-slate-500">{idx + 1}</span>
+                                    <div>
+                                        <p className="text-[11px] font-black text-slate-700 truncate max-w-[120px]">{item.name}</p>
+                                        <p className="text-[8px] text-slate-400 font-bold uppercase">SL: {item.quantity}</p>
+                                    </div>
+                                </div>
+                                <p className="text-[11px] font-black text-rose-600">{formatCurrency(item.revenue)}</p>
+                            </div>
+                        ))}
+                        {(!data.bestSellers || data.bestSellers.length === 0) && (
+                            <p className="text-center py-8 text-[9px] font-bold text-slate-300 uppercase tracking-widest">Chưa có dữ liệu</p>
+                        )}
+                    </div>
+                </div>
+            </div>
+
             {/* Cơ cấu Thanh toán (Pie Chart) */}
             {data.paymentMethodBreakdown && (
                 <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
@@ -929,6 +1083,7 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
                     </div>
                 </div>
             </div>
+
         </div>
     );
 }
@@ -1261,9 +1416,11 @@ function SaleDashboard({ data, startDate, endDate }: { data: any, startDate: str
 
 function TelesaleDashboard({ data, startDate, endDate }: { data: any, startDate: string, endDate: string }) {
     const router = useRouter();
-    const fbRevenue = data.fbRevenue || 0;
-    const fbOrderCount = data.fbOrderCount || 0;
+    const systemRevenue = data.systemRevenue || 0;
+    const totalOrderCount = data.totalOrderCount || 0;
+    const baseSalary = data.baseSalary || 6000000;
     const commission = data.commission || 0;
+    const netIncome = data.netIncome || (baseSalary + commission);
 
     return (
         <div className="space-y-6 text-left">
@@ -1276,68 +1433,50 @@ function TelesaleDashboard({ data, startDate, endDate }: { data: any, startDate:
                     <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2 opacity-80">
                             <TrendingUp size={14} />
-                            <h3 className="text-[10px] font-black uppercase tracking-widest">Doanh số Facebook</h3>
+                            <h3 className="text-[10px] font-black uppercase tracking-widest text-rose-100">Doanh số toàn hệ thống</h3>
                         </div>
                         <p className="text-3xl md:text-4xl font-black truncate tracking-tight">
-                            {formatCurrency(fbRevenue)}
+                            {formatCurrency(systemRevenue)}
                         </p>
-                        <div className="mt-3 flex gap-2">
+                        <div className="mt-3 flex flex-wrap gap-2">
                             <span className="text-[10px] font-bold bg-black/20 px-3 py-1 rounded-full border border-white/5">
-                                Số đơn: {fbOrderCount}
+                                Tổng đơn: {totalOrderCount}
+                            </span>
+                            <span className="text-[10px] font-bold bg-emerald-500/20 px-3 py-1 rounded-full border border-emerald-400/20 text-emerald-300">
+                                Lương cứng: {formatCurrency(baseSalary)}
                             </span>
                         </div>
                     </div>
 
                     {/* Right: Commission Card */}
-                    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/10 min-w-[260px]">
-                        <div className="flex items-center gap-2 mb-1">
-                            <CreditCard size={14} className="text-emerald-400" />
-                            <h4 className="text-[10px] font-black uppercase tracking-widest text-rose-100">Hoa hồng dự kiến (0.3%)</h4>
-                        </div>
-                        <p className="text-3xl font-black text-emerald-400">
-                            {formatCurrency(commission)}
-                        </p>
-                        <p className="text-[9px] text-rose-200/50 mt-2 italic leading-tight">
-                            * Tính trên tổng doanh thu Facebook tháng này.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 overflow-hidden">
-                <h3 className="font-bold text-slate-800 mb-6 flex items-center gap-2 text-lg">
-                    <ShoppingBag size={20} className="text-rose-600" /> Đơn hàng Facebook gần đây
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {data.recentOrders?.map((order: any) => (
-                        <div
-                            key={order.id}
-                            onClick={() => router.push(`/orders/${order.id}`)}
-                            className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl cursor-pointer hover:bg-rose-50 border border-transparent hover:border-rose-100 transition-all group"
-                        >
-                            <div className="space-y-1">
-                                <p className="text-xs font-bold text-slate-700 group-hover:text-rose-700">#{order.id.slice(0, 8)}</p>
-                                <p className="text-[9px] text-slate-400 flex items-center gap-1">
-                                    <Clock size={10} /> {new Date(order.createdAt).toLocaleDateString('vi-VN')}
+                    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/10 min-w-[280px]">
+                        <div className="flex items-center justify-between mb-4">
+                            <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                    <CreditCard size={14} className="text-emerald-400" />
+                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-rose-100">Hoa hồng (0.2%)</h4>
+                                </div>
+                                <p className="text-2xl font-black text-emerald-400">
+                                    {formatCurrency(commission)}
                                 </p>
                             </div>
                             <div className="text-right">
-                                <p className="text-sm font-black text-emerald-600">{formatCurrency(order.totalAmount)}</p>
-                                <p className="text-[9px] text-emerald-500 font-black tracking-tighter">
-                                    HH (0.3%): {formatCurrency(Number(order.totalAmount) * 0.003)}
+                                <div className="flex items-center gap-2 mb-1 justify-end">
+                                    <DollarSign size={14} className="text-white" />
+                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-rose-100">Tổng thực nhận</h4>
+                                </div>
+                                <p className="text-2xl font-black text-white">
+                                    {formatCurrency(netIncome)}
                                 </p>
-                                <p className="text-[9px] text-slate-400 uppercase font-bold truncate max-w-[100px] mt-1">{order.customerName}</p>
                             </div>
                         </div>
-                    ))}
-                </div>
-                {(!data.recentOrders || data.recentOrders.length === 0) && (
-                    <div className="py-10 text-center text-slate-300 text-xs font-bold uppercase tracking-widest">
-                        Chưa có đơn hàng nào
+                        <p className="text-[9px] text-rose-200/50 italic leading-tight border-t border-white/5 pt-2">
+                            * Cách tính: 6.000.000đ lương cứng + 0.2% tổng doanh số hệ thống tháng này.
+                        </p>
                     </div>
-                )}
+                </div>
             </div>
+
         </div>
     );
 }
@@ -1546,13 +1685,13 @@ function DriverDashboard({ data, startDate, endDate }: { data: any, startDate: s
 
 function StatCard({ title, value, icon, trend }: any) {
     return (
-        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:border-rose-100 transition-colors">
-            <div className="flex justify-between items-start mb-3">
+        <div className="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm hover:border-rose-100 transition-colors">
+            <div className="flex justify-between items-start mb-2">
                 <div className="text-left">
-                    <p className="text-xs text-slate-500 font-medium mb-0.5">{title}</p>
-                    <h3 className="text-xl font-black text-slate-800">{value}</h3>
+                    <p className="text-[10px] text-slate-500 font-medium mb-0.5 uppercase tracking-tight">{title}</p>
+                    <h3 className="text-lg font-black text-slate-800 leading-tight">{value}</h3>
                 </div>
-                <div className="p-2.5 bg-slate-50 rounded-xl">
+                <div className="p-2 bg-slate-50 rounded-xl">
                     {icon}
                 </div>
             </div>

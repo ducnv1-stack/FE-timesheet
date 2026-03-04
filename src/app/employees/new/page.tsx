@@ -181,6 +181,7 @@ export default function NewEmployeePage() {
                                 { label: 'HCNS', value: 'HCNS' },
                                 { label: 'Nhân viên KT (NVKT)', value: 'NVKT' },
                                 { label: 'Lái xe (Driver)', value: 'Driver' },
+                                { label: 'Marketing', value: 'Marketing' },
                                 { label: 'Nhân viên (Khác)', value: 'Nhân viên' },
                             ]}
                             placeholder="Chọn chức vụ"

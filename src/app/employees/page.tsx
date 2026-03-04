@@ -43,6 +43,7 @@ export default function EmployeesPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedBranch, setSelectedBranch] = useState('');
     const [selectedPosition, setSelectedPosition] = useState('');
+    const [selectedDepartment, setSelectedDepartment] = useState('');
     const [selectedStatus, setSelectedStatus] = useState('');
     const [hasAccountFilter, setHasAccountFilter] = useState('');
 
@@ -95,6 +96,7 @@ export default function EmployeesPage() {
             const params = new URLSearchParams();
             if (selectedBranch) params.append('branchId', selectedBranch);
             if (selectedPosition) params.append('position', selectedPosition);
+            if (selectedDepartment) params.append('department', selectedDepartment);
             if (selectedStatus) params.append('status', selectedStatus);
             if (hasAccountFilter) params.append('hasAccount', hasAccountFilter);
 
@@ -118,7 +120,7 @@ export default function EmployeesPage() {
         if (currentUser) {
             fetchEmployees();
         }
-    }, [currentUser, selectedBranch, selectedPosition, selectedStatus, hasAccountFilter]);
+    }, [currentUser, selectedBranch, selectedPosition, selectedDepartment, selectedStatus, hasAccountFilter]);
 
     const filteredEmployees = employees.filter(emp =>
         emp.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -165,7 +167,7 @@ export default function EmployeesPage() {
                         <Filter className="w-3.5 h-3.5 text-slate-600" />
                         <h2 className="text-xs font-bold text-slate-900">Bộ Lọc</h2>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-2">
                         {/* Search */}
                         <div>
                             <label className="block text-[10px] font-semibold text-slate-700 mb-1">
@@ -226,7 +228,29 @@ export default function EmployeesPage() {
                                 <option value="HCNS">Hành chính nhân sự (HCNS)</option>
                                 <option value="NVKT">Nhân viên kỹ thuật (NVKT)</option>
                                 <option value="Driver">Lái xe (Driver)</option>
+                                <option value="Marketing">Marketing</option>
                                 <option value="Nhân viên">Nhân viên (Khác)</option>
+                            </select>
+                        </div>
+
+                        {/* Department Filter */}
+                        <div>
+                            <label className="block text-[10px] font-semibold text-slate-700 mb-1">
+                                Phòng Ban
+                            </label>
+                            <select
+                                value={selectedDepartment}
+                                onChange={(e) => setSelectedDepartment(e.target.value)}
+                                className="w-full px-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                            >
+                                <option value="">Tất cả</option>
+                                <option value="BGĐ">BGĐ</option>
+                                <option value="MKT">MKT</option>
+                                <option value="HCKT">HCKT</option>
+                                <option value="Kỹ Thuật">Kỹ Thuật</option>
+                                <option value="Kho">Kho</option>
+                                <option value="Lái xe">Lái xe</option>
+                                <option value="Phòng KD">Phòng KD</option>
                             </select>
                         </div>
 
