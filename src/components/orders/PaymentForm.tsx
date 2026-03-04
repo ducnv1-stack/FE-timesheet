@@ -47,21 +47,24 @@ export default function PaymentForm({ payments, totalOrderAmount, onChange }: Pa
                 {payments.map((payment, index) => (
                     <div key={index} className="flex flex-col gap-1.5 p-2 bg-white rounded-lg border border-slate-200 shadow-sm relative">
                         {/* Row 1: Method & Actions */}
-                        <div className="flex items-center gap-1.5">
-                            <select
-                                value={payment.paymentMethod}
-                                onChange={(e) => updatePayment(index, 'paymentMethod', e.target.value)}
-                                className="flex-1 bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-rose-500 rounded p-1.5 text-xs font-medium"
-                            >
-                                <option value="CASH">💵 Tiền mặt (CASH)</option>
-                                <option value="TRANSFER_COMPANY">🏢 Chuyển khoản Công ty (CORP)</option>
-                                <option value="TRANSFER_PERSONAL">👤 Chuyển khoản Cá nhân (PERSONAL)</option>
-                                <option value="CARD">💳 Quẹt thẻ (CARD/CREDIT)</option>
-                                <option value="INSTALLMENT">🏦 Trả góp (INSTALLMENT)</option>
-                            </select>
+                        <div className="flex items-center gap-1.5 min-w-0">
+                            <div className="flex-1 min-w-0">
+                                <select
+                                    value={payment.paymentMethod}
+                                    onChange={(e) => updatePayment(index, 'paymentMethod', e.target.value)}
+                                    className="w-full bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-rose-500 rounded p-1.5 text-xs font-medium truncate"
+                                >
+                                    <option value="CASH">💵 Tiền mặt (CASH)</option>
+                                    <option value="TRANSFER_COMPANY">🏢 Chuyển khoản Công ty (CORP)</option>
+                                    <option value="TRANSFER_PERSONAL">👤 Chuyển khoản Cá nhân (PERSONAL)</option>
+                                    <option value="CARD">💳 Quẹt thẻ (CARD/CREDIT)</option>
+                                    <option value="INSTALLMENT">🏦 Trả góp (INSTALLMENT)</option>
+                                </select>
+                            </div>
                             <button
                                 onClick={() => removePayment(index)}
                                 className="p-1.5 text-slate-300 hover:text-rose-600 transition-colors bg-white border border-slate-100 rounded shadow-sm shrink-0"
+                                title="Xóa thanh toán"
                             >
                                 <Trash2 size={12} />
                             </button>

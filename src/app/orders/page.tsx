@@ -582,9 +582,9 @@ export default function OrdersPage() {
                             }}
                             className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium ${paymentStatusFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
                         >
-                            <option value="all">Giao dịch: Tất cả</option>
-                            <option value="pending">⏳ Chờ KT duyệt</option>
-                            <option value="confirmed">✅ Đã khớp tiền</option>
+                            <option value="all">Thanh toán: Tất cả</option>
+                            <option value="confirmed">✅ Đã thanh toán đủ</option>
+                            <option value="pending">⏳ Còn nợ / Chờ TT</option>
                         </select>
                     </div>
 
@@ -1041,7 +1041,7 @@ export default function OrdersPage() {
                                                                     {isSale && (
                                                                         <span className={cn(
                                                                             "text-[8px] font-black uppercase tracking-tighter leading-none",
-                                                                            inc.isRecognized ? "text-slate-400" : "text-amber-500 animate-pulse"
+                                                                            inc.isRecognized ? "text-slate-400" : "text-amber-500"
                                                                         )}>
                                                                             DS: {formatCurrency(inc.revenue)} {inc.isRecognized ? '✓' : ''}
                                                                         </span>
@@ -1121,6 +1121,9 @@ export default function OrdersPage() {
                                             <td className="px-2 py-1.5 text-center whitespace-nowrap">
                                                 <div className="flex flex-col items-center justify-center gap-0.5">
                                                     {(() => {
+                                                        const totalPaid = order.payments?.reduce((sum: number, p: any) => sum + Number(p.amount), 0) || 0;
+                                                        const remaining = Number(order.totalAmount) - totalPaid;
+
                                                         if (order.isPaymentConfirmed) {
                                                             return (
                                                                 <div className="flex flex-col items-center animate-in zoom-in duration-300">
@@ -1132,21 +1135,32 @@ export default function OrdersPage() {
                                                             );
                                                         }
 
-                                                        if (isGlobalRole) {
-                                                            return (
-                                                                <button
-                                                                    onClick={() => handleConfirmPayment(order.id)}
-                                                                    className="px-1 py-0.5 bg-rose-600 text-white rounded text-[8px] font-black hover:bg-rose-700 transition-all active:scale-95 shadow-sm whitespace-nowrap"
-                                                                >
-                                                                    XÁC NHẬN
-                                                                </button>
-                                                            );
-                                                        }
-
                                                         return (
-                                                            <span className="px-1 py-0.5 rounded text-[8px] font-black bg-amber-50 text-amber-600 border border-amber-100 whitespace-nowrap italic uppercase">
-                                                                Chờ xác nhận
-                                                            </span>
+                                                            <div className="flex flex-col items-center gap-1">
+                                                                <div className="flex flex-col items-center">
+                                                                    <span className="text-[7px] font-black text-amber-600 bg-amber-50 px-1 py-[0.5px] rounded border border-amber-200 uppercase">
+                                                                        {totalPaid > 0 ? `Đã trả: ${formatCurrency(totalPaid)}` : 'Chưa thu tiền'}
+                                                                    </span>
+                                                                    {remaining > 0 && (
+                                                                        <span className="text-[8px] font-black text-rose-500 bg-rose-50 px-1 rounded mt-0.5 border border-rose-100">
+                                                                            Còn nợ: {formatCurrency(remaining)}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+
+                                                                {isGlobalRole ? (
+                                                                    <button
+                                                                        onClick={() => handleConfirmPayment(order.id)}
+                                                                        className="px-1.5 py-0.5 bg-rose-600 text-white rounded text-[8px] font-black hover:bg-rose-700 transition-all active:scale-95 shadow-sm whitespace-nowrap uppercase"
+                                                                    >
+                                                                        Xác nhận đủ
+                                                                    </button>
+                                                                ) : (
+                                                                    <span className="px-1 py-0.5 rounded text-[8px] font-black bg-slate-50 text-slate-400 border border-slate-100 whitespace-nowrap italic uppercase">
+                                                                        Chờ kế toán
+                                                                    </span>
+                                                                )}
+                                                            </div>
                                                         );
                                                     })()}
                                                 </div>

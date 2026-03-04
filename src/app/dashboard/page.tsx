@@ -216,22 +216,44 @@ function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, us
         <div className="space-y-6 text-left">
             {/* Main Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatCard
-                    title="Tổng doanh thu hệ thống"
-                    value={formatCurrency(data.totalRevenue)}
-                    icon={<DollarSign size={20} className="text-emerald-600" />}
-                    trend="+0% tháng này"
-                />
-                <StatCard
-                    title="Tiền mặt đã thu"
-                    value={formatCurrency(data.paymentSummary?.cash || 0)}
-                    icon={<Wallet size={20} className="text-blue-600" />}
-                />
-                <StatCard
-                    title="Chuyển khoản / Thẻ"
-                    value={formatCurrency((data.paymentSummary?.transfer || 0) + (data.paymentSummary?.card || 0))}
-                    icon={<CreditCard size={20} className="text-violet-600" />}
-                />
+                <div className="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                            <DollarSign size={20} />
+                        </div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase">Doanh số hoàn thành</p>
+                    </div>
+                    <p className="text-xl font-black text-slate-800">{formatCurrency(data.totalRevenue)}</p>
+                    <p className="text-[10px] text-slate-400 mt-1">{data.totalOrders || 0} đơn đã xác nhận</p>
+                </div>
+                <div className="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                            <ShoppingBag size={20} />
+                        </div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase">Doanh số bán</p>
+                    </div>
+                    <p className="text-xl font-black text-blue-700">{formatCurrency(data.salesRevenue || 0)}</p>
+                    <p className="text-[10px] text-slate-400 mt-1">{data.salesOrderCount || 0} đơn trong kỳ</p>
+                </div>
+                {(data.pendingRevenueTotal || 0) > 0 ? (
+                    <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200 shadow-sm">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600">
+                                <Clock size={20} />
+                            </div>
+                            <p className="text-[10px] font-black text-amber-700 uppercase">Chờ thanh toán</p>
+                        </div>
+                        <p className="text-xl font-black text-amber-700">{formatCurrency(data.pendingRevenueTotal)}</p>
+                        <p className="text-[10px] text-amber-600 mt-1">⚠️ Chưa xác nhận đủ tiền</p>
+                    </div>
+                ) : (
+                    <StatCard
+                        title="Tiền mặt đã thu"
+                        value={formatCurrency(data.paymentSummary?.cash || 0)}
+                        icon={<Wallet size={20} className="text-blue-600" />}
+                    />
+                )}
                 <StatCard
                     title="Tổng đơn hàng"
                     value={String(data.totalOrders || 0)}
@@ -498,6 +520,8 @@ function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, us
 function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: string, endDate: string }) {
     const router = useRouter();
     const branchRevenue = data.branchRevenue || 0;
+    const branchSalesRevenue = data.branchSalesRevenue || 0;
+    const branchPendingRevenue = data.branchPendingRevenue || 0;
     const milestones = data.milestones || []; // Dynamic milestones from backend
     const currentPercent = data.performance?.milestonePercent || 0;
     const isPenalty = data.performance?.isPenalty || false;
@@ -522,7 +546,7 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
                         <div>
                             <p className="text-rose-100 text-sm font-medium mb-0.5 flex items-center gap-2">
-                                <TrendingUp size={14} /> Doanh số chi nhánh tháng này
+                                <TrendingUp size={14} /> Doanh số hoàn thành CN
                             </p>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight drop-shadow-lg leading-tight">
                                 {formatCurrency(branchRevenue)}
@@ -531,7 +555,6 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
                                 <div className="text-rose-200 text-xs bg-black/20 px-2.5 py-1 rounded-full backdrop-blur-sm border border-white/10">
                                     Mốc hiện tại: {formatCurrency(branchRevenue)}
                                 </div>
-                                {/* Removed Tỉ lệ đạt % */}
                                 {isPenalty && (
                                     <div className={`text-xs px-2.5 py-1 rounded-full backdrop-blur-sm border flex items-center gap-1 ${isClemency
                                         ? 'text-emerald-300 bg-emerald-900/30 border-emerald-500/30'
@@ -539,6 +562,17 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
                                         }`}>
                                         <div className="w-1.5 h-1.5 rounded-full bg-current"></div>
                                         {isClemency ? 'Đã được khoan hồng' : `Tỷ lệ giá thấp: ${lowPriceRatio.toFixed(1)}%`}
+                                    </div>
+                                )}
+                            </div>
+                            {/* Doanh số bán CN & chờ thanh toán */}
+                            <div className="flex flex-wrap gap-2 mt-2">
+                                <div className="text-[10px] bg-white/10 px-2 py-0.5 rounded-full border border-white/10">
+                                    <span className="text-rose-200">DS Bán CN:</span> <span className="text-white font-bold">{formatCurrency(branchSalesRevenue)}</span>
+                                </div>
+                                {branchPendingRevenue > 0 && (
+                                    <div className="text-[10px] bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-400/30">
+                                        <span className="text-amber-200">⚠️ Chờ TT:</span> <span className="text-amber-300 font-bold">{formatCurrency(branchPendingRevenue)}</span>
                                     </div>
                                 )}
                             </div>
@@ -918,7 +952,10 @@ function ActionButton({ icon, title, href }: { icon: React.ReactNode, title: str
 function SaleDashboard({ data, startDate, endDate }: { data: any, startDate: string, endDate: string }) {
     // Force 200M base target as requested (100% = 200tr)
     const KPI_TARGET = 200000000;
-    const currentRevenue = data.monthlyRevenue || 0;
+    const salesRevenue = data.salesRevenue || 0;
+    const completedRevenue = data.completedRevenue || data.monthlyRevenue || 0;
+    const pendingRevenue = data.pendingRevenue || 0;
+    const currentRevenue = completedRevenue; // Lương/thưởng tính trên doanh số hoàn thành
     const lowPriceRevenue = data.lowPriceRevenue || 0;
 
     // Define Tiers based on user request/image
@@ -967,10 +1004,10 @@ function SaleDashboard({ data, startDate, endDate }: { data: any, startDate: str
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
                         <div>
                             <p className="text-rose-100 text-sm font-medium mb-0.5 flex items-center gap-2">
-                                <TrendingUp size={14} /> Doanh số tháng này
+                                <TrendingUp size={14} /> Doanh số hoàn thành
                             </p>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight drop-shadow-lg leading-tight">
-                                {formatCurrency(currentRevenue)}
+                                {formatCurrency(completedRevenue)}
                             </h2>
                             <div className="flex flex-wrap items-center gap-3 mt-2">
                                 <div className="text-rose-200 text-xs bg-black/20 px-2.5 py-1 rounded-full backdrop-blur-sm border border-white/10">
@@ -979,6 +1016,17 @@ function SaleDashboard({ data, startDate, endDate }: { data: any, startDate: str
                                 {isPenalty && (
                                     <div className="text-amber-300 text-xs bg-amber-900/30 px-2.5 py-1 rounded-full backdrop-blur-sm border border-amber-500/30 flex items-center gap-1 animate-pulse">
                                         <Info size={12} /> Tỷ lệ giá thấp: {((lowPriceRevenue / currentRevenue) * 100).toFixed(1)}% (&gt;20%)
+                                    </div>
+                                )}
+                            </div>
+                            {/* Doanh số bán & chờ thanh toán */}
+                            <div className="flex flex-wrap gap-2 mt-2">
+                                <div className="text-[10px] bg-white/10 px-2 py-0.5 rounded-full border border-white/10">
+                                    <span className="text-rose-200">DS Bán:</span> <span className="text-white font-bold">{formatCurrency(salesRevenue)}</span>
+                                </div>
+                                {pendingRevenue > 0 && (
+                                    <div className="text-[10px] bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-400/30">
+                                        <span className="text-amber-200">⚠️ Chờ TT:</span> <span className="text-amber-300 font-bold">{formatCurrency(pendingRevenue)}</span>
                                     </div>
                                 )}
                             </div>

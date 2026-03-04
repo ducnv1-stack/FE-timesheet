@@ -10,6 +10,7 @@ import ItemGrid from '@/components/orders/ItemGrid';
 import GiftGrid from '@/components/orders/GiftGrid';
 import SplitManager from '@/components/orders/SplitManager';
 import PaymentForm from '@/components/orders/PaymentForm';
+import AddressSelector from '@/components/orders/AddressSelector';
 import { FullOrder, Product, Employee, Branch } from '@/types/order';
 
 export default function EditOrderPage() {
@@ -33,10 +34,12 @@ export default function EditOrderPage() {
         customerName: '',
         customerPhone: '',
         customerAddress: '',
+        provinceId: '',
+        wardId: '',
         customerCardNumber: '',
         customerCardIssueDate: '',
         orderDate: new Date().toISOString().split('T')[0],
-        orderSource: 'HOTLINE',
+        orderSource: '',
         giftAmount: 0,
         gifts: [],
         items: [],
@@ -79,6 +82,10 @@ export default function EditOrderPage() {
                         customerName: orderData.customerName,
                         customerPhone: orderData.customerPhone,
                         customerAddress: orderData.customerAddress || '',
+                        provinceId: orderData.provinceId || '',
+                        wardId: orderData.wardId || '',
+                        province: orderData.province,
+                        ward: orderData.ward,
                         customerCardNumber: orderData.customerCardNumber || '',
                         customerCardIssueDate: orderData.customerCardIssueDate ? orderData.customerCardIssueDate.split('T')[0] : '',
                         orderDate: orderData.orderDate.split('T')[0],
@@ -170,7 +177,10 @@ export default function EditOrderPage() {
         // Validation (same as create)
         if (!order.customerName) { toastError('Vui lòng nhập tên khách hàng'); return; }
         if (!order.customerPhone) { toastError('Vui lòng nhập số điện thoại khách hàng'); return; }
-        if (!order.customerAddress) { toastError('Vui lòng nhập địa chỉ khách hàng'); return; }
+        if (!order.customerAddress || !order.provinceId || !order.wardId) {
+            toastError('Vui lòng nhập đầy đủ địa chỉ (Tỉnh, Xã, Số nhà)');
+            return;
+        }
         if (!order.customerCardNumber) { toastError('Vui lòng nhập số căn cước công dân (CCCD)'); return; }
 
         const hasEmptyProduct = order.items.some(i => !i.productId && (i.unitPrice > 0 || i.quantity > 0));
@@ -231,6 +241,8 @@ export default function EditOrderPage() {
             delete payload.isPaymentConfirmed;
             delete payload.confirmedAt;
             delete payload.confirmer;
+            delete payload.province;
+            delete payload.ward;
             delete payload.id; // Also remove id if present in state
 
             const finalTotal = validItems.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
@@ -384,11 +396,13 @@ export default function EditOrderPage() {
                         </div>
                         <div className="grid grid-cols-[120px_1fr] items-center border-b border-slate-100 py-1 md:col-span-2">
                             <span className="font-bold text-slate-600">Địa chỉ:</span>
-                            <input
-                                type="text"
-                                value={order.customerAddress || ''}
-                                onChange={(e) => setOrder({ ...order, customerAddress: e.target.value })}
-                                className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900"
+                            <AddressSelector
+                                provinceId={order.provinceId}
+                                wardId={order.wardId}
+                                customerAddress={order.customerAddress}
+                                initialProvince={order.province}
+                                initialWard={order.ward}
+                                onChange={(data) => setOrder({ ...order, ...data })}
                             />
                         </div>
                         <div className="grid grid-cols-[120px_1fr] items-center border-b border-slate-100 py-1">

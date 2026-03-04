@@ -10,6 +10,7 @@ import ItemGrid from '@/components/orders/ItemGrid';
 import GiftGrid from '@/components/orders/GiftGrid';
 import SplitManager from '@/components/orders/SplitManager';
 import PaymentForm from '@/components/orders/PaymentForm';
+import AddressSelector from '@/components/orders/AddressSelector';
 import { FullOrder, Product, Employee, Branch, Gift } from '@/types/order';
 
 
@@ -31,10 +32,12 @@ export default function NewOrderPage() {
         customerName: '',
         customerPhone: '',
         customerAddress: '',
+        provinceId: '',
+        wardId: '',
         customerCardNumber: '',
         customerCardIssueDate: '',
         orderDate: new Date().toISOString().split('T')[0],
-        orderSource: 'HOTLINE',
+        orderSource: '',
         giftAmount: 0,
         gifts: [],
         items: [{ productId: '', quantity: 1, unitPrice: 0 }],
@@ -130,8 +133,8 @@ export default function NewOrderPage() {
             toastError('Vui lòng nhập số điện thoại khách hàng');
             return;
         }
-        if (!order.customerAddress) {
-            toastError('Vui lòng nhập địa chỉ khách hàng');
+        if (!order.customerAddress || !order.provinceId || !order.wardId) {
+            toastError('Vui lòng nhập đầy đủ địa chỉ (Tỉnh, Xã, Số nhà)');
             return;
         }
         if (!order.customerCardNumber) {
@@ -242,6 +245,10 @@ export default function NewOrderPage() {
             }
 
             payload.splits = [creatorSplit, ...otherSplits];
+
+            // Omit province and ward objects from the payload if they exist
+            delete payload.province;
+            delete payload.ward;
 
             const res = await fetch(`${apiUrl}/orders`, {
                 method: 'POST',
@@ -357,12 +364,11 @@ export default function NewOrderPage() {
                         </div>
                         <div className="grid grid-cols-[120px_1fr] items-center border-b border-slate-100 py-1 md:col-span-2">
                             <span className="font-bold text-slate-600">Địa chỉ:</span>
-                            <input
-                                type="text"
-                                value={order.customerAddress || ''}
-                                onChange={(e) => setOrder({ ...order, customerAddress: e.target.value })}
-                                className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900"
-                                placeholder="Số nhà, đường, phường/xã..."
+                            <AddressSelector
+                                provinceId={order.provinceId}
+                                wardId={order.wardId}
+                                customerAddress={order.customerAddress}
+                                onChange={(data) => setOrder({ ...order, ...data })}
                             />
                         </div>
                         <div className="grid grid-cols-[120px_1fr] items-center border-b border-slate-100 py-1">

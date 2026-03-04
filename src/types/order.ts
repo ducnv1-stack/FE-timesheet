@@ -82,11 +82,26 @@ export interface Delivery {
     driver?: Employee;
 }
 
+export interface Province {
+    id: string;
+    name: string;
+}
+
+export interface Ward {
+    id: string;
+    name: string;
+    provinceId: string;
+}
+
 export interface FullOrder {
     branchId: string;
     customerName: string;
     customerPhone: string;
     customerAddress?: string;
+    provinceId?: string;
+    wardId?: string;
+    province?: Province;
+    ward?: Ward;
     customerCardNumber?: string;
     customerCardIssueDate?: string;
     staffCode?: string;
