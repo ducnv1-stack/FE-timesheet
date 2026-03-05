@@ -14,6 +14,7 @@ import {
     ShoppingBag,
     ScrollText,
     Users,
+    Building2,
     Menu,
     X
 } from 'lucide-react';
@@ -77,8 +78,20 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             label: 'Quản lý nhân viên',
             icon: Users,
             href: '/employees',
-            active: pathname.startsWith('/employees'),
+            active: pathname.startsWith('/employees') && !pathname.includes('/attendance') && !pathname.includes('/timesheet'),
             roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT']
+        },
+        {
+            label: 'Chấm công',
+            icon: LayoutDashboard,
+            href: '/employees/attendance',
+            active: pathname === '/employees/attendance',
+        },
+        {
+            label: 'Bảng công tháng',
+            icon: ScrollText,
+            href: '/employees/timesheet',
+            active: pathname === '/employees/timesheet',
         },
         {
             label: 'Quản lý sản phẩm',
@@ -86,6 +99,13 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             href: '/products',
             active: pathname === '/products',
             roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT']
+        },
+        {
+            label: 'Quản lý chi nhánh',
+            icon: Building2,
+            href: '/branches',
+            active: pathname === '/branches',
+            roleAccess: ['DIRECTOR', 'MANAGER']
         },
         {
             label: 'Cài đặt',

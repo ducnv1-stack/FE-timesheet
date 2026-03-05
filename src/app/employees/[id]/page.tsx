@@ -958,8 +958,8 @@ export default function EmployeeDetailPage() {
             {/* Step 1 Delete Confirm */}
             <ConfirmModal
                 isOpen={showDeleteConfirm}
-                title="Xác nhận xóa nhân viên"
-                message={`Bạn có chắc chắn muốn XÓA nhân viên ${employee?.fullName}? Thao tác này sẽ xóa vĩnh viễn dữ liệu nhân viên và tài khoản liên quan (nếu có).`}
+                title="XÁC NHẬN XÓA VĨNH VIỄN"
+                message={`LƯU Ý QUAN TRỌNG: Hành động này sẽ xóa nhân viên "${employee?.fullName}" cùng toàn bộ dữ liệu chấm công, doanh số, và lịch sử liên quan. Mọi dữ liệu sẽ BỊ MẤT VĨNH VIỄN và không thể khôi phục. Bạn có chắc chắn muốn tiếp tục?`}
                 isDanger={true}
                 onConfirm={handleConfirmDeleteStep1}
                 onCancel={() => setShowDeleteConfirm(false)}
