@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
     Search,
@@ -39,7 +39,7 @@ const LoadingBarStyle = () => (
     `}</style>
 );
 
-export default function OrdersPage() {
+function OrdersPageContent() {
     const [orders, setOrders] = useState<any[]>([]);
     const [branches, setBranches] = useState<any[]>([]);
     const [employees, setEmployees] = useState<any[]>([]);
@@ -1310,5 +1310,17 @@ export default function OrdersPage() {
                 isDanger={true}
             />
         </div >
+    );
+}
+
+export default function OrdersPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-rose-600"></div>
+            </div>
+        }>
+            <OrdersPageContent />
+        </Suspense>
     );
 }
