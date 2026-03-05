@@ -23,6 +23,7 @@ export default function AttendancePage() {
     const [todayData, setTodayData] = useState<any>(null);
     const [distance, setDistance] = useState<number | null>(null);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [gpsError, setGpsError] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const { success, error: toastError } = useToast();
 
@@ -49,7 +50,7 @@ export default function AttendancePage() {
             } else if (data.checkInTime) {
                 setState(data.checkInStatus === 'ON_TIME' ? 'SUCCESS' : 'LATE');
             } else if (data.checkInAttempts > 0) {
-                setState(data.checkInAttempts >= 3 ? 'LOCKED' : 'RETRY');
+                setState('RETRY');
             }
         } catch (error) {
             console.error('Error fetching status:', error);
@@ -116,7 +117,10 @@ export default function AttendancePage() {
             },
             (error) => {
                 let msg = 'Không thể lấy vị trí của bạn';
-                if (error.code === 1) msg = 'Vui lòng cho phép quyền truy cập vị trí';
+                if (error.code === 1) {
+                    msg = 'Vui lòng cho phép quyền truy cập vị trí';
+                    setGpsError(true);
+                }
                 toastError(msg);
                 setLoading(false);
             },
@@ -125,7 +129,7 @@ export default function AttendancePage() {
     };
 
     const renderButton = () => {
-        const baseClass = "w-full py-6 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all duration-300 shadow-lg active:scale-95";
+        const baseClass = "w-full py-6 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all duration-300 shadow-lg active:scale-95 cursor-pointer";
 
         switch (state) {
             case 'INITIAL':
@@ -149,8 +153,8 @@ export default function AttendancePage() {
                 return (
                     <button onClick={handleAction} disabled={loading} className={cn(baseClass, "bg-amber-500 hover:bg-amber-600 text-white")}>
                         {loading ? <RefreshCcw className="animate-spin" size={32} /> : <RefreshCcw size={32} />}
-                        <span className="text-xl font-bold">THỬ LẠI ({3 - (todayData?.checkInAttempts || 0)} LẦN)</span>
-                        <span className="text-sm opacity-80">NGOÀI PHẠM VI CHO PHÉP</span>
+                        <span className="text-xl font-bold uppercase">THỬ LẠI</span>
+                        <span className="text-sm opacity-80 uppercase">NGOÀI PHẠM VI CHO PHÉP</span>
                     </button>
                 );
             case 'LOCKED':
@@ -170,6 +174,15 @@ export default function AttendancePage() {
                     </div>
                 );
             default:
+                if (gpsError) {
+                    return (
+                        <button onClick={() => { setGpsError(false); handleAction(); }} className={cn(baseClass, "bg-slate-800 hover:bg-slate-900 text-white animate-in zoom-in-95 duration-300")}>
+                            <MapPin className="animate-pulse" size={32} />
+                            <span className="text-xl font-bold uppercase">BẬT GPS / THỬ LẠI</span>
+                            <span className="text-sm opacity-80 uppercase text-center px-4">Hệ thống cần vị trí để xác thực</span>
+                        </button>
+                    );
+                }
                 return (
                     <div className={cn(baseClass, "bg-slate-100 text-slate-400 animate-pulse")}>
                         <RefreshCcw size={32} className="animate-spin" />
@@ -263,7 +276,6 @@ export default function AttendancePage() {
                     <li>• Vui lòng bật GPS và cho phép trình duyệt truy cập vị trí.</li>
                     <li>• Khoảng cách cho phép tối đa là 70 mét tính từ tâm chi nhánh.</li>
                     <li>• Nếu sai lệch GPS, hãy di chuyển ra nơi thoáng đãng và thử lại.</li>
-                    <li>• Bạn có tối đa 3 lần thử check-in ngoài phạm vi mỗi ngày.</li>
                 </ul>
             </div>
 

@@ -350,7 +350,7 @@ export default function EmployeesPage() {
                             <div className="lg:hidden pt-2 border-t border-slate-100 mt-1">
                                 <button
                                     onClick={resetFilters}
-                                    className="w-full py-2 bg-rose-50 text-rose-600 font-black text-[10px] uppercase tracking-wider rounded-lg border border-rose-100"
+                                    className="w-full py-2 bg-rose-50 text-rose-600 font-black text-[10px] uppercase tracking-wider rounded-lg border border-rose-100 cursor-pointer"
                                 >
                                     ✕ Xóa Tất Cả Bộ Lọc
                                 </button>

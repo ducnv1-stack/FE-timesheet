@@ -136,7 +136,7 @@ export default function NewEmployeePage() {
                 <div className="flex items-center gap-3 mb-4">
                     <button
                         onClick={() => router.push('/employees')}
-                        className="p-1.5 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+                        className="p-1.5 bg-white rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer"
                     >
                         <ArrowLeft className="w-5 h-5 text-slate-700" />
                     </button>
@@ -295,7 +295,7 @@ export default function NewEmployeePage() {
                                 onChange={(e) => setForm({ ...form, isInternalDriver: e.target.checked })}
                                 className="w-4 h-4 rounded border-slate-300 text-pink-600 focus:ring-pink-500"
                             />
-                            <label htmlFor="isInternalDriver" className="text-[11px] font-semibold text-slate-700">
+                            <label htmlFor="isInternalDriver" className="text-[11px] font-semibold text-slate-700 cursor-pointer">
                                 Là tài xế nội bộ
                             </label>
                         </div>
@@ -306,14 +306,14 @@ export default function NewEmployeePage() {
                 <div className="flex justify-end gap-2">
                     <button
                         onClick={() => router.push('/employees')}
-                        className="px-4 py-2 bg-slate-200 text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-300 transition-colors"
+                        className="px-4 py-2 bg-slate-200 text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-300 transition-colors cursor-pointer"
                     >
                         Hủy
                     </button>
                     <button
                         onClick={handleSubmit}
                         disabled={saving}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-pink-600 to-rose-600 text-white font-bold text-xs rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100"
+                        className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-pink-600 to-rose-600 text-white font-bold text-xs rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100 cursor-pointer"
                     >
                         <Save className="w-3.5 h-3.5" />
                         {saving ? 'Đang lưu...' : 'Lưu Nhân Viên'}
@@ -347,7 +347,7 @@ function FormField({
                 <select
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
-                    className="w-full px-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white"
+                    className="w-full px-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white cursor-pointer"
                 >
                     <option value="">{placeholder || 'Chọn...'}</option>
                     {options?.map((opt) => (
@@ -361,7 +361,7 @@ function FormField({
                     type="date"
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
-                    className="w-full px-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    className="w-full px-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent cursor-pointer"
                 />
             ) : (
                 <input

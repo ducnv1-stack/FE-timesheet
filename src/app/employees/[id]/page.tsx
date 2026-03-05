@@ -442,7 +442,7 @@ export default function EmployeeDetailPage() {
                     <div className="h-32 bg-gradient-to-r from-slate-900 via-slate-800 to-rose-900 relative">
                         <button
                             onClick={() => router.push('/employees')}
-                            className="absolute top-4 left-4 p-2.5 bg-white/10 backdrop-blur-md text-white rounded-xl hover:bg-white/20 transition-all active:scale-90 z-10"
+                            className="absolute top-4 left-4 p-2.5 bg-white/10 backdrop-blur-md text-white rounded-xl hover:bg-white/20 transition-all active:scale-90 z-10 cursor-pointer"
                         >
                             <ArrowLeft size={20} />
                         </button>
@@ -722,7 +722,7 @@ export default function EmployeeDetailPage() {
                                         <div className="grid grid-cols-1 gap-2">
                                             <button
                                                 onClick={() => setShowResetPassword(true)}
-                                                className="flex items-center justify-center gap-2 w-full py-3 bg-white border-2 border-slate-100 text-slate-700 rounded-xl hover:border-blue-500 hover:text-blue-600 font-bold text-xs transition-all active:scale-95"
+                                                className="flex items-center justify-center gap-2 w-full py-3 bg-white border-2 border-slate-100 text-slate-700 rounded-xl hover:border-blue-500 hover:text-blue-600 font-bold text-xs transition-all active:scale-95 cursor-pointer"
                                             >
                                                 <Key size={14} />
                                                 RESET MẬT KHẨU
@@ -730,7 +730,7 @@ export default function EmployeeDetailPage() {
                                             <button
                                                 onClick={handleToggleAccount}
                                                 className={cn(
-                                                    "flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold text-xs transition-all active:scale-95",
+                                                    "flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold text-xs transition-all active:scale-95 cursor-pointer",
                                                     employee.user.isActive
                                                         ? "bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white"
                                                         : "bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white"
@@ -741,7 +741,7 @@ export default function EmployeeDetailPage() {
                                             </button>
                                             <button
                                                 onClick={handleEditAccount}
-                                                className="flex items-center justify-center gap-2 w-full py-3 bg-slate-900 text-white rounded-xl hover:bg-slate-800 font-bold text-xs transition-all active:scale-95 shadow-lg shadow-slate-900/10"
+                                                className="flex items-center justify-center gap-2 w-full py-3 bg-slate-900 text-white rounded-xl hover:bg-slate-800 font-bold text-xs transition-all active:scale-95 shadow-lg shadow-slate-900/10 cursor-pointer"
                                             >
                                                 <Edit size={14} />
                                                 SỬA THÔNG TIN
@@ -758,7 +758,7 @@ export default function EmployeeDetailPage() {
                                         </div>
                                         <button
                                             onClick={() => setShowCreateAccount(true)}
-                                            className="flex items-center justify-center gap-2 w-full py-4 bg-gradient-to-r from-pink-600 to-rose-600 text-white font-black rounded-2xl hover:shadow-xl hover:shadow-rose-500/20 transition-all active:scale-95 text-xs tracking-wider"
+                                            className="flex items-center justify-center gap-2 w-full py-4 bg-gradient-to-r from-pink-600 to-rose-600 text-white font-black rounded-2xl hover:shadow-xl hover:shadow-rose-500/20 transition-all active:scale-95 text-xs tracking-wider cursor-pointer"
                                         >
                                             <UserPlus size={18} />
                                             TẠO TÀI KHOẢN

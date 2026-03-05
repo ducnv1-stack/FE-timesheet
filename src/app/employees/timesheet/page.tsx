@@ -80,8 +80,8 @@ export default function TimesheetPage() {
     };
 
     return (
-        <div className="p-6 space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="p-3 md:p-6 space-y-4 md:space-y-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
                 <div className="space-y-1">
                     <h1 className="text-2xl font-black text-slate-900 font-outfit uppercase tracking-tight flex items-center gap-2">
                         <CalendarDays className="text-rose-600" />
@@ -106,11 +106,11 @@ export default function TimesheetPage() {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <StatCard label="Ngày làm việc" value={stats.totalWorkDays} icon={CheckCircle2} color="text-emerald-600" bg="bg-emerald-50" />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                <StatCard label="Ngày công" value={stats.totalWorkDays} icon={CheckCircle2} color="text-emerald-600" bg="bg-emerald-50" />
                 <StatCard label="Đi muộn" value={stats.lateDays} icon={AlertCircle} color="text-rose-600" bg="bg-rose-50" />
                 <StatCard label="Về sớm" value={stats.earlyLeaveDays} icon={Clock} color="text-amber-600" bg="bg-amber-50" />
-                <StatCard label="Tăng ca (giờ)" value={stats.totalOvertimeHours} icon={TrendingUp} color="text-blue-600" bg="bg-blue-50" />
+                <StatCard label="Tăng ca" value={stats.totalOvertimeHours} icon={TrendingUp} color="text-blue-600" bg="bg-blue-50" />
             </div>
 
             {/* Timesheet Table */}
@@ -119,14 +119,14 @@ export default function TimesheetPage() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-slate-50/50">
-                                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Ngày</th>
-                                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Thứ</th>
-                                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Vào ca</th>
-                                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Ra ca</th>
-                                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Muộn (p)</th>
-                                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Về sớm (p)</th>
-                                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Tăng ca (p)</th>
-                                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center">Trạng thái</th>
+                                <th className="px-3 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest">Ngày</th>
+                                <th className="px-3 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest">Thứ</th>
+                                <th className="px-3 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest">Vào</th>
+                                <th className="px-3 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest">Ra</th>
+                                <th className="px-3 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest text-center">Muộn</th>
+                                <th className="px-3 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest text-center">Sớm</th>
+                                <th className="px-3 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest text-center">TC</th>
+                                <th className="px-3 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest text-center">Trạng thái</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
@@ -149,38 +149,38 @@ export default function TimesheetPage() {
                                     const date = new Date(row.date);
                                     return (
                                         <tr key={row.id} className="hover:bg-slate-50/50 transition-colors group">
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className="text-sm font-bold text-slate-700">{date.getDate().toString().padStart(2, '0')}/{(date.getMonth() + 1).toString().padStart(2, '0')}</span>
+                                            <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
+                                                <span className="text-[11px] md:text-sm font-bold text-slate-700">{date.getDate().toString().padStart(2, '0')}/{(date.getMonth() + 1).toString().padStart(2, '0')}</span>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className="text-xs font-bold text-slate-500 uppercase">{getDayName(date)}</span>
+                                            <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
+                                                <span className="text-[10px] md:text-xs font-bold text-slate-500 uppercase">{getDayName(date).replace('Thứ ', 'T')}</span>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={cn("text-sm font-black", row.checkInTime ? "text-slate-900" : "text-slate-300")}>
+                                            <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
+                                                <span className={cn("text-xs md:text-sm font-black", row.checkInTime ? "text-slate-900" : "text-slate-300")}>
                                                     {formatTime(row.checkInTime)}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={cn("text-sm font-black", row.checkOutTime ? "text-slate-900" : "text-slate-300")}>
+                                            <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
+                                                <span className={cn("text-xs md:text-sm font-black", row.checkOutTime ? "text-slate-900" : "text-slate-300")}>
                                                     {formatTime(row.checkOutTime)}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={cn("text-sm font-bold", row.lateMinutes > 0 ? "text-rose-600" : "text-slate-300")}>
+                                            <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-center">
+                                                <span className={cn("text-xs md:text-sm font-bold", row.lateMinutes > 0 ? "text-rose-600" : "text-slate-300")}>
                                                     {row.lateMinutes || '-'}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={cn("text-sm font-bold", row.earlyLeaveMinutes > 0 ? "text-amber-600" : "text-slate-300")}>
+                                            <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-center">
+                                                <span className={cn("text-xs md:text-sm font-bold", row.earlyLeaveMinutes > 0 ? "text-amber-600" : "text-slate-300")}>
                                                     {row.earlyLeaveMinutes || '-'}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={cn("text-sm font-bold", row.overtimeMinutes > 0 ? "text-blue-600" : "text-slate-300")}>
+                                            <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-center">
+                                                <span className={cn("text-xs md:text-sm font-bold", row.overtimeMinutes > 0 ? "text-blue-600" : "text-slate-300")}>
                                                     {row.overtimeMinutes || '-'}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                                            <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-center">
                                                 <StatusBadge status={row.dailyStatus} />
                                             </td>
                                         </tr>
@@ -197,13 +197,13 @@ export default function TimesheetPage() {
 
 function StatCard({ label, value, icon: Icon, color, bg }: any) {
     return (
-        <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm flex flex-col gap-3">
-            <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center", bg, color)}>
-                <Icon size={20} />
+        <div className="bg-white rounded-2xl md:rounded-3xl p-3 md:p-5 border border-slate-100 shadow-sm flex flex-col gap-2 md:gap-3">
+            <div className={cn("w-8 h-8 md:w-10 md:h-10 rounded-xl md:rounded-2xl flex items-center justify-center", bg, color)}>
+                <Icon className="w-4 h-4 md:w-5 md:h-5" />
             </div>
             <div>
-                <p className="text-slate-400 text-xs font-bold uppercase tracking-wider">{label}</p>
-                <p className="text-2xl font-black text-slate-900 font-outfit">{value}</p>
+                <p className="text-slate-400 text-[10px] md:text-xs font-bold uppercase tracking-wider">{label}</p>
+                <p className="text-xl md:text-2xl font-black text-slate-900 font-outfit">{value}</p>
             </div>
         </div>
     );
