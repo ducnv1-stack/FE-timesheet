@@ -71,12 +71,6 @@ export default function EmployeeDetailPage() {
     const [editUsername, setEditUsername] = useState('');
     const [editRoleId, setEditRoleId] = useState('');
 
-    // Delete employee workflow
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-    const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
-    const [adminPassword, setAdminPassword] = useState('');
-    const [deleting, setDeleting] = useState(false);
-
     // Confirmation modal
     const [confirmModal, setConfirmModal] = useState<{
         isOpen: boolean;
@@ -324,57 +318,6 @@ export default function EmployeeDetailPage() {
         });
     };
 
-    const handleDeleteClick = () => {
-        setShowDeleteConfirm(true);
-    };
-
-    const handleConfirmDeleteStep1 = () => {
-        setShowDeleteConfirm(false);
-        setShowPasswordConfirm(true);
-    };
-
-    const handleFinalDelete = async () => {
-        if (!adminPassword) {
-            toastError('Vui lòng nhập mật khẩu xác nhận');
-            return;
-        }
-
-        setDeleting(true);
-        try {
-            // Step 1: Verify current user password
-            const verifyRes = await fetch(`${API_URL}/auth/verify-password`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    userId: currentUser?.id,
-                    password: adminPassword
-                }),
-            });
-
-            if (!verifyRes.ok) {
-                const errorData = await verifyRes.json();
-                throw new Error(errorData.message || 'Mật khẩu xác nhận không chính xác');
-            }
-
-            // Step 2: Perform delete
-            const deleteRes = await fetch(`${API_URL}/employees/${params.id}`, {
-                method: 'DELETE',
-            });
-
-            if (!deleteRes.ok) {
-                const errorData = await deleteRes.json();
-                throw new Error(errorData.message || 'Không thể xóa nhân viên');
-            }
-
-            success('Xóa nhân viên thành công!');
-            router.replace('/employees');
-        } catch (error: any) {
-            toastError(error.message);
-        } finally {
-            setDeleting(false);
-        }
-    };
-
     const fetchPerformanceStats = async () => {
         try {
             const res = await fetch(`${API_URL}/employees/${params.id}/performance?month=${perfMonth}&year=${perfYear}`);
@@ -487,15 +430,6 @@ export default function EmployeeDetailPage() {
                                         <Edit size={16} />
                                         CHỈNH SỬA
                                     </button>
-                                    {['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT'].includes(currentUser?.role?.code) && (
-                                        <button
-                                            onClick={handleDeleteClick}
-                                            className="flex items-center gap-2 px-5 py-3 bg-rose-50 text-rose-600 font-black text-xs rounded-2xl hover:bg-rose-600 hover:text-white transition-all shadow-sm active:scale-95 cursor-pointer"
-                                        >
-                                            <X size={16} />
-                                            XÓA
-                                        </button>
-                                    )}
                                 </>
                             ) : (
                                 <>
@@ -955,60 +889,6 @@ export default function EmployeeDetailPage() {
                 onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
             />
 
-            {/* Step 1 Delete Confirm */}
-            <ConfirmModal
-                isOpen={showDeleteConfirm}
-                title="XÁC NHẬN XÓA VĨNH VIỄN"
-                message={`LƯU Ý QUAN TRỌNG: Hành động này sẽ xóa nhân viên "${employee?.fullName}" cùng toàn bộ dữ liệu chấm công, doanh số, và lịch sử liên quan. Mọi dữ liệu sẽ BỊ MẤT VĨNH VIỄN và không thể khôi phục. Bạn có chắc chắn muốn tiếp tục?`}
-                isDanger={true}
-                onConfirm={handleConfirmDeleteStep1}
-                onCancel={() => setShowDeleteConfirm(false)}
-            />
-
-            {/* Step 2 Password Confirm */}
-            {showPasswordConfirm && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 animate-in fade-in duration-200">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 md:p-8 animate-in zoom-in-95 duration-200">
-                        <div className="flex flex-col items-center text-center mb-6">
-                            <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center text-rose-600 mb-4 shadow-inner ring-4 ring-rose-50">
-                                <Lock size={32} />
-                            </div>
-                            <h3 className="text-xl font-black text-slate-900 leading-tight mb-2">Xác nhận mật khẩu</h3>
-                            <p className="text-slate-500 text-xs leading-relaxed">Để bảo mật, vui lòng nhập mật khẩu của bạn để xác nhận hành động xóa nhân viên này.</p>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div>
-                                <input
-                                    type="password"
-                                    value={adminPassword}
-                                    onChange={(e) => setAdminPassword(e.target.value)}
-                                    autoFocus
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all font-bold text-center text-slate-900 placeholder:text-slate-300"
-                                    placeholder="Nhập mật khẩu của bạn"
-                                    onKeyDown={(e) => e.key === 'Enter' && handleFinalDelete()}
-                                />
-                            </div>
-
-                            <div className="flex flex-col gap-2">
-                                <button
-                                    onClick={handleFinalDelete}
-                                    disabled={deleting}
-                                    className="w-full py-3 bg-rose-600 text-white font-black rounded-xl hover:bg-rose-700 shadow-lg shadow-rose-600/20 disabled:opacity-50 transition-all active:scale-[0.98] cursor-pointer uppercase tracking-widest text-[10px]"
-                                >
-                                    {deleting ? 'Đang thực hiện...' : 'Xác nhận xóa vĩnh viễn'}
-                                </button>
-                                <button
-                                    onClick={() => { setShowPasswordConfirm(false); setAdminPassword(''); }}
-                                    className="w-full py-3 bg-white text-slate-500 font-bold rounded-xl hover:bg-slate-50 transition-all cursor-pointer text-[10px] uppercase tracking-wider"
-                                >
-                                    Hủy bỏ
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
