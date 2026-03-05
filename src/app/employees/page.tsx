@@ -46,6 +46,7 @@ export default function EmployeesPage() {
     const [selectedDepartment, setSelectedDepartment] = useState('');
     const [selectedStatus, setSelectedStatus] = useState('');
     const [hasAccountFilter, setHasAccountFilter] = useState('');
+    const [showMobileFilters, setShowMobileFilters] = useState(false);
 
     useEffect(() => {
         const user = localStorage.getItem('user');
@@ -116,6 +117,22 @@ export default function EmployeesPage() {
         }
     };
 
+    const resetFilters = () => {
+        setSearchTerm('');
+        setSelectedPosition('');
+        setSelectedDepartment('');
+        setSelectedStatus('');
+        setHasAccountFilter('');
+
+        const userRole = currentUser?.role?.code;
+        const userBranchId = currentUser?.employee?.branchId;
+        if (userRole === 'MANAGER' && userBranchId) {
+            setSelectedBranch(userBranchId);
+        } else {
+            setSelectedBranch('');
+        }
+    };
+
     useEffect(() => {
         if (currentUser) {
             fetchEmployees();
@@ -124,8 +141,11 @@ export default function EmployeesPage() {
 
     const filteredEmployees = employees.filter(emp =>
         emp.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        emp.phone?.toLowerCase().includes(searchTerm.toLowerCase())
+        emp.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        emp.user?.username?.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    const cn = (...classes: any[]) => classes.filter(Boolean).join(' ');
 
     // Check permissions
     const userRole = currentUser?.role?.code;
@@ -153,7 +173,7 @@ export default function EmployeesPage() {
                     {canCreate && (
                         <button
                             onClick={() => router.push('/employees/new')}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-pink-600 to-rose-600 text-white font-bold text-xs rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+                            className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-pink-600 to-rose-600 text-white font-bold text-xs rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all cursor-pointer"
                         >
                             <Plus className="w-3.5 h-3.5" />
                             Thêm Nhân Viên
@@ -163,127 +183,178 @@ export default function EmployeesPage() {
 
                 {/* Filters */}
                 <div className="bg-white rounded-lg shadow-md p-2.5 mb-3 border border-slate-200">
-                    <div className="flex items-center gap-1.5 mb-2">
-                        <Filter className="w-3.5 h-3.5 text-slate-600" />
-                        <h2 className="text-xs font-bold text-slate-900">Bộ Lọc</h2>
+                    {/* PC Header */}
+                    <div className="hidden lg:flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-1.5">
+                            <Filter className="w-3.5 h-3.5 text-slate-600" />
+                            <h2 className="text-xs font-bold text-slate-900">Bộ Lọc</h2>
+                        </div>
+                        <button
+                            onClick={resetFilters}
+                            className="text-[10px] font-bold text-rose-500 hover:text-rose-600 px-2 py-1 bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                        >
+                            ✕ Reset
+                        </button>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-2">
-                        {/* Search */}
-                        <div>
-                            <label className="block text-[10px] font-semibold text-slate-700 mb-1">
-                                Tìm kiếm
-                            </label>
-                            <div className="relative">
-                                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                                <input
-                                    type="text"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    placeholder="Tên, SĐT..."
-                                    className="w-full pl-8 pr-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                                />
-                            </div>
-                        </div>
 
-                        {/* Branch Filter */}
-                        <div>
-                            <label className="block text-[10px] font-semibold text-slate-700 mb-1">
-                                Chi Nhánh
-                            </label>
-                            <select
-                                value={selectedBranch}
-                                onChange={(e) => setSelectedBranch(e.target.value)}
-                                disabled={currentUser?.role?.code === 'MANAGER'}
-                                className="w-full px-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed"
-                            >
-                                <option value="">Tất cả</option>
-                                {branches.map(b => (
-                                    <option key={b.id} value={b.id}>{b.name}</option>
-                                ))}
-                            </select>
-                            {currentUser?.role?.code === 'MANAGER' && (
-                                <p className="text-[9px] text-slate-500 mt-0.5">Bạn chỉ có thể xem nhân viên chi nhánh của mình</p>
+                    {/* Mobile Header & Search Toggles */}
+                    <div className="flex lg:hidden items-center gap-2 mb-2">
+                        <div className="relative flex-1">
+                            <Search className={`absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 transition-colors ${searchTerm ? 'text-rose-500' : 'text-slate-400'}`} />
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Tên, SĐT..."
+                                className={`w-full pl-8 pr-3 py-1.5 text-[11px] font-bold border rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all ${searchTerm ? 'border-rose-300 bg-rose-50' : 'border-slate-300 bg-slate-50'}`}
+                            />
+                        </div>
+                        <button
+                            onClick={() => setShowMobileFilters(!showMobileFilters)}
+                            className={cn(
+                                "flex items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all border shrink-0 cursor-pointer",
+                                showMobileFilters || selectedBranch || selectedPosition || selectedDepartment || selectedStatus || hasAccountFilter
+                                    ? "bg-rose-600 text-white border-rose-600 shadow-md"
+                                    : "bg-white text-slate-600 border-slate-200"
                             )}
-                        </div>
+                        >
+                            <Filter className="w-3.5 h-3.5" />
+                            {showMobileFilters ? 'ĐÓNG' : 'BỘ LỌC'}
+                        </button>
+                    </div>
 
-                        {/* Position Filter */}
-                        <div>
-                            <label className="block text-[10px] font-semibold text-slate-700 mb-1">
-                                Chức Vụ
-                            </label>
-                            <select
-                                value={selectedPosition}
-                                onChange={(e) => setSelectedPosition(e.target.value)}
-                                className="w-full px-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                            >
-                                <option value="">Tất cả</option>
-                                <option value="GĐ">Giám đốc (GĐ)</option>
-                                <option value="GĐKD">Giám đốc kinh doanh (GĐKD)</option>
-                                <option value="Trợ lý GĐ">Trợ lý Giám đốc</option>
-                                <option value="Quản Lý">Quản Lý</option>
-                                <option value="NVBH">Nhân viên bán hàng (NVBH)</option>
-                                <option value="Kế toán">Kế toán</option>
-                                <option value="Media">Media</option>
-                                <option value="ADS">ADS</option>
-                                <option value="HCNS">Hành chính nhân sự (HCNS)</option>
-                                <option value="NVKT">Nhân viên kỹ thuật (NVKT)</option>
-                                <option value="Driver">Lái xe (Driver)</option>
-                                <option value="Marketing">Marketing</option>
-                                <option value="Nhân viên">Nhân viên (Khác)</option>
-                            </select>
-                        </div>
+                    <div className={cn(
+                        "transition-all duration-300 overflow-hidden",
+                        showMobileFilters ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0 lg:max-h-none lg:opacity-100"
+                    )}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-2 pt-1 lg:pt-0">
+                            {/* Search (Desktop Only) */}
+                            <div className="hidden lg:block">
+                                <label className="block text-[10px] font-semibold text-slate-700 mb-1">
+                                    Tìm kiếm
+                                </label>
+                                <div className="relative">
+                                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                                    <input
+                                        type="text"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        placeholder="Tên, SĐT..."
+                                        className="w-full pl-8 pr-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                                    />
+                                </div>
+                            </div>
 
-                        {/* Department Filter */}
-                        <div>
-                            <label className="block text-[10px] font-semibold text-slate-700 mb-1">
-                                Phòng Ban
-                            </label>
-                            <select
-                                value={selectedDepartment}
-                                onChange={(e) => setSelectedDepartment(e.target.value)}
-                                className="w-full px-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                            >
-                                <option value="">Tất cả</option>
-                                <option value="BGĐ">BGĐ</option>
-                                <option value="MKT">MKT</option>
-                                <option value="HCKT">HCKT</option>
-                                <option value="Kỹ Thuật">Kỹ Thuật</option>
-                                <option value="Kho">Kho</option>
-                                <option value="Lái xe">Lái xe</option>
-                                <option value="Phòng KD">Phòng KD</option>
-                            </select>
-                        </div>
+                            {/* Branch Filter */}
+                            <div>
+                                <label className="block text-[10px] font-semibold text-slate-700 mb-1">
+                                    Chi Nhánh
+                                </label>
+                                <select
+                                    value={selectedBranch}
+                                    onChange={(e) => setSelectedBranch(e.target.value)}
+                                    disabled={currentUser?.role?.code === 'MANAGER'}
+                                    className="w-full px-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed cursor-pointer"
+                                >
+                                    <option value="">Tất cả</option>
+                                    {branches.map(b => (
+                                        <option key={b.id} value={b.id}>{b.name}</option>
+                                    ))}
+                                </select>
+                                {currentUser?.role?.code === 'MANAGER' && (
+                                    <p className="text-[9px] text-slate-500 mt-0.5 lg:hidden">Bạn chỉ có thể xem nhân viên chi nhánh của mình</p>
+                                )}
+                            </div>
 
-                        {/* Status Filter */}
-                        <div>
-                            <label className="block text-[10px] font-semibold text-slate-700 mb-1">
-                                Trạng Thái
-                            </label>
-                            <select
-                                value={selectedStatus}
-                                onChange={(e) => setSelectedStatus(e.target.value)}
-                                className="w-full px-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                            >
-                                <option value="">Tất cả</option>
-                                <option value="Đang làm việc">Đang làm việc</option>
-                                <option value="Nghỉ việc">Nghỉ việc</option>
-                            </select>
-                        </div>
+                            {/* Position Filter */}
+                            <div>
+                                <label className="block text-[10px] font-semibold text-slate-700 mb-1">
+                                    Chức Vụ
+                                </label>
+                                <select
+                                    value={selectedPosition}
+                                    onChange={(e) => setSelectedPosition(e.target.value)}
+                                    className="w-full px-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent cursor-pointer"
+                                >
+                                    <option value="">Tất cả</option>
+                                    <option value="GĐ">Giám đốc (GĐ)</option>
+                                    <option value="GĐKD">Giám đốc kinh doanh (GĐKD)</option>
+                                    <option value="Trợ lý GĐ">Trợ lý Giám đốc</option>
+                                    <option value="Quản Lý">Quản Lý</option>
+                                    <option value="NVBH">Nhân viên bán hàng (NVBH)</option>
+                                    <option value="Kế toán">Kế toán</option>
+                                    <option value="Media">Media</option>
+                                    <option value="ADS">ADS</option>
+                                    <option value="HCNS">Hành chính nhân sự (HCNS)</option>
+                                    <option value="NVKT">Nhân viên kỹ thuật (NVKT)</option>
+                                    <option value="Driver">Lái xe (Driver)</option>
+                                    <option value="Marketing">Marketing</option>
+                                    <option value="Nhân viên">Nhân viên (Khác)</option>
+                                </select>
+                            </div>
 
-                        {/* Has Account Filter */}
-                        <div>
-                            <label className="block text-[10px] font-semibold text-slate-700 mb-1">
-                                Tài Khoản
-                            </label>
-                            <select
-                                value={hasAccountFilter}
-                                onChange={(e) => setHasAccountFilter(e.target.value)}
-                                className="w-full px-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                            >
-                                <option value="">Tất cả</option>
-                                <option value="true">Có tài khoản</option>
-                                <option value="false">Chưa có</option>
-                            </select>
+                            {/* Department Filter */}
+                            <div>
+                                <label className="block text-[10px] font-semibold text-slate-700 mb-1">
+                                    Phòng Ban
+                                </label>
+                                <select
+                                    value={selectedDepartment}
+                                    onChange={(e) => setSelectedDepartment(e.target.value)}
+                                    className="w-full px-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent cursor-pointer"
+                                >
+                                    <option value="">Tất cả</option>
+                                    <option value="BGĐ">BGĐ</option>
+                                    <option value="MKT">MKT</option>
+                                    <option value="HCKT">HCKT</option>
+                                    <option value="Kỹ Thuật">Kỹ Thuật</option>
+                                    <option value="Kho">Kho</option>
+                                    <option value="Lái xe">Lái xe</option>
+                                    <option value="Phòng KD">Phòng KD</option>
+                                </select>
+                            </div>
+
+                            {/* Status Filter */}
+                            <div>
+                                <label className="block text-[10px] font-semibold text-slate-700 mb-1">
+                                    Trạng Thái
+                                </label>
+                                <select
+                                    value={selectedStatus}
+                                    onChange={(e) => setSelectedStatus(e.target.value)}
+                                    className="w-full px-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent cursor-pointer"
+                                >
+                                    <option value="">Tất cả</option>
+                                    <option value="Đang làm việc">Đang làm việc</option>
+                                    <option value="Nghỉ việc">Nghỉ việc</option>
+                                </select>
+                            </div>
+
+                            {/* Has Account Filter */}
+                            <div>
+                                <label className="block text-[10px] font-semibold text-slate-700 mb-1">
+                                    Tài Khoản
+                                </label>
+                                <select
+                                    value={hasAccountFilter}
+                                    onChange={(e) => setHasAccountFilter(e.target.value)}
+                                    className="w-full px-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent cursor-pointer"
+                                >
+                                    <option value="">Tất cả</option>
+                                    <option value="true">Có tài khoản</option>
+                                    <option value="false">Chưa có</option>
+                                </select>
+                            </div>
+
+                            {/* Mobile Reset Button */}
+                            <div className="lg:hidden pt-2 border-t border-slate-100 mt-1">
+                                <button
+                                    onClick={resetFilters}
+                                    className="w-full py-2 bg-rose-50 text-rose-600 font-black text-[10px] uppercase tracking-wider rounded-lg border border-rose-100"
+                                >
+                                    ✕ Xóa Tất Cả Bộ Lọc
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -299,14 +370,14 @@ export default function EmployeesPage() {
                         <div className="overflow-x-auto">
                             <table className="w-full text-xs">
                                 <thead className="bg-gradient-to-r from-slate-700 to-slate-800 text-white">
-                                    <tr>
-                                        <th className="px-2 py-1.5 text-left font-bold text-[9px] uppercase tracking-wider">Tên Nhân Viên</th>
-                                        <th className="px-2 py-1.5 text-left font-bold text-[9px] uppercase tracking-wider">SĐT</th>
-                                        <th className="px-2 py-1.5 text-left font-bold text-[9px] uppercase tracking-wider">Chi Nhánh</th>
-                                        <th className="px-2 py-1.5 text-left font-bold text-[9px] uppercase tracking-wider">Phòng Ban</th>
-                                        <th className="px-2 py-1.5 text-left font-bold text-[9px] uppercase tracking-wider">Chức Vụ</th>
-                                        <th className="px-2 py-1.5 text-left font-bold text-[9px] uppercase tracking-wider">Trạng Thái</th>
-                                        <th className="px-2 py-1.5 text-left font-bold text-[9px] uppercase tracking-wider">Tài Khoản</th>
+                                    <tr className="whitespace-nowrap">
+                                        <th className="px-2 py-1.5 pr-6 text-left font-bold text-[9px] uppercase tracking-wider">Tên Nhân Viên</th>
+                                        <th className="px-2 py-1.5 pr-6 text-left font-bold text-[9px] uppercase tracking-wider">SĐT</th>
+                                        <th className="px-2 py-1.5 pr-6 text-left font-bold text-[9px] uppercase tracking-wider">Chi Nhánh</th>
+                                        <th className="px-2 py-1.5 pr-6 text-left font-bold text-[9px] uppercase tracking-wider">Phòng Ban</th>
+                                        <th className="px-2 py-1.5 pr-6 text-left font-bold text-[9px] uppercase tracking-wider">Chức Vụ</th>
+                                        <th className="px-2 py-1.5 pr-6 text-left font-bold text-[9px] uppercase tracking-wider">Trạng Thái</th>
+                                        <th className="px-2 py-1.5 pr-6 text-left font-bold text-[9px] uppercase tracking-wider">Tài Khoản</th>
                                         <th className="px-2 py-1.5 text-center font-bold text-[9px] uppercase tracking-wider">Thao Tác</th>
                                     </tr>
                                 </thead>
@@ -319,17 +390,17 @@ export default function EmployeesPage() {
                                         </tr>
                                     ) : (
                                         filteredEmployees.map((emp) => (
-                                            <tr key={emp.id} className="hover:bg-slate-50 transition-colors">
-                                                <td className="px-2 py-1.5 font-semibold text-slate-900 text-[11px]">{emp.fullName}</td>
-                                                <td className="px-2 py-1.5 text-slate-600 text-[11px]">{emp.phone || '-'}</td>
-                                                <td className="px-2 py-1.5 text-slate-600 font-medium text-[11px]">{emp.branch.name}</td>
-                                                <td className="px-2 py-1.5 text-slate-600 font-medium text-[11px]">{emp.department || '-'}</td>
-                                                <td className="px-2 py-1.5">
+                                            <tr key={emp.id} className="hover:bg-slate-50 transition-colors whitespace-nowrap">
+                                                <td className="px-2 py-1.5 pr-6 font-semibold text-slate-900 text-[11px] text-left">{emp.fullName}</td>
+                                                <td className="px-2 py-1.5 pr-6 text-slate-600 text-[11px] text-left">{emp.phone || '-'}</td>
+                                                <td className="px-2 py-1.5 pr-6 text-slate-600 font-medium text-[11px] text-left">{emp.branch.name}</td>
+                                                <td className="px-2 py-1.5 pr-6 text-slate-600 font-medium text-[11px] text-left">{emp.department || '-'}</td>
+                                                <td className="px-2 py-1.5 pr-6 text-left">
                                                     <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-[10px] font-bold">
                                                         {emp.position}
                                                     </span>
                                                 </td>
-                                                <td className="px-2 py-1.5">
+                                                <td className="px-2 py-1.5 pr-6 text-left">
                                                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${emp.status === 'Đang làm việc'
                                                         ? 'bg-green-100 text-green-700'
                                                         : 'bg-slate-100 text-slate-600'
@@ -337,11 +408,11 @@ export default function EmployeesPage() {
                                                         {emp.status || 'Không rõ'}
                                                     </span>
                                                 </td>
-                                                <td className="px-2 py-1.5">
+                                                <td className="px-2 py-1.5 pr-6 text-left">
                                                     {emp.user ? (
                                                         <div className="flex flex-col gap-0.5">
-                                                            <span className="text-[11px] font-semibold text-slate-900">{emp.user.username}</span>
-                                                            <span className={`text-[9px] ${emp.user.isActive ? 'text-green-600' : 'text-red-600'}`}>
+                                                            <span className="text-[11px] font-semibold text-slate-900 leading-none">{emp.user.username}</span>
+                                                            <span className={`text-[9px] leading-none ${emp.user.isActive ? 'text-green-600' : 'text-red-600'}`}>
                                                                 {emp.user.isActive ? '✓ Hoạt động' : '✗ Bị khóa'}
                                                             </span>
                                                         </div>
@@ -353,7 +424,7 @@ export default function EmployeesPage() {
                                                     <div className="flex items-center justify-center gap-1">
                                                         <button
                                                             onClick={() => router.push(`/employees/${emp.id}`)}
-                                                            className="px-2.5 py-1 bg-blue-500 text-white text-[10px] font-bold rounded-lg hover:bg-blue-600 transition-colors"
+                                                            className="px-2.5 py-1 bg-blue-500 text-white text-[10px] font-bold rounded-lg hover:bg-blue-600 transition-colors cursor-pointer"
                                                         >
                                                             Xem
                                                         </button>

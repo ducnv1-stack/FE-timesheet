@@ -11,6 +11,7 @@ import GiftGrid from '@/components/orders/GiftGrid';
 import SplitManager from '@/components/orders/SplitManager';
 import PaymentForm from '@/components/orders/PaymentForm';
 import AddressSelector from '@/components/orders/AddressSelector';
+import EmployeeSearchSelector from '@/components/orders/EmployeeSearchSelector';
 import { FullOrder, Product, Employee, Branch } from '@/types/order';
 
 export default function EditOrderPage() {
@@ -308,7 +309,7 @@ export default function EditOrderPage() {
             <div className="flex items-center justify-between mb-6">
                 <button
                     onClick={() => router.back()}
-                    className="flex items-center gap-1 text-slate-500 hover:text-slate-800 transition-colors text-sm font-medium print:hidden"
+                    className="flex items-center gap-1 text-slate-500 hover:text-slate-800 transition-colors text-sm font-medium print:hidden cursor-pointer"
                 >
                     <ChevronLeft size={16} /> Quay lại
                 </button>
@@ -360,7 +361,7 @@ export default function EditOrderPage() {
                             <select
                                 value={order.branchId}
                                 onChange={(e) => setOrder({ ...order, branchId: e.target.value })}
-                                className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 line-clamp-1"
+                                className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 line-clamp-1 cursor-pointer"
                             >
                                 {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                             </select>
@@ -370,7 +371,7 @@ export default function EditOrderPage() {
                             <select
                                 value={order.staffCode || ''}
                                 onChange={(e) => setOrder({ ...order, staffCode: e.target.value })}
-                                className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900"
+                                className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 cursor-pointer"
                             >
                                 <option value="">Chọn NV...</option>
                                 {headerEmployees.map(emp => <option key={emp.id} value={emp.id}>{emp.fullName}</option>)}
@@ -382,7 +383,7 @@ export default function EditOrderPage() {
                                 type="date"
                                 value={order.orderDate}
                                 onChange={(e) => setOrder({ ...order, orderDate: e.target.value })}
-                                className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900"
+                                className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 cursor-pointer"
                             />
                         </div>
                         <div className="grid grid-cols-[120px_1fr] items-center border-b border-slate-100 py-1">
@@ -429,7 +430,7 @@ export default function EditOrderPage() {
                                 type="date"
                                 value={order.customerCardIssueDate || ''}
                                 onChange={(e) => setOrder({ ...order, customerCardIssueDate: e.target.value })}
-                                className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900"
+                                className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 cursor-pointer"
                             />
                         </div>
                         <div className="grid grid-cols-[120px_1fr] items-start border-b border-slate-100 py-2">
@@ -459,7 +460,7 @@ export default function EditOrderPage() {
                                             });
                                         }
                                     }}
-                                    className="bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[10px] font-bold text-slate-700 w-full outline-none focus:ring-1 focus:ring-rose-200"
+                                    className="bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[10px] font-bold text-slate-700 w-full outline-none focus:ring-1 focus:ring-rose-200 cursor-pointer"
                                 >
                                     <option value="none">-- Không --</option>
                                     <option value="external">🚚 Lái xe ngoài (+0k)</option>
@@ -476,7 +477,7 @@ export default function EditOrderPage() {
                                             ) || [];
                                             setOrder({ ...order, deliveries: newDeliveries });
                                         }}
-                                        className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 w-full text-[11px]"
+                                        className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 w-full text-[11px] cursor-pointer"
                                     >
                                         <option value="">-- Chọn lái xe --</option>
                                         {allEmployees
@@ -493,10 +494,11 @@ export default function EditOrderPage() {
                         <div className="grid grid-cols-[120px_1fr] items-start border-b border-slate-100 py-2">
                             <span className="font-bold text-slate-600 mt-1">Người giao:</span>
                             <div className="space-y-1.5">
-                                <select
-                                    value={order.deliveries?.find(d => d.role === 'STAFF')?.driverId || ''}
-                                    onChange={(e) => {
-                                        const val = e.target.value;
+                                <EmployeeSearchSelector
+                                    employees={allEmployees.filter(e => e.department !== 'Lái xe' && e.position !== 'driver' && !e.isInternalDriver)}
+                                    selectedId={order.deliveries?.find(d => d.role === 'STAFF')?.driverId || ''}
+                                    staffCode={order.staffCode || ''}
+                                    onSelect={(val) => {
                                         const otherDeliveries = order.deliveries?.filter(d => d.role !== 'STAFF') || [];
 
                                         if (!val) {
@@ -520,20 +522,7 @@ export default function EditOrderPage() {
                                             deliveries: [...otherDeliveries, { category, driverId: val, role: 'STAFF' }]
                                         });
                                     }}
-                                    className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 w-full text-[11px]"
-                                >
-                                    <option value="">-- Không --</option>
-                                    {allEmployees
-                                        .filter(e => e.department !== 'Lái xe' && e.position !== 'driver' && !e.isInternalDriver)
-                                        .map(emp => {
-                                            let feeLabel = "(+70k)";
-                                            if (emp.id === order.staffCode) feeLabel = "(+100k)";
-                                            else if (emp.position === 'sale' || emp.position === 'NVBH' || emp.department === 'Phòng KD') feeLabel = "(+200k)";
-
-                                            return <option key={emp.id} value={emp.id}>{emp.fullName} {feeLabel}</option>;
-                                        })
-                                    }
-                                </select>
+                                />
                             </div>
                         </div>
                     </div>
@@ -581,7 +570,7 @@ export default function EditOrderPage() {
                             value={order.note || ''}
                             onChange={(e) => setOrder({ ...order, note: e.target.value })}
                             placeholder="Nhập ghi chú chi tiết về đơn hàng, vận chuyển..."
-                            className="w-full bg-slate-50 border-none rounded-lg p-3 text-sm min-h-[100px] focus:ring-0 print:hidden"
+                            className="w-full bg-slate-50 border-none rounded-lg p-3 text-sm min-h-[100px] focus:ring-0 print:hidden cursor-pointer"
                         />
                         <div className="hidden print:block text-sm text-slate-800 italic p-3 bg-slate-50 rounded-lg">
                             {order.note || 'Không có ghi chú.'}

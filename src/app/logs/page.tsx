@@ -50,9 +50,9 @@ export default function LogsPage() {
     const getActionBadge = (action: string) => {
         switch (action) {
             case 'create':
-                return <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-black uppercase">Tạo mới</span>;
+                return <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-black uppercase whitespace-nowrap tracking-tighter">Tạo mới</span>;
             case 'update':
-                return <span className="px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full text-[10px] font-black uppercase">Cập nhật</span>;
+                return <span className="px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full text-[10px] font-black uppercase whitespace-nowrap tracking-tighter">Cập nhật</span>;
             case 'delete':
                 return <span className="px-2 py-0.5 bg-rose-100 text-rose-700 rounded-full text-[10px] font-black uppercase">Xóa</span>;
             default:
@@ -103,11 +103,11 @@ export default function LogsPage() {
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-slate-50 border-b border-slate-100">
-                                    <th className="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-wider">Thời gian</th>
-                                    <th className="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-wider">Người thực hiện</th>
-                                    <th className="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-wider">Hành động</th>
-                                    <th className="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-wider">Chi tiết đơn</th>
-                                    <th className="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-wider text-right">Thao tác</th>
+                                    <th className="px-3 py-3 md:px-6 md:py-4 text-[10px] md:text-[11px] font-black text-slate-400 uppercase tracking-wider">Thời gian</th>
+                                    <th className="px-3 py-3 md:px-6 md:py-4 text-[10px] md:text-[11px] font-black text-slate-400 uppercase tracking-wider">Người thực hiện</th>
+                                    <th className="px-3 py-3 md:px-6 md:py-4 text-[10px] md:text-[11px] font-black text-slate-400 uppercase tracking-wider">Hành động</th>
+                                    <th className="px-3 py-3 md:px-6 md:py-4 text-[10px] md:text-[11px] font-black text-slate-400 uppercase tracking-wider">Chi tiết đơn</th>
+                                    <th className="px-3 py-3 md:px-6 md:py-4 text-[10px] md:text-[11px] font-black text-slate-400 uppercase tracking-wider text-right whitespace-nowrap">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">
@@ -117,62 +117,62 @@ export default function LogsPage() {
                                         className="hover:bg-slate-50/50 transition-colors group cursor-pointer"
                                         onClick={() => setSelectedLog(log)}
                                     >
-                                        <td className="px-6 py-4">
+                                        <td className="px-3 py-3 md:px-6 md:py-4">
                                             <div className="flex flex-col">
-                                                <span className="text-sm font-bold text-slate-700 flex items-center gap-1.5">
-                                                    <Calendar size={12} className="text-slate-400" />
+                                                <span className="text-xs md:text-sm font-bold text-slate-700 flex items-center gap-1 md:gap-1.5 whitespace-nowrap">
+                                                    <Calendar size={10} className="text-slate-400 md:size-[12px]" />
                                                     {new Date(log.changedAt).toLocaleDateString('vi-VN')}
                                                 </span>
-                                                <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1.5 mt-0.5">
-                                                    <Clock size={12} className="text-slate-300" />
+                                                <span className="text-[9px] md:text-[10px] text-slate-400 font-medium flex items-center gap-1 md:gap-1.5 mt-0.5">
+                                                    <Clock size={10} className="text-slate-300 md:size-[12px]" />
                                                     {new Date(log.changedAt).toLocaleTimeString('vi-VN')}
                                                 </span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-rose-50 flex items-center justify-center text-rose-600 font-bold text-xs">
-                                                    {log.changedByUser?.employee?.fullName?.charAt(0) || <UserIcon size={14} />}
+                                        <td className="px-3 py-3 md:px-6 md:py-4">
+                                            <div className="flex items-center gap-2 md:gap-3">
+                                                <div className="w-7 h-7 md:w-8 md:h-8 shrink-0 rounded-full bg-rose-50 flex items-center justify-center text-rose-600 font-bold text-[10px] md:text-xs">
+                                                    {log.changedByUser?.employee?.fullName?.charAt(0) || <UserIcon size={12} />}
                                                 </div>
                                                 <div className="flex flex-col">
-                                                    <span className="text-sm font-bold text-slate-900 leading-none">
+                                                    <span className="text-xs md:text-sm font-bold text-slate-900 leading-tight md:leading-none whitespace-nowrap">
                                                         {log.changedByUser?.employee?.fullName || 'N/A'}
                                                     </span>
-                                                    <span className="text-[10px] text-slate-400 font-medium mt-1">
+                                                    <span className="text-[9px] md:text-[10px] text-slate-400 font-medium mt-0.5 md:mt-1">
                                                         @{log.changedByUser?.username || 'unknown'}
                                                     </span>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-3 py-3 md:px-6 md:py-4 whitespace-nowrap">
                                             {getActionBadge(log.action)}
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex flex-col gap-1">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-xs font-black text-slate-800 uppercase tracking-tighter">
+                                        <td className="px-3 py-3 md:px-6 md:py-4">
+                                            <div className="flex flex-col gap-0.5 md:gap-1">
+                                                <div className="flex items-center gap-1.5 md:gap-2">
+                                                    <span className="text-[10px] md:text-xs font-black text-slate-800 uppercase tracking-tighter">
                                                         #{log.order?.id.substring(0, 8)}
                                                     </span>
                                                     {log.order?.branch && (
-                                                        <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-bold uppercase">
+                                                        <span className="text-[8px] md:text-[10px] bg-slate-100 text-slate-500 px-1 md:px-1.5 py-0.5 rounded font-bold uppercase whitespace-nowrap">
                                                             {log.order.branch.name}
                                                         </span>
                                                     )}
                                                 </div>
-                                                <span className="text-[10px] text-slate-400 italic truncate max-w-[200px]">
+                                                <span className="text-[9px] md:text-[10px] text-slate-400 italic truncate max-w-[120px] md:max-w-[200px]">
                                                     {log.action === 'create' ? 'Tạo mới đơn hàng' : 'Cập nhật nội dung đơn hàng'}
                                                 </span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 text-right">
+                                        <td className="px-3 py-3 md:px-6 md:py-4 text-right">
                                             <button
-                                                className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                                                className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all cursor-pointer"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     setSelectedLog(log);
                                                 }}
                                             >
-                                                <Eye size={18} />
+                                                <Eye size={16} className="md:size-[18px]" />
                                             </button>
                                         </td>
                                     </tr>

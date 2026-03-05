@@ -248,16 +248,21 @@ export default function LogDetailModal({ log, onClose }: LogDetailModalProps) {
             <div className="relative w-full max-w-[98vw] h-[94vh] bg-white/95 rounded-[40px] shadow-2xl flex flex-col overflow-hidden border border-white/20 scale-in animate-in fade-in duration-300">
 
                 {/* Header Section - Dark & Professional like Image 2 */}
-                <div className="bg-[#1e293b] border-b border-white/5 py-4 px-8 flex justify-between items-center relative overflow-hidden shrink-0">
+                <div className="bg-[#1e293b] border-b border-white/5 py-3 px-5 md:px-8 flex justify-between items-center relative overflow-hidden shrink-0">
                     <div className="flex items-center gap-4 relative z-10">
                         <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-slate-900 shadow-xl">
                             <Activity size={22} className="rotate-0" />
                         </div>
                         <div className="flex flex-col">
-                            <h2 className="text-xl font-black text-white tracking-tight uppercase">Đối Chiếu Lịch Sử Thay Đổi</h2>
-                            <div className="flex items-center gap-3">
-                                <span className="text-white/40 text-[11px] font-bold uppercase tracking-[0.2em]">Hóa đơn: #{log.order?.id?.substring(0, 8) || 'N/A'}</span>
-                                <span className="bg-amber-500/20 text-amber-400 text-[10px] px-2 py-0.5 rounded-md font-black uppercase border border-amber-500/30">Cập nhật</span>
+                            <h2 className="text-lg md:text-xl font-black text-white tracking-tight uppercase leading-tight">Đối Chiếu Lịch Sử Thay Đổi</h2>
+                            <div className="flex items-center gap-2 md:gap-3">
+                                <span className="text-white/40 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em]">Hóa đơn: #{log.order?.id?.substring(0, 8) || 'N/A'}</span>
+                                <span className={cn(
+                                    "text-[10px] px-1.5 py-0.5 rounded font-black uppercase border",
+                                    isCreate ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" : "bg-amber-500/20 text-amber-400 border-amber-500/30"
+                                )}>
+                                    {isCreate ? 'Tạo mới' : 'Cập nhật'}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -271,30 +276,30 @@ export default function LogDetailModal({ log, onClose }: LogDetailModalProps) {
                 </div>
 
                 {/* Main Content Area */}
-                <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#f1f5f9] p-4 space-y-8">
+                <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#f1f5f9] p-3 md:p-4 space-y-6 md:space-y-8">
 
                     {/* Summary Cards */}
                     {changes.length > 0 && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-in slide-in-from-bottom-4 duration-500 delay-150">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4 animate-in slide-in-from-bottom-4 duration-500 delay-150">
                             {changes.map((change, idx) => (
-                                <div key={idx} className="group bg-white/80 backdrop-blur-md p-4 rounded-3xl border border-slate-100 hover:border-emerald-200 transition-all duration-500 hover:shadow-2xl hover:shadow-emerald-500/10 hover:-translate-y-1">
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <div className={`w-10 h-10 rounded-2xl ${change.bgColor} flex items-center justify-center ${change.color} shadow-lg shadow-current/10 group-hover:scale-110 transition-transform duration-500`}>
+                                <div key={idx} className="group bg-white/80 backdrop-blur-md p-3.5 md:p-4 rounded-2xl md:rounded-3xl border border-slate-100 hover:border-emerald-200 transition-all duration-500 hover:shadow-2xl hover:shadow-emerald-500/10 hover:-translate-y-1">
+                                    <div className="flex items-center gap-3 mb-2 md:mb-3">
+                                        <div className={`w-8 h-8 md:w-10 md:h-10 rounded-xl md:rounded-2xl ${change.bgColor} flex items-center justify-center ${change.color} shadow-lg shadow-current/10 group-hover:scale-110 transition-transform duration-500`}>
                                             {change.icon}
                                         </div>
                                         <div>
-                                            <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest block">{change.label}</span>
+                                            <span className="text-xs font-black uppercase text-slate-400 tracking-widest block">{change.label}</span>
                                             <div className="h-0.5 w-6 bg-emerald-500/30 rounded-full mt-1 group-hover:w-10 transition-all duration-500" />
                                         </div>
                                     </div>
-                                    <div className="space-y-2">
+                                    <div className="space-y-1 md:space-y-2">
                                         <div className="flex items-start gap-2">
                                             <div className="w-1.5 h-1.5 rounded-full bg-slate-200 mt-1.5 shrink-0" />
-                                            <span className="text-[11px] text-slate-400 font-bold italic line-through decoration-slate-300/50 break-words">{change.old}</span>
+                                            <span className="text-[10px] md:text-xs text-slate-400 font-bold italic line-through decoration-slate-300/50 break-words">{change.old}</span>
                                         </div>
                                         <div className="flex items-start gap-2">
                                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse mt-1.5 shrink-0" />
-                                            <span className="text-xs font-black text-slate-800 tracking-tight break-words">{change.new}</span>
+                                            <span className="text-xs md:text-sm font-black text-slate-800 tracking-tight break-words">{change.new}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -324,18 +329,19 @@ export default function LogDetailModal({ log, onClose }: LogDetailModalProps) {
                                     transformOrigin: 'top left',
                                     width: '210mm'
                                 }} className="flex flex-col shrink-0 bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
-                                    <div className="bg-slate-50 border-b border-slate-100 p-6 flex flex-col gap-1.5 font-sans rounded-t-3xl">
+                                    <div className="bg-slate-50 border-b border-slate-100 p-4 md:p-6 flex flex-col gap-1 md:gap-1.5 font-sans rounded-t-3xl text-sm md:text-base">
                                         <div className="flex items-center gap-2">
                                             <div className="w-2.5 h-2.5 rounded-full bg-slate-400" />
-                                            <h4 className="text-slate-700 font-black uppercase tracking-tight text-xl">1. Bản Cũ (Trước Chỉnh Sửa)</h4>
+                                            <h4 className="text-slate-700 font-black uppercase tracking-tight text-lg md:text-xl">1. Bản Cũ (Trước Chỉnh Sửa)</h4>
                                         </div>
-                                        <span className="text-sm font-bold text-slate-400 uppercase tracking-[0.2em] pl-4.5">Hóa Đơn #{log.order?.id?.substring(0, 8) || 'N/A'}</span>
+                                        <span className="text-base font-bold text-slate-400 uppercase tracking-[0.2em] pl-4.5">Hóa Đơn #{log.order?.id?.substring(0, 8) || 'N/A'}</span>
                                     </div>
                                     <InvoicePaper
                                         order={oldData}
                                         type="old"
                                         isCreate={isCreate}
                                         className="shadow-none border-none"
+                                        forceGrid={true}
                                     />
                                 </div>
                             </div>
@@ -380,22 +386,28 @@ export default function LogDetailModal({ log, onClose }: LogDetailModalProps) {
                                     transformOrigin: 'top left',
                                     width: '210mm'
                                 }} className="flex flex-col shrink-0 bg-white rounded-3xl shadow-2xl border border-emerald-500/20 overflow-hidden">
-                                    <div className="bg-emerald-50/50 border-b border-emerald-100 p-6 flex flex-col gap-1.5 font-sans rounded-t-3xl">
+                                    <div className="bg-emerald-50/50 border-b border-emerald-100 p-4 md:p-6 flex flex-col gap-1 md:gap-1.5 font-sans rounded-t-3xl text-sm md:text-base">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
-                                                    <CheckCircle2 size={16} />
+                                                <div className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
+                                                    <CheckCircle2 size={14} className="md:size-16" />
                                                 </div>
-                                                <h4 className="text-emerald-800 font-black uppercase tracking-tight text-xl">2. Bản Mới (Sau Chỉnh Sửa)</h4>
+                                                <h4 className="text-emerald-800 font-black uppercase tracking-tight text-lg md:text-xl">2. Bản Mới (Sau Chỉnh Sửa)</h4>
                                             </div>
-                                            <span className="bg-emerald-600 text-white text-[10px] px-3 py-1 rounded-full font-black uppercase tracking-widest shadow-lg shadow-emerald-600/20">Cập nhật</span>
+                                            <span className={cn(
+                                                "text-white text-[9px] md:text-[10px] px-2 py-0.5 md:px-3 md:py-1 rounded-full font-black uppercase tracking-widest shadow-lg",
+                                                isCreate ? "bg-indigo-600 shadow-indigo-600/20" : "bg-emerald-600 shadow-emerald-600/20"
+                                            )}>
+                                                {isCreate ? 'Tạo mới' : 'Cập nhật'}
+                                            </span>
                                         </div>
-                                        <span className="text-sm font-bold text-emerald-600/60 uppercase tracking-[0.2em] pl-10">Hóa Đơn #{log.order?.id?.substring(0, 8) || 'N/A'}</span>
+                                        <span className="text-base font-bold text-emerald-600/60 uppercase tracking-[0.2em] pl-10">Hóa Đơn #{log.order?.id?.substring(0, 8) || 'N/A'}</span>
                                     </div>
                                     <InvoicePaper
                                         order={newData}
                                         type="new"
                                         className="shadow-none border-none"
+                                        forceGrid={true}
                                     />
                                 </div>
                             </div>

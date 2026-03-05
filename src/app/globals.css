@@ -78,8 +78,18 @@ body {
   }
 
   @page {
-    margin: 0.5cm;
-    size: A4;
+    margin: 5mm;
+    size: A4 portrait;
+  }
+
+  /* Global print fixes for forms in invoice */
+  #invoice-paper input::placeholder,
+  #invoice-paper textarea::placeholder {
+    color: transparent !important;
+  }
+
+  #invoice-paper select {
+    background-image: none !important;
   }
 }
 

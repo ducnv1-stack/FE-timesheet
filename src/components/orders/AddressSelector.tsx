@@ -69,8 +69,8 @@ export default function AddressSelector({
         }
     };
 
-    const selectedProvince = provinces.find(p => p.id === provinceId) || initialProvince;
-    const selectedWard = wards.find(w => w.id === wardId) || initialWard;
+    const selectedProvince = (provinceId && provinces.find(p => p.id === provinceId)) || (provinceId ? initialProvince : undefined);
+    const selectedWard = (wardId && wards.find(w => w.id === wardId)) || (wardId ? initialWard : undefined);
 
     const displayAddress = [
         customerAddress,
@@ -90,7 +90,7 @@ export default function AddressSelector({
                         readOnly
                         value={displayAddress || ''}
                         placeholder="Số nhà, đường, phường/xã..."
-                        className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-xs"
+                        className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-sm print:text-sm print:placeholder-transparent"
                     />
                     {displayAddress && (
                         <button
@@ -98,13 +98,13 @@ export default function AddressSelector({
                                 e.stopPropagation();
                                 onChange({ provinceId: '', wardId: '', customerAddress: '' });
                             }}
-                            className="p-1 hover:bg-rose-50 rounded-full text-rose-500 transition-colors shrink-0 print:hidden"
+                            className="p-1 hover:bg-rose-50 rounded-full text-rose-500 transition-colors shrink-0 print:hidden cursor-pointer"
                             title="Xóa địa chỉ"
                         >
                             <X size={12} />
                         </button>
                     )}
-                    <ChevronDown size={12} className="text-slate-400 group-hover:text-slate-600 transition-colors shrink-0" />
+                    <ChevronDown size={12} className="text-slate-400 group-hover:text-slate-600 transition-colors shrink-0 print:hidden" />
                 </div>
             ) : (
                 <>
@@ -137,7 +137,7 @@ export default function AddressSelector({
                                             const pId = e.target.value;
                                             onChange({ provinceId: pId, wardId: '', customerAddress: customerAddress || '' });
                                         }}
-                                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-lg px-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-rose-500 transition-all appearance-none"
+                                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-lg px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:border-rose-500 transition-all appearance-none cursor-pointer"
                                     >
                                         <option value="">-- Chọn Tỉnh --</option>
                                         {provinces.map(p => (
@@ -161,7 +161,7 @@ export default function AddressSelector({
                                         onChange={(e) => {
                                             onChange({ provinceId: provinceId!, wardId: e.target.value, customerAddress: customerAddress || '' });
                                         }}
-                                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-lg px-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-rose-500 transition-all appearance-none disabled:opacity-50"
+                                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-lg px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:border-rose-500 transition-all appearance-none disabled:opacity-50 cursor-pointer"
                                     >
                                         <option value="">-- Chọn Xã --</option>
                                         {wards.map(w => (
@@ -189,13 +189,19 @@ export default function AddressSelector({
                                     if (e.key === 'Enter') setIsExpanded(false);
                                 }}
                                 placeholder="VD: 1012 Đường Láng..."
-                                className="w-full bg-slate-50 border-2 border-slate-100 rounded-lg px-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-rose-500 transition-all placeholder:font-normal"
+                                className="w-full bg-slate-50 border-2 border-slate-100 rounded-lg px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:border-rose-500 transition-all placeholder:font-normal"
                             />
                         </div>
 
                         <button
-                            onClick={() => setIsExpanded(false)}
-                            className="w-full bg-slate-900 text-white rounded-lg py-2 text-xs font-black uppercase tracking-widest hover:bg-slate-800 transition-all mt-2"
+                            onClick={() => {
+                                // Blur any active input to help mobile browser reset zoom
+                                if (document.activeElement instanceof HTMLElement) {
+                                    document.activeElement.blur();
+                                }
+                                setIsExpanded(false);
+                            }}
+                            className="w-full bg-slate-900 text-white rounded-lg py-2.5 text-xs font-black uppercase tracking-widest hover:bg-slate-800 transition-all mt-2 active:scale-[0.98] cursor-pointer"
                         >
                             Xác nhận địa chỉ
                         </button>

@@ -3,6 +3,7 @@
 import { Plus, Trash2, UserPlus, AlertCircle } from 'lucide-react';
 import { Employee, Branch, OrderSplit } from '@/types/order';
 import { formatCurrency, formatNumber, parseNumber, cn } from '@/lib/utils';
+import EmployeeSearchSelector from './EmployeeSearchSelector';
 
 interface SplitManagerProps {
     splits: OrderSplit[];
@@ -44,7 +45,7 @@ export default function SplitManager({ splits, employees, branches, totalOrderAm
     const isValid = totalSplitAmount <= totalOrderAmount;
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-visible">
             <div className="p-2 border-b border-slate-100 flex justify-between items-center bg-rose-50">
                 <h3 className="font-bold text-slate-800 text-xs uppercase tracking-tight">
                     Chia doanh số
@@ -52,7 +53,7 @@ export default function SplitManager({ splits, employees, branches, totalOrderAm
                 <button
                     onClick={addSplit}
                     type="button"
-                    className="flex items-center gap-1 px-1.5 py-0.5 bg-slate-800 hover:bg-slate-900 text-white rounded text-[10px] font-bold"
+                    className="flex items-center gap-1 px-1.5 py-0.5 bg-slate-800 hover:bg-slate-900 text-white rounded text-[10px] font-bold cursor-pointer"
                 >
                     <UserPlus size={12} /> Thêm
                 </button>
@@ -66,7 +67,7 @@ export default function SplitManager({ splits, employees, branches, totalOrderAm
                             <select
                                 value={split.branchId}
                                 onChange={(e) => updateSplit(index, 'branchId', e.target.value)}
-                                className="flex-1 bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-rose-500 rounded p-1.5 text-xs font-medium"
+                                className="flex-1 bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-rose-500 rounded p-1.5 text-xs font-medium cursor-pointer"
                             >
                                 <option value="">Chọn Chi nhánh...</option>
                                 {branches.map(b => (
@@ -75,25 +76,35 @@ export default function SplitManager({ splits, employees, branches, totalOrderAm
                             </select>
                             <button
                                 onClick={() => removeSplit(index)}
-                                className="p-1.5 text-slate-300 hover:text-rose-600 transition-colors bg-white border border-slate-100 rounded shadow-sm shrink-0"
+                                className="p-1.5 text-slate-300 hover:text-rose-600 transition-colors bg-white border border-slate-100 rounded shadow-sm shrink-0 cursor-pointer"
                             >
                                 <Trash2 size={12} />
                             </button>
                         </div>
 
                         {/* Row 2: Employee */}
-                        <select
-                            value={split.employeeId}
-                            onChange={(e) => updateSplit(index, 'employeeId', e.target.value)}
-                            className="w-full bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-rose-500 rounded p-1.5 text-xs"
-                        >
-                            <option value="">Chọn Nhân viên...</option>
-                            {employees
-                                .filter(emp => !split.branchId || emp.branchId === split.branchId)
-                                .map(emp => (
-                                    <option key={emp.id} value={emp.id}>{emp.fullName}</option>
-                                ))}
-                        </select>
+                        <EmployeeSearchSelector
+                            employees={employees.filter(emp => !split.branchId || emp.branchId === split.branchId)}
+                            selectedId={split.employeeId}
+                            placeholder="Chọn Nhân viên..."
+                            showFee={false}
+                            triggerClassName="bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-rose-500 rounded p-1.5 text-xs text-slate-700 font-bold"
+                            onSelect={(empId) => {
+                                const emp = employees.find(e => e.id === empId);
+                                if (emp && emp.branchId) {
+                                    // Auto update branch if employee has branch
+                                    const newSplits = [...splits];
+                                    newSplits[index] = {
+                                        ...newSplits[index],
+                                        employeeId: empId,
+                                        branchId: emp.branchId
+                                    };
+                                    onChange(newSplits);
+                                } else {
+                                    updateSplit(index, 'employeeId', empId);
+                                }
+                            }}
+                        />
 
                         {/* Row 3: Amount & Percent */}
                         <div className="flex items-center gap-2">
@@ -101,10 +112,10 @@ export default function SplitManager({ splits, employees, branches, totalOrderAm
                                 <span className="text-[8px] text-slate-400 font-bold block uppercase tracking-wider">Doanh số</span>
                                 <input
                                     type="text"
-                                    value={formatNumber(split.splitAmount)}
+                                    value={split.splitAmount === 0 ? '' : formatNumber(split.splitAmount)}
                                     onChange={(e) => updateSplit(index, 'splitAmount', parseNumber(e.target.value))}
                                     className="w-full border-none p-0 text-xs font-bold text-slate-700 focus:ring-0 focus:outline-none bg-transparent"
-                                    placeholder="0"
+                                    placeholder="Doanh số..."
                                 />
                             </div>
                             <div className="text-[9px] text-slate-400 font-medium whitespace-nowrap">

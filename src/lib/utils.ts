@@ -13,7 +13,7 @@ export function formatCurrency(value: number) {
 }
 
 export const formatNumber = (val: number | null | undefined) => {
-    if (!val && val !== 0) return '';
+    if (!val) return '';
     return new Intl.NumberFormat('vi-VN').format(val);
 };
 

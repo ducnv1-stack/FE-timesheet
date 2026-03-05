@@ -13,6 +13,7 @@ import {
     PieChart as PieChartIcon, X
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils'; // Ensure this exists or reimplement locally if simpler
+import KPIPeriodTrend from '@/components/dashboard/KPIPeriodTrend';
 
 const formatLocalDate = (date: Date): string => {
     const y = date.getFullYear();
@@ -40,7 +41,13 @@ export default function DashboardPage() {
         }
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
-        fetchDashboardData(parsedUser.id, startDate, endDate);
+
+        // Sử dụng debounce để tránh load liên tục khi người dùng đổi tháng ở date picker
+        const timer = setTimeout(() => {
+            fetchDashboardData(parsedUser.id, startDate, endDate);
+        }, 500); // Đợi 500ms sau khi ngừng thao tác mới load
+
+        return () => clearTimeout(timer);
     }, [startDate, endDate]);
 
     const fetchDashboardData = async (userId: string, start: string, end: string) => {
@@ -64,8 +71,8 @@ export default function DashboardPage() {
 
         switch (range) {
             case 'today':
-                start = new Date(now.setHours(0, 0, 0, 0));
-                end = new Date(now.setHours(23, 59, 59, 999));
+                start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
                 break;
             case 'week':
                 const first = now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1); // Monday
@@ -93,7 +100,7 @@ export default function DashboardPage() {
         router.push('/login');
     };
 
-    if (loading) return (
+    if (loading && !data) return (
         <div className="min-h-screen flex items-center justify-center bg-rose-50/50">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-rose-600"></div>
         </div>
@@ -131,7 +138,7 @@ export default function DashboardPage() {
                             <button
                                 key={btn.val}
                                 onClick={() => setQuickRange(btn.val as any)}
-                                className="px-2 md:px-3 py-1.5 text-[10px] font-black uppercase tracking-tight rounded-xl transition-all hover:bg-white hover:shadow-sm text-slate-500 hover:text-rose-600"
+                                className="px-2 md:px-3 py-1.5 text-[10px] font-black uppercase tracking-tight rounded-xl transition-all hover:bg-white hover:shadow-sm text-slate-500 hover:text-rose-600 cursor-pointer"
                             >
                                 {btn.label}
                             </button>
@@ -158,9 +165,9 @@ export default function DashboardPage() {
                     </div>
 
                     <button
-                        onClick={() => fetchDashboardData(user.id, startDate, endDate)}
-                        className="p-2.5 bg-rose-600 text-white rounded-2xl hover:bg-rose-700 transition-all shadow-lg shadow-rose-200 hover:scale-105 active:scale-95 group"
-                        title="Làm mới dữ liệu"
+                        onClick={() => setQuickRange('month')}
+                        className="p-2.5 bg-rose-600 text-white rounded-2xl hover:bg-rose-700 transition-all shadow-lg shadow-rose-200 hover:scale-105 active:scale-95 group cursor-pointer"
+                        title="Reset về tháng này"
                     >
                         <Clock size={18} className="group-hover:rotate-12 transition-transform" />
                     </button>
@@ -224,7 +231,7 @@ function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, us
                         <p className="text-[10px] font-black text-slate-400 uppercase">Doanh số hoàn thành</p>
                     </div>
                     <p className="text-lg font-black text-slate-800">{formatCurrency(data.totalRevenue)}</p>
-                    <p className="text-[9px] text-slate-400 mt-0.5">{data.totalOrders || 0} đơn đã xác nhận</p>
+                    <p className="text-[9px] text-slate-400 mt-0.5">{data.orderCount || 0} đơn đã xác nhận</p>
                 </div>
                 <div className="p-3 bg-white rounded-2xl border border-slate-100 shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
@@ -332,10 +339,11 @@ function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, us
                                 <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} />
                                 <YAxis fontSize={10} tickLine={false} axisLine={false} tickFormatter={(val) => `${(val / 1000000).toFixed(0)}tr`} />
                                 <Tooltip
-                                    formatter={(value: any) => formatCurrency(value)}
+                                    labelFormatter={(label) => `Chi nhánh: ${label}`}
+                                    formatter={(value: any) => [formatCurrency(value), "Doanh thu"]}
                                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                                 />
-                                <Bar dataKey="revenue" fill="#be123c" radius={[6, 6, 0, 0]} barSize={45} />
+                                <Bar name="Doanh thu" dataKey="revenue" fill="#be123c" radius={[6, 6, 0, 0]} barSize={45} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
@@ -421,7 +429,16 @@ function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, us
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                 <XAxis dataKey="date" fontSize={9} tickLine={false} axisLine={false} tickFormatter={(val) => val.split('-').slice(1).reverse().join('/')} />
                                 <YAxis fontSize={9} tickLine={false} axisLine={false} tickFormatter={(val) => `${(val / 1000000).toFixed(0)}tr`} />
-                                <Tooltip formatter={(value: any) => formatCurrency(value)} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
+                                <Tooltip
+                                    labelFormatter={(label) => {
+                                        if (!label) return '';
+                                        const parts = label.split('-');
+                                        if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                                        return label;
+                                    }}
+                                    formatter={(value: any) => [formatCurrency(value), "Doanh thu"]}
+                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                />
                                 <Line type="monotone" dataKey="revenue" stroke="#e11d48" strokeWidth={2} dot={{ r: 2.5, fill: '#fff', strokeWidth: 2 }} activeDot={{ r: 5 }} />
                             </LineChart>
                         </ResponsiveContainer>
@@ -493,28 +510,31 @@ function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, us
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="border-b border-slate-50">
-                                    <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-wider">Chi nhánh</th>
-                                    <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-wider text-right">Doanh thu</th>
-                                    <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Đơn hàng</th>
-                                    <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Tỷ lệ giá thấp</th>
-                                    <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Chờ khớp tiền</th>
-                                    <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Chờ trả góp</th>
+                                <tr className="border-b border-slate-50 whitespace-nowrap">
+                                    <th className="pb-3 pr-6 text-[10px] font-black text-slate-400 uppercase tracking-wider text-left">Chi nhánh</th>
+                                    <th className="pb-3 pr-6 text-[10px] font-black text-slate-400 uppercase tracking-wider text-right">Doanh thu</th>
+                                    <th className="pb-3 pr-6 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Đơn hàng</th>
+                                    <th className="pb-3 pr-6 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Tỷ lệ giá thấp</th>
+                                    <th className="pb-3 pr-6 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Chờ khớp tiền</th>
+                                    <th className="pb-3 pr-6 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Chờ trả góp</th>
                                     <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Hóa đơn</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">
                                 {data.branchDetails?.map((branch: any, i: number) => (
-                                    <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                                        <td className="py-3 text-xs font-black text-slate-700">{branch.name}</td>
-                                        <td className="py-3 text-xs font-black text-emerald-600 text-right">{formatCurrency(branch.revenue)}</td>
-                                        <td className="py-3 text-xs font-bold text-slate-600 text-center">{branch.orderCount}</td>
-                                        <td className="py-3 text-center">
+                                    <tr key={i} className="hover:bg-slate-50/50 transition-colors whitespace-nowrap">
+                                        <td className="py-3 pr-6 text-xs font-black text-slate-700 text-left">{branch.name}</td>
+                                        <td className="py-3 pr-6 text-xs font-black text-emerald-600 text-right">{formatCurrency(branch.revenue)}</td>
+                                        <td className="py-3 pr-6 text-xs font-bold text-slate-600 text-center">
+                                            {branch.totalOrders || branch.orderCount}
+                                            <p className="text-[8px] text-slate-400 -mt-1">({branch.orderCount} đã xác nhận)</p>
+                                        </td>
+                                        <td className="py-3 pr-6 text-center">
                                             <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${branch.lowPriceRatio > 15 ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'}`}>
                                                 {branch.lowPriceRatio}%
                                             </span>
                                         </td>
-                                        <td className="py-3 text-center">
+                                        <td className="py-3 pr-6 text-center">
                                             {branch.unconfirmedOrders > 0 ? (
                                                 <span
                                                     onClick={() => router.push(`/orders?paymentStatus=pending&excludeInstallment=true&branchId=${branch.id}&startDate=${startDate}&endDate=${endDate}`)}
@@ -526,7 +546,7 @@ function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, us
                                                 <CheckCircle size={14} className="text-emerald-500 mx-auto" />
                                             )}
                                         </td>
-                                        <td className="py-3 text-center">
+                                        <td className="py-3 pr-6 text-center">
                                             {branch.pendingInstallmentOrders > 0 ? (
                                                 <span
                                                     onClick={() => router.push(`/orders?tab=installment&paymentStatus=pending&branchId=${branch.id}&startDate=${startDate}&endDate=${endDate}`)}
@@ -885,7 +905,16 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                 <XAxis dataKey="date" fontSize={9} tickLine={false} axisLine={false} tickFormatter={(val) => val.split('-').slice(1).reverse().join('/')} />
                                 <YAxis fontSize={9} tickLine={false} axisLine={false} tickFormatter={(val) => `${(val / 1000000).toFixed(0)}tr`} />
-                                <Tooltip formatter={(value: any) => formatCurrency(value)} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
+                                <Tooltip
+                                    labelFormatter={(label) => {
+                                        if (!label) return '';
+                                        const parts = label.split('-');
+                                        if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                                        return label;
+                                    }}
+                                    formatter={(value: any) => [formatCurrency(value), "Doanh thu"]}
+                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                />
                                 <Line type="monotone" dataKey="revenue" stroke="#e11d48" strokeWidth={2} dot={{ r: 2.5, fill: '#fff', strokeWidth: 2 }} activeDot={{ r: 5 }} />
                             </LineChart>
                         </ResponsiveContainer>
@@ -1290,6 +1319,9 @@ function SaleDashboard({ data, startDate, endDate }: { data: any, startDate: str
                 </div>
             </div>
 
+            {/* KPI Period Trend */}
+            <KPIPeriodTrend periodStats={data.periodStats} />
+
             <div className="grid grid-cols-2 gap-3">
                 <button
                     onClick={() => window.location.href = '/orders/new'}
@@ -1325,10 +1357,11 @@ function SaleDashboard({ data, startDate, endDate }: { data: any, startDate: str
 
                 <div className="p-5 space-y-6">
                     {/* Key Income Metrics */}
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
                         <div className="p-3 bg-slate-50/50 rounded-2xl border border-slate-100">
-                            <p className="text-[9px] font-black text-slate-400 uppercase mb-0.5">Số đơn hàng</p>
-                            <p className="text-lg font-black text-slate-900">{data.orderCount || 0}</p>
+                            <p className="text-[9px] font-black text-slate-400 uppercase mb-0.5">Tổng đơn hàng</p>
+                            <p className="text-lg font-black text-slate-900">{data.salesOrderCount || data.orderCount || 0}</p>
+                            <p className="text-[8px] text-slate-400 -mt-0.5">Trong kỳ báo cáo</p>
                         </div>
                         <div className="p-3 bg-slate-50/50 rounded-2xl border border-slate-100">
                             <p className="text-[9px] font-black text-slate-400 uppercase mb-0.5">Lương cơ bản</p>
@@ -1341,6 +1374,12 @@ function SaleDashboard({ data, startDate, endDate }: { data: any, startDate: str
                         <div className="p-3 bg-slate-50/50 rounded-2xl border border-slate-100">
                             <p className="text-[9px] font-black text-slate-400 uppercase mb-0.5">Thưởng nóng</p>
                             <p className="text-lg font-black text-rose-600">{formatCurrency(data.hotBonus || 0)}</p>
+                        </div>
+                        <div className="p-3 bg-slate-50/50 rounded-2xl border border-slate-100">
+                            <p className="text-[9px] font-black text-slate-400 uppercase mb-0.5">Thưởng KPI kỳ</p>
+                            <p className={`text-lg font-black ${(data.periodBonus || 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                {formatCurrency(data.periodBonus || 0)}
+                            </p>
                         </div>
                         <div className="p-3 bg-slate-50/50 rounded-2xl border border-slate-100">
                             <p className="text-[9px] font-black text-slate-400 uppercase mb-0.5">Tiền Ship</p>
@@ -1399,7 +1438,7 @@ function SaleDashboard({ data, startDate, endDate }: { data: any, startDate: str
                                     <div className="text-right">
                                         <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">Tổng thu nhập</p>
                                         <p className="text-lg font-black text-emerald-400">
-                                            {formatCurrency((data.baseSalary || 0) + (data.totalCommission || 0) + (data.hotBonus || 0) + (data.shippingFees || 0) + (data.performance?.actualReward || 0))}
+                                            {formatCurrency(data.netIncome || 0)}
                                         </p>
                                     </div>
                                 </div>

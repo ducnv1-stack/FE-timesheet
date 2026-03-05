@@ -71,6 +71,7 @@ export default function OrdersPage() {
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [tabCounts, setTabCounts] = useState<any>({ all: 0, created: 0, assigned: 0, installment: 0, invoice: 0 });
     const [refreshing, setRefreshing] = useState(false);
+    const [showMobileFilters, setShowMobileFilters] = useState(false);
 
     const { error: toastError, success } = useToast();
     const router = useRouter();
@@ -447,7 +448,7 @@ export default function OrdersPage() {
             <div className="space-y-6">
                 <button
                     onClick={() => setSelectedOrder(null)}
-                    className="flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors font-medium print:hidden"
+                    className="flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors font-medium print:hidden cursor-pointer"
                 >
                     <ArrowLeft size={18} /> Quay lại danh sách
                 </button>
@@ -479,17 +480,46 @@ export default function OrdersPage() {
             </div>
 
             {/* Filters Section */}
-            <div className="bg-white p-2.5 rounded-xl shadow-sm border border-slate-100 space-y-2 overflow-x-auto scrollbar-hide">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 xl:grid-cols-7 gap-1.5 items-center min-w-max lg:min-w-0">
-                    {/* Search Search */}
-                    <div className="relative">
+            <div className="bg-white p-2.5 rounded-xl shadow-sm border border-slate-100 space-y-2">
+                {/* Mobile Toggle & Search */}
+                <div className="flex lg:hidden items-center gap-2">
+                    <div className="relative flex-1">
                         <Search className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${searchTerm ? 'text-rose-500' : 'text-slate-400'}`} size={14} />
                         <input
                             type="text"
                             placeholder="Tìm khách, SĐT..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className={`w-full pl-8 pr-2 py-1 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none transition-all text-[10.5px] font-medium ${searchTerm ? 'border-rose-300' : 'border-slate-200'}`}
+                            className={`w-full pl-8 pr-2 py-1.5 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none transition-all text-[11px] font-bold cursor-pointer ${searchTerm ? 'border-rose-300' : 'border-slate-200'}`}
+                        />
+                    </div>
+                    <button
+                        onClick={() => setShowMobileFilters(!showMobileFilters)}
+                        className={cn(
+                            "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all border shrink-0 cursor-pointer",
+                            showMobileFilters || statusFilter !== 'all' || timeFilter !== 'all' || paymentMethodFilter !== 'all' || paymentStatusFilter !== 'all' || invoiceStatusFilter !== 'all' || deliveryTypeFilter !== 'all' || selectedBranchId !== 'all' || selectedEmployeeId !== 'all'
+                                ? "bg-rose-600 text-white border-rose-600 shadow-md scale-105"
+                                : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                        )}
+                    >
+                        <Filter size={14} className={cn(showMobileFilters ? "animate-pulse" : "")} />
+                        {showMobileFilters ? "Đóng" : "Bộ lọc"}
+                    </button>
+                </div>
+
+                <div className={cn(
+                    "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 xl:grid-cols-7 gap-1.5 items-center transition-all duration-300 lg:min-w-0 lg:opacity-100 lg:max-h-none",
+                    showMobileFilters ? "max-h-[1000px] opacity-100 mt-2" : "max-h-0 opacity-0 overflow-hidden lg:max-h-none lg:opacity-100"
+                )}>
+                    {/* Search Search (Desktop Only) */}
+                    <div className="relative hidden lg:block">
+                        <Search className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${searchTerm ? 'text-rose-500' : 'text-slate-400'}`} size={14} />
+                        <input
+                            type="text"
+                            placeholder="Tìm khách, SĐT..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className={`w-full pl-8 pr-2 py-1 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none transition-all text-[10.5px] font-medium cursor-pointer ${searchTerm ? 'border-rose-300' : 'border-slate-200'}`}
                         />
                     </div>
 
@@ -499,7 +529,7 @@ export default function OrdersPage() {
                         <select
                             value={statusFilter}
                             onChange={(e: any) => setStatusFilter(e.target.value)}
-                            className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium ${statusFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                            className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${statusFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
                         >
                             <option value="all">Tất cả trạng thái</option>
                             <option value="pending">⏳ Chờ giao</option>
@@ -522,7 +552,7 @@ export default function OrdersPage() {
                                         setEndDate('');
                                     }
                                 }}
-                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium ${timeFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${timeFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
                             >
                                 <option value="all">Thời gian: Tất cả</option>
                                 <option value="today">Hôm nay</option>
@@ -560,7 +590,7 @@ export default function OrdersPage() {
                                 setPaymentMethodFilter(e.target.value);
                                 setExcludeInstallment(false);
                             }}
-                            className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium ${paymentMethodFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                            className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${paymentMethodFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
                         >
                             <option value="all">PTTT: Tất cả</option>
                             <option value="CASH">💵 Tiền mặt</option>
@@ -580,7 +610,7 @@ export default function OrdersPage() {
                                 setPaymentStatusFilter(e.target.value);
                                 setExcludeInstallment(false);
                             }}
-                            className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium ${paymentStatusFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                            className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${paymentStatusFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
                         >
                             <option value="all">Thanh toán: Tất cả</option>
                             <option value="confirmed">✅ Đã thanh toán đủ</option>
@@ -594,7 +624,7 @@ export default function OrdersPage() {
                         <select
                             value={invoiceStatusFilter}
                             onChange={(e: any) => setInvoiceStatusFilter(e.target.value)}
-                            className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium ${invoiceStatusFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                            className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${invoiceStatusFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
                         >
                             <option value="all">Hóa đơn: Tất cả</option>
                             <option value="pending">⏳ Chưa xuất HĐ</option>
@@ -608,7 +638,7 @@ export default function OrdersPage() {
                         <select
                             value={deliveryTypeFilter}
                             onChange={(e: any) => setDeliveryTypeFilter(e.target.value)}
-                            className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium ${deliveryTypeFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                            className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${deliveryTypeFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
                         >
                             <option value="all">Lái xe: Tất cả</option>
                             <option value="company">🏢 Xe công ty</option>
@@ -624,7 +654,7 @@ export default function OrdersPage() {
                                 value={selectedBranchId}
                                 onChange={(e) => setSelectedBranchId(e.target.value)}
                                 disabled={isManager}
-                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium ${selectedBranchId !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'} ${isManager ? 'opacity-70 cursor-not-allowed bg-slate-100' : ''}`}
+                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${selectedBranchId !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'} ${isManager ? 'opacity-70 cursor-not-allowed bg-slate-100' : ''}`}
                             >
                                 {isGlobalRole && <option value="all">Tất cả chi nhánh</option>}
                                 {branches.map(b => (
@@ -639,8 +669,8 @@ export default function OrdersPage() {
                                 className={cn(
                                     "w-full flex items-center justify-center gap-1.5 px-3 h-[28px] py-0 rounded-lg text-[10.5px] font-bold transition-all border",
                                     showLowPriceOnly
-                                        ? "bg-amber-100 text-amber-700 border-amber-300 shadow-sm"
-                                        : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100"
+                                        ? "bg-amber-100 text-amber-700 border-amber-300 shadow-sm cursor-pointer"
+                                        : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100 cursor-pointer"
                                 )}
                             >
                                 GIÁ MIN
@@ -655,7 +685,7 @@ export default function OrdersPage() {
                             <select
                                 value={selectedEmployeeId}
                                 onChange={(e) => setSelectedEmployeeId(e.target.value)}
-                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium ${selectedEmployeeId !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${selectedEmployeeId !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
                             >
                                 <option value="all">Tất cả nhân viên</option>
                                 {employees
@@ -676,8 +706,8 @@ export default function OrdersPage() {
                                 className={cn(
                                     "w-full flex items-center justify-center gap-1.5 px-3 h-[28px] py-0 rounded-lg text-[10.5px] font-bold transition-all border",
                                     showLowPriceOnly
-                                        ? "bg-amber-100 text-amber-700 border-amber-300 shadow-sm"
-                                        : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100"
+                                        ? "bg-amber-100 text-amber-700 border-amber-300 shadow-sm cursor-pointer"
+                                        : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100 cursor-pointer"
                                 )}
                             >
                                 GIÁ MIN
@@ -685,18 +715,29 @@ export default function OrdersPage() {
                         </div>
                     )}
 
-                    {/* Reset Filter Button */}
-                    <div className="relative">
+                    {/* Reset Filter Button (Inside Mobile Menu) */}
+                    <div className="relative lg:hidden">
                         <button
                             onClick={resetFilters}
-                            className="w-full flex items-center justify-center gap-1.5 px-3 h-[28px] py-0 rounded-lg text-[10.5px] font-bold transition-all border bg-rose-50 text-rose-500 border-rose-200 hover:bg-rose-500 hover:text-white"
+                            className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all border bg-rose-50 text-rose-500 border-rose-200 hover:bg-rose-500 hover:text-white cursor-pointer"
+                            title="Xoá toàn bộ bộ lọc"
+                        >
+                            ✕ Reset
+                        </button>
+                    </div>
+
+                    {/* Reset Filter Button (Desktop Only) */}
+                    <div className="relative hidden lg:block">
+                        <button
+                            onClick={resetFilters}
+                            className="w-full flex items-center justify-center gap-1.5 px-3 h-[28px] py-0 rounded-lg text-[10.5px] font-bold transition-all border bg-rose-50 text-rose-500 border-rose-200 hover:bg-rose-500 hover:text-white cursor-pointer"
                             title="Xoá toàn bộ bộ lọc"
                         >
                             ✕ Reset
                         </button>
                     </div>
                 </div>
-            </div>
+            </div >
 
             {/* Tabs Navigation */}
             <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
@@ -704,10 +745,10 @@ export default function OrdersPage() {
                     <button
                         onClick={() => { setActiveTab('all'); setExcludeInstallment(false); }}
                         className={cn(
-                            "flex-1 min-w-0 px-2 py-1.5 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1",
+                            "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5",
                             activeTab === 'all'
-                                ? "text-rose-600 bg-rose-50"
-                                : "text-slate-600 hover:bg-slate-50"
+                                ? "text-rose-600 bg-rose-50 cursor-pointer"
+                                : "text-slate-600 hover:bg-slate-50 cursor-pointer"
                         )}
                     >
                         <span className="truncate min-w-0">Tất cả</span>
@@ -724,10 +765,10 @@ export default function OrdersPage() {
                     <button
                         onClick={() => { setActiveTab('created'); setExcludeInstallment(false); }}
                         className={cn(
-                            "flex-1 min-w-0 px-2 py-1.5 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1",
+                            "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5",
                             activeTab === 'created'
-                                ? "text-emerald-600 bg-emerald-50"
-                                : "text-slate-600 hover:bg-slate-50"
+                                ? "text-emerald-600 bg-emerald-50 cursor-pointer"
+                                : "text-slate-600 hover:bg-slate-50 cursor-pointer"
                         )}
                     >
                         <span className="truncate min-w-0">Của tôi</span>
@@ -744,10 +785,10 @@ export default function OrdersPage() {
                     <button
                         onClick={() => { setActiveTab('assigned'); setExcludeInstallment(false); }}
                         className={cn(
-                            "flex-1 min-w-0 px-2 py-1.5 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1",
+                            "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5",
                             activeTab === 'assigned'
-                                ? "text-blue-600 bg-blue-50"
-                                : "text-slate-600 hover:bg-slate-50"
+                                ? "text-blue-600 bg-blue-50 cursor-pointer"
+                                : "text-slate-600 hover:bg-slate-50 cursor-pointer"
                         )}
                     >
                         <span className="truncate min-w-0">Được chia</span>
@@ -761,61 +802,65 @@ export default function OrdersPage() {
                             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"></div>
                         )}
                     </button>
-                    {(isGlobalRole || isManager) && (
-                        <>
-                            <button
-                                onClick={() => { setActiveTab('installment'); setExcludeInstallment(false); }}
-                                className={cn(
-                                    "flex-1 min-w-0 px-2 py-1.5 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1",
-                                    activeTab === 'installment'
-                                        ? "text-orange-600 bg-orange-50"
-                                        : "text-slate-600 hover:bg-slate-50"
-                                )}
-                            >
-                                <span className="truncate min-w-0">Trả góp</span>
-                                <span className={cn(
-                                    "px-1.5 py-0.5 rounded-full text-[10px] font-black flex-none",
-                                    activeTab === 'installment' ? "bg-orange-600 text-white" : "bg-slate-200 text-slate-600"
-                                )}>
-                                    {installmentCount > 999 ? '999+' : installmentCount}
-                                </span>
-                                {activeTab === 'installment' && (
-                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-600"></div>
-                                )}
-                            </button>
-                            <button
-                                onClick={() => { setActiveTab('invoice'); setExcludeInstallment(false); }}
-                                className={cn(
-                                    "flex-1 min-w-0 px-2 py-1.5 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1",
-                                    activeTab === 'invoice'
-                                        ? "text-indigo-600 bg-indigo-50"
-                                        : "text-slate-600 hover:bg-slate-50"
-                                )}
-                            >
-                                <span className="truncate min-w-0">Xuất hóa đơn</span>
-                                <span className={cn(
-                                    "px-1.5 py-0.5 rounded-full text-[10px] font-black flex-none",
-                                    activeTab === 'invoice' ? "bg-indigo-600 text-white" : "bg-slate-200 text-slate-600"
-                                )}>
-                                    {invoiceCount > 999 ? '999+' : invoiceCount}
-                                </span>
-                                {activeTab === 'invoice' && (
-                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600"></div>
-                                )}
-                            </button>
-                        </>
-                    )}
-                </div>
-            </div>
+                    {
+                        (isGlobalRole || isManager) && (
+                            <>
+                                <button
+                                    onClick={() => { setActiveTab('installment'); setExcludeInstallment(false); }}
+                                    className={cn(
+                                        "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5",
+                                        activeTab === 'installment'
+                                            ? "text-orange-600 bg-orange-50 cursor-pointer"
+                                            : "text-slate-600 hover:bg-slate-50 cursor-pointer"
+                                    )}
+                                >
+                                    <span className="truncate min-w-0">Trả góp</span>
+                                    <span className={cn(
+                                        "px-1.5 py-0.5 rounded-full text-[10px] font-black flex-none",
+                                        activeTab === 'installment' ? "bg-orange-600 text-white" : "bg-slate-200 text-slate-600"
+                                    )}>
+                                        {installmentCount > 999 ? '999+' : installmentCount}
+                                    </span>
+                                    {activeTab === 'installment' && (
+                                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-600"></div>
+                                    )}
+                                </button >
+                                <button
+                                    onClick={() => { setActiveTab('invoice'); setExcludeInstallment(false); }}
+                                    className={cn(
+                                        "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5",
+                                        activeTab === 'invoice'
+                                            ? "text-indigo-600 bg-indigo-50 cursor-pointer"
+                                            : "text-slate-600 hover:bg-slate-50 cursor-pointer"
+                                    )}
+                                >
+                                    <span className="truncate min-w-0">Xuất hóa đơn</span>
+                                    <span className={cn(
+                                        "px-1.5 py-0.5 rounded-full text-[10px] font-black flex-none",
+                                        activeTab === 'invoice' ? "bg-indigo-600 text-white" : "bg-slate-200 text-slate-600"
+                                    )}>
+                                        {invoiceCount > 999 ? '999+' : invoiceCount}
+                                    </span>
+                                    {activeTab === 'invoice' && (
+                                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600"></div>
+                                    )}
+                                </button>
+                            </>
+                        )
+                    }
+                </div >
+            </div >
 
             {/* Order Table */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden relative">
+            < div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden relative" >
                 {/* Silent Loading Bar */}
-                {refreshing && (
-                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-slate-100 overflow-hidden z-20">
-                        <div className="h-full bg-rose-500 animate-[loading-bar_1.5s_infinite_linear]"></div>
-                    </div>
-                )}
+                {
+                    refreshing && (
+                        <div className="absolute top-0 left-0 right-0 h-[2px] bg-slate-100 overflow-hidden z-20">
+                            <div className="h-full bg-rose-500 animate-[loading-bar_1.5s_infinite_linear]"></div>
+                        </div>
+                    )
+                }
                 <div className="overflow-x-auto">
                     <table className="w-full min-w-[1200px] text-left border-collapse">
                         <thead>
@@ -998,7 +1043,7 @@ export default function OrdersPage() {
                                                                 {isAccountant && (
                                                                     <button
                                                                         onClick={() => handleConfirmInvoice(order.id)}
-                                                                        className="mt-0.5 px-1 py-0.5 bg-blue-600 text-white rounded text-[8px] font-black uppercase hover:bg-blue-700 transition-all active:scale-95 shadow-sm"
+                                                                        className="mt-0.5 px-1 py-0.5 bg-blue-600 text-white rounded text-[8px] font-black uppercase hover:bg-blue-700 transition-all active:scale-95 shadow-sm cursor-pointer"
                                                                     >
                                                                         XN HĐ
                                                                     </button>
@@ -1083,7 +1128,7 @@ export default function OrdersPage() {
                                                             {(isGlobalRole || isSale || (isDriver && isOrderAssignedToUser(order))) ? (
                                                                 <button
                                                                     onClick={() => handleConfirmDelivery(order.id)}
-                                                                    className="px-1 py-0.5 bg-emerald-600 text-white rounded text-[8px] font-black uppercase hover:bg-emerald-700 transition-all active:scale-95 shadow-sm whitespace-nowrap"
+                                                                    className="px-1 py-0.5 bg-emerald-600 text-white rounded text-[8px] font-black uppercase hover:bg-emerald-700 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
                                                                 >
                                                                     XÁC NHẬN XONG
                                                                 </button>
@@ -1110,8 +1155,8 @@ export default function OrdersPage() {
                                                         </div>
                                                     ) : (
                                                         <div className="flex flex-col items-center gap-0.5">
-                                                            <Clock size={14} className="text-slate-400" />
-                                                            <span className="px-1 py-0.5 rounded text-[8px] font-black bg-slate-50 text-slate-400 border border-slate-200 whitespace-nowrap uppercase italic">
+                                                            <Clock size={14} className="text-slate-400 cursor-pointer" />
+                                                            <span className="px-1 py-0.5 rounded text-[8px] font-black bg-slate-50 text-slate-400 border border-slate-200 whitespace-nowrap uppercase italic cursor-pointer">
                                                                 Chờ
                                                             </span>
                                                         </div>
@@ -1151,7 +1196,7 @@ export default function OrdersPage() {
                                                                 {isGlobalRole ? (
                                                                     <button
                                                                         onClick={() => handleConfirmPayment(order.id)}
-                                                                        className="px-1.5 py-0.5 bg-rose-600 text-white rounded text-[8px] font-black hover:bg-rose-700 transition-all active:scale-95 shadow-sm whitespace-nowrap uppercase"
+                                                                        className="px-1.5 py-0.5 bg-rose-600 text-white rounded text-[8px] font-black hover:bg-rose-700 transition-all active:scale-95 shadow-sm whitespace-nowrap uppercase cursor-pointer"
                                                                     >
                                                                         Xác nhận đủ
                                                                     </button>
@@ -1169,7 +1214,7 @@ export default function OrdersPage() {
                                                 <div className="flex items-center justify-center gap-1 flex-nowrap">
                                                     <button
                                                         onClick={() => setSelectedOrder(order)}
-                                                        className="inline-flex items-center gap-1 px-1.5 py-1 bg-slate-800 text-white rounded text-[10px] font-black hover:bg-slate-700 transition-all active:scale-95 shadow-sm whitespace-nowrap"
+                                                        className="inline-flex items-center gap-1 px-1.5 py-1 bg-slate-800 text-white rounded text-[10px] font-black hover:bg-slate-700 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
                                                     >
                                                         <FileText size={12} /> XEM
                                                     </button>
@@ -1179,7 +1224,7 @@ export default function OrdersPage() {
                                                                 setDeleteOrderId(order.id);
                                                                 setShowDeleteConfirm(true);
                                                             }}
-                                                            className="p-1 text-rose-500 hover:bg-rose-50 rounded transition-colors whitespace-nowrap"
+                                                            className="p-1 text-rose-500 hover:bg-rose-50 rounded transition-colors whitespace-nowrap cursor-pointer"
                                                         >
                                                             <Trash2 size={13} />
                                                         </button>
@@ -1193,64 +1238,66 @@ export default function OrdersPage() {
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </div >
 
             {/* Pagination UI */}
-            {!loading && totalPages > 1 && (
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 px-2 pb-10">
-                    <div className="text-[11px] text-slate-500 font-medium bg-white px-3 py-1.5 rounded-lg border border-slate-100 shadow-sm">
-                        Hiển thị <span className="font-bold text-slate-800">{(page - 1) * limit + 1}</span> - <span className="font-bold text-slate-800">{Math.min(page * limit, total)}</span> trong tổng số <span className="font-bold text-rose-600 font-mono">{total}</span> đơn hàng
-                    </div>
-
-                    <div className="flex items-center gap-1.5">
-                        <button
-                            onClick={() => setPage(p => Math.max(1, p - 1))}
-                            disabled={page === 1}
-                            className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
-                        >
-                            <ArrowLeft size={16} />
-                        </button>
-
-                        <div className="flex items-center gap-1 font-mono text-xs">
-                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                let pageNum;
-                                if (totalPages <= 5) {
-                                    pageNum = i + 1;
-                                } else if (page <= 3) {
-                                    pageNum = i + 1;
-                                } else if (page >= totalPages - 2) {
-                                    pageNum = totalPages - 4 + i;
-                                } else {
-                                    pageNum = page - 2 + i;
-                                }
-
-                                return (
-                                    <button
-                                        key={pageNum}
-                                        onClick={() => setPage(pageNum)}
-                                        className={cn(
-                                            "min-w-[32px] h-8 flex items-center justify-center rounded-lg border transition-all shadow-sm font-bold",
-                                            page === pageNum
-                                                ? "bg-rose-600 border-rose-600 text-white"
-                                                : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-                                        )}
-                                    >
-                                        {pageNum}
-                                    </button>
-                                );
-                            })}
+            {
+                !loading && totalPages > 1 && (
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 px-2 pb-10">
+                        <div className="text-[11px] text-slate-500 font-medium bg-white px-3 py-1.5 rounded-lg border border-slate-100 shadow-sm">
+                            Hiển thị <span className="font-bold text-slate-800">{(page - 1) * limit + 1}</span> - <span className="font-bold text-slate-800">{Math.min(page * limit, total)}</span> trong tổng số <span className="font-bold text-rose-600 font-mono">{total}</span> đơn hàng
                         </div>
 
-                        <button
-                            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                            disabled={page === totalPages}
-                            className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
-                        >
-                            <ArrowRight size={16} />
-                        </button>
+                        <div className="flex items-center gap-1.5">
+                            <button
+                                onClick={() => setPage(p => Math.max(1, p - 1))}
+                                disabled={page === 1}
+                                className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+                            >
+                                <ArrowLeft size={16} />
+                            </button>
+
+                            <div className="flex items-center gap-1 font-mono text-xs">
+                                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                    let pageNum;
+                                    if (totalPages <= 5) {
+                                        pageNum = i + 1;
+                                    } else if (page <= 3) {
+                                        pageNum = i + 1;
+                                    } else if (page >= totalPages - 2) {
+                                        pageNum = totalPages - 4 + i;
+                                    } else {
+                                        pageNum = page - 2 + i;
+                                    }
+
+                                    return (
+                                        <button
+                                            key={pageNum}
+                                            onClick={() => setPage(pageNum)}
+                                            className={cn(
+                                                "min-w-[32px] h-8 flex items-center justify-center rounded-lg border transition-all shadow-sm font-bold",
+                                                page === pageNum
+                                                    ? "bg-rose-600 border-rose-600 text-white cursor-pointer"
+                                                    : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 cursor-pointer"
+                                            )}
+                                        >
+                                            {pageNum}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            <button
+                                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                                disabled={page === totalPages}
+                                className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+                            >
+                                <ArrowRight size={16} />
+                            </button>
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             <ConfirmModal
                 isOpen={showDeleteConfirm}

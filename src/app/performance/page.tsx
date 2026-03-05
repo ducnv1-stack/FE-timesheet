@@ -163,7 +163,7 @@ export default function PerformancePage() {
                             <select
                                 value={month}
                                 onChange={(e) => setMonth(parseInt(e.target.value))}
-                                className="bg-transparent px-2 py-1.5 text-xs font-bold text-slate-700 outline-none"
+                                className="bg-transparent px-2 py-1.5 text-xs font-bold text-slate-700 outline-none cursor-pointer"
                             >
                                 {Array.from({ length: 12 }, (_, i) => (
                                     <option key={i + 1} value={i + 1}>Tháng {i + 1}</option>
@@ -172,7 +172,7 @@ export default function PerformancePage() {
                             <select
                                 value={year}
                                 onChange={(e) => setYear(parseInt(e.target.value))}
-                                className="bg-transparent px-2 py-1.5 text-xs font-bold text-slate-700 outline-none"
+                                className="bg-transparent px-2 py-1.5 text-xs font-bold text-slate-700 outline-none cursor-pointer"
                             >
                                 {Array.from({ length: new Date().getFullYear() - 2025 + 2 }, (_, i) => 2025 + i).map(y => (
                                     <option key={y} value={y}>Năm {y}</option>
@@ -182,7 +182,7 @@ export default function PerformancePage() {
 
                         <button
                             onClick={handleExportExcel}
-                            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-bold transition-all shadow-lg shadow-emerald-100 active:scale-95 whitespace-nowrap"
+                            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-bold transition-all shadow-lg shadow-emerald-100 active:scale-95 whitespace-nowrap cursor-pointer"
                         >
                             <FileSpreadsheet size={16} />
                             Xuất Excel

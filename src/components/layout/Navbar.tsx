@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { ChevronLeft } from 'lucide-react';
+import { Menu, ChevronLeft } from 'lucide-react';
 
-export default function Navbar() {
+export default function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
     const pathname = usePathname();
     const router = useRouter();
     const isLoginPage = pathname === '/login';
@@ -23,12 +23,18 @@ export default function Navbar() {
     return (
         <nav className="sticky top-0 z-30 w-full backdrop-blur-md bg-white/70 border-b border-slate-200/50 no-print">
             <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-                {/* Left side: Module Title or Page Name */}
-                <div className="flex items-center gap-3">
+                {/* Left side: Menu Toggle (Mobile) and Module Title */}
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={onMenuClick}
+                        className="lg:hidden p-2 -ml-2 hover:bg-slate-100 rounded-xl transition-all text-slate-500 hover:text-rose-600 focus:outline-none cursor-pointer"
+                    >
+                        <Menu size={22} strokeWidth={2.5} />
+                    </button>
                     {!isDashboard && (
                         <button
                             onClick={() => router.back()}
-                            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors"
+                            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
                         >
                             <ChevronLeft size={20} />
                         </button>

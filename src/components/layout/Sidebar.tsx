@@ -13,7 +13,9 @@ import {
     ChevronRight,
     ShoppingBag,
     ScrollText,
-    Users
+    Users,
+    Menu,
+    X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -110,16 +112,23 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         <aside
             className={cn(
                 "fixed top-0 left-0 h-full z-40 bg-white border-r border-slate-200 transition-all duration-300 no-print",
-                isCollapsed ? "w-20" : "w-64"
+                "lg:translate-x-0", // Always show on desktop
+                isCollapsed ? "-translate-x-full lg:w-20 lg:translate-x-0" : "translate-x-0 w-64 shadow-2xl lg:shadow-none"
             )}
         >
-            {/* Logo Section */}
-            <div className="h-16 flex items-center px-6 border-b border-slate-50">
-                {!isCollapsed ? (
-                    <img src="/logo.png" alt="Ohari Logo" className="h-8 w-auto object-contain" />
-                ) : (
-                    <div className="w-full flex justify-center">
-                        <img src="/favicon.png" alt="Logo" className="h-10 w-10 object-contain" />
+            {/* Header Section: Menu Button instead of Logo on Mobile/Collapsed */}
+            <div className="h-16 flex items-center px-4 border-b border-slate-50 justify-between gap-2 overflow-hidden">
+                <button
+                    onClick={onToggle}
+                    className="p-2 hover:bg-slate-100 rounded-xl transition-all text-slate-500 hover:text-rose-600 focus:outline-none cursor-pointer"
+                    title={isCollapsed ? "Mở menu" : "Thu gọn"}
+                >
+                    {isCollapsed ? <Menu size={24} strokeWidth={2.5} /> : <X size={24} strokeWidth={2.5} />}
+                </button>
+
+                {!isCollapsed && (
+                    <div className="flex-1 flex items-center gap-2 animate-in fade-in duration-500">
+                        <img src="/logo.png" alt="Ohari Logo" className="h-7 w-auto object-contain" />
                     </div>
                 )}
             </div>
@@ -168,10 +177,10 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     {!isCollapsed && <span className="font-medium text-sm">Đăng xuất</span>}
                 </button>
 
-                {/* Collapse Toggle */}
+                {/* Collapse Toggle (Desktop only) */}
                 <button
                     onClick={onToggle}
-                    className="absolute -right-3 top-[-30px] w-6 h-6 bg-white border border-slate-200 rounded-full flex items-center justify-center shadow-sm text-slate-400 hover:text-slate-600 hover:border-slate-300 transition-all cursor-pointer"
+                    className="absolute -right-3 top-[-30px] w-6 h-6 bg-white border border-slate-200 rounded-full hidden lg:flex items-center justify-center shadow-sm text-slate-400 hover:text-slate-600 hover:border-slate-300 transition-all cursor-pointer"
                 >
                     {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                 </button>

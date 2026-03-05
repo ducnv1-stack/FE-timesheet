@@ -37,7 +37,7 @@ export default function PaymentForm({ payments, totalOrderAmount, onChange }: Pa
                 <button
                     onClick={addPayment}
                     type="button"
-                    className="flex items-center gap-1 px-1.5 py-0.5 text-rose-700 hover:bg-rose-50 rounded text-[10px] font-bold border border-rose-200"
+                    className="flex items-center gap-1 px-1.5 py-0.5 text-rose-700 hover:bg-rose-50 rounded text-[10px] font-bold border border-rose-200 cursor-pointer"
                 >
                     <Plus size={12} /> Thêm
                 </button>
@@ -52,7 +52,7 @@ export default function PaymentForm({ payments, totalOrderAmount, onChange }: Pa
                                 <select
                                     value={payment.paymentMethod}
                                     onChange={(e) => updatePayment(index, 'paymentMethod', e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-rose-500 rounded p-1.5 text-xs font-medium truncate"
+                                    className="w-full bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-rose-500 rounded p-1.5 text-xs font-medium truncate cursor-pointer"
                                 >
                                     <option value="CASH">💵 Tiền mặt (CASH)</option>
                                     <option value="TRANSFER_COMPANY">🏢 Chuyển khoản Công ty (CORP)</option>
@@ -63,7 +63,7 @@ export default function PaymentForm({ payments, totalOrderAmount, onChange }: Pa
                             </div>
                             <button
                                 onClick={() => removePayment(index)}
-                                className="p-1.5 text-slate-300 hover:text-rose-600 transition-colors bg-white border border-slate-100 rounded shadow-sm shrink-0"
+                                className="p-1.5 text-slate-300 hover:text-rose-600 transition-colors bg-white border border-slate-100 rounded shadow-sm shrink-0 cursor-pointer"
                                 title="Xóa thanh toán"
                             >
                                 <Trash2 size={12} />
@@ -76,14 +76,14 @@ export default function PaymentForm({ payments, totalOrderAmount, onChange }: Pa
                                 type="date"
                                 value={payment.paidAt}
                                 onChange={(e) => updatePayment(index, 'paidAt', e.target.value)}
-                                className="w-full bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-rose-500 rounded p-1.5 text-[10px]"
+                                className="w-full bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-rose-500 rounded p-1.5 text-[10px] cursor-pointer"
                             />
                             <input
                                 type="text"
-                                value={formatNumber(payment.amount)}
+                                value={payment.amount === 0 ? '' : formatNumber(payment.amount)}
                                 onChange={(e) => updatePayment(index, 'amount', parseNumber(e.target.value))}
                                 className="w-full bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-rose-500 rounded p-1.5 text-xs text-right font-bold"
-                                placeholder="Số tiền"
+                                placeholder="Nhập số tiền..."
                             />
                         </div>
                     </div>

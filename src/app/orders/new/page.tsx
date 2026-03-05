@@ -11,6 +11,7 @@ import GiftGrid from '@/components/orders/GiftGrid';
 import SplitManager from '@/components/orders/SplitManager';
 import PaymentForm from '@/components/orders/PaymentForm';
 import AddressSelector from '@/components/orders/AddressSelector';
+import EmployeeSearchSelector from '@/components/orders/EmployeeSearchSelector';
 import { FullOrder, Product, Employee, Branch, Gift } from '@/types/order';
 
 
@@ -321,13 +322,13 @@ export default function NewOrderPage() {
                         Hóa đơn bán hàng
                     </h1>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 mb-6 text-xs">
+                    <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-x-6 gap-y-1 mb-6 text-sm">
                         <div className="grid grid-cols-[120px_1fr] items-center border-b border-slate-100 py-1">
                             <span className="font-bold text-slate-600">Chi nhánh:</span>
                             <select
                                 value={order.branchId}
                                 onChange={(e) => setOrder({ ...order, branchId: e.target.value })}
-                                className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900"
+                                className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 appearance-none print:appearance-none cursor-pointer"
                             >
                                 {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                             </select>
@@ -337,7 +338,7 @@ export default function NewOrderPage() {
                             <select
                                 value={order.staffCode || ''}
                                 onChange={(e) => setOrder({ ...order, staffCode: e.target.value })}
-                                className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900"
+                                className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 appearance-none print:appearance-none cursor-pointer"
                             >
                                 <option value="">Chọn NV...</option>
                                 {headerEmployees.map(emp => <option key={emp.id} value={emp.id}>{emp.fullName}</option>)}
@@ -349,7 +350,7 @@ export default function NewOrderPage() {
                                 type="date"
                                 value={order.orderDate}
                                 onChange={(e) => setOrder({ ...order, orderDate: e.target.value })}
-                                className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900"
+                                className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 cursor-pointer"
                             />
                         </div>
                         <div className="grid grid-cols-[120px_1fr] items-center border-b border-slate-100 py-1">
@@ -397,7 +398,7 @@ export default function NewOrderPage() {
                                 type="date"
                                 value={order.customerCardIssueDate || ''}
                                 onChange={(e) => setOrder({ ...order, customerCardIssueDate: e.target.value })}
-                                className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900"
+                                className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 cursor-pointer"
                             />
                         </div>
                         <div className="grid grid-cols-[120px_1fr] items-start border-b border-slate-100 py-2">
@@ -427,7 +428,7 @@ export default function NewOrderPage() {
                                             });
                                         }
                                     }}
-                                    className="bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[10px] font-bold text-slate-700 w-full outline-none focus:ring-1 focus:ring-rose-200"
+                                    className="bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[10px] font-bold text-slate-700 w-full outline-none focus:ring-1 focus:ring-rose-200 appearance-none print:appearance-none print:bg-transparent print:border-none print:p-0 print:text-[11px] cursor-pointer"
                                 >
                                     <option value="none">-- Không --</option>
                                     <option value="external">🚚 Lái xe ngoài (+0k)</option>
@@ -444,7 +445,7 @@ export default function NewOrderPage() {
                                             ) || [];
                                             setOrder({ ...order, deliveries: newDeliveries });
                                         }}
-                                        className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 w-full text-[11px]"
+                                        className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 w-full text-[11px] appearance-none print:appearance-none cursor-pointer"
                                     >
                                         <option value="">-- Chọn lái xe --</option>
                                         {allEmployees
@@ -461,10 +462,11 @@ export default function NewOrderPage() {
                         <div className="grid grid-cols-[120px_1fr] items-start border-b border-slate-100 py-2">
                             <span className="font-bold text-slate-600 mt-1">Người giao:</span>
                             <div className="space-y-1.5">
-                                <select
-                                    value={order.deliveries?.find(d => d.role === 'STAFF')?.driverId || ''}
-                                    onChange={(e) => {
-                                        const val = e.target.value;
+                                <EmployeeSearchSelector
+                                    employees={allEmployees.filter(e => e.department !== 'Lái xe' && e.position !== 'driver' && !e.isInternalDriver)}
+                                    selectedId={order.deliveries?.find(d => d.role === 'STAFF')?.driverId || ''}
+                                    staffCode={order.staffCode || ''}
+                                    onSelect={(val) => {
                                         const otherDeliveries = order.deliveries?.filter(d => d.role !== 'STAFF') || [];
 
                                         if (!val) {
@@ -488,20 +490,7 @@ export default function NewOrderPage() {
                                             deliveries: [...otherDeliveries, { category, driverId: val, role: 'STAFF' }]
                                         });
                                     }}
-                                    className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 w-full text-[11px]"
-                                >
-                                    <option value="">-- Không --</option>
-                                    {allEmployees
-                                        .filter(e => e.department !== 'Lái xe' && e.position !== 'driver' && !e.isInternalDriver)
-                                        .map(emp => {
-                                            let feeLabel = "(+70k)";
-                                            if (emp.id === order.staffCode) feeLabel = "(+100k)";
-                                            else if (emp.position === 'sale' || emp.position === 'NVBH' || emp.department === 'Phòng KD') feeLabel = "(+200k)";
-
-                                            return <option key={emp.id} value={emp.id}>{emp.fullName} {feeLabel}</option>;
-                                        })
-                                    }
-                                </select>
+                                />
                             </div>
                         </div>
                     </div>
@@ -522,16 +511,16 @@ export default function NewOrderPage() {
                         </div>
                     </div>
 
-                    <div className="flex flex-col items-end space-y-1 text-xs">
-                        <div className="grid grid-cols-[120px_160px] border-b border-slate-200 py-1">
+                    <div className="flex flex-col items-end space-y-1 text-sm print:break-inside-avoid">
+                        <div className="grid grid-cols-[120px_160px] print:grid-cols-[140px_180px] border-b border-slate-200 py-1">
                             <span className="font-bold text-slate-600">Tổng cộng:</span>
                             <span className="text-right font-black text-sm text-slate-900">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalProductAmount)}</span>
                         </div>
-                        <div className="grid grid-cols-[120px_160px] border-b border-slate-200 py-1 text-emerald-600">
+                        <div className="grid grid-cols-[120px_160px] print:grid-cols-[140px_180px] border-b border-slate-200 py-1 text-emerald-600">
                             <span className="font-bold">Đã thanh toán:</span>
                             <span className="text-right font-bold">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(paidAmount)}</span>
                         </div>
-                        <div className="grid grid-cols-[120px_160px] py-1 text-red-600">
+                        <div className="grid grid-cols-[120px_160px] print:grid-cols-[140px_180px] py-1 text-red-600">
                             <span className="font-bold">Còn lại:</span>
                             <span className="text-right font-bold">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(remainingAmount)}</span>
                         </div>
@@ -545,7 +534,7 @@ export default function NewOrderPage() {
                             placeholder="Nhập ghi chú chi tiết về đơn hàng, vận chuyển..."
                             className="w-full bg-slate-50 border-none rounded-lg p-3 text-sm min-h-[100px] focus:ring-0 print:hidden"
                         />
-                        <div className="hidden print:block text-sm text-slate-800 italic p-3 bg-slate-50 rounded-lg">
+                        <div className="hidden print:block text-sm text-slate-800 italic p-3 bg-white border border-slate-100 rounded-lg">
                             {order.note || 'Không có ghi chú.'}
                         </div>
                     </div>

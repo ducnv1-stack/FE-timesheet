@@ -12,6 +12,8 @@ interface ItemGridProps {
 }
 
 export default function ItemGrid({ items, products, onChange }: ItemGridProps) {
+    const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
+    const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const addItem = () => {
         onChange([...items, { productId: '', quantity: 1, unitPrice: 0 }]);
     };
@@ -83,7 +85,7 @@ export default function ItemGrid({ items, products, onChange }: ItemGridProps) {
                                         <select
                                             value={item.productId}
                                             onChange={(e) => updateItem(index, 'productId', e.target.value)}
-                                            className="w-full bg-transparent border-none focus:ring-0 rounded p-1"
+                                            className="w-full bg-transparent border-none focus:ring-0 rounded p-1 appearance-none print:appearance-none cursor-pointer"
                                         >
                                             <option value="">Chọn sản phẩm...</option>
                                             {products.map(p => (
@@ -94,27 +96,35 @@ export default function ItemGrid({ items, products, onChange }: ItemGridProps) {
                                     <td className="px-2 py-2 border-r-2 border-slate-800">
                                         <input
                                             type="text"
-                                            value={formatNumber(item.quantity)}
+                                            value={item.quantity === 0 ? '' : formatNumber(item.quantity)}
                                             onChange={(e) => updateItem(index, 'quantity', parseNumber(e.target.value))}
-                                            className="w-full bg-transparent border-none focus:ring-0 p-1 text-center font-bold"
                                             placeholder="1"
+                                            className="w-full bg-transparent border-none focus:ring-0 p-1 text-center font-bold print:placeholder-transparent"
                                         />
                                     </td>
                                     <td className="px-2 py-2 border-r-2 border-slate-800">
                                         <div className="relative">
                                             <input
                                                 type="text"
-                                                value={formatNumber(item.unitPrice)}
+                                                value={item.unitPrice === 0 ? '' : formatNumber(item.unitPrice)}
                                                 onChange={(e) => updateItem(index, 'unitPrice', parseNumber(e.target.value))}
+                                                onFocus={() => setFocusedIndex(index)}
+                                                onBlur={() => setFocusedIndex(null)}
+                                                onMouseEnter={() => setHoveredIndex(index)}
+                                                onMouseLeave={() => setHoveredIndex(null)}
                                                 className={cn(
-                                                    "w-full bg-transparent border-none focus:ring-0 p-1 text-right font-bold",
+                                                    "w-full bg-transparent border-none focus:ring-0 p-1 text-right font-bold print:placeholder-transparent transition-colors",
                                                     isBelowMin && "text-amber-600"
                                                 )}
-                                                placeholder="0"
+                                                placeholder="Giá bán..."
                                             />
-                                            {isBelowMin && (
-                                                <div className="absolute -top-7 right-0 scale-90 bg-amber-600 text-white text-[10px] px-1.5 py-0.5 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                                                    Dưới giá Min: {formatCurrency(selectedProduct.minPrice)}
+                                            {selectedProduct && selectedProduct.minPrice > 0 && (
+                                                <div className={cn(
+                                                    "absolute -top-7 right-0 scale-90 px-1.5 py-0.5 rounded shadow-lg transition-all whitespace-nowrap z-10 font-bold text-[10px]",
+                                                    isBelowMin ? "bg-amber-600 text-white" : "bg-slate-800 text-white",
+                                                    (focusedIndex === index || hoveredIndex === index) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1 pointer-events-none"
+                                                )}>
+                                                    {isBelowMin ? `Dưới giá Min: ${formatCurrency(selectedProduct.minPrice)}` : `Giá tối thiểu: ${formatCurrency(selectedProduct.minPrice)}`}
                                                 </div>
                                             )}
                                         </div>

@@ -18,6 +18,7 @@ import {
     Check
 } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
+import ConfirmModal from '@/components/ui/confirm-modal';
 
 // --- Types ---
 interface Product {
@@ -58,6 +59,19 @@ export default function ProductsPage() {
     const [editingGift, setEditingGift] = useState<Gift | null>(null);
     const [selectedProductForBonus, setSelectedProductForBonus] = useState<Product | null>(null);
 
+    // Deletion confirm state
+    const [deleteConfirm, setDeleteConfirm] = useState<{
+        isOpen: boolean;
+        type: 'product' | 'gift' | null;
+        id: string | null;
+        name: string | null;
+    }>({
+        isOpen: false,
+        type: null,
+        id: null,
+        name: null
+    });
+
     const router = useRouter();
 
     const fetchData = async () => {
@@ -94,29 +108,42 @@ export default function ProductsPage() {
         fetchData();
     }, []);
 
-    const handleDeleteProduct = async (id: string) => {
-        if (!confirm('Bạn có chắc chắn muốn xoá sản phẩm này?')) return;
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${id}`, { method: 'DELETE' });
-            if (res.ok) {
-                success('Xoá sản phẩm thành công');
-                fetchData();
-            }
-        } catch (err) {
-            toastError('Lỗi khi xoá sản phẩm');
-        }
+    const handleDeleteProduct = (product: Product) => {
+        setDeleteConfirm({
+            isOpen: true,
+            type: 'product',
+            id: product.id,
+            name: product.name
+        });
     };
 
-    const handleDeleteGift = async (id: string) => {
-        if (!confirm('Bạn có chắc chắn muốn xoá quà tặng này?')) return;
+    const handleDeleteGift = (gift: Gift) => {
+        setDeleteConfirm({
+            isOpen: true,
+            type: 'gift',
+            id: gift.id,
+            name: gift.name
+        });
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteConfirm.id || !deleteConfirm.type) return;
+
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/gifts/${id}`, { method: 'DELETE' });
+            const url = deleteConfirm.type === 'product'
+                ? `${process.env.NEXT_PUBLIC_API_URL}/products/${deleteConfirm.id}`
+                : `${process.env.NEXT_PUBLIC_API_URL}/gifts/${deleteConfirm.id}`;
+
+            const res = await fetch(url, { method: 'DELETE' });
             if (res.ok) {
-                success('Xoá quà tặng thành công');
+                success(`Xoá ${deleteConfirm.type === 'product' ? 'sản phẩm' : 'quà tặng'} thành công`);
+                setDeleteConfirm({ isOpen: false, type: null, id: null, name: null });
                 fetchData();
+            } else {
+                toastError(`Lỗi khi xoá ${deleteConfirm.type === 'product' ? 'sản phẩm' : 'quà tặng'}`);
             }
         } catch (err) {
-            toastError('Lỗi khi xoá quà tặng');
+            toastError('Lỗi kết nối server');
         }
     };
 
@@ -135,17 +162,17 @@ export default function ProductsPage() {
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-rose-600 rounded-xl shadow-lg shadow-rose-200">
-                            <Package className="w-6 h-6 text-white" />
+                    <div className="flex items-center gap-2 md:gap-3">
+                        <div className="p-1.5 md:p-2 bg-rose-600 rounded-lg md:rounded-xl shadow-lg shadow-rose-200">
+                            <Package className="w-5 h-5 md:w-6 md:h-6 text-white" />
                         </div>
                         <div>
-                            <h1 className="text-xl font-black text-slate-900 leading-tight">Quản Lý Sản Phẩm</h1>
-                            <p className="text-slate-500 text-xs font-medium uppercase tracking-widest leading-none mt-1">Sản phẩm, quà tặng và chính sách thưởng</p>
+                            <h1 className="text-lg md:text-xl font-black text-slate-900 leading-tight">Quản Lý Sản Phẩm</h1>
+                            <p className="text-slate-500 text-[10px] font-medium uppercase tracking-widest leading-none mt-0.5 md:mt-1">Sản phẩm, quà tặng và chính sách thưởng</p>
                         </div>
                     </div>
 
-                    <div className="flex bg-white p-1 rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div className="flex bg-white p-1 rounded-xl shadow-sm border border-slate-200 overflow-hidden w-full md:w-auto overflow-x-auto no-scrollbar">
                         {[
                             { id: 'products', label: 'Sản phẩm', icon: Package },
                             { id: 'gifts', label: 'Quà tặng', icon: GiftIcon },
@@ -154,12 +181,12 @@ export default function ProductsPage() {
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === tab.id
+                                className={`flex items-center justify-center gap-1.5 px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-[10px] md:text-xs font-bold transition-all whitespace-nowrap flex-1 md:flex-none cursor-pointer ${activeTab === tab.id
                                     ? 'bg-rose-600 text-white shadow-md scale-105'
                                     : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
                                     }`}
                             >
-                                <tab.icon className="w-3.5 h-3.5" />
+                                <tab.icon className="w-3 md:w-3.5 h-3 md:h-3.5" />
                                 {tab.label}
                             </button>
                         ))}
@@ -169,23 +196,23 @@ export default function ProductsPage() {
                 {/* Main Content Area */}
                 <div className="grid grid-cols-1 gap-6">
                     {/* Filters & Actions */}
-                    <div className="flex flex-col md:flex-row gap-3 items-center justify-between bg-white p-3 rounded-2xl shadow-sm border border-slate-200">
+                    <div className="flex flex-col md:flex-row gap-2.5 md:gap-3 items-center justify-between bg-white p-2.5 md:p-3 rounded-2xl shadow-sm border border-slate-200">
                         <div className="relative w-full md:w-80">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400" />
                             <input
                                 type="text"
                                 placeholder="Tìm kiếm tên..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 bg-slate-50 border-none rounded-xl text-xs focus:ring-2 focus:ring-rose-500 transition-all font-medium"
+                                className="w-full pl-9 md:pl-10 pr-4 py-1.5 md:py-2 bg-slate-50 border-none rounded-xl text-[11px] md:text-xs focus:ring-2 focus:ring-rose-500 transition-all font-medium"
                             />
                         </div>
                         {activeTab !== 'premium' && (
                             <button
                                 onClick={() => activeTab === 'products' ? setIsProductModalOpen(true) : setIsGiftModalOpen(true)}
-                                className="flex items-center gap-2 px-5 py-2.5 bg-rose-600 text-white rounded-xl text-xs font-bold hover:bg-rose-700 transition-all shadow-lg shadow-rose-200 w-full md:w-auto justify-center active:scale-95"
+                                className="flex items-center gap-1.5 md:gap-2 px-4 md:px-5 py-2 md:py-2.5 bg-rose-600 text-white rounded-xl text-[11px] md:text-xs font-bold hover:bg-rose-700 transition-all shadow-lg shadow-rose-200 w-full md:w-auto justify-center active:scale-95 cursor-pointer"
                             >
-                                <Plus className="w-4 h-4" />
+                                <Plus className="w-3.5 md:w-4 h-3.5 md:h-4" />
                                 Thêm {activeTab === 'products' ? 'sản phẩm' : 'quà tặng'}
                             </button>
                         )}
@@ -246,6 +273,17 @@ export default function ProductsPage() {
                     onSuccess={() => { setIsBonusModalOpen(false); setSelectedProductForBonus(null); fetchData(); }}
                 />
             )}
+
+            <ConfirmModal
+                isOpen={deleteConfirm.isOpen}
+                title="Xác nhận xóa"
+                message={`Bạn có chắc chắn muốn xoá ${deleteConfirm.type === 'product' ? 'sản phẩm' : 'quà tặng'} "${deleteConfirm.name}"? Thao tác này không thể hoàn tác.`}
+                confirmLabel="Xóa ngay"
+                cancelLabel="Quay lại"
+                isDanger={true}
+                onConfirm={confirmDelete}
+                onCancel={() => setDeleteConfirm({ isOpen: false, type: null, id: null, name: null })}
+            />
         </div>
     );
 }
@@ -262,48 +300,44 @@ const parseNumber = (val: string) => {
 
 // --- Sub-components ---
 
-function ProductTable({ products, onEdit, onDelete }: { products: Product[], onEdit: (p: Product) => void, onDelete: (id: string) => void }) {
+function ProductTable({ products, onEdit, onDelete }: { products: Product[], onEdit: (p: Product) => void, onDelete: (p: Product) => void }) {
     if (products.length === 0) return <EmptyState label="sản phẩm" />;
     return (
         <div className="overflow-x-auto">
             <table className="w-full border-collapse">
                 <thead>
-                    <tr className="bg-slate-50/50 border-b border-slate-100">
-                        <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Tên sản phẩm</th>
-                        <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Giá tối thiểu</th>
-                        <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Loại hàng</th>
-                        <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Thưởng nóng</th>
-                        <th className="px-6 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Hành động</th>
+                    <tr className="bg-slate-50/50 border-b border-slate-100 whitespace-nowrap">
+                        <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest pr-8">Tên sản phẩm</th>
+                        <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest pr-8">Giá tối thiểu</th>
+                        <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest pr-8">Loại hàng</th>
+                        <th className="px-3 md:px-6 py-3 md:py-4 text-right text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Hành động</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
                     {products.map(product => (
-                        <tr key={product.id} className="hover:bg-slate-50/80 transition-colors group">
-                            <td className="px-6 py-4">
-                                <span className="text-sm font-bold text-slate-800">{product.name}</span>
+                        <tr key={product.id} className="hover:bg-slate-50/80 transition-colors group whitespace-nowrap">
+                            <td className="px-3 md:px-6 py-3 md:py-4 pr-8">
+                                <span className="text-xs md:text-sm font-bold text-slate-800">{product.name}</span>
                             </td>
-                            <td className="px-6 py-4 font-mono text-xs font-bold text-rose-600">
+                            <td className="px-3 md:px-6 py-3 md:py-4 font-mono text-[10px] md:text-xs font-bold text-rose-600 pr-8">
                                 {new Intl.NumberFormat('vi-VN').format(product.minPrice)}đ
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-3 md:px-6 py-3 md:py-4 pr-8">
                                 {product.isHighEnd ? (
-                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-[10px] font-black border border-amber-100 uppercase tracking-wider">
-                                        <Star className="w-3 h-3 fill-current" /> Cao cấp
+                                    <span className="inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-0.5 md:py-1 bg-amber-50 text-amber-600 rounded-full text-[8px] md:text-[10px] font-black border border-amber-100 uppercase tracking-wider">
+                                        <Star className="w-2.5 h-2.5 md:w-3 md:h-3 fill-current" /> Cao cấp
                                     </span>
                                 ) : (
-                                    <span className="inline-flex items-center px-3 py-1 bg-slate-100 text-slate-400 rounded-full text-[10px] font-black border border-slate-200 uppercase tracking-wider">Phổ thông</span>
+                                    <span className="inline-flex items-center px-2 md:px-3 py-0.5 md:py-1 bg-slate-100 text-slate-400 rounded-full text-[8px] md:text-[10px] font-black border border-slate-200 uppercase tracking-wider">Phổ thông</span>
                                 )}
                             </td>
-                            <td className="px-6 py-4 font-mono text-xs font-bold text-rose-500">
-                                {product.hotBonus > 0 ? `${new Intl.NumberFormat('vi-VN').format(product.hotBonus)}đ` : '-'}
-                            </td>
-                            <td className="px-6 py-4">
-                                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
-                                    <button onClick={() => onEdit(product)} className="p-2 text-slate-400 hover:text-rose-600 hover:bg-white rounded-xl transition-all shadow-sm hover:shadow-md border border-transparent hover:border-slate-100">
-                                        <Edit2 className="w-4 h-4" />
+                            <td className="px-3 md:px-6 py-3 md:py-4">
+                                <div className="flex items-center justify-end gap-1 md:gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all md:transform md:translate-x-2 md:group-hover:translate-x-0">
+                                    <button onClick={() => onEdit(product)} className="p-1.5 md:p-2 text-slate-400 hover:text-rose-600 hover:bg-white rounded-lg md:rounded-xl transition-all shadow-sm hover:shadow-md border border-slate-100 md:border-transparent hover:border-slate-100 cursor-pointer">
+                                        <Edit2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                     </button>
-                                    <button onClick={() => onDelete(product.id)} className="p-2 text-slate-400 hover:text-rose-600 hover:bg-white rounded-xl transition-all shadow-sm hover:shadow-md border border-transparent hover:border-slate-100">
-                                        <Trash2 className="w-4 h-4" />
+                                    <button onClick={() => onDelete(product)} className="p-1.5 md:p-2 text-slate-400 hover:text-rose-600 hover:bg-white rounded-lg md:rounded-xl transition-all shadow-sm hover:shadow-md border border-slate-100 md:border-transparent hover:border-slate-100 cursor-pointer">
+                                        <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                     </button>
                                 </div>
                             </td>
@@ -315,34 +349,34 @@ function ProductTable({ products, onEdit, onDelete }: { products: Product[], onE
     );
 }
 
-function GiftTable({ gifts, onEdit, onDelete }: { gifts: Gift[], onEdit: (g: Gift) => void, onDelete: (id: string) => void }) {
+function GiftTable({ gifts, onEdit, onDelete }: { gifts: Gift[], onEdit: (g: Gift) => void, onDelete: (g: Gift) => void }) {
     if (gifts.length === 0) return <EmptyState label="quà tặng" icon={<GiftIcon className="w-12 h-12 text-slate-200" />} />;
     return (
         <div className="overflow-x-auto">
             <table className="w-full border-collapse">
                 <thead>
-                    <tr className="bg-slate-50/50 border-b border-slate-100">
-                        <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Tên quà tặng</th>
-                        <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Giá quy đổi</th>
-                        <th className="px-6 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Hành động</th>
+                    <tr className="bg-slate-50/50 border-b border-slate-100 whitespace-nowrap">
+                        <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest pr-8">Tên quà tặng</th>
+                        <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest pr-8">Giá quy đổi</th>
+                        <th className="px-3 md:px-6 py-3 md:py-4 text-right text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Hành động</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
                     {gifts.map(gift => (
-                        <tr key={gift.id} className="hover:bg-slate-50/80 transition-colors group">
-                            <td className="px-6 py-4">
-                                <span className="text-sm font-bold text-slate-800">{gift.name}</span>
+                        <tr key={gift.id} className="hover:bg-slate-50/80 transition-colors group whitespace-nowrap">
+                            <td className="px-3 md:px-6 py-3 md:py-4 pr-8">
+                                <span className="text-xs md:text-sm font-bold text-slate-800">{gift.name}</span>
                             </td>
-                            <td className="px-6 py-4 font-mono text-xs font-bold text-emerald-600">
+                            <td className="px-3 md:px-6 py-3 md:py-4 font-mono text-[10px] md:text-xs font-bold text-emerald-600 pr-8">
                                 {new Intl.NumberFormat('vi-VN').format(gift.price)}đ
                             </td>
-                            <td className="px-6 py-4">
-                                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
-                                    <button onClick={() => onEdit(gift)} className="p-2 text-slate-400 hover:text-rose-600 hover:bg-white rounded-xl transition-all shadow-sm border border-transparent hover:border-slate-100">
-                                        <Edit2 className="w-4 h-4" />
+                            <td className="px-3 md:px-6 py-3 md:py-4">
+                                <div className="flex items-center justify-end gap-1 md:gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all md:translate-x-2 md:group-hover:translate-x-0">
+                                    <button onClick={() => onEdit(gift)} className="p-1.5 md:p-2 text-slate-400 hover:text-rose-600 hover:bg-white rounded-lg md:rounded-xl transition-all shadow-sm border border-slate-100 md:border-transparent hover:border-slate-100 cursor-pointer">
+                                        <Edit2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                     </button>
-                                    <button onClick={() => onDelete(gift.id)} className="p-2 text-slate-400 hover:text-rose-600 hover:bg-white rounded-xl transition-all shadow-sm border border-transparent hover:border-slate-100">
-                                        <Trash2 className="w-4 h-4" />
+                                    <button onClick={() => onDelete(gift)} className="p-1.5 md:p-2 text-slate-400 hover:text-rose-600 hover:bg-white rounded-lg md:rounded-xl transition-all shadow-sm border border-slate-100 md:border-transparent hover:border-slate-100 cursor-pointer">
+                                        <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                     </button>
                                 </div>
                             </td>
@@ -366,22 +400,22 @@ function PremiumBonusView({ products, onUpdateBonus }: { products: Product[], on
     );
 
     return (
-        <div className="p-6">
+        <div className="p-3 md:p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {products.map(product => (
-                    <div key={product.id} className="bg-white rounded-3xl border border-slate-100 p-5 hover:border-rose-100 transition-all hover:shadow-xl group relative overflow-hidden bg-gradient-to-br from-white to-slate-50/50">
+                    <div key={product.id} className="bg-white rounded-2xl md:rounded-3xl border border-slate-100 p-4 md:p-5 hover:border-rose-100 transition-all hover:shadow-xl group relative overflow-hidden bg-gradient-to-br from-white to-slate-50/50">
                         <div className="absolute -right-4 -top-4 w-24 h-24 bg-rose-50/50 rounded-full blur-2xl group-hover:bg-rose-100/50 transition-colors" />
 
-                        <div className="flex items-center justify-between mb-5 relative z-10">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2.5 bg-white rounded-2xl border border-slate-200 group-hover:border-rose-200 group-hover:scale-110 transition-all shadow-sm">
-                                    <TrendingUp className="w-4 h-4 text-rose-600" />
+                        <div className="flex items-center justify-between mb-4 md:mb-5 relative z-10">
+                            <div className="flex items-center gap-2 md:gap-3">
+                                <div className="p-2 md:p-2.5 bg-white rounded-xl md:rounded-2xl border border-slate-200 group-hover:border-rose-200 group-hover:scale-110 transition-all shadow-sm">
+                                    <TrendingUp className="w-3.5 md:w-4 h-3.5 md:h-4 text-rose-600" />
                                 </div>
-                                <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">{product.name}</h3>
+                                <h3 className="text-[10px] md:text-[11px] font-bold text-slate-800 uppercase tracking-wider">{product.name}</h3>
                             </div>
                             <button
                                 onClick={() => onUpdateBonus(product)}
-                                className="text-[10px] font-black text-rose-600 hover:text-white hover:bg-rose-600 bg-rose-50 px-4 py-2 rounded-xl uppercase tracking-widest transition-all active:scale-90"
+                                className="shrink-0 text-[9px] md:text-[10px] font-black text-rose-600 hover:text-white hover:bg-rose-600 bg-rose-50 px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl uppercase tracking-widest transition-all active:scale-90 cursor-pointer"
                             >
                                 + Thiết lập
                             </button>
@@ -389,24 +423,24 @@ function PremiumBonusView({ products, onUpdateBonus }: { products: Product[], on
 
                         <div className="space-y-2 relative z-10">
                             {product.bonusRules.length > 0 ? (
-                                product.bonusRules.sort((a, b) => a.minSellPrice - b.minSellPrice).map((rule, idx) => (
-                                    <div key={rule.id || idx} className="flex items-center justify-between bg-white/60 backdrop-blur-sm p-3 rounded-2xl border border-white shadow-sm transition-all hover:scale-[1.02]">
-                                        <div className="flex items-center gap-3">
+                                [...product.bonusRules].sort((a, b) => a.minSellPrice - b.minSellPrice).map((rule, idx) => (
+                                    <div key={rule.id || idx} className="flex items-center justify-between bg-white/60 backdrop-blur-sm p-2.5 md:p-3 rounded-xl md:rounded-2xl border border-white shadow-sm transition-all hover:scale-[1.02]">
+                                        <div className="flex items-center gap-2 md:gap-3">
                                             <div className="flex flex-col">
-                                                <span className="text-[8px] font-black text-slate-400 uppercase tracking-tight">Giá ≥</span>
-                                                <span className="text-xs font-bold text-slate-700">
+                                                <span className="text-[7px] md:text-[8px] font-black text-slate-400 uppercase tracking-tight">Giá ≥</span>
+                                                <span className="text-[10px] md:text-xs font-bold text-slate-700">
                                                     {new Intl.NumberFormat('vi-VN').format(rule.minSellPrice)}
                                                 </span>
                                             </div>
-                                            <ChevronRight className="w-3 h-3 text-slate-300" />
+                                            <ChevronRight className="w-2.5 md:w-3 h-2.5 md:h-3 text-slate-300" />
                                             <div className="flex flex-col">
-                                                <span className="text-[8px] font-black text-rose-400 uppercase tracking-tight">Thưởng</span>
-                                                <span className="text-xs font-black text-rose-600">
+                                                <span className="text-[7px] md:text-[8px] font-black text-rose-400 uppercase tracking-tight">Thưởng</span>
+                                                <span className="text-[10px] md:text-xs font-black text-rose-600">
                                                     {new Intl.NumberFormat('vi-VN').format(rule.bonusAmount)}
                                                 </span>
                                             </div>
                                         </div>
-                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
+                                        <div className="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
                                     </div>
                                 ))
                             ) : (
@@ -470,7 +504,7 @@ function ProductModal({ isOpen, onClose, onSuccess, product }: { isOpen: boolean
             <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
                 <div className="p-6 border-b border-slate-50 flex items-center justify-between">
                     <h2 className="text-base font-black text-slate-800 uppercase tracking-widest">{product ? 'Sửa sản phẩm' : 'Thêm sản phẩm mới'}</h2>
-                    <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-xl text-slate-400 transition-all"><X className="w-5 h-5" /></button>
+                    <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-xl text-slate-400 transition-all cursor-pointer"><X className="w-5 h-5" /></button>
                 </div>
                 <form onSubmit={handleSubmit} className="p-6 space-y-5">
                     <div>
@@ -493,7 +527,7 @@ function ProductModal({ isOpen, onClose, onSuccess, product }: { isOpen: boolean
                         <Star className={`w-4 h-4 ml-auto ${isHighEnd ? 'text-amber-500 fill-current' : 'text-slate-300'}`} />
                     </div>
                     <div className="pt-2">
-                        <button disabled={submitting} className="w-full py-4 bg-rose-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-rose-100 hover:bg-rose-700 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                        <button disabled={submitting} className="w-full py-4 bg-rose-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-rose-100 hover:bg-rose-700 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer">
                             {submitting ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
                             {product ? 'Lưu thay đổi' : 'Tạo sản phẩm'}
                         </button>
@@ -546,7 +580,7 @@ function GiftModal({ isOpen, onClose, onSuccess, gift }: { isOpen: boolean, onCl
             <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
                 <div className="p-6 border-b border-slate-50 flex items-center justify-between">
                     <h2 className="text-base font-black text-slate-800 uppercase tracking-widest">{gift ? 'Sửa quà tặng' : 'Thêm quà tặng mới'}</h2>
-                    <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-xl transition-all"><X className="w-5 h-5" /></button>
+                    <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"><X className="w-5 h-5" /></button>
                 </div>
                 <form onSubmit={handleSubmit} className="p-6 space-y-5">
                     <div>
@@ -558,7 +592,7 @@ function GiftModal({ isOpen, onClose, onSuccess, gift }: { isOpen: boolean, onCl
                         <input type="text" required value={formatNumber(price)} onChange={e => setPrice(parseNumber(e.target.value))} className="w-full px-4 py-3 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-rose-500 font-mono text-sm font-bold" placeholder="Nhập giá trị..." />
                     </div>
                     <div className="pt-2">
-                        <button disabled={submitting} className="w-full py-4 bg-rose-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-rose-100 hover:bg-rose-700 transition-all flex items-center justify-center gap-2">
+                        <button disabled={submitting} className="w-full py-4 bg-rose-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-rose-100 hover:bg-rose-700 transition-all flex items-center justify-center gap-2 cursor-pointer">
                             {submitting ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
                             {gift ? 'Lưu thay đổi' : 'Thêm quà tặng'}
                         </button>
@@ -570,8 +604,11 @@ function GiftModal({ isOpen, onClose, onSuccess, gift }: { isOpen: boolean, onCl
 }
 
 function BonusModal({ product, onClose, onSuccess }: { product: Product, onClose: () => void, onSuccess: () => void }) {
-    const [rules, setRules] = useState<BonusRule[]>(product.bonusRules || []);
+    const [rules, setRules] = useState<BonusRule[]>(() =>
+        [...(product.bonusRules || [])].sort((a, b) => a.minSellPrice - b.minSellPrice)
+    );
     const [submitting, setSubmitting] = useState(false);
+    const [deletingIdx, setDeletingIdx] = useState<number | null>(null);
     const { success, error } = useToast();
 
     const addRule = () => {
@@ -579,7 +616,14 @@ function BonusModal({ product, onClose, onSuccess }: { product: Product, onClose
     };
 
     const removeRule = (idx: number) => {
-        setRules(rules.filter((_, i) => i !== idx));
+        setDeletingIdx(idx);
+    };
+
+    const confirmDelete = () => {
+        if (deletingIdx !== null) {
+            setRules(rules.filter((_, i) => i !== deletingIdx));
+            setDeletingIdx(null);
+        }
     };
 
     const updateRule = (idx: number, field: keyof BonusRule, value: number) => {
@@ -626,7 +670,7 @@ function BonusModal({ product, onClose, onSuccess }: { product: Product, onClose
                         <h2 className="text-base font-black text-slate-800 uppercase tracking-widest leading-none">Thiết lập thưởng nóng</h2>
                         <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest mt-1">Sản phẩm: {product.name}</p>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-white rounded-xl transition-all shadow-sm"><X className="w-5 h-5 text-slate-400" /></button>
+                    <button onClick={onClose} className="p-2 hover:bg-white rounded-xl transition-all shadow-sm cursor-pointer"><X className="w-5 h-5 text-slate-400" /></button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6">
@@ -637,7 +681,7 @@ function BonusModal({ product, onClose, onSuccess }: { product: Product, onClose
                                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Chưa có quy tắc nào</p>
                             </div>
                         ) : (
-                            rules.sort((a, b) => a.minSellPrice - b.minSellPrice).map((rule, idx) => (
+                            rules.map((rule, idx) => (
                                 <div key={idx} className="flex items-center gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100 group">
                                     <div className="flex-1">
                                         <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Giá bán từ (đ)</label>
@@ -647,8 +691,8 @@ function BonusModal({ product, onClose, onSuccess }: { product: Product, onClose
                                         <label className="block text-[8px] font-black text-rose-400 uppercase tracking-widest mb-1 ml-1">Mức thưởng (đ)</label>
                                         <input type="text" value={formatNumber(rule.bonusAmount)} onChange={e => updateRule(idx, 'bonusAmount', parseNumber(e.target.value))} className="w-full px-3 py-2 bg-rose-50/30 rounded-xl border-none focus:ring-1 focus:ring-rose-500 font-mono text-xs font-black text-rose-600 shadow-sm" placeholder="Nhập thưởng..." />
                                     </div>
-                                    <button type="button" onClick={() => removeRule(idx)} className="mt-4 p-2 text-slate-300 hover:text-rose-500 hover:bg-white rounded-lg transition-all shadow-sm opacity-0 group-hover:opacity-100">
-                                        <Trash2 className="w-4 h-4" />
+                                    <button type="button" onClick={() => removeRule(idx)} className="mt-4 p-2 text-slate-300 hover:text-rose-500 hover:bg-white rounded-lg transition-all shadow-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 cursor-pointer">
+                                        <Trash2 className="w-3.5 md:w-4 h-3.5 md:h-4" />
                                     </button>
                                 </div>
                             ))
@@ -656,15 +700,26 @@ function BonusModal({ product, onClose, onSuccess }: { product: Product, onClose
                     </div>
 
                     <div className="flex gap-4">
-                        <button type="button" onClick={addRule} className="flex-1 py-3 border-2 border-dashed border-slate-200 text-slate-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:border-rose-200 hover:text-rose-500 hover:bg-rose-50/30 transition-all flex items-center justify-center gap-2">
+                        <button type="button" onClick={addRule} className="flex-1 py-3 border-2 border-dashed border-slate-200 text-slate-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:border-rose-200 hover:text-rose-500 hover:bg-rose-50/30 transition-all flex items-center justify-center gap-2 cursor-pointer">
                             <Plus className="w-4 h-4" /> Thêm mức mới
                         </button>
-                        <button disabled={submitting} className="flex-1 py-3 bg-rose-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-rose-100 hover:bg-rose-700 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50">
+                        <button disabled={submitting} className="flex-1 py-3 bg-rose-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-rose-100 hover:bg-rose-700 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 cursor-pointer">
                             {submitting ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Check className="w-4 h-4" />}
                             Lưu tất cả
                         </button>
                     </div>
                 </form>
+
+                <ConfirmModal
+                    isOpen={deletingIdx !== null}
+                    title="Xác nhận xóa"
+                    message="Bạn có chắc chắn muốn xoá quy tắc thưởng này? Thao tác này sẽ cập nhật danh sách ngay lập tức."
+                    confirmLabel="Xóa ngay"
+                    cancelLabel="Quay lại"
+                    isDanger={true}
+                    onConfirm={confirmDelete}
+                    onCancel={() => setDeletingIdx(null)}
+                />
             </div>
         </div>
     );

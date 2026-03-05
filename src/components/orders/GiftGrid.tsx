@@ -49,7 +49,7 @@ export default function GiftGrid({ orderGifts, allGifts, onChange }: GiftGridPro
                 <button
                     onClick={addGift}
                     type="button"
-                    className="flex items-center gap-1 px-1.5 py-0.5 bg-rose-700 hover:bg-rose-800 text-white rounded text-[10px] font-bold"
+                    className="flex items-center gap-1 px-1.5 py-0.5 bg-rose-700 hover:bg-rose-800 text-white rounded text-[10px] font-bold no-print cursor-pointer"
                 >
                     <Plus size={12} /> Thêm quà
                 </button>
@@ -68,7 +68,7 @@ export default function GiftGrid({ orderGifts, allGifts, onChange }: GiftGridPro
                             <select
                                 value={og.giftId}
                                 onChange={(e) => updateGift(index, 'giftId', e.target.value)}
-                                className="w-full bg-white border border-slate-200 focus:ring-2 focus:ring-rose-500 rounded p-1 text-[11px] font-medium"
+                                className="w-full bg-white border border-slate-200 focus:ring-2 focus:ring-rose-500 rounded p-1 text-[11px] font-medium appearance-none print:appearance-none print:border-none print:p-0 print:bg-transparent cursor-pointer"
                             >
                                 <option value="">Chọn quà tặng...</option>
                                 {allGifts.map(g => (
@@ -77,14 +77,14 @@ export default function GiftGrid({ orderGifts, allGifts, onChange }: GiftGridPro
                             </select>
                         </div>
 
-                        <div className="w-20 bg-white border border-slate-200 rounded px-1.5 py-0.5 focus-within:ring-2 focus-within:ring-rose-500 transition-all shrink-0">
+                        <div className="w-20 bg-white border border-slate-200 rounded px-1.5 py-0.5 focus-within:ring-2 focus:ring-rose-500 transition-all shrink-0">
                             <span className="text-[7px] text-slate-400 font-bold block uppercase tracking-wider leading-none">Số lượng</span>
                             <input
                                 type="number"
                                 min="1"
-                                value={og.quantity}
-                                onChange={(e) => updateGift(index, 'quantity', parseInt(e.target.value) || 1)}
-                                className="w-full border-none p-0 text-[11px] font-bold text-slate-700 focus:ring-0 focus:outline-none bg-transparent"
+                                value={og.quantity || ''}
+                                onChange={(e) => updateGift(index, 'quantity', parseInt(e.target.value) || 0)}
+                                className="w-full border-none p-0 text-[11px] font-bold text-slate-700 focus:ring-0 focus:outline-none bg-transparent print:placeholder-transparent"
                             />
                         </div>
 
@@ -97,7 +97,7 @@ export default function GiftGrid({ orderGifts, allGifts, onChange }: GiftGridPro
 
                         <button
                             onClick={() => removeGift(index)}
-                            className="p-1 text-slate-300 hover:text-rose-600 transition-colors bg-white border border-slate-100 rounded shadow-sm shrink-0"
+                            className="p-1 text-slate-300 hover:text-rose-600 transition-colors bg-white border border-slate-100 rounded shadow-sm shrink-0 no-print cursor-pointer"
                         >
                             <Trash2 size={12} />
                         </button>

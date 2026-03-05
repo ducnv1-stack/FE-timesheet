@@ -12,7 +12,7 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(true);
     const pathname = usePathname();
     const router = useRouter();
     const { error: toastError } = useToast();
@@ -72,6 +72,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
     return (
         <div className="flex min-h-screen">
+            {/* Overlay for mobile when sidebar is open */}
+            {!isCollapsed && (
+                <div
+                    className="fixed inset-0 bg-slate-900/20 backdrop-blur-[2px] z-30 lg:hidden transition-opacity"
+                    onClick={() => setIsCollapsed(true)}
+                />
+            )}
+
             <Sidebar
                 isCollapsed={isCollapsed}
                 onToggle={() => setIsCollapsed(!isCollapsed)}
@@ -79,9 +87,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
             <div className={cn(
                 "flex-1 min-w-0 transition-all duration-300 min-h-screen flex flex-col print:ml-0",
-                isCollapsed ? "ml-20" : "ml-64"
+                "ml-0 lg:ml-20", // Clear margin on mobile
+                !isCollapsed && "lg:ml-64" // Margin for expanded state on desktop
             )}>
-                <Navbar />
+                <Navbar onMenuClick={() => setIsCollapsed(!isCollapsed)} />
                 <main className="max-w-7xl mx-auto w-full px-4 py-8 flex-1 min-w-0">
                     {children}
                 </main>

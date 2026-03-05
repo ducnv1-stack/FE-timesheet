@@ -10,9 +10,10 @@ interface InvoicePaperProps {
     type?: 'old' | 'new';
     isCreate?: boolean;
     scale?: number;
+    forceGrid?: boolean;
 }
 
-export default function InvoicePaper({ order, className, type, isCreate, scale }: InvoicePaperProps) {
+export default function InvoicePaper({ order, className, type, isCreate, scale, forceGrid }: InvoicePaperProps) {
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
@@ -71,7 +72,7 @@ export default function InvoicePaper({ order, className, type, isCreate, scale }
         <div
             id="invoice-paper"
             className={cn(
-                "w-full max-w-[210mm] bg-white border-2 p-4 md:p-6 shadow-2xl relative overflow-hidden print:shadow-none print:border-none print:p-0 transition-all",
+                "w-full max-w-[210mm] bg-white border-2 p-4 md:p-6 shadow-2xl relative overflow-hidden print:shadow-none print:border-none print:p-[10mm] transition-all",
                 type === 'old' ? "border-slate-300 opacity-70 saturate-50" : "border-emerald-500 opacity-100",
                 !type && "border-slate-800",
                 className
@@ -110,8 +111,11 @@ export default function InvoicePaper({ order, className, type, isCreate, scale }
                 Hóa đơn bán hàng
             </h1>
 
-            {/* Info Grid - Fixed 2 columns to match Image 2 */}
-            <div className="grid grid-cols-2 gap-x-8 gap-y-2 mb-8 text-sm">
+            {/* Info Grid - Responsive grid to match New Order Page */}
+            <div className={cn(
+                "grid gap-x-6 gap-y-1 mb-6 text-sm",
+                forceGrid ? "grid-cols-2" : "grid-cols-1 md:grid-cols-2 print:grid-cols-2"
+            )}>
                 <div className="grid grid-cols-[120px_1fr] items-center border-b border-slate-100 py-1">
                     <span className="font-bold text-slate-600">Chi nhánh:</span>
                     <span className="font-medium text-slate-900">{order.branch?.name || '---'}</span>
@@ -157,25 +161,25 @@ export default function InvoicePaper({ order, className, type, isCreate, scale }
 
 
                 {/* Delivery rows */}
-                <div className="grid grid-cols-[140px_1fr] items-center border-b border-slate-100 py-1.5">
+                <div className="grid grid-cols-[120px_1fr] items-center border-b border-slate-100 py-1">
                     <span className="font-bold text-slate-600">Lái xe:</span>
                     {driverDelivery ? (
-                        <span className="font-black text-rose-600">
+                        <span className="font-black text-rose-600 leading-tight">
                             {driverDelivery.category === 'EXTERNAL_DRIVER'
                                 ? '🚚 Lái xe ngoài'
                                 : `🏢 ${driverDelivery.driver?.fullName || '---'}`}
-                            <span className="text-xs text-slate-400 font-medium ml-1">({formatCurrency(Number(driverDelivery.deliveryFee || 0))})</span>
+                            <span className="text-[10px] text-slate-400 font-medium ml-1">({formatCurrency(Number(driverDelivery.deliveryFee || 0))})</span>
                         </span>
                     ) : (
                         <span className="font-medium text-slate-400 italic">Chưa chọn</span>
                     )}
                 </div>
-                <div className="grid grid-cols-[140px_1fr] items-center border-b border-slate-100 py-1.5">
+                <div className="grid grid-cols-[120px_1fr] items-center border-b border-slate-100 py-1">
                     <span className="font-bold text-slate-600">Người giao:</span>
                     {staffDelivery ? (
-                        <span className="font-black text-blue-600">
+                        <span className="font-black text-blue-600 leading-tight">
                             {staffDelivery.driver?.fullName || '---'}
-                            <span className="text-xs text-slate-400 font-medium ml-1">({getCategoryLabel(staffDelivery.category)} - {formatCurrency(Number(staffDelivery.deliveryFee || 0))})</span>
+                            <span className="text-[10px] text-slate-400 font-medium ml-1">({getCategoryLabel(staffDelivery.category)} - {formatCurrency(Number(staffDelivery.deliveryFee || 0))})</span>
                         </span>
                     ) : (
                         <span className="font-medium text-slate-400 italic">Chưa chọn</span>
@@ -269,24 +273,36 @@ export default function InvoicePaper({ order, className, type, isCreate, scale }
             )}
 
             {/* Summary */}
-            <div className="flex flex-col items-end space-y-1 text-sm mb-6">
-                <div className="grid grid-cols-[140px_180px] border-b border-slate-200 py-2">
+            <div className="flex flex-col items-end space-y-1 text-sm mb-6 print:break-inside-avoid">
+                <div className={cn(
+                    "grid border-b border-slate-200 py-2 w-full max-w-[320px]",
+                    forceGrid ? "grid-cols-[140px_1fr]" : "grid-cols-[120px_1fr] md:grid-cols-[140px_180px] print:grid-cols-[140px_180px]"
+                )}>
                     <span className="font-bold text-slate-600">Tổng cộng:</span>
-                    <span className="text-right font-black text-base text-slate-900">{formatCurrency(totalProductAmount)}</span>
+                    <span className="text-right font-black text-sm text-slate-900">{formatCurrency(totalProductAmount)}</span>
                 </div>
                 {giftAmount > 0 && (
-                    <div className="grid grid-cols-[140px_180px] border-b border-slate-200 py-2 text-rose-600">
+                    <div className={cn(
+                        "grid border-b border-slate-200 py-2 text-rose-600 w-full max-w-[320px]",
+                        forceGrid ? "grid-cols-[140px_1fr]" : "grid-cols-[120px_1fr] md:grid-cols-[140px_180px] print:grid-cols-[140px_180px]"
+                    )}>
                         <span className="font-bold">Quà tặng:</span>
-                        <span className="text-right font-black">{formatCurrency(giftAmount)}</span>
+                        <span className="text-right font-black text-sm">{formatCurrency(giftAmount)}</span>
                     </div>
                 )}
-                <div className="grid grid-cols-[140px_180px] border-b border-slate-200 py-2 text-emerald-600">
+                <div className={cn(
+                    "grid border-b border-slate-200 py-2 text-emerald-600 w-full max-w-[320px]",
+                    forceGrid ? "grid-cols-[140px_1fr]" : "grid-cols-[120px_1fr] md:grid-cols-[140px_180px] print:grid-cols-[140px_180px]"
+                )}>
                     <span className="font-bold">Đã thanh toán:</span>
-                    <span className="text-right font-black">{formatCurrency(paidAmount)}</span>
+                    <span className="text-right font-black text-sm">{formatCurrency(paidAmount)}</span>
                 </div>
-                <div className="grid grid-cols-[140px_180px] py-2 text-red-600">
-                    <span className="font-bold text-base">Còn lại:</span>
-                    <span className="text-right font-black text-base">{formatCurrency(remainingAmount)}</span>
+                <div className={cn(
+                    "grid py-2 text-red-600 w-full max-w-[320px]",
+                    forceGrid ? "grid-cols-[140px_1fr]" : "grid-cols-[120px_1fr] md:grid-cols-[140px_180px] print:grid-cols-[140px_180px]"
+                )}>
+                    <span className="font-bold text-sm">Còn lại:</span>
+                    <span className="text-right font-black text-sm">{formatCurrency(remainingAmount)}</span>
                 </div>
             </div>
 
@@ -294,14 +310,17 @@ export default function InvoicePaper({ order, className, type, isCreate, scale }
             <div className="space-y-6">
                 {order.payments?.length > 0 && (
                     <div className="border-t border-slate-200 pt-4">
-                        <h3 className="text-xs font-black uppercase text-slate-400 mb-4 tracking-widest flex items-center gap-2">
+                        <h3 className="text-sm font-black uppercase text-slate-400 mb-4 tracking-widest flex items-center gap-2">
                             <CreditCard size={14} /> Thông tin thanh toán
                         </h3>
 
-                        <div className="grid grid-cols-2 items-center gap-x-12 gap-y-6">
-                            <div className="space-y-3 flex-1">
+                        <div className={cn(
+                            "grid items-start gap-y-4",
+                            forceGrid ? "grid-cols-2 gap-x-6" : "grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-x-12"
+                        )}>
+                            <div className="space-y-2 flex-1">
                                 {order.payments.map((p: any, i: number) => (
-                                    <div key={i} className="flex justify-between border-b border-slate-100 py-2 items-center leading-none">
+                                    <div key={i} className="flex justify-between border-b border-slate-100 py-1.5 items-center leading-none">
                                         <div className="flex items-center gap-2">
                                             <span className="text-sm font-medium text-slate-600">
                                                 {(() => {
@@ -316,11 +335,11 @@ export default function InvoicePaper({ order, className, type, isCreate, scale }
                                                     }
                                                 })()}
                                             </span>
-                                            <span className="text-[11px] text-slate-400 font-medium">
+                                            <span className="text-[10px] text-slate-400 font-medium tracking-tight">
                                                 ({p.paidAt ? new Date(p.paidAt).toLocaleDateString('vi-VN') : '---'})
                                             </span>
                                         </div>
-                                        <span className="text-sm font-black text-slate-800">{formatCurrency(Number(p.amount))}</span>
+                                        <span className="text-xs font-black text-slate-800">{formatCurrency(Number(p.amount))}</span>
                                     </div>
                                 ))}
                             </div>
@@ -328,15 +347,15 @@ export default function InvoicePaper({ order, className, type, isCreate, scale }
                             <div className="flex items-center">
                                 {order.isPaymentConfirmed ? (
                                     <div className="flex items-center gap-2 bg-emerald-50 px-2 py-1 rounded border border-emerald-100 shadow-sm">
-                                        <span className="text-[9px] font-black text-emerald-600 uppercase">✓ KT xác nhận:</span>
-                                        <span className="text-[9px] font-bold text-emerald-800 italic">
+                                        <span className="text-[8px] font-black text-emerald-600 uppercase">✓ KT xác nhận:</span>
+                                        <span className="text-[8px] font-bold text-emerald-800 italic">
                                             {order.confirmer?.fullName || order.confirmer?.employee?.fullName || 'Hệ thống'} - {order.confirmedAt ? new Date(order.confirmedAt).toLocaleDateString('vi-VN') : '---'}
                                         </span>
                                     </div>
                                 ) : (
                                     <div className="flex items-center gap-2 bg-amber-50 px-2 py-1 rounded border border-amber-100 shadow-sm">
-                                        <span className="text-[9px] font-black text-amber-600 uppercase tracking-tighter">TRẠNG THÁI:</span>
-                                        <span className="text-[9px] font-bold text-amber-500 italic">
+                                        <span className="text-[8px] font-black text-amber-600 uppercase tracking-tighter">TRẠNG THÁI:</span>
+                                        <span className="text-[8px] font-bold text-amber-500 italic">
                                             Đang chờ kế toán xác nhận
                                         </span>
                                     </div>
@@ -348,18 +367,21 @@ export default function InvoicePaper({ order, className, type, isCreate, scale }
 
                 {order.splits?.length > 0 && (
                     <div className="border-t border-slate-200 pt-4">
-                        <h3 className="text-xs font-black uppercase text-slate-400 mb-3 tracking-widest text-center md:text-left flex items-center gap-2">
+                        <h3 className="text-sm font-black uppercase text-slate-400 mb-3 tracking-widest text-center md:text-left flex items-center gap-2">
                             Danh sách nhân viên chia đơn
                         </h3>
-                        <div className="grid grid-cols-2 gap-x-8 gap-y-2">
+                        <div className={cn(
+                            "grid gap-y-2",
+                            forceGrid ? "grid-cols-2 gap-x-6" : "grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-x-8"
+                        )}>
                             {order.splits.map((s: any, i: number) => (
-                                <div key={i} className="flex justify-between border-b border-slate-100 pb-1">
+                                <div key={i} className="flex justify-between border-b border-slate-100 pb-1 items-center">
                                     <div className="flex flex-col">
-                                        <span className="text-sm font-bold text-slate-800">{s.employee?.fullName || 'N/A'}</span>
-                                        <span className="text-[10px] text-slate-500 uppercase">{s.branch?.name || 'N/A'}</span>
+                                        <span className="text-sm font-bold text-slate-800 leading-tight">{s.employee?.fullName || 'N/A'}</span>
+                                        <span className="text-[9px] text-slate-500 uppercase tracking-tighter font-bold">{s.branch?.name || 'N/A'}</span>
                                     </div>
                                     <span className="text-sm font-medium italic text-slate-600">
-                                        Doanh số: {formatCurrency(Number(s.splitAmount))}
+                                        Doanh số: <span className="font-black text-slate-900 not-italic">{formatCurrency(Number(s.splitAmount))}</span>
                                     </span>
                                 </div>
                             ))}

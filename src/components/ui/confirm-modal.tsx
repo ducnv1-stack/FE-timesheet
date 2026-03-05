@@ -34,13 +34,10 @@ export default function ConfirmModal({
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header with Icon */}
-                <div className={cn(
-                    "p-6 flex flex-col items-center text-center",
-                    isDanger ? "bg-rose-50" : "bg-blue-50"
-                )}>
+                <div className="p-6 flex flex-col items-center text-center bg-rose-50">
                     <div className={cn(
                         "w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-transform hover:scale-110",
-                        isDanger ? "bg-rose-100 text-rose-600" : "bg-blue-100 text-blue-600"
+                        isDanger ? "bg-rose-100 text-rose-600" : "bg-rose-100/80 text-rose-500"
                     )}>
                         <AlertTriangle size={32} />
                     </div>
@@ -58,7 +55,7 @@ export default function ConfirmModal({
                 <div className="p-6 bg-slate-50 flex gap-3">
                     <button
                         onClick={onCancel}
-                        className="flex-1 px-4 py-3 bg-white border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-100 transition-all flex items-center justify-center gap-2"
+                        className="flex-1 px-4 py-3 bg-white border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-100 transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
                         <X size={18} />
                         {cancelLabel}
@@ -66,10 +63,7 @@ export default function ConfirmModal({
                     <button
                         onClick={onConfirm}
                         className={cn(
-                            "flex-1 px-4 py-3 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 active:translate-y-0",
-                            isDanger
-                                ? "bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 shadow-rose-200"
-                                : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-blue-200"
+                            "flex-1 px-4 py-3 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 active:translate-y-0 cursor-pointer bg-rose-600 hover:bg-rose-700 shadow-rose-200"
                         )}
                     >
                         {confirmLabel}
