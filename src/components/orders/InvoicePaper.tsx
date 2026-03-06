@@ -88,7 +88,7 @@ export default function InvoicePaper({ order, className, type, isCreate, scale, 
                 <div className="space-y-4">
                     <img src="/logo.png" alt="Ohari Logo" className="h-12 w-auto object-contain" />
                     <div className="space-y-1">
-                        <p className="text-xs font-black text-slate-800 uppercase tracking-tighter">Công ty TNHH OHARI Việt Nam</p>
+                        <p className="text-xs font-black text-slate-800 uppercase tracking-tighter">Công ty TNHH Tập đoàn OHARI</p>
                         <p className="text-[10px] text-slate-500 max-w-[200px] leading-relaxed">
                             {order.branch?.address || order.branch?.name || 'Chi nhánh Ohari'}
                         </p>

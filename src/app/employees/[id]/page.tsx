@@ -334,7 +334,7 @@ export default function EmployeeDetailPage() {
         if (userStr) {
             const user = JSON.parse(userStr);
             setCurrentUser(user);
-            if (['DIRECTOR', 'CHIEF_ACCOUNTANT'].includes(user.role?.code)) {
+            if (['DIRECTOR', 'CHIEF_ACCOUNTANT', 'HR'].includes(user.role?.code)) {
                 fetchPerformanceStats();
             }
         }
@@ -497,6 +497,7 @@ export default function EmployeeDetailPage() {
                                         { label: 'Trợ lý Giám đốc', value: 'Trợ lý GĐ' },
                                         { label: 'Quản Lý', value: 'Quản Lý' },
                                         { label: 'Nhân viên bán hàng (NVBH)', value: 'NVBH' },
+                                        { label: 'Nhân viên giao hàng (NVGH)', value: 'NVGH' },
                                         { label: 'Kế toán', value: 'Kế toán' },
                                         { label: 'Media', value: 'Media' },
                                         { label: 'ADS', value: 'ADS' },

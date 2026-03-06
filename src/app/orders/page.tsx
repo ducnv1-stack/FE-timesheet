@@ -29,6 +29,7 @@ import { formatCurrency, cn } from '@/lib/utils';
 import { useToast } from '@/components/ui/toast';
 import OrderInvoiceView from '../../components/orders/OrderInvoiceView';
 import ConfirmModal from '@/components/ui/confirm-modal';
+import SearchableSelect from '@/components/ui/SearchableSelect';
 
 const LoadingBarStyle = () => (
     <style jsx global>{`
@@ -382,7 +383,7 @@ function OrdersPageContent() {
     const isDirector = userRole === 'DIRECTOR';
     const isAccountant = userRole === 'ACCOUNTANT' || userRole === 'CHIEF_ACCOUNTANT';
     const isSale = userRole === 'SALE' || userRole === 'TELESALE';
-    const isDriver = userRole === 'DRIVER';
+    const isDriver = userRole === 'DRIVER' || userRole === 'DELIVERY_STAFF';
 
     // Income calculation helper
     const calculateOrderIncome = (order: any) => {
@@ -508,8 +509,8 @@ function OrdersPageContent() {
                 </div>
 
                 <div className={cn(
-                    "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 xl:grid-cols-7 gap-1.5 items-center transition-all duration-300 lg:min-w-0 lg:opacity-100 lg:max-h-none",
-                    showMobileFilters ? "max-h-[1000px] opacity-100 mt-2" : "max-h-0 opacity-0 overflow-hidden lg:max-h-none lg:opacity-100"
+                    "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 xl:grid-cols-7 gap-1.5 items-center transition-[max-height,opacity] duration-300 lg:min-w-0 lg:opacity-100 lg:max-h-none lg:overflow-visible",
+                    showMobileFilters ? "max-h-[1000px] opacity-100 mt-2" : "max-h-0 opacity-0 overflow-hidden lg:max-h-none lg:opacity-100 lg:overflow-visible"
                 )}>
                     {/* Search Search (Desktop Only) */}
                     <div className="relative hidden lg:block">
@@ -680,22 +681,18 @@ function OrdersPageContent() {
 
                     {/* Employee Filter (Global Roles & Manager) */}
                     {(isGlobalRole || isManager) ? (
-                        <div className="relative">
-                            <UserIcon className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${selectedEmployeeId !== 'all' ? 'text-rose-500' : 'text-slate-400'}`} size={14} />
-                            <select
-                                value={selectedEmployeeId}
-                                onChange={(e) => setSelectedEmployeeId(e.target.value)}
-                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${selectedEmployeeId !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
-                            >
-                                <option value="all">Tất cả nhân viên</option>
-                                {employees
-                                    .filter(e => selectedBranchId === 'all' || e.branchId === selectedBranchId)
-                                    .map(e => (
-                                        <option key={e.id} value={e.id}>{e.fullName}</option>
-                                    ))
-                                }
-                            </select>
-                        </div>
+                        <SearchableSelect
+                            options={employees
+                                .filter(e => (selectedBranchId === 'all' || e.branchId === selectedBranchId) && e.status !== 'Nghỉ việc')
+                                .map(e => ({ label: e.fullName, value: e.id }))
+                            }
+                            value={selectedEmployeeId}
+                            onSelect={(val) => setSelectedEmployeeId(val)}
+                            placeholder="Chọn nhân viên..."
+                            allOption={{ label: 'Tất cả nhân viên', value: 'all' }}
+                            icon={<UserIcon />}
+                            className="relative w-full"
+                        />
                     ) : null}
 
                     {/* Low Price for Admin roles */}
@@ -1125,7 +1122,7 @@ function OrdersPageContent() {
                                                         </div>
                                                     ) : (order.status === 'assigned' || (order.deliveries && order.deliveries.length > 0)) ? (
                                                         <div className="flex flex-col items-center gap-1">
-                                                            {(isGlobalRole || isSale || (isDriver && isOrderAssignedToUser(order))) ? (
+                                                            {((isGlobalRole && !isDirector) || isSale || (isDriver && isOrderAssignedToUser(order))) ? (
                                                                 <button
                                                                     onClick={() => handleConfirmDelivery(order.id)}
                                                                     className="px-1 py-0.5 bg-emerald-600 text-white rounded text-[8px] font-black uppercase hover:bg-emerald-700 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
@@ -1193,7 +1190,7 @@ function OrdersPageContent() {
                                                                     )}
                                                                 </div>
 
-                                                                {isGlobalRole ? (
+                                                                {(isGlobalRole && !isDirector) ? (
                                                                     <button
                                                                         onClick={() => handleConfirmPayment(order.id)}
                                                                         className="px-1.5 py-0.5 bg-rose-600 text-white rounded text-[8px] font-black hover:bg-rose-700 transition-all active:scale-95 shadow-sm whitespace-nowrap uppercase cursor-pointer"
@@ -1218,7 +1215,7 @@ function OrdersPageContent() {
                                                     >
                                                         <FileText size={12} /> XEM
                                                     </button>
-                                                    {isGlobalRole && (
+                                                    {(isGlobalRole && !isDirector) && (
                                                         <button
                                                             onClick={() => {
                                                                 setDeleteOrderId(order.id);

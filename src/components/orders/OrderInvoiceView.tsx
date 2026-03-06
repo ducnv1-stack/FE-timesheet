@@ -69,7 +69,7 @@ export default function OrderInvoiceView({ order, onBack }: OrderInvoiceViewProp
                         const storedUser = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
                         const user = storedUser ? JSON.parse(storedUser) : null;
                         const userRole = user ? (typeof user.role === 'object' ? (user.role.code || user.role.name) : user.role) : '';
-                        if (userRole === 'DRIVER') return null;
+                        if (userRole === 'DRIVER' || userRole === 'DIRECTOR' || userRole === 'DELIVERY_STAFF') return null;
                         return (
                             <button
                                 onClick={() => router.push(`/orders/edit/${order.id}`)}

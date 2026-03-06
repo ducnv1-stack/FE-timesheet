@@ -15,6 +15,7 @@ import {
 import { cn } from '@/lib/utils';
 import * as XLSX from 'xlsx';
 import { useToast } from '@/components/ui/toast';
+import { ChevronDown, Check } from 'lucide-react';
 
 interface PerformanceRecord {
     employeeId: string;
@@ -34,14 +35,106 @@ interface PerformanceRecord {
     netIncome: number;        // New
     isPenalty: boolean;
     isClemency: boolean;
+    position: string;         // New
+    department: string | null; // New
+    branchId: string;         // New
+    status: string;           // New
+}
+
+interface Branch {
+    id: string;
+    name: string;
+}
+
+function MultiSelect({
+    label,
+    options,
+    selected,
+    onChange,
+    placeholder
+}: {
+    label: string;
+    options: { label: string; value: string }[];
+    selected: string[];
+    onChange: (values: string[]) => void;
+    placeholder: string;
+}) {
+    const [isOpen, setIsOpen] = useState(false);
+
+    const toggleOption = (value: string) => {
+        if (selected.includes(value)) {
+            onChange(selected.filter(v => v !== value));
+        } else {
+            onChange([...selected, value]);
+        }
+    };
+
+    const isAllSelected = selected.length === 0;
+
+    return (
+        <div className="relative">
+            <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 flex items-center justify-between hover:border-rose-500 transition-all shadow-sm outline-none"
+            >
+                <span className="truncate">
+                    {isAllSelected ? placeholder : `${label} (${selected.length})`}
+                </span>
+                <ChevronDown size={14} className={cn("transition-transform", isOpen && "rotate-180")} />
+            </button>
+
+            {isOpen && (
+                <>
+                    <div
+                        className="fixed inset-0 z-10"
+                        onClick={() => setIsOpen(false)}
+                    />
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-20 max-h-60 overflow-y-auto p-1 py-2">
+                        <div
+                            onClick={() => {
+                                onChange([]);
+                                setIsOpen(false);
+                            }}
+                            className={cn(
+                                "flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer text-xs font-bold transition-colors",
+                                isAllSelected ? "bg-rose-50 text-rose-600" : "hover:bg-slate-50 text-slate-600"
+                            )}
+                        >
+                            <span>Tất cả {label}</span>
+                            {isAllSelected && <Check size={14} />}
+                        </div>
+                        <div className="h-px bg-slate-100 my-1" />
+                        {options.map(opt => (
+                            <div
+                                key={opt.value}
+                                onClick={() => toggleOption(opt.value)}
+                                className={cn(
+                                    "flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer text-xs font-medium transition-colors mb-0.5",
+                                    selected.includes(opt.value) ? "bg-rose-50 text-rose-600 font-bold" : "hover:bg-slate-50 text-slate-600"
+                                )}
+                            >
+                                <span>{opt.label}</span>
+                                {selected.includes(opt.value) && <Check size={14} />}
+                            </div>
+                        ))}
+                    </div>
+                </>
+            )}
+        </div>
+    );
 }
 
 export default function PerformancePage() {
     const [month, setMonth] = useState(new Date().getMonth() + 1);
     const [year, setYear] = useState(new Date().getFullYear());
     const [records, setRecords] = useState<PerformanceRecord[]>([]);
+    const [branches, setBranches] = useState<Branch[]>([]);
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedBranches, setSelectedBranches] = useState<string[]>([]);
+    const [selectedPositions, setSelectedPositions] = useState<string[]>([]);
+    const [selectedDepartments, setSelectedDepartments] = useState<string[]>([]);
     const { error: toastError } = useToast();
     const router = useRouter();
 
@@ -60,8 +153,19 @@ export default function PerformancePage() {
             return;
         }
 
+        fetchBranches();
         fetchReport();
     }, [month, year]);
+
+    const fetchBranches = async () => {
+        try {
+            const res = await fetch(`${API_URL}/branches`);
+            const data = await res.json();
+            setBranches(data);
+        } catch (error) {
+            console.error('Error fetching branches:', error);
+        }
+    };
 
     const fetchReport = async () => {
         setLoading(true);
@@ -78,9 +182,10 @@ export default function PerformancePage() {
     };
 
     const handleExportExcel = () => {
-        const exportData = records.map(r => ({
+        const exportData = filteredRecords.map(r => ({
             'Nhân viên': r.fullName,
             'Chi nhánh': r.branchName || '-',
+            'Chức vụ': r.position || '-',
             'Tổng đơn': r.totalOrders,
             'Doanh số': r.totalRevenue,
             'Hoa hồng': r.commission,
@@ -100,7 +205,7 @@ export default function PerformancePage() {
 
         // Apply number formatting for currency columns
         const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
-        const currencyCols = [3, 4, 5, 6, 7, 9, 10, 11, 12, 13]; // Doanh số, Hoa hồng, Thưởng nóng, Ship, Đơn dưới Min, Mốc, Thưởng gốc, Thưởng thực tế, Lương CB, Thực nhận
+        const currencyCols = [4, 5, 6, 7, 8, 10, 11, 12, 13, 14]; // Doanh số, Hoa hồng, Thưởng nóng, Ship, Đơn dưới Min, Mốc, Thưởng gốc, Thưởng thực tế, Lương CB, Thực nhận
 
         for (let R = range.s.r + 1; R <= range.e.r; ++R) {
             currencyCols.forEach(C => {
@@ -116,6 +221,7 @@ export default function PerformancePage() {
         ws['!cols'] = [
             { wch: 20 }, // Nhân viên
             { wch: 15 }, // Chi nhánh
+            { wch: 15 }, // Chức vụ
             { wch: 10 }, // Tổng đơn
             { wch: 15 }, // Doanh số
             { wch: 15 }, // Hoa hồng
@@ -140,10 +246,15 @@ export default function PerformancePage() {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
     };
 
-    const filteredRecords = records.filter(r =>
-        r.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        r.branchName?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredRecords = records.filter(r => {
+        const matchSearch = r.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            r.branchName?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchBranch = selectedBranches.length === 0 || selectedBranches.includes(r.branchId);
+        const matchPosition = selectedPositions.length === 0 || selectedPositions.includes(r.position);
+        const matchDepartment = selectedDepartments.length === 0 || (r.department && selectedDepartments.includes(r.department));
+
+        return matchSearch && matchBranch && matchPosition && matchDepartment;
+    });
 
     return (
         <div className="min-h-screen bg-slate-50/50 pt-1 px-3 pb-3">
@@ -190,15 +301,58 @@ export default function PerformancePage() {
                     </div>
                 </div>
 
-                {/* Filters & Search */}
-                <div className="relative group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-rose-500 transition-colors" size={18} />
-                    <input
-                        type="text"
-                        placeholder="Tìm theo tên nhân viên hoặc chi nhánh..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl shadow-sm outline-none focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 transition-all text-sm font-medium"
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div className="relative group col-span-1 md:col-span-1">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-rose-500 transition-colors" size={18} />
+                        <input
+                            type="text"
+                            placeholder="Tìm tên nhân viên..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full h-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl shadow-sm outline-none focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 transition-all text-sm font-medium"
+                        />
+                    </div>
+
+                    <MultiSelect
+                        label="Chi nhánh"
+                        placeholder="Tất cả chi nhánh"
+                        options={branches.map(b => ({ label: b.name, value: b.id }))}
+                        selected={selectedBranches}
+                        onChange={setSelectedBranches}
+                    />
+
+                    <MultiSelect
+                        label="Phòng ban"
+                        placeholder="Tất cả phòng ban"
+                        options={[
+                            { label: 'BGĐ', value: 'BGĐ' },
+                            { label: 'MKT', value: 'MKT' },
+                            { label: 'HCKT', value: 'HCKT' },
+                            { label: 'Kỹ Thuật', value: 'Kỹ Thuật' },
+                            { label: 'Kho', value: 'Kho' },
+                            { label: 'Lái xe', value: 'Lái xe' },
+                            { label: 'Phòng KD', value: 'Phòng KD' },
+                        ]}
+                        selected={selectedDepartments}
+                        onChange={setSelectedDepartments}
+                    />
+
+                    <MultiSelect
+                        label="Chức vụ"
+                        placeholder="Tất cả chức vụ"
+                        options={[
+                            { label: 'Giám đốc (GĐ)', value: 'GĐ' },
+                            { label: 'Giám đốc kinh doanh (GĐKD)', value: 'GĐKD' },
+                            { label: 'Nhân viên bán hàng (NVBH)', value: 'NVBH' },
+                            { label: 'Nhân viên giao hàng (NVGH)', value: 'NVGH' },
+                            { label: 'Quản Lý', value: 'Quản Lý' },
+                            { label: 'Kế toán', value: 'Kế toán' },
+                            { label: 'Nhân viên kỹ thuật (NVKT)', value: 'NVKT' },
+                            { label: 'Lái xe (Driver)', value: 'Driver' },
+                            { label: 'Marketing', value: 'Marketing' },
+                        ]}
+                        selected={selectedPositions}
+                        onChange={setSelectedPositions}
                     />
                 </div>
 
@@ -210,6 +364,7 @@ export default function PerformancePage() {
                                 <tr className="bg-gradient-to-r from-slate-100 to-slate-50 border-b-2 border-slate-300 whitespace-nowrap">
                                     <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase border-r border-slate-200">Nhân viên</th>
                                     <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase border-r border-slate-200">Chi nhánh</th>
+                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase border-r border-slate-200">Chức vụ</th>
                                     <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-center border-r border-slate-200">Tổng đơn</th>
                                     <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Doanh số</th>
                                     <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Hoa hồng</th>
@@ -235,6 +390,7 @@ export default function PerformancePage() {
                                         <tr key={r.employeeId} className="hover:bg-slate-50 transition-colors group text-[12px] border-b border-slate-100">
                                             <td className="px-2 py-2 whitespace-nowrap font-bold text-slate-900 border-r border-slate-100">{r.fullName}</td>
                                             <td className="px-2 py-2 whitespace-nowrap text-slate-600 border-r border-slate-100">{r.branchName || '-'}</td>
+                                            <td className="px-2 py-2 whitespace-nowrap text-slate-600 border-r border-slate-100">{r.position || '-'}</td>
                                             <td className="px-2 py-2 text-center font-bold text-slate-700 border-r border-slate-100">{r.totalOrders}</td>
                                             <td className="px-2 py-2 text-right font-bold text-indigo-600 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.totalRevenue)}</td>
                                             <td className="px-2 py-2 text-right font-medium text-slate-600 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.commission)}</td>

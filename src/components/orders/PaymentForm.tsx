@@ -54,11 +54,11 @@ export default function PaymentForm({ payments, totalOrderAmount, onChange }: Pa
                                     onChange={(e) => updatePayment(index, 'paymentMethod', e.target.value)}
                                     className="w-full bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-rose-500 rounded p-1.5 text-xs font-medium truncate cursor-pointer"
                                 >
-                                    <option value="CASH">💵 Tiền mặt (CASH)</option>
-                                    <option value="TRANSFER_COMPANY">🏢 Chuyển khoản Công ty (CORP)</option>
-                                    <option value="TRANSFER_PERSONAL">👤 Chuyển khoản Cá nhân (PERSONAL)</option>
-                                    <option value="CARD">💳 Quẹt thẻ (CARD/CREDIT)</option>
-                                    <option value="INSTALLMENT">🏦 Trả góp (INSTALLMENT)</option>
+                                    <option value="CASH">💵 Tiền mặt </option>
+                                    <option value="TRANSFER_COMPANY">🏢 Chuyển khoản Công ty (Ohari - Đuôi 6666)</option>
+                                    <option value="TRANSFER_PERSONAL">👤 Chuyển khoản Cá nhân (C Hằng - Đuôi 9099)</option>
+                                    <option value="CARD">💳 Quẹt thẻ (Mpos)</option>
+                                    <option value="INSTALLMENT">🏦 Trả góp (Homecredit)</option>
                                 </select>
                             </div>
                             <button

@@ -65,7 +65,7 @@ export default function EmployeesPage() {
 
         // RBAC: Only allowed roles can access this page
         const roleCode = parsedUser.role?.code;
-        const allowedRoles = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'];
+        const allowedRoles = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR'];
 
         if (!allowedRoles.includes(roleCode)) {
             router.push('/dashboard');
@@ -210,12 +210,15 @@ export default function EmployeesPage() {
 
     // Check permissions
     const userRole = currentUser?.role?.code;
-    const isGlobal = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'].includes(userRole);
+    const isGlobal = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR'].includes(userRole);
     const isBranch = ['MANAGER'].includes(userRole);
 
     const canCreate = isGlobal || isBranch;
     const canEdit = isGlobal || isBranch;
     const canDelete = isGlobal;
+
+    // HR can view AND manage (create/edit/delete)
+    const canManage = true; // Everyone who can access this page (already filtered by allowedRoles)
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-3">
@@ -239,7 +242,7 @@ export default function EmployeesPage() {
                             <FileSpreadsheet className="w-3.5 h-3.5" />
                             Xuất Excel
                         </button>
-                        {canCreate && (
+                        {canManage && canCreate && (
                             <button
                                 onClick={() => router.push('/employees/new')}
                                 className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-pink-600 to-rose-600 text-white font-bold text-xs rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all cursor-pointer"
@@ -352,6 +355,7 @@ export default function EmployeesPage() {
                                     <option value="Trợ lý GĐ">Trợ lý Giám đốc</option>
                                     <option value="Quản Lý">Quản Lý</option>
                                     <option value="NVBH">Nhân viên bán hàng (NVBH)</option>
+                                    <option value="NVGH">Nhân viên giao hàng (NVGH)</option>
                                     <option value="Kế toán">Kế toán</option>
                                     <option value="Media">Media</option>
                                     <option value="ADS">ADS</option>

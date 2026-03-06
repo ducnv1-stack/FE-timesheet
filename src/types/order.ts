@@ -30,6 +30,7 @@ export interface Employee {
     position?: string;
     isInternalDriver?: boolean;
     employeeCode?: string;
+    status?: string;
 }
 
 export interface Branch {

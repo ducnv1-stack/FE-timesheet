@@ -135,7 +135,7 @@ export default function EditOrderPage() {
                 }
                 const user = JSON.parse(storedUser);
                 const userRole = typeof user.role === 'object' ? (user.role.code || user.role.name) : user.role;
-                if (userRole === 'DRIVER') {
+                if (userRole === 'DRIVER' || userRole === 'DELIVERY_STAFF') {
                     router.push('/orders');
                     return;
                 }
@@ -151,7 +151,7 @@ export default function EditOrderPage() {
         setIsMounted(true);
     }, [orderId, router]);
 
-    const headerEmployees = allEmployees.filter(e => e.branchId === order.branchId);
+    const headerEmployees = allEmployees.filter(e => e.branchId === order.branchId && e.status !== 'Nghỉ việc');
     const totalAmount = order.items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
     const totalGiftAmount = order.gifts.reduce((sum, g) => sum + (g.quantity * (g.price || 0)), 0);
     const paidAmount = order.payments.reduce((sum, p) => sum + p.amount, 0);
@@ -334,7 +334,7 @@ export default function EditOrderPage() {
                         <div className="space-y-4">
                             <img src="/logo.png" alt="Ohari Logo" className="h-12 w-auto object-contain" />
                             <div className="space-y-1">
-                                <p className="text-xs font-black text-slate-800 uppercase tracking-tighter">Công ty TNHH OHARI Việt Nam</p>
+                                <p className="text-xs font-black text-slate-800 uppercase tracking-tighter">Công ty TNHH Tập đoàn OHARI</p>
                                 <p className="text-[10px] text-slate-500 max-w-[200px] leading-relaxed">
                                     {(() => {
                                         const b = branches.find(b => b.id === order.branchId);
@@ -481,7 +481,7 @@ export default function EditOrderPage() {
                                     >
                                         <option value="">-- Chọn lái xe --</option>
                                         {allEmployees
-                                            .filter(e => e.department === 'Lái xe' || e.position === 'driver' || e.isInternalDriver)
+                                            .filter(e => (e.department === 'Lái xe' || e.position === 'driver' || e.isInternalDriver) && e.status !== 'Nghỉ việc')
                                             .map(emp => (
                                                 <option key={emp.id} value={emp.id}>{emp.fullName}</option>
                                             ))
@@ -495,10 +495,10 @@ export default function EditOrderPage() {
                             <span className="font-bold text-slate-600 mt-1">Người giao:</span>
                             <div className="space-y-1.5">
                                 <EmployeeSearchSelector
-                                    employees={allEmployees.filter(e => e.department !== 'Lái xe' && e.position !== 'driver' && !e.isInternalDriver)}
+                                    employees={allEmployees}
                                     selectedId={order.deliveries?.find(d => d.role === 'STAFF')?.driverId || ''}
                                     staffCode={order.staffCode || ''}
-                                    onSelect={(val) => {
+                                    onSelect={(val, tab) => {
                                         const otherDeliveries = order.deliveries?.filter(d => d.role !== 'STAFF') || [];
 
                                         if (!val) {
@@ -510,10 +510,14 @@ export default function EditOrderPage() {
                                         let category: any = 'STAFF_DELIVERER';
 
                                         if (emp) {
-                                            if (val === order.staffCode) {
-                                                category = 'SELLING_SALE';
-                                            } else if (emp.position === 'sale' || emp.position === 'NVBH' || emp.department === 'Phòng KD') {
-                                                category = 'OTHER_SALE';
+                                            if (tab === 'deliverer') {
+                                                category = 'STAFF_DELIVERER';
+                                            } else {
+                                                if (val === order.staffCode) {
+                                                    category = 'SELLING_SALE';
+                                                } else if (emp.position === 'sale' || emp.position === 'NVBH' || emp.department === 'Phòng KD') {
+                                                    category = 'OTHER_SALE';
+                                                }
                                             }
                                         }
 

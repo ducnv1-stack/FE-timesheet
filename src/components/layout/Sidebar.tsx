@@ -79,7 +79,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             icon: Users,
             href: '/employees',
             active: pathname.startsWith('/employees') && !pathname.includes('/attendance') && !pathname.includes('/timesheet'),
-            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT']
+            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR']
         },
         // {
         //     label: 'Chấm công',

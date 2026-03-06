@@ -188,7 +188,7 @@ export default function DashboardPage() {
                 {data.role === 'SALE' && <SaleDashboard data={data} startDate={startDate} endDate={endDate} />}
                 {data.role === 'TELESALE' && <TelesaleDashboard data={data} startDate={startDate} endDate={endDate} />}
                 {data.role === 'MARKETING' && <MarketingDashboard data={data} startDate={startDate} endDate={endDate} />}
-                {data.role === 'DRIVER' && <DriverDashboard data={data} startDate={startDate} endDate={endDate} />}
+                {(data.role === 'DRIVER' || data.role === 'DELIVERY_STAFF') && <DriverDashboard data={data} startDate={startDate} endDate={endDate} />}
             </main>
         </div>
     );

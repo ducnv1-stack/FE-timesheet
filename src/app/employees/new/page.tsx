@@ -46,7 +46,7 @@ export default function NewEmployeePage() {
         }
         const parsedUser = JSON.parse(user);
         const roleCode = parsedUser.role?.code;
-        const allowedRoles = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'];
+        const allowedRoles = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR'];
         if (!allowedRoles.includes(roleCode)) {
             router.push('/dashboard');
             return;
@@ -175,6 +175,7 @@ export default function NewEmployeePage() {
                                 { label: 'Trợ lý Giám đốc', value: 'Trợ lý GĐ' },
                                 { label: 'Quản Lý', value: 'Quản Lý' },
                                 { label: 'Nhân viên bán hàng (NVBH)', value: 'NVBH' },
+                                { label: 'Nhân viên giao hàng (NVGH)', value: 'NVGH' },
                                 { label: 'Kế toán', value: 'Kế toán' },
                                 { label: 'Media', value: 'Media' },
                                 { label: 'ADS', value: 'ADS' },
