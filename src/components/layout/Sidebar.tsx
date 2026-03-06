@@ -110,9 +110,8 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         {
             label: 'Cài đặt',
             icon: Settings,
-            href: '/settings',
-            active: pathname === '/settings',
-            disabled: true
+            href: '/profile',
+            active: pathname === '/profile',
         }
     ];
 
@@ -158,15 +157,13 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                 {visibleNavItems.map((item) => (
                     <Link
                         key={item.href}
-                        href={item.disabled ? "#" : item.href}
+                        href={item.href}
                         className={cn(
                             "group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 cursor-pointer",
                             item.active
                                 ? "bg-rose-50 text-rose-700 shadow-sm"
-                                : "text-slate-500 hover:bg-slate-50 hover:text-slate-900",
-                            item.disabled && "opacity-50 cursor-not-allowed"
+                                : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                         )}
-                        onClick={(e) => item.disabled && e.preventDefault()}
                     >
                         <item.icon size={20} className={cn(
                             "shrink-0",

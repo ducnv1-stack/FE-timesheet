@@ -406,7 +406,17 @@ export default function EmployeeDetailPage() {
                             </div>
 
                             <div className="flex-1 pb-2">
-                                <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-1">{employee.fullName}</h1>
+                                {!isEditing ? (
+                                    <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-1">{employee.fullName}</h1>
+                                ) : (
+                                    <input
+                                        type="text"
+                                        value={editForm.fullName || ''}
+                                        onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
+                                        className="text-3xl font-black text-slate-900 tracking-tight mb-1 bg-slate-50 border-b-2 border-rose-500 outline-none w-full max-w-md px-2 py-1 rounded-lg"
+                                        placeholder="Nhập họ tên đầy đủ"
+                                    />
+                                )}
                                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
                                     <span className="px-3 py-1 bg-rose-50 text-rose-600 rounded-full text-[10px] font-black uppercase tracking-wider border border-rose-100 flex items-center gap-1.5">
                                         <Briefcase size={12} />
@@ -534,8 +544,10 @@ export default function EmployeeDetailPage() {
                                     icon={<Clock size={14} />}
                                     value={employee.workingType}
                                     isEditing={isEditing}
+                                    type="text"
                                     editValue={editForm.workingType}
                                     onChange={(val) => setEditForm({ ...editForm, workingType: val })}
+                                    placeholder="VD: Full time, Hành chính..."
                                 />
                                 <InfoField
                                     label="Ngày vào làm"
@@ -546,6 +558,51 @@ export default function EmployeeDetailPage() {
                                     editValue={editForm.joinDate}
                                     onChange={(val) => setEditForm({ ...editForm, joinDate: val })}
                                 />
+                                <InfoField
+                                    label="Loại hợp đồng"
+                                    icon={<BadgeCheck size={14} />}
+                                    value={employee.contractType}
+                                    isEditing={isEditing}
+                                    type="text"
+                                    editValue={editForm.contractType}
+                                    onChange={(val) => setEditForm({ ...editForm, contractType: val })}
+                                    placeholder="VD: 1 năm, Không xác định..."
+                                />
+                                <InfoField
+                                    label="Ngày ký hợp đồng"
+                                    icon={<Calendar size={14} />}
+                                    value={employee.contractSigningDate ? new Date(employee.contractSigningDate).toLocaleDateString('vi-VN') : '-'}
+                                    isEditing={isEditing}
+                                    type="date"
+                                    editValue={editForm.contractSigningDate}
+                                    onChange={(val) => setEditForm({ ...editForm, contractSigningDate: val })}
+                                />
+                                <div className="min-[500px]:col-span-2 mt-2">
+                                    <label className="flex items-center gap-3 cursor-pointer group">
+                                        <div className="relative">
+                                            <input
+                                                type="checkbox"
+                                                checked={editForm.isInternalDriver || false}
+                                                onChange={(e) => setEditForm({ ...editForm, isInternalDriver: e.target.checked })}
+                                                disabled={!isEditing}
+                                                className="peer sr-only"
+                                            />
+                                            <div className={cn(
+                                                "w-12 h-6 bg-slate-200 rounded-full transition-all duration-300",
+                                                editForm.isInternalDriver && "bg-emerald-500",
+                                                !isEditing && "opacity-50 cursor-not-allowed"
+                                            )} />
+                                            <div className={cn(
+                                                "absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-all duration-300",
+                                                editForm.isInternalDriver && "translate-x-6 shadow-md"
+                                            )} />
+                                        </div>
+                                        <span className={cn(
+                                            "text-xs font-black uppercase tracking-wider transition-colors",
+                                            editForm.isInternalDriver ? "text-emerald-600" : "text-slate-400"
+                                        )}>Là tài xế nội bộ</span>
+                                    </label>
+                                </div>
                             </div>
                         </div>
 
@@ -565,6 +622,7 @@ export default function EmployeeDetailPage() {
                                     isEditing={isEditing}
                                     editValue={editForm.phone}
                                     onChange={(val) => setEditForm({ ...editForm, phone: val })}
+                                    placeholder="Số điện thoại"
                                 />
                                 <InfoField
                                     label="Ngày sinh"
@@ -595,6 +653,7 @@ export default function EmployeeDetailPage() {
                                     isEditing={isEditing}
                                     editValue={editForm.idCardNumber}
                                     onChange={(val) => setEditForm({ ...editForm, idCardNumber: val })}
+                                    placeholder="Số CMND/CCCD"
                                 />
                                 <div className="min-[500px]:col-span-2">
                                     <InfoField
@@ -604,6 +663,18 @@ export default function EmployeeDetailPage() {
                                         isEditing={isEditing}
                                         editValue={editForm.email}
                                         onChange={(val) => setEditForm({ ...editForm, email: val })}
+                                        placeholder="Email"
+                                    />
+                                </div>
+                                <div className="min-[500px]:col-span-1">
+                                    <InfoField
+                                        label="Số sổ BHXH"
+                                        icon={<Heart size={14} />}
+                                        value={employee.socialInsuranceNumber}
+                                        isEditing={isEditing}
+                                        editValue={editForm.socialInsuranceNumber}
+                                        onChange={(val) => setEditForm({ ...editForm, socialInsuranceNumber: val })}
+                                        placeholder="Số bảo hiểm xã hội"
                                     />
                                 </div>
                                 <div className="min-[500px]:col-span-2">
@@ -614,6 +685,7 @@ export default function EmployeeDetailPage() {
                                         isEditing={isEditing}
                                         editValue={editForm.permanentAddress}
                                         onChange={(val) => setEditForm({ ...editForm, permanentAddress: val })}
+                                        placeholder="Địa chỉ"
                                     />
                                 </div>
                             </div>
@@ -901,7 +973,8 @@ function InfoField({
     type = 'text',
     editValue,
     options = [],
-    onChange
+    onChange,
+    placeholder
 }: {
     label: string,
     icon?: React.ReactNode,
@@ -910,7 +983,8 @@ function InfoField({
     type?: 'text' | 'select' | 'date',
     editValue?: string | null,
     options?: { label: string, value: string }[],
-    onChange?: (val: string) => void
+    onChange?: (val: string) => void,
+    placeholder?: string
 }) {
     return (
         <div className="flex flex-col gap-1.5 group/field">
@@ -927,6 +1001,7 @@ function InfoField({
                             type="text"
                             value={editValue || ''}
                             onChange={(e) => onChange?.(e.target.value)}
+                            placeholder={placeholder}
                             className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-100 rounded-xl focus:bg-white focus:border-rose-500 outline-none transition-all font-bold text-slate-900 text-xs"
                         />
                     )}

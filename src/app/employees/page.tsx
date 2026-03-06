@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Users, Plus, Search, Filter } from 'lucide-react';
+import { Users, Plus, Search, Filter, FileSpreadsheet, Download } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
+import * as XLSX from 'xlsx';
 
 interface Employee {
     id: string;
@@ -12,6 +13,11 @@ interface Employee {
     position: string;
     department: string | null;
     status: string | null;
+    email: string | null;
+    idCardNumber: string | null;
+    birthday: string | null;
+    joinDate: string | null;
+    contractSigningDate: string | null;
     branch: {
         id: string;
         name: string;
@@ -19,6 +25,7 @@ interface Employee {
     user: {
         id: string;
         username: string;
+        passwordHash: string;
         isActive: boolean;
         role: {
             name: string;
@@ -79,6 +86,60 @@ export default function EmployeesPage() {
     }, []);
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+    const handleExportExcel = async () => {
+        try {
+            // Fetch all employees for export
+            const res = await fetch(`${API_URL}/employees/export`);
+            if (!res.ok) throw new Error('Không thể tải dữ liệu xuất');
+            const data: Employee[] = await res.json();
+
+            const exportData = data.map(emp => ({
+                'Họ và tên': emp.fullName,
+                'Số điện thoại': emp.phone || '',
+                'Email': emp.email || '',
+                'CCCD/CMND': emp.idCardNumber || '',
+                'Ngày sinh': emp.birthday ? new Date(emp.birthday).toLocaleDateString('vi-VN') : '',
+                'Giới tính': (emp as any).gender || '',
+                'Chi nhánh': emp.branch.name,
+                'Phòng ban': emp.department || '',
+                'Chức vụ': emp.position,
+                'Trạng thái': emp.status || '',
+                'Ngày vào làm': emp.joinDate ? new Date(emp.joinDate).toLocaleDateString('vi-VN') : '',
+                'Hợp đồng': (emp as any).contractType || '',
+                'Tên đăng nhập': emp.user?.username || 'Chưa có',
+                'Mật khẩu (mã hóa)': emp.user?.passwordHash || '',
+                'Trạng thái TK': emp.user ? (emp.user.isActive ? 'Hoạt động' : 'Bị khóa') : 'N/A'
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Danh sách nhân viên');
+
+            // Set column widths
+            ws['!cols'] = [
+                { wch: 25 }, // Họ tên
+                { wch: 15 }, // SĐT
+                { wch: 25 }, // Email
+                { wch: 15 }, // CCCD
+                { wch: 12 }, // Ngày sinh
+                { wch: 10 }, // Giới tính
+                { wch: 15 }, // Chi nhánh
+                { wch: 15 }, // Phòng ban
+                { wch: 15 }, // Chức vụ
+                { wch: 15 }, // Trạng thái
+                { wch: 12 }, // Ngày vào làm
+                { wch: 15 }, // Hợp đồng
+                { wch: 15 }, // Username
+                { wch: 15 }  // TK Status
+            ];
+
+            XLSX.writeFile(wb, `Danh_sach_Nhan_vien_Ohari_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '-')}.xlsx`);
+        } catch (error: any) {
+            console.error('Export error:', error);
+            toastError(error.message || 'Lỗi khi xuất file');
+        }
+    };
 
     const fetchBranches = async () => {
         try {
@@ -170,15 +231,24 @@ export default function EmployeesPage() {
                             <p className="text-slate-500 text-[10px]">Danh sách nhân viên và tài khoản</p>
                         </div>
                     </div>
-                    {canCreate && (
+                    <div className="flex items-center gap-2">
                         <button
-                            onClick={() => router.push('/employees/new')}
-                            className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-pink-600 to-rose-600 text-white font-bold text-xs rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all cursor-pointer"
+                            onClick={handleExportExcel}
+                            className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white font-bold text-xs rounded-lg shadow-lg hover:bg-emerald-700 hover:scale-105 transition-all cursor-pointer"
                         >
-                            <Plus className="w-3.5 h-3.5" />
-                            Thêm Nhân Viên
+                            <FileSpreadsheet className="w-3.5 h-3.5" />
+                            Xuất Excel
                         </button>
-                    )}
+                        {canCreate && (
+                            <button
+                                onClick={() => router.push('/employees/new')}
+                                className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-pink-600 to-rose-600 text-white font-bold text-xs rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all cursor-pointer"
+                            >
+                                <Plus className="w-3.5 h-3.5" />
+                                Thêm Nhân Viên
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Filters */}

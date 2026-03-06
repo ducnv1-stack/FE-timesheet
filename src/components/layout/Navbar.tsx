@@ -47,14 +47,18 @@ export default function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
                 {/* Right side: User info */}
                 <div className="flex items-center gap-4">
                     {user && (
-                        <div className="flex items-center gap-3 px-3 py-1.5 bg-slate-50 border border-slate-100 rounded-lg">
+                        <div
+                            onClick={() => router.push('/profile')}
+                            className="flex items-center gap-3 px-3 py-1.5 bg-slate-50 border border-slate-100 rounded-lg hover:bg-rose-50 hover:border-rose-200 transition-all cursor-pointer group"
+                            title="Xem hồ sơ cá nhân"
+                        >
                             <div className="flex flex-col items-end">
-                                <span className="text-[10px] font-bold text-slate-900 leading-tight">{user.employee?.fullName || user.username}</span>
+                                <span className="text-[10px] font-bold text-slate-900 leading-tight group-hover:text-rose-700 transition-colors">{user.employee?.fullName || user.username}</span>
                                 <span className="text-[8px] text-slate-500 uppercase font-medium">
                                     {typeof user.role === 'object' ? user.role.name : user.role}
                                 </span>
                             </div>
-                            <div className="w-8 h-8 bg-rose-600 rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-sm">
+                            <div className="w-8 h-8 bg-rose-600 rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-sm group-hover:shadow-md group-hover:scale-105 transition-all">
                                 {(user.employee?.fullName || user.username).substring(0, 2).toUpperCase()}
                             </div>
                         </div>
