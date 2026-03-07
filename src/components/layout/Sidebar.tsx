@@ -65,7 +65,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             icon: ScrollText,
             href: '/performance',
             active: pathname === '/performance',
-            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT']
+            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER']
         },
         {
             label: 'Log hệ thống',

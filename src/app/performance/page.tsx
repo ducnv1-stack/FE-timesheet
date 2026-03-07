@@ -21,8 +21,10 @@ interface PerformanceRecord {
     employeeId: string;
     fullName: string;
     branchName: string;
-    totalOrders: number;      // New
+    totalOrders: number;
     totalRevenue: number;
+    branchTotalOrders: number;   // New
+    branchTotalRevenue: number;  // New
     lowPriceValue: number;
     lowPriceRatio: number;
     milestone: number;
@@ -135,6 +137,9 @@ export default function PerformancePage() {
     const [selectedBranches, setSelectedBranches] = useState<string[]>([]);
     const [selectedPositions, setSelectedPositions] = useState<string[]>([]);
     const [selectedDepartments, setSelectedDepartments] = useState<string[]>([]);
+    const [isManager, setIsManager] = useState(false);
+    const [managerBranchId, setManagerBranchId] = useState<string | null>(null);
+    const [managerBranchName, setManagerBranchName] = useState<string>('');
     const { error: toastError } = useToast();
     const router = useRouter();
 
@@ -147,10 +152,16 @@ export default function PerformancePage() {
             return;
         }
         const parsedUser = JSON.parse(user);
-        const allowedRoles = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'];
+        const allowedRoles = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER'];
         if (!allowedRoles.includes(parsedUser.role?.code)) {
             router.push('/dashboard');
             return;
+        }
+
+        if (parsedUser.role?.code === 'MANAGER' && parsedUser.employee?.branchId) {
+            setIsManager(true);
+            setManagerBranchId(parsedUser.employee.branchId);
+            setManagerBranchName(parsedUser.employee.branch?.name || '');
         }
 
         fetchBranches();
@@ -170,7 +181,11 @@ export default function PerformancePage() {
     const fetchReport = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`${API_URL}/employees/performance/report?month=${month}&year=${year}`);
+            const user = localStorage.getItem('user');
+            const parsedUser = user ? JSON.parse(user) : null;
+            const branchFilter = parsedUser?.role?.code === 'MANAGER' && parsedUser?.employee?.branchId
+                ? `&branchId=${parsedUser.employee.branchId}` : '';
+            const res = await fetch(`${API_URL}/employees/performance/report?month=${month}&year=${year}${branchFilter}`);
             if (!res.ok) throw new Error('Không thể tải báo cáo');
             const data = await res.json();
             setRecords(data);
@@ -182,60 +197,72 @@ export default function PerformancePage() {
     };
 
     const handleExportExcel = () => {
-        const exportData = filteredRecords.map(r => ({
-            'Nhân viên': r.fullName,
-            'Chi nhánh': r.branchName || '-',
-            'Chức vụ': r.position || '-',
-            'Tổng đơn': r.totalOrders,
-            'Doanh số': r.totalRevenue,
-            'Hoa hồng': r.commission,
-            'Thưởng nóng': r.hotBonus,
-            'Tiền ship': r.shippingFee,
-            'Đơn dưới Min': r.lowPriceValue,
-            'Tỷ lệ thấp (%)': r.lowPriceRatio.toFixed(1),
-            'Mốc doanh số': r.milestone,
-            'Thưởng mốc (gốc)': r.baseReward,
-            'Thưởng mốc (thực tế)': r.actualReward,
-            'Lương cơ bản': r.baseSalary,
-            'Thực nhận': r.netIncome,
-            'Trạng thái': r.isClemency ? 'Khoan hồng' : (r.isPenalty ? 'Bị phạt' : 'Bình thường')
-        }));
+        const exportData = filteredRecords.map(r => {
+            if (isManager) {
+                return {
+                    'Nhân viên': r.fullName,
+                    'Chi nhánh': r.branchName || '-',
+                    'Chức vụ': r.position || '-',
+                    'Tổng đơn': r.totalOrders,
+                    'Doanh số': r.totalRevenue,
+                    'Đơn dưới Min': r.lowPriceValue,
+                    'Tỷ lệ thấp (%)': r.lowPriceRatio.toFixed(1),
+                };
+            }
+            return {
+                'Nhân viên': r.fullName,
+                'Chi nhánh': r.branchName || '-',
+                'Chức vụ': r.position || '-',
+                'Tổng đơn': r.totalOrders,
+                'Doanh số': r.totalRevenue,
+                'Hoa hồng': r.commission,
+                'Thưởng nóng': r.hotBonus,
+                'Tiền ship': r.shippingFee,
+                'Đơn dưới Min': r.lowPriceValue,
+                'Tỷ lệ thấp (%)': r.lowPriceRatio.toFixed(1),
+                'Mốc doanh số': r.milestone,
+                'Thưởng mốc (gốc)': r.baseReward,
+                'Thưởng mốc (thực tế)': r.actualReward,
+                'Lương cơ bản': r.baseSalary,
+                'Thực nhận': r.netIncome,
+                'Trạng thái': r.isClemency ? 'Khoan hồng' : (r.isPenalty ? 'Bị phạt' : 'Bình thường')
+            };
+        });
 
         const ws = XLSX.utils.json_to_sheet(exportData);
-
-        // Apply number formatting for currency columns
         const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
-        const currencyCols = [4, 5, 6, 7, 8, 10, 11, 12, 13, 14]; // Doanh số, Hoa hồng, Thưởng nóng, Ship, Đơn dưới Min, Mốc, Thưởng gốc, Thưởng thực tế, Lương CB, Thực nhận
 
-        for (let R = range.s.r + 1; R <= range.e.r; ++R) {
-            currencyCols.forEach(C => {
-                const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
-                if (ws[cellAddress]) {
-                    ws[cellAddress].t = 'n'; // Set type to number
-                    ws[cellAddress].z = '#,##0 "₫"'; // Vietnamese currency format
-                }
-            });
+        if (!isManager) {
+            const currencyCols = [4, 5, 6, 7, 8, 10, 11, 12, 13, 14];
+            for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+                currencyCols.forEach(C => {
+                    const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+                    if (ws[cellAddress]) {
+                        ws[cellAddress].t = 'n';
+                        ws[cellAddress].z = '#,##0 "₫"';
+                    }
+                });
+            }
+            ws['!cols'] = [
+                { wch: 20 }, { wch: 15 }, { wch: 15 }, { wch: 12 }, { wch: 15 },
+                { wch: 15 }, { wch: 15 }, { wch: 12 }, { wch: 15 }, { wch: 12 },
+                { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }
+            ];
+        } else {
+            const currencyCols = [4, 5];
+            for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+                currencyCols.forEach(C => {
+                    const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+                    if (ws[cellAddress]) {
+                        ws[cellAddress].t = 'n';
+                        ws[cellAddress].z = '#,##0 "₫"';
+                    }
+                });
+            }
+            ws['!cols'] = [
+                { wch: 20 }, { wch: 15 }, { wch: 15 }, { wch: 12 }, { wch: 15 }, { wch: 15 }, { wch: 12 }
+            ];
         }
-
-        // Set column widths for better readability
-        ws['!cols'] = [
-            { wch: 20 }, // Nhân viên
-            { wch: 15 }, // Chi nhánh
-            { wch: 15 }, // Chức vụ
-            { wch: 10 }, // Tổng đơn
-            { wch: 15 }, // Doanh số
-            { wch: 15 }, // Hoa hồng
-            { wch: 15 }, // Thưởng nóng
-            { wch: 12 }, // Tiền ship
-            { wch: 15 }, // Đơn dưới Min
-            { wch: 12 }, // Tỷ lệ
-            { wch: 15 }, // Mốc doanh số
-            { wch: 15 }, // Thưởng mốc gốc
-            { wch: 15 }, // Thưởng mốc thực tế
-            { wch: 15 }, // Lương CB
-            { wch: 15 }, // Thực nhận
-            { wch: 15 }  // Trạng thái
-        ];
 
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, `Bao_cao_T${month}_${year}`);
@@ -264,9 +291,11 @@ export default function PerformancePage() {
                     <div>
                         <h1 className="text-xl font-black text-slate-900 flex items-center gap-2">
                             <TrendingUp className="text-rose-500" size={20} />
-                            Báo Cáo Doanh Số & Thưởng
+                            {isManager ? 'Báo Cáo Doanh Số Chi Nhánh' : 'Báo Cáo Doanh Số & Thưởng'}
                         </h1>
-                        <p className="text-slate-400 font-medium text-xs">Theo dõi hiệu suất và chính sách thưởng cá nhân</p>
+                        <p className="text-slate-400 font-medium text-xs">
+                            {isManager ? `Chi nhánh: ${managerBranchName}` : 'Theo dõi hiệu suất và chính sách thưởng cá nhân'}
+                        </p>
                     </div>
 
                     <div className="flex items-center gap-3">
@@ -313,13 +342,20 @@ export default function PerformancePage() {
                         />
                     </div>
 
-                    <MultiSelect
-                        label="Chi nhánh"
-                        placeholder="Tất cả chi nhánh"
-                        options={branches.map(b => ({ label: b.name, value: b.id }))}
-                        selected={selectedBranches}
-                        onChange={setSelectedBranches}
-                    />
+                    {isManager ? (
+                        <div className="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-500 flex items-center gap-2 cursor-not-allowed">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                            {managerBranchName || 'Chi nhánh của bạn'}
+                        </div>
+                    ) : (
+                        <MultiSelect
+                            label="Chi nhánh"
+                            placeholder="Tất cả chi nhánh"
+                            options={branches.map(b => ({ label: b.name, value: b.id }))}
+                            selected={selectedBranches}
+                            onChange={setSelectedBranches}
+                        />
+                    )}
 
                     <MultiSelect
                         label="Phòng ban"
@@ -356,135 +392,196 @@ export default function PerformancePage() {
                     />
                 </div>
 
-                {/* Main Table */}
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-gradient-to-r from-slate-100 to-slate-50 border-b-2 border-slate-300 whitespace-nowrap">
-                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase border-r border-slate-200">Nhân viên</th>
-                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase border-r border-slate-200">Chi nhánh</th>
-                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase border-r border-slate-200">Chức vụ</th>
-                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-center border-r border-slate-200">Tổng đơn</th>
-                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Doanh số</th>
-                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Hoa hồng</th>
-                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Thưởng nóng</th>
-                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Tiền ship</th>
-                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Đơn dưới Min</th>
-                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-center border-r border-slate-200">Tỷ lệ</th>
-                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Mốc thưởng</th>
-                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Lương CB</th>
-                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Thực nhận</th>
-                                    <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-center">Trạng thái</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-200">
-                                {loading ? (
-                                    [1, 2, 3].map(i => (
-                                        <tr key={i} className="animate-pulse">
-                                            <td colSpan={13} className="px-6 py-8 bg-slate-50/30"></td>
-                                        </tr>
-                                    ))
-                                ) : filteredRecords.length > 0 ? (
-                                    filteredRecords.map((r) => (
-                                        <tr key={r.employeeId} className="hover:bg-slate-50 transition-colors group text-[12px] border-b border-slate-100">
-                                            <td className="px-2 py-2 whitespace-nowrap font-bold text-slate-900 border-r border-slate-100">{r.fullName}</td>
-                                            <td className="px-2 py-2 whitespace-nowrap text-slate-600 border-r border-slate-100">{r.branchName || '-'}</td>
-                                            <td className="px-2 py-2 whitespace-nowrap text-slate-600 border-r border-slate-100">{r.position || '-'}</td>
-                                            <td className="px-2 py-2 text-center font-bold text-slate-700 border-r border-slate-100">{r.totalOrders}</td>
-                                            <td className="px-2 py-2 text-right font-bold text-indigo-600 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.totalRevenue)}</td>
-                                            <td className="px-2 py-2 text-right font-medium text-slate-600 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.commission)}</td>
-                                            <td className="px-2 py-2 text-right font-medium text-amber-600 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.hotBonus)}</td>
-                                            <td className="px-2 py-2 text-right font-medium text-blue-600 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.shippingFee)}</td>
-                                            <td className="px-2 py-2 text-right text-slate-500 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.lowPriceValue)}</td>
-                                            <td className="px-2 py-2 text-center border-r border-slate-100">
-                                                <span className={cn(
-                                                    "px-1 py-0.5 rounded text-[9px] font-black",
-                                                    r.lowPriceRatio >= 20 ? "bg-red-50 text-red-600" : "bg-emerald-50 text-emerald-600"
-                                                )}>
-                                                    {r.lowPriceRatio.toFixed(1)}%
-                                                </span>
-                                            </td>
-                                            <td className="px-2 py-2 text-right border-r border-slate-100">
-                                                <div className="font-bold text-slate-700 whitespace-nowrap">{formatCurrency(r.milestone)}</div>
-                                                <div className={cn(
-                                                    "text-[9px] font-bold uppercase mt-0.5",
-                                                    (r.isPenalty && !r.isClemency) ? "text-slate-400 line-through" : "text-slate-500"
-                                                )}>
-                                                    Thưởng: {formatCurrency(r.baseReward)}
-                                                </div>
-                                                {(r.isPenalty && !r.isClemency) && (
-                                                    <div className="text-[10px] font-black text-red-600 mt-0.5">
-                                                        {formatCurrency(r.actualReward)}
-                                                    </div>
-                                                )}
-                                            </td>
-                                            <td className="px-2 py-2 text-right font-bold text-slate-700 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.baseSalary)}</td>
-                                            <td className="px-2 py-2 text-right border-r border-slate-100">
-                                                <div className={cn(
-                                                    "font-black whitespace-nowrap text-[12px]",
-                                                    r.isPenalty && !r.isClemency ? "text-red-600" : "text-emerald-600"
-                                                )}>
-                                                    {formatCurrency(r.netIncome)}
-                                                </div>
-                                            </td>
-                                            <td className="px-2 py-2 text-center">
-                                                <div className="flex justify-center">
-                                                    {r.isClemency ? (
-                                                        <div className="flex items-center gap-1 bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded-full text-[9px] font-black whitespace-nowrap border border-amber-200">
-                                                            <CheckCircle2 size={10} /> Khoan hồng
-                                                        </div>
-                                                    ) : r.isPenalty ? (
-                                                        <div className="flex items-center gap-1 bg-red-50 text-red-600 px-1.5 py-0.5 rounded-full text-[9px] font-black whitespace-nowrap border border-red-200">
-                                                            <AlertTriangle size={10} /> Bị phạt
-                                                        </div>
-                                                    ) : r.totalRevenue > 0 ? (
-                                                        <div className="flex items-center gap-1 bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded-full text-[9px] font-black whitespace-nowrap border border-emerald-200">
-                                                            <CheckCircle2 size={10} /> Hợp lệ
-                                                        </div>
-                                                    ) : (
-                                                        <span className="text-slate-300">-</span>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan={7} className="px-6 py-20 text-center">
-                                            <div className="flex flex-col items-center gap-2 opacity-50">
-                                                <FileSpreadsheet size={48} className="text-slate-300" />
-                                                <p className="font-bold text-slate-400">Không tìm thấy dữ liệu phù hợp</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                {/* Totals calculation for filtered records */}
+                {(() => {
+                    const totals = filteredRecords.reduce((acc, r) => ({
+                        totalOrders: acc.totalOrders + (r.totalOrders || 0),
+                        totalRevenue: acc.totalRevenue + (Number(r.totalRevenue) || 0),
+                        commission: acc.commission + (Number(r.commission) || 0),
+                        hotBonus: acc.hotBonus + (Number(r.hotBonus) || 0),
+                        shippingFee: acc.shippingFee + (Number(r.shippingFee) || 0),
+                        lowPriceValue: acc.lowPriceValue + (Number(r.lowPriceValue) || 0),
+                        baseSalary: acc.baseSalary + (Number(r.baseSalary) || 0),
+                        netIncome: acc.netIncome + (Number(r.netIncome) || 0),
+                    }), {
+                        totalOrders: 0,
+                        totalRevenue: 0,
+                        commission: 0,
+                        hotBonus: 0,
+                        shippingFee: 0,
+                        lowPriceValue: 0,
+                        baseSalary: 0,
+                        netIncome: 0
+                    });
 
-                {/* Policy Legend */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-white p-6 rounded-2xl border border-slate-200">
-                        <h4 className="font-black text-slate-800 text-sm mb-3 flex items-center gap-2">
-                            <AlertTriangle size={16} className="text-red-500" />
-                            CHÍNH SÁCH PHẠT (20%)
-                        </h4>
-                        <p className="text-sm text-slate-500 leading-relaxed font-medium">
-                            Nếu tổng giá trị các mặt hàng bán <span className="text-red-600 font-bold">dưới giá Min</span> chiếm hơn <span className="bg-red-50 text-red-600 px-1 rounded font-bold">20%</span> doanh số cá nhân, thưởng mốc đạt được sẽ bị giảm xuống còn <span className="font-bold">70%</span>.
-                        </p>
+                    const colCount = isManager ? 7 : 14;
+
+                    return (
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6">
+                            <div className="overflow-auto max-h-[calc(100vh-320px)] custom-scrollbar">
+                                <table className="w-full text-left border-collapse">
+                                    <thead className="sticky top-0 z-20 shadow-sm">
+                                        <tr className="bg-slate-100 border-b-2 border-slate-300 whitespace-nowrap">
+                                            <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase border-r border-slate-200">Nhân viên</th>
+                                            <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase border-r border-slate-200">Chi nhánh</th>
+                                            <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase border-r border-slate-200">Chức vụ</th>
+                                            <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-center border-r border-slate-200">Tổng đơn</th>
+                                            <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Doanh số</th>
+                                            {!isManager && <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Hoa hồng</th>}
+                                            {!isManager && <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Thưởng nóng</th>}
+                                            {!isManager && <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Tiền ship</th>}
+                                            <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Đơn dưới Min</th>
+                                            <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-center border-r border-slate-200">Tỷ lệ</th>
+                                            {!isManager && <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Mốc thưởng</th>}
+                                            {!isManager && <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Lương CB</th>}
+                                            {!isManager && <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Thực nhận</th>}
+                                            {!isManager && <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-center">Trạng thái</th>}
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-200">
+                                        {loading ? (
+                                            [1, 2, 3].map(i => (
+                                                <tr key={i} className="animate-pulse">
+                                                    <td colSpan={colCount} className="px-6 py-8 bg-slate-50/30"></td>
+                                                </tr>
+                                            ))
+                                        ) : filteredRecords.length > 0 ? (
+                                            filteredRecords.map((r) => (
+                                                <tr key={r.employeeId} className="hover:bg-slate-50 transition-colors group text-[12px] border-b border-slate-100">
+                                                    <td className="px-2 py-2 whitespace-nowrap font-bold text-slate-900 border-r border-slate-100">{r.fullName}</td>
+                                                    <td className="px-2 py-2 whitespace-nowrap text-slate-600 border-r border-slate-100">{r.branchName || '-'}</td>
+                                                    <td className="px-2 py-2 whitespace-nowrap text-slate-600 border-r border-slate-100">{r.position || '-'}</td>
+                                                    <td className="px-2 py-2 text-center border-r border-slate-100">
+                                                        <div className="font-bold text-slate-700">{r.totalOrders}</div>
+                                                        {!isManager && r.position?.toLowerCase().includes('telesale') && <div className="text-[9px] text-slate-400 font-bold uppercase">(System)</div>}
+                                                    </td>
+                                                    <td className="px-2 py-2 text-right border-r border-slate-100">
+                                                        <div className="font-bold text-indigo-600 whitespace-nowrap">{formatCurrency(r.totalRevenue)}</div>
+                                                        {!isManager && r.position?.toLowerCase().includes('telesale') && <div className="text-[9px] text-slate-400 font-bold uppercase">(Hệ thống)</div>}
+                                                        {!isManager && (r.position?.toLowerCase().includes('manager') || r.position?.toLowerCase().includes('quản lý')) && <div className="text-[9px] text-amber-500 font-bold uppercase">(Chi nhánh)</div>}
+                                                        {!isManager && r.position?.toLowerCase().includes('marketing') && <div className="text-[9px] text-slate-400 font-bold uppercase">(Hệ thống)</div>}
+                                                        {!isManager && ['lái xe', 'nvgh', 'driver'].some(p => r.position?.toLowerCase().includes(p)) && <div className="text-[9px] text-blue-500 font-bold uppercase">(Phí ship)</div>}
+                                                    </td>
+                                                    {!isManager && <td className="px-2 py-2 text-right font-medium text-slate-600 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.commission)}</td>}
+                                                    {!isManager && <td className="px-2 py-2 text-right font-medium text-amber-600 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.hotBonus)}</td>}
+                                                    {!isManager && <td className="px-2 py-2 text-right font-medium text-blue-600 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.shippingFee)}</td>}
+                                                    <td className="px-2 py-2 text-right text-slate-500 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.lowPriceValue)}</td>
+                                                    <td className="px-2 py-2 text-center border-r border-slate-100">
+                                                        <span className={cn(
+                                                            "px-1 py-0.5 rounded text-[9px] font-black",
+                                                            r.lowPriceRatio >= 20 ? "bg-red-50 text-red-600" : "bg-emerald-50 text-emerald-600"
+                                                        )}>
+                                                            {r.lowPriceRatio.toFixed(1)}%
+                                                        </span>
+                                                    </td>
+                                                    {!isManager && (
+                                                        <td className="px-2 py-2 text-right border-r border-slate-100">
+                                                            <div className="font-bold text-slate-700 whitespace-nowrap">{formatCurrency(r.milestone)}</div>
+                                                            <div className={cn(
+                                                                "text-[9px] font-bold uppercase mt-0.5",
+                                                                (r.isPenalty && !r.isClemency) ? "text-slate-400 line-through" : "text-slate-500"
+                                                            )}>
+                                                                Thưởng: {formatCurrency(r.baseReward)}
+                                                            </div>
+                                                            {(r.isPenalty && !r.isClemency) && (
+                                                                <div className="text-[10px] font-black text-red-600 mt-0.5">
+                                                                    {formatCurrency(r.actualReward)}
+                                                                </div>
+                                                            )}
+                                                        </td>
+                                                    )}
+                                                    {!isManager && <td className="px-2 py-2 text-right font-bold text-slate-700 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.baseSalary)}</td>}
+                                                    {!isManager && (
+                                                        <td className="px-2 py-2 text-right border-r border-slate-100">
+                                                            <div className={cn(
+                                                                "font-black whitespace-nowrap text-[12px]",
+                                                                r.isPenalty && !r.isClemency ? "text-red-600" : "text-emerald-600"
+                                                            )}>
+                                                                {formatCurrency(r.netIncome)}
+                                                            </div>
+                                                        </td>
+                                                    )}
+                                                    {!isManager && (
+                                                        <td className="px-2 py-2 text-center">
+                                                            <div className="flex justify-center">
+                                                                {r.isClemency ? (
+                                                                    <div className="flex items-center gap-1 bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded-full text-[9px] font-black whitespace-nowrap border border-amber-200">
+                                                                        <CheckCircle2 size={10} /> Khoan hồng
+                                                                    </div>
+                                                                ) : r.isPenalty ? (
+                                                                    <div className="flex items-center gap-1 bg-red-50 text-red-600 px-1.5 py-0.5 rounded-full text-[9px] font-black whitespace-nowrap border border-red-200">
+                                                                        <AlertTriangle size={10} /> Bị phạt
+                                                                    </div>
+                                                                ) : r.totalRevenue > 0 ? (
+                                                                    <div className="flex items-center gap-1 bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded-full text-[9px] font-black whitespace-nowrap border border-emerald-200">
+                                                                        <CheckCircle2 size={10} /> Hợp lệ
+                                                                    </div>
+                                                                ) : (
+                                                                    <span className="text-slate-300">-</span>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                    )}
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan={colCount} className="px-6 py-20 text-center">
+                                                    <div className="flex flex-col items-center gap-2 opacity-50">
+                                                        <FileSpreadsheet size={48} className="text-slate-300" />
+                                                        <p className="font-bold text-slate-400">Không tìm thấy dữ liệu phù hợp</p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                    {filteredRecords.length > 0 && (
+                                        <tfoot className="sticky bottom-0 z-30 shadow-[0_-2px_4px_rgba(0,0,0,0.05)]">
+                                            <tr className="bg-slate-50 border-t-2 border-slate-300 text-[11px] font-black text-slate-700">
+                                                <td colSpan={3} className="px-4 py-3 text-left bg-slate-100 border-r border-slate-200 uppercase tracking-wider">TỔNG CỘNG</td>
+                                                <td className="px-2 py-3 text-center border-r border-slate-200 text-rose-600">{totals.totalOrders}</td>
+                                                <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 text-rose-600 bg-rose-50/20">{formatCurrency(totals.totalRevenue)}</td>
+                                                {!isManager && <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 text-indigo-600">{formatCurrency(totals.commission)}</td>}
+                                                {!isManager && <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 text-amber-600">{formatCurrency(totals.hotBonus)}</td>}
+                                                {!isManager && <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 text-blue-600">{formatCurrency(totals.shippingFee)}</td>}
+                                                <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 text-slate-500">{formatCurrency(totals.lowPriceValue)}</td>
+                                                <td className="px-2 py-3 border-r border-slate-200 bg-slate-100/30"></td>
+                                                {!isManager && <td className="px-2 py-3 border-r border-slate-200 bg-slate-100/30"></td>}
+                                                {!isManager && <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 text-slate-700">{formatCurrency(totals.baseSalary)}</td>}
+                                                {!isManager && <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 text-emerald-700 bg-emerald-50/30">{formatCurrency(totals.netIncome)}</td>}
+                                                {!isManager && <td className="px-2 py-3 bg-slate-100/30"></td>}
+                                            </tr>
+                                        </tfoot>
+                                    )}
+                                </table>
+                            </div>
+                        </div>
+                    )
+                })()}
+
+                {/* Policy Legend - Only visible for non-managers */}
+                {!isManager && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200">
+                            <h4 className="font-black text-slate-800 text-sm mb-3 flex items-center gap-2">
+                                <AlertTriangle size={16} className="text-red-500" />
+                                CHÍNH SÁCH PHẠT (20%)
+                            </h4>
+                            <p className="text-sm text-slate-500 leading-relaxed font-medium">
+                                Nếu tổng giá trị các mặt hàng bán <span className="text-red-600 font-bold">dưới giá Min</span> chiếm hơn <span className="bg-red-50 text-red-600 px-1 rounded font-bold">20%</span> doanh số cá nhân, thưởng mốc đạt được sẽ bị giảm xuống còn <span className="font-bold">70%</span>.
+                            </p>
+                        </div>
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200">
+                            <h4 className="font-black text-slate-800 text-sm mb-3 flex items-center gap-2">
+                                <TrendingUp size={16} className="text-emerald-500" />
+                                CHẾ ĐỘ KHOAN HỒNG (110%)
+                            </h4>
+                            <p className="text-sm text-slate-500 leading-relaxed font-medium">
+                                Nếu doanh số thực tế đạt trên <span className="bg-emerald-50 text-emerald-600 px-1 rounded font-bold">110%</span> so với mốc thưởng đang xét, nhân viên sẽ được xóa phạt và hưởng <span className="font-bold">100%</span> thưởng mốc.
+                            </p>
+                        </div>
                     </div>
-                    <div className="bg-white p-6 rounded-2xl border border-slate-200">
-                        <h4 className="font-black text-slate-800 text-sm mb-3 flex items-center gap-2">
-                            <TrendingUp size={16} className="text-emerald-500" />
-                            CHẾ ĐỘ KHOAN HỒNG (110%)
-                        </h4>
-                        <p className="text-sm text-slate-500 leading-relaxed font-medium">
-                            Nếu doanh số thực tế đạt trên <span className="bg-emerald-50 text-emerald-600 px-1 rounded font-bold">110%</span> so với mốc thưởng đang xét, nhân viên sẽ được xóa phạt và hưởng <span className="font-bold">100%</span> thưởng mốc.
-                        </p>
-                    </div>
-                </div>
+                )}
             </div>
         </div>
     );

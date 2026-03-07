@@ -28,6 +28,7 @@ import {
 import { formatCurrency, cn } from '@/lib/utils';
 import { useToast } from '@/components/ui/toast';
 import OrderInvoiceView from '../../components/orders/OrderInvoiceView';
+import InsufficientPaymentModal from '../../components/orders/InsufficientPaymentModal';
 import ConfirmModal from '@/components/ui/confirm-modal';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 
@@ -56,6 +57,7 @@ function OrdersPageContent() {
     const [showLowPriceOnly, setShowLowPriceOnly] = useState(false);
     const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'assigned' | 'delivered'>('all');
     const [paymentStatusFilter, setPaymentStatusFilter] = useState<'all' | 'pending' | 'confirmed'>('all');
+    const [insufficientPaymentOrder, setInsufficientPaymentOrder] = useState<any>(null);
     const [paymentMethodFilter, setPaymentMethodFilter] = useState<string>('all');
     const [invoiceStatusFilter, setInvoiceStatusFilter] = useState<'all' | 'pending' | 'issued'>('all');
     const [timeFilter, setTimeFilter] = useState<'all' | 'today' | 'week' | 'month' | 'custom'>('all');
@@ -140,6 +142,18 @@ function OrdersPageContent() {
     const handleConfirmPayment = async (orderId: string) => {
         if (!user) return;
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+        // Validation: Check if payment is balanced
+        const order = orders.find(o => o.id === orderId);
+        if (order) {
+            const totalPaid = order.payments?.reduce((sum: number, p: any) => sum + Number(p.amount), 0) || 0;
+            const totalAmount = Number(order.totalAmount);
+            if (totalPaid < totalAmount) {
+                setInsufficientPaymentOrder(order);
+                return;
+            }
+        }
+
         try {
             const res = await fetch(`${apiUrl}/orders/${orderId}/confirm-payment?userId=${user.id}`, {
                 method: 'PATCH',
@@ -444,20 +458,6 @@ function OrdersPageContent() {
         </div>
     );
 
-    if (selectedOrder) {
-        return (
-            <div className="space-y-6">
-                <button
-                    onClick={() => setSelectedOrder(null)}
-                    className="flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors font-medium print:hidden cursor-pointer"
-                >
-                    <ArrowLeft size={18} /> Quay lại danh sách
-                </button>
-                <OrderInvoiceView order={selectedOrder} onBack={() => setSelectedOrder(null)} />
-            </div>
-        );
-    }
-
     return (
         <div className="space-y-3 animate-in fade-in duration-500">
             <LoadingBarStyle />
@@ -488,10 +488,10 @@ function OrdersPageContent() {
                         <Search className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${searchTerm ? 'text-rose-500' : 'text-slate-400'}`} size={14} />
                         <input
                             type="text"
-                            placeholder="Tìm khách, SĐT..."
+                            placeholder="Tìm khách, SĐT, mã đơn..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className={`w-full pl-8 pr-2 py-1.5 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none transition-all text-[11px] font-bold cursor-pointer ${searchTerm ? 'border-rose-300' : 'border-slate-200'}`}
+                            className={`w-full pl-8 pr-2 py-1.5 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none transition-all text-[11px] font-bold cursor-text ${searchTerm ? 'border-rose-300' : 'border-slate-200'}`}
                         />
                     </div>
                     <button
@@ -517,10 +517,10 @@ function OrdersPageContent() {
                         <Search className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${searchTerm ? 'text-rose-500' : 'text-slate-400'}`} size={14} />
                         <input
                             type="text"
-                            placeholder="Tìm khách, SĐT..."
+                            placeholder="Tìm khách, SĐT, mã đơn..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className={`w-full pl-8 pr-2 py-1 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none transition-all text-[10.5px] font-medium cursor-pointer ${searchTerm ? 'border-rose-300' : 'border-slate-200'}`}
+                            className={`w-full pl-8 pr-2 py-1 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none transition-all text-[10.5px] font-medium cursor-text ${searchTerm ? 'border-rose-300' : 'border-slate-200'}`}
                         />
                     </div>
 
@@ -1028,7 +1028,7 @@ function OrdersPageContent() {
                                                         ) : (
                                                             <>
                                                                 {/* Non-cash orders that are not issued yet get a RED warning */}
-                                                                {order.payments?.some((p: any) => p.paymentMethod !== 'CASH' && p.paymentMethod !== 'TRANSFER') ? (
+                                                                {order.payments?.some((p: any) => p.paymentMethod !== 'CASH' && p.paymentMethod !== 'TRANSFER' && p.paymentMethod !== 'TRANSFER_PERSONAL') ? (
                                                                     <span className="px-1 py-0.5 rounded text-[8px] font-black bg-rose-50 text-rose-600 border border-rose-100 whitespace-nowrap animate-pulse uppercase">
                                                                         GẤP
                                                                     </span>
@@ -1305,6 +1305,30 @@ function OrdersPageContent() {
                 confirmLabel="Xác nhận xóa"
                 cancelLabel="Hủy"
                 isDanger={true}
+            />
+
+            {selectedOrder && (
+                <div className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+                        <OrderInvoiceView
+                            order={selectedOrder}
+                            onBack={() => {
+                                setSelectedOrder(null);
+                                fetchOrders();
+                            }}
+                        />
+                    </div>
+                </div>
+            )}
+
+            <InsufficientPaymentModal
+                isOpen={!!insufficientPaymentOrder}
+                order={insufficientPaymentOrder}
+                onClose={() => setInsufficientPaymentOrder(null)}
+                onViewDetails={() => {
+                    setSelectedOrder(insufficientPaymentOrder);
+                    setInsufficientPaymentOrder(null);
+                }}
             />
         </div >
     );
