@@ -61,6 +61,7 @@ export interface OrderPayment {
     amount: number;
     paidAt: string;
     files?: File[];
+    existingImages?: string[];
 }
 
 export interface OrderGift {
@@ -129,4 +130,5 @@ export interface FullOrder {
         fullName: string;
         employee?: Employee;
     };
+    images?: string[];
 }

@@ -28,6 +28,8 @@ export default function EditOrderPage() {
     const [allEmployees, setAllEmployees] = useState<Employee[]>([]);
     const [allGifts, setAllGifts] = useState<any[]>([]);
     const [driverTab, setDriverTab] = useState<'staff' | 'driver'>('driver');
+    const [removedImages, setRemovedImages] = useState<string[]>([]);
+    const [systemImages, setSystemImages] = useState<string[]>([]);
 
     const [order, setOrder] = useState<FullOrder>({
         branchId: '',
@@ -46,7 +48,8 @@ export default function EditOrderPage() {
         items: [],
         splits: [],
         payments: [],
-        deliveries: []
+        deliveries: [],
+        images: []
     });
 
     // Fetch initial data and order details
@@ -55,12 +58,13 @@ export default function EditOrderPage() {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
             try {
                 // 1. Fetch reference data
-                const [branchesRes, productsRes, employeesRes, giftsRes, orderRes] = await Promise.all([
+                const [branchesRes, productsRes, employeesRes, giftsRes, orderRes, systemImagesRes] = await Promise.all([
                     fetch(`${apiUrl}/branches`),
                     fetch(`${apiUrl}/products`),
                     fetch(`${apiUrl}/employees`),
                     fetch(`${apiUrl}/gifts`),
-                    fetch(`${apiUrl}/orders/${orderId}`)
+                    fetch(`${apiUrl}/orders/${orderId}`),
+                    fetch(`${apiUrl}/orders/${orderId}/system-images`).catch(() => ({ json: () => [] }))
                 ]);
 
                 const branchesData = await branchesRes.json();
@@ -68,11 +72,15 @@ export default function EditOrderPage() {
                 const employeesData = await employeesRes.json();
                 const giftsData = await giftsRes.json();
                 const orderData = await orderRes.json();
+                const sysImagesData = await systemImagesRes.json();
 
                 setBranches(branchesData);
                 setProducts(productsData);
                 setAllEmployees(employeesData);
                 setAllGifts(giftsData);
+                if (Array.isArray(sysImagesData)) {
+                    setSystemImages(sysImagesData);
+                }
 
                 // 2. Map order data to state
                 if (orderData) {
@@ -114,15 +122,17 @@ export default function EditOrderPage() {
                             splitPercent: Number(s.splitPercent),
                             splitAmount: Number(s.splitAmount),
                         })),
-                        payments: orderData.payments.map((p: any) => ({
+                        payments: orderData.payments.map((p: any, index: number) => ({
                             paymentMethod: p.paymentMethod,
                             amount: Number(p.amount),
                             paidAt: p.paidAt.split('T')[0],
+                            existingImages: index === 0 ? orderData.images : []
                         })),
                         isPaymentConfirmed: orderData.isPaymentConfirmed,
                         confirmedAt: orderData.confirmedAt,
                         confirmer: orderData.confirmer,
-                        note: orderData.note || ''
+                        note: orderData.note || '',
+                        images: orderData.images || []
                     };
                     setOrder(formattedOrder);
                 }
@@ -204,7 +214,24 @@ export default function EditOrderPage() {
 
             const payload: any = { ...order, items: validItems };
 
-            // Clean up
+            // Calculate exact images in use
+            const currentPaymentImages = new Set<string>();
+            order.payments.forEach(p => {
+                if (p.existingImages) {
+                    p.existingImages.forEach(url => currentPaymentImages.add(url));
+                }
+            });
+
+            // Clean up and set final images
+            payload.images = Array.from(currentPaymentImages);
+            if (payload.payments) {
+                payload.payments = payload.payments.map((p: any) => ({
+                    paymentMethod: p.paymentMethod,
+                    amount: p.amount,
+                    paidAt: p.paidAt
+                }));
+            }
+
             if (!payload.staffCode) delete payload.staffCode;
             if (!payload.note) delete payload.note;
             if (!payload.customerAddress) delete payload.customerAddress;
@@ -284,6 +311,36 @@ export default function EditOrderPage() {
                 const errorData = await res.json().catch(() => ({}));
                 console.error('Update Order Error:', errorData);
                 throw new Error(errorData.message || 'Failed to update order');
+            }
+
+            // Images array is already synced via payload.images during the PATCH request.
+
+            // Handle new image uploads
+            const allFiles: File[] = [];
+            order.payments.forEach(p => {
+                if (p.files && p.files.length > 0) {
+                    allFiles.push(...p.files);
+                }
+            });
+
+            if (allFiles.length > 0) {
+                const formData = new FormData();
+                allFiles.forEach(file => {
+                    formData.append('files', file);
+                });
+                const storedUser = localStorage.getItem('user');
+                const currentUser = storedUser ? JSON.parse(storedUser) : null;
+                const currentUserId = currentUser?.id || '00000000-0000-0000-0000-000000000000';
+
+                const uploadRes = await fetch(`${apiUrl}/orders/${orderId}/images?userId=${currentUserId}`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!uploadRes.ok) {
+                    console.error('Failed to upload some images');
+                    toastError('Cập nhật đơn thành công nhưng lỗi tải ảnh lên!');
+                }
             }
 
             success('Cập nhật hóa đơn thành công!');
@@ -767,6 +824,13 @@ export default function EditOrderPage() {
                         payments={order.payments}
                         totalOrderAmount={totalAmount}
                         onChange={(payments) => setOrder({ ...order, payments })}
+                        availableSystemImages={systemImages.filter(url => !order.payments.some(p => p.existingImages?.includes(url)))}
+                        onAddSystemImage={(paymentIndex, url) => {
+                            const newPayments = [...order.payments];
+                            const existing = newPayments[paymentIndex].existingImages || [];
+                            newPayments[paymentIndex] = { ...newPayments[paymentIndex], existingImages: [...existing, url] };
+                            setOrder({ ...order, payments: newPayments });
+                        }}
                     />
 
                     {/* Instructions Section */}

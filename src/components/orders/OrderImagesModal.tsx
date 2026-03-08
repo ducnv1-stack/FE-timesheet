@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef } from 'react';
-import { X, Upload, Trash2, Image as ImageIcon, ExternalLink, Camera } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { X, Upload, Trash2, Image as ImageIcon, ExternalLink, Camera, FolderOpen } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
 import { cn } from '@/lib/utils';
 import imageCompression from 'browser-image-compression';
@@ -24,18 +24,37 @@ export default function OrderImagesModal({ order, onClose, onRefresh }: OrderIma
 
     // Use local state to update the view without waiting for parent refresh
     const [images, setImages] = useState<string[]>(order?.images || []);
+    const [originalImages, setOriginalImages] = useState<string[]>(order?.images || []);
+    const [systemImages, setSystemImages] = useState<string[]>([]);
+    const [uploadOptionsOpen, setUploadOptionsOpen] = useState(false);
+    const [systemImageModalOpen, setSystemImageModalOpen] = useState(false);
+    const [pendingClose, setPendingClose] = useState(false);
 
     const fetchLatestImages = async () => {
         try {
-            const res = await fetch(`${API_URL}/orders/${order.id}`);
-            if (res.ok) {
-                const data = await res.json();
+            const [orderRes, sysImgRes] = await Promise.all([
+                fetch(`${API_URL}/orders/${order.id}`),
+                fetch(`${API_URL}/orders/${order.id}/system-images`).catch(() => null)
+            ]);
+
+            if (orderRes.ok) {
+                const data = await orderRes.json();
                 setImages(data.images || []);
+                setOriginalImages(data.images || []);
+            }
+            if (sysImgRes && sysImgRes.ok) {
+                const sysData = await sysImgRes.json();
+                setSystemImages(Array.isArray(sysData) ? sysData : []);
             }
         } catch (error) {
             console.error('Lỗi lấy ảnh mới:', error);
         }
     };
+
+    // Load initial system images on mount
+    useEffect(() => {
+        fetchLatestImages();
+    }, [order.id]);
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
@@ -61,7 +80,11 @@ export default function OrderImagesModal({ order, onClose, onRefresh }: OrderIma
                 }
             }
 
-            const res = await fetch(`${API_URL}/orders/${order.id}/images`, {
+            const storedUser = localStorage.getItem('user');
+            const currentUser = storedUser ? JSON.parse(storedUser) : null;
+            const currentUserId = currentUser?.id || '00000000-0000-0000-0000-000000000000';
+
+            const res = await fetch(`${API_URL}/orders/${order.id}/images?userId=${currentUserId}`, {
                 method: 'POST',
                 body: formData,
             });
@@ -71,8 +94,22 @@ export default function OrderImagesModal({ order, onClose, onRefresh }: OrderIma
                 throw new Error(data.message || 'Lỗi tải ảnh');
             }
 
+            const updatedOrder = await res.json();
+            const newServerImages = updatedOrder.images || [];
+            const newlyUploaded = newServerImages.filter((img: string) => !originalImages.includes(img));
+
+            setOriginalImages(newServerImages);
+            setImages(prev => Array.from(new Set([...prev, ...newlyUploaded])));
+
             success('Đã đính kèm chứng từ thành công');
-            await fetchLatestImages();
+
+            // Cập nhật lại list ảnh hệ thống rảnh rỗi
+            const sysImgRes = await fetch(`${API_URL}/orders/${order.id}/system-images`).catch(() => null);
+            if (sysImgRes && sysImgRes.ok) {
+                const sysData = await sysImgRes.json();
+                setSystemImages(Array.isArray(sysData) ? sysData : []);
+            }
+
             onRefresh();
         } catch (error: any) {
             toastError(error.message);
@@ -82,36 +119,66 @@ export default function OrderImagesModal({ order, onClose, onRefresh }: OrderIma
         }
     };
 
-    const handleDelete = async (imageUrl: string) => {
+    const handleAddSystemImageLocal = (url: string) => {
+        if (images.includes(url)) {
+            toastError('Ảnh này đã có trong danh sách');
+            return;
+        }
+        setImages([...images, url]);
+        setSystemImageModalOpen(false);
+    };
+
+    const handleSaveChanges = async () => {
         try {
-            const res = await fetch(`${API_URL}/orders/${order.id}/images?imageUrl=${encodeURIComponent(imageUrl)}`, {
-                method: 'DELETE',
+            const storedUser = localStorage.getItem('user');
+            const currentUser = storedUser ? JSON.parse(storedUser) : null;
+            const currentUserId = currentUser?.id || '00000000-0000-0000-0000-000000000000';
+
+            const res = await fetch(`${API_URL}/orders/${order.id}?userId=${currentUserId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ images })
             });
 
             if (!res.ok) {
                 const data = await res.json();
-                throw new Error(data.message || 'Lỗi khi xóa ảnh');
+                throw new Error(data.message || 'Lỗi khi lưu ảnh');
             }
 
-            success('Đã xóa chứng từ');
+            success('Đã lưu thay đổi ảnh');
             await fetchLatestImages();
             onRefresh();
-            if (previewImage === imageUrl) setPreviewImage(null);
-            setDeleteConfirm(null);
+            setPendingClose(false);
+            onClose();
         } catch (error: any) {
             toastError(error.message);
         }
     };
 
+    const handleCloseAttempt = () => {
+        const hasChanges =
+            originalImages.length !== images.length ||
+            originalImages.some(img => !images.includes(img)) ||
+            images.some(img => !originalImages.includes(img));
+
+        if (hasChanges) {
+            setPendingClose(true);
+        } else {
+            onClose();
+        }
+    };
+
     const getImageUrl = (url: string) => {
         if (url.startsWith('http')) return url;
-        return `${API_URL.replace('/api', '')}${url}`;
+        const cleanApiUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
+        const cleanUrl = url.startsWith('/') ? url : `/${url}`;
+        return `${cleanApiUrl}${cleanUrl}`;
     };
 
     return (
         <div
             className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in duration-200"
-            onClick={onClose}
+            onClick={handleCloseAttempt}
         >
             <div
                 className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300"
@@ -129,7 +196,7 @@ export default function OrderImagesModal({ order, onClose, onRefresh }: OrderIma
                         </div>
                     </div>
                     <button
-                        onClick={onClose}
+                        onClick={handleCloseAttempt}
                         className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
                     >
                         <X size={20} />
@@ -148,32 +215,33 @@ export default function OrderImagesModal({ order, onClose, onRefresh }: OrderIma
                                     onClick={() => setPreviewImage(img)}
                                 />
                                 <div
-                                    className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3 pointer-events-none lg:pointer-events-auto"
+                                    className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors pointer-events-none lg:pointer-events-auto"
                                     onClick={() => setPreviewImage(img)}
                                 >
-                                    <div className="flex justify-between items-center pointer-events-auto">
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); setPreviewImage(img); }}
-                                            className="p-1.5 bg-white/20 hover:bg-white text-white hover:text-slate-900 rounded bg-blur transition-colors cursor-pointer"
-                                            title="Xem phóng to"
-                                        >
-                                            <ExternalLink size={14} />
-                                        </button>
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); setDeleteConfirm(img); }}
-                                            className="p-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded transition-colors cursor-pointer"
-                                            title="Xóa ảnh này"
-                                        >
-                                            <Trash2 size={14} />
-                                        </button>
-                                    </div>
+                                    {/* X Button Top Right */}
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); setImages(images.filter(i => i !== img)); }}
+                                        className="absolute top-2 right-2 p-1.5 bg-black/40 hover:bg-rose-500 text-white rounded-full transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100 cursor-pointer pointer-events-auto"
+                                        title="Gỡ ảnh này khỏi đơn hàng"
+                                    >
+                                        <X size={14} />
+                                    </button>
+                                    {/* View Button Bottom Left */}
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); setPreviewImage(img); }}
+                                        className="absolute bottom-2 left-2 p-1.5 bg-black/50 hover:bg-white text-white hover:text-slate-900 rounded-lg transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100 cursor-pointer pointer-events-auto flex items-center gap-1.5"
+                                        title="Xem phóng to"
+                                    >
+                                        <ExternalLink size={12} />
+                                        <span className="text-[10px] font-bold">Xem</span>
+                                    </button>
                                 </div>
                             </div>
                         ))}
 
                         {/* Upload Button */}
                         <div
-                            onClick={() => fileInputRef.current?.click()}
+                            onClick={() => setUploadOptionsOpen(true)}
                             className={cn(
                                 "flex flex-col items-center justify-center gap-2 aspect-[3/4] rounded-xl border-2 border-dashed transition-all cursor-pointer w-full h-full",
                                 uploading
@@ -240,16 +308,108 @@ export default function OrderImagesModal({ order, onClose, onRefresh }: OrderIma
                 </div>
             )}
 
-            <ConfirmModal
-                isOpen={!!deleteConfirm}
-                onCancel={() => setDeleteConfirm(null)}
-                onConfirm={() => deleteConfirm && handleDelete(deleteConfirm)}
-                title="Xóa chứng từ?"
-                message="Bạn có chắc chắn muốn xóa ảnh chứng từ này khỏi hệ thống? Hành động này sẽ không thể khôi phục."
-                confirmLabel="Xác nhận Xóa"
-                cancelLabel="Hủy bỏ"
-                isDanger={true}
-            />
+            {/* Modal Upload Options */}
+            {uploadOptionsOpen && (
+                <div className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in duration-200" onClick={() => setUploadOptionsOpen(false)}>
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+                        <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                            <h3 className="font-bold text-sm text-slate-800">Tùy chọn tải ảnh</h3>
+                            <button onClick={() => setUploadOptionsOpen(false)} className="text-slate-400 hover:text-rose-500 cursor-pointer p-1"><X size={20} /></button>
+                        </div>
+                        <div className="p-4 flex flex-col gap-3">
+                            <button
+                                className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 hover:border-rose-400 hover:bg-rose-50 transition-all text-left group cursor-pointer"
+                                onClick={() => {
+                                    fileInputRef.current?.click();
+                                    setUploadOptionsOpen(false);
+                                }}
+                            >
+                                <div className="w-10 h-10 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center group-hover:bg-rose-500 group-hover:text-white transition-colors shadow-sm">
+                                    <Camera size={20} />
+                                </div>
+                                <div className="flex-1">
+                                    <div className="font-bold text-sm text-slate-800 group-hover:text-rose-600 transition-colors">Tải ảnh từ thiết bị</div>
+                                    <div className="text-[11px] text-slate-500 font-medium mt-0.5">Chọn file hình ảnh từ máy tính hoặc điện thoại</div>
+                                </div>
+                            </button>
+
+                            <button
+                                className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 transition-all text-left group cursor-pointer"
+                                onClick={() => {
+                                    setSystemImageModalOpen(true);
+                                    setUploadOptionsOpen(false);
+                                }}
+                            >
+                                <div className="w-10 h-10 bg-indigo-100 text-indigo-500 rounded-full flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition-colors shadow-sm">
+                                    <FolderOpen size={20} />
+                                </div>
+                                <div className="flex-1">
+                                    <div className="font-bold text-sm text-slate-800 group-hover:text-indigo-600 transition-colors">Chọn ảnh từ hệ thống</div>
+                                    <div className="text-[11px] text-slate-500 font-medium mt-0.5">Sử dụng lại ảnh có sẵn của hóa đơn này</div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Select System Image */}
+            {systemImageModalOpen && (
+                <div className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in duration-200" onClick={() => setSystemImageModalOpen(false)}>
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+                        <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                            <h3 className="font-bold text-sm text-slate-800">Chọn ảnh từ hệ thống</h3>
+                            <button onClick={() => setSystemImageModalOpen(false)} className="text-slate-400 hover:text-rose-500 cursor-pointer p-1"><X size={20} /></button>
+                        </div>
+                        <div className="p-4 grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-[60vh] overflow-y-auto bg-slate-50/30">
+                            {systemImages.filter(url => !images.includes(url)).length === 0 ? (
+                                <div className="col-span-full py-8 text-center text-slate-500 text-sm font-medium">
+                                    Không có ảnh hệ thống nào đang trống để chọn thêm.
+                                </div>
+                            ) : (
+                                systemImages.filter(url => !images.includes(url)).map(url => (
+                                    <div key={url} className="relative group aspect-square rounded-lg overflow-hidden border border-slate-200 cursor-pointer shadow-sm hover:ring-2 hover:ring-rose-500 transition-all"
+                                        onClick={() => handleAddSystemImageLocal(url)}>
+                                        <img src={getImageUrl(url)} alt="System Image" className="w-full h-full object-cover" />
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <span className="text-white text-xs font-bold px-2 py-1 bg-rose-600 rounded">Chọn</span>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Confirm Save Changes */}
+            {pendingClose && (
+                <div className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in duration-200" onClick={() => setPendingClose(false)}>
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 text-center p-6" onClick={e => e.stopPropagation()}>
+                        <div className="w-16 h-16 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Upload size={32} />
+                        </div>
+                        <h3 className="font-black text-lg text-slate-800 mb-2">Lưu thay đổi?</h3>
+                        <p className="text-sm text-slate-500 mb-6 px-4">
+                            Bạn đã thêm hoặc gỡ hình ảnh nháp nhưng chưa lưu. Bạn có muốn lưu lại những thay đổi này không?
+                        </p>
+                        <div className="flex flex-col gap-3">
+                            <button
+                                onClick={handleSaveChanges}
+                                className="w-full bg-rose-600 hover:bg-rose-700 text-white py-3 px-4 rounded-xl font-bold transition-colors cursor-pointer"
+                            >
+                                Lưu thay đổi
+                            </button>
+                            <button
+                                onClick={() => { setPendingClose(false); onClose(); }}
+                                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-3 px-4 rounded-xl font-bold transition-colors cursor-pointer"
+                            >
+                                Không lưu & Đóng
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

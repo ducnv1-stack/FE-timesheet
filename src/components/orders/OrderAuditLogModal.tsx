@@ -92,6 +92,11 @@ const getChangesSummary = (oldData: any, newData: any) => {
         list.push({ label: 'Chia doanh số', old: (oldData?.splits || []).map((s: any) => `${s.employee?.fullName} (${s.splitPercent}%)`).join(', ') || '---', new: (newData?.splits || []).map((s: any) => `${s.employee?.fullName} (${s.splitPercent}%)`).join(', ') || '---' });
     }
 
+    const getImagesKey = (images: string[]) => (images || []).sort().join('|');
+    if (getImagesKey(oldData?.images) !== getImagesKey(newData?.images)) {
+        list.push({ label: 'Ảnh đính kèm', old: `${(oldData?.images || []).length} ảnh`, new: `${(newData?.images || []).length} ảnh` });
+    }
+
     return list;
 };
 

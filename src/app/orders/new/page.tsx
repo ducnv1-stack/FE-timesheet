@@ -273,8 +273,11 @@ export default function NewOrderPage() {
                 allFiles.forEach(file => {
                     formData.append('files', file);
                 });
+                const storedUser = localStorage.getItem('user');
+                const currentUser = storedUser ? JSON.parse(storedUser) : null;
+                const currentUserId = currentUser?.id || '00000000-0000-0000-0000-000000000000';
 
-                const uploadRes = await fetch(`${apiUrl}/orders/${createdOrder.id}/images`, {
+                const uploadRes = await fetch(`${apiUrl}/orders/${createdOrder.id}/images?userId=${currentUserId}`, {
                     method: 'POST',
                     body: formData
                 });
