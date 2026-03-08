@@ -60,6 +60,7 @@ export interface OrderPayment {
     paymentMethod: string;
     amount: number;
     paidAt: string;
+    files?: File[];
 }
 
 export interface OrderGift {

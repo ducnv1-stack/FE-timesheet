@@ -472,7 +472,7 @@ export default function EmployeesPage() {
                                                     <div className="w-7 h-7 rounded-sm overflow-hidden border border-slate-200 bg-slate-100 mx-auto flex items-center justify-center shrink-0">
                                                         {emp.avatarUrl ? (
                                                             <img
-                                                                src={emp.avatarUrl.startsWith('http') ? emp.avatarUrl : `${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace('/api', '')}${emp.avatarUrl}`}
+                                                                src={emp.avatarUrl.startsWith('http') ? emp.avatarUrl : `${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001')}${emp.avatarUrl}`}
                                                                 alt="Avatar"
                                                                 className="w-full h-full object-cover"
                                                             />

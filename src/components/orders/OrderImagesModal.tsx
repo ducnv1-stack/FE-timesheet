@@ -120,7 +120,7 @@ export default function OrderImagesModal({ order, onClose, onRefresh }: OrderIma
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50/50">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center">
+                        <div className="w-10 h-10 bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center">
                             <ImageIcon size={20} />
                         </div>
                         <div>
@@ -148,20 +148,20 @@ export default function OrderImagesModal({ order, onClose, onRefresh }: OrderIma
                                     onClick={() => setPreviewImage(img)}
                                 />
                                 <div
-                                    className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3 cursor-pointer"
+                                    className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3 pointer-events-none lg:pointer-events-auto"
                                     onClick={() => setPreviewImage(img)}
                                 >
-                                    <div className="flex justify-between items-center">
+                                    <div className="flex justify-between items-center pointer-events-auto">
                                         <button
                                             onClick={(e) => { e.stopPropagation(); setPreviewImage(img); }}
-                                            className="p-1.5 bg-white/20 hover:bg-white text-white hover:text-slate-900 rounded bg-blur transition-colors"
+                                            className="p-1.5 bg-white/20 hover:bg-white text-white hover:text-slate-900 rounded bg-blur transition-colors cursor-pointer"
                                             title="Xem phóng to"
                                         >
                                             <ExternalLink size={14} />
                                         </button>
                                         <button
                                             onClick={(e) => { e.stopPropagation(); setDeleteConfirm(img); }}
-                                            className="p-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded transition-colors"
+                                            className="p-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded transition-colors cursor-pointer"
                                             title="Xóa ảnh này"
                                         >
                                             <Trash2 size={14} />
@@ -175,23 +175,23 @@ export default function OrderImagesModal({ order, onClose, onRefresh }: OrderIma
                         <div
                             onClick={() => fileInputRef.current?.click()}
                             className={cn(
-                                "flex flex-col items-center justify-center gap-2 aspect-[3/4] rounded-xl border-2 border-dashed transition-all cursor-pointer",
+                                "flex flex-col items-center justify-center gap-2 aspect-[3/4] rounded-xl border-2 border-dashed transition-all cursor-pointer w-full h-full",
                                 uploading
                                     ? "bg-slate-50 border-slate-200"
-                                    : "border-indigo-200 hover:border-indigo-400 hover:bg-indigo-50/50 group"
+                                    : "border-rose-200 hover:border-rose-400 hover:bg-rose-50/50 group min-h-[160px]"
                             )}
                         >
                             {uploading ? (
                                 <>
-                                    <div className="animate-spin w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full shadow-lg"></div>
+                                    <div className="animate-spin w-8 h-8 border-4 border-rose-500 border-t-transparent rounded-full shadow-lg"></div>
                                     <span className="text-xs font-bold text-slate-500 animate-pulse mt-2">Đang tải lên...</span>
                                 </>
                             ) : (
                                 <>
-                                    <div className="w-12 h-12 bg-indigo-100 text-indigo-500 rounded-full flex items-center justify-center group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white transition-all shadow-sm">
+                                    <div className="w-12 h-12 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center group-hover:scale-110 group-hover:bg-rose-500 group-hover:text-white transition-all shadow-sm">
                                         <Camera size={24} />
                                     </div>
-                                    <span className="text-xs font-black text-slate-400 group-hover:text-indigo-600 uppercase tracking-wider text-center px-4">Đính kèm ảnh mới</span>
+                                    <span className="text-xs font-black text-slate-400 group-hover:text-rose-600 uppercase tracking-wider text-center px-4">Đính kèm ảnh mới</span>
                                 </>
                             )}
                             <input

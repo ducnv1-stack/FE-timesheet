@@ -258,6 +258,32 @@ export default function NewOrderPage() {
             });
 
             if (!res.ok) throw new Error('Failed to save order');
+            const createdOrder = await res.json();
+
+            // Handle image uploads
+            const allFiles: File[] = [];
+            order.payments.forEach(p => {
+                if (p.files && p.files.length > 0) {
+                    allFiles.push(...p.files);
+                }
+            });
+
+            if (allFiles.length > 0) {
+                const formData = new FormData();
+                allFiles.forEach(file => {
+                    formData.append('files', file);
+                });
+
+                const uploadRes = await fetch(`${apiUrl}/orders/${createdOrder.id}/images`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!uploadRes.ok) {
+                    console.error('Failed to upload some images');
+                    toastError('Tạo đơn thành công nhưng lỗi tải ảnh lên!');
+                }
+            }
 
             success('Lưu đơn hàng thành công!');
             router.push('/orders');

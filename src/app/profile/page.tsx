@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
     User, Building2, Briefcase, Phone, Mail, Calendar, MapPin, CreditCard,
     BadgeCheck, Clock, Contact, Heart, Shield, Key, Eye, EyeOff, Save, ArrowLeft,
-    Pencil, ChevronRight, Trash2
+    Pencil, ChevronRight, Trash2, Camera
 } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
 import { cn, formatDate } from '@/lib/utils';
@@ -278,7 +278,7 @@ export default function ProfilePage() {
                             onClick={() => emp && document.getElementById('profile-avatar-upload')?.click()}
                         >
                             {emp?.avatarUrl ? (
-                                <img src={emp.avatarUrl.startsWith('http') ? emp.avatarUrl : `${apiUrl.replace('/api', '')}${emp.avatarUrl}`} alt="Avatar" className="w-full h-full object-cover" />
+                                <img src={emp.avatarUrl.startsWith('http') ? emp.avatarUrl : `${apiUrl}${emp.avatarUrl}`} alt="Avatar" className="w-full h-full object-cover" />
                             ) : (
                                 emp ? getInitials(emp.fullName) : profile.username.substring(0, 2).toUpperCase()
                             )}
@@ -302,6 +302,18 @@ export default function ProfilePage() {
                                 title="Xóa ảnh đại diện"
                             >
                                 <Trash2 size={16} />
+                            </button>
+                        )}
+                        {emp && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    document.getElementById('profile-avatar-upload')?.click();
+                                }}
+                                className="absolute -bottom-2 -right-2 p-2 bg-white text-slate-700 hover:text-rose-600 rounded-full transition-all shadow-[0_4px_10px_rgba(0,0,0,0.1)] z-10 cursor-pointer border border-slate-100"
+                                title="Đổi ảnh đại diện"
+                            >
+                                <Camera size={16} />
                             </button>
                         )}
                         {emp && (

@@ -441,7 +441,7 @@ export default function EmployeeDetailPage() {
                             <div className="w-32 h-32 rounded-[2.5rem] bg-white p-1.5 shadow-2xl relative">
                                 <div className="w-full h-full rounded-[2.2rem] bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-white text-4xl font-black tracking-tighter cursor-pointer overflow-hidden group relative" onClick={() => document.getElementById('avatar-upload')?.click()}>
                                     {employee.avatarUrl ? (
-                                        <img src={employee.avatarUrl.startsWith('http') ? employee.avatarUrl : `${API_URL.replace('/api', '')}${employee.avatarUrl}`} alt="Avatar" className="w-full h-full object-cover" />
+                                        <img src={employee.avatarUrl.startsWith('http') ? employee.avatarUrl : `${API_URL}${employee.avatarUrl}`} alt="Avatar" className="w-full h-full object-cover" />
                                     ) : (
                                         getInitials(employee.fullName)
                                     )}
