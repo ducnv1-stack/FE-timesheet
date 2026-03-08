@@ -71,6 +71,12 @@ function OrdersPageContent() {
     const [endDate, setEndDate] = useState<string>('');
     const [excludeInstallment, setExcludeInstallment] = useState(false);
     const [deliveryTypeFilter, setDeliveryTypeFilter] = useState<'all' | 'company' | 'external'>('all');
+    const [editTimeFilter, setEditTimeFilter] = useState<'all' | 'today' | 'week' | 'month' | 'custom'>('all');
+    const [editStartDate, setEditStartDate] = useState<string>('');
+    const [editEndDate, setEditEndDate] = useState<string>('');
+    const [confirmedTimeFilter, setConfirmedTimeFilter] = useState<'all' | 'today' | 'week' | 'month' | 'custom'>('all');
+    const [confirmedStartDate, setConfirmedStartDate] = useState<string>('');
+    const [confirmedEndDate, setConfirmedEndDate] = useState<string>('');
 
     // Pagination States
     const [page, setPage] = useState(1);
@@ -262,6 +268,22 @@ function OrdersPageContent() {
             if (showLowPriceOnly) orderParams.append('lowPrice', 'true');
             if (deliveryTypeFilter !== 'all') orderParams.append('deliveryType', deliveryTypeFilter);
 
+            // Edit Date filters
+            if (editStartDate && editEndDate) {
+                orderParams.append('editStartDate', editStartDate);
+                orderParams.append('editEndDate', editEndDate);
+            } else if (editTimeFilter !== 'all' && editTimeFilter !== 'custom') {
+                orderParams.append('editTimeFilter', editTimeFilter);
+            }
+
+            // Confirmed Date filters
+            if (confirmedStartDate && confirmedEndDate) {
+                orderParams.append('confirmedStartDate', confirmedStartDate);
+                orderParams.append('confirmedEndDate', confirmedEndDate);
+            } else if (confirmedTimeFilter !== 'all' && confirmedTimeFilter !== 'custom') {
+                orderParams.append('confirmedTimeFilter', confirmedTimeFilter);
+            }
+
             const orderUrl = `${apiUrl}/orders?${orderParams.toString()}`;
 
             const orderRes = await fetch(orderUrl);
@@ -324,6 +346,12 @@ function OrdersPageContent() {
         showLowPriceOnly,
         excludeInstallment,
         deliveryTypeFilter,
+        editTimeFilter,
+        editStartDate,
+        editEndDate,
+        confirmedTimeFilter,
+        confirmedStartDate,
+        confirmedEndDate,
         searchParams  // Re-fetch when URL params change (drill-down from dashboard)
     ]);
 
@@ -373,6 +401,12 @@ function OrdersPageContent() {
         setShowLowPriceOnly(false);
         setExcludeInstallment(false);
         setDeliveryTypeFilter('all');
+        setEditTimeFilter('all');
+        setEditStartDate('');
+        setEditEndDate('');
+        setConfirmedTimeFilter('all');
+        setConfirmedStartDate('');
+        setConfirmedEndDate('');
         setPage(1);
         router.push('/orders');
     };
@@ -506,7 +540,7 @@ function OrdersPageContent() {
                             onClick={() => setShowMobileFilters(!showMobileFilters)}
                             className={cn(
                                 "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all border shrink-0 cursor-pointer",
-                                showMobileFilters || statusFilter !== 'all' || timeFilter !== 'all' || paymentMethodFilter !== 'all' || paymentStatusFilter !== 'all' || invoiceStatusFilter !== 'all' || deliveryTypeFilter !== 'all' || selectedBranchId !== 'all' || selectedEmployeeId !== 'all'
+                                showMobileFilters || statusFilter !== 'all' || timeFilter !== 'all' || paymentMethodFilter !== 'all' || paymentStatusFilter !== 'all' || invoiceStatusFilter !== 'all' || deliveryTypeFilter !== 'all' || selectedBranchId !== 'all' || selectedEmployeeId !== 'all' || editTimeFilter !== 'all' || confirmedTimeFilter !== 'all'
                                     ? "bg-rose-600 text-white border-rose-600 shadow-md scale-105"
                                     : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
                             )}
@@ -639,6 +673,91 @@ function OrdersPageContent() {
                                 <option value="pending">⏳ Chưa xuất HĐ</option>
                                 <option value="issued">✅ Đã xuất HĐ</option>
                             </select>
+                        </div>
+
+                        {/* Order Edit Date Filter */}
+                        <div className={`flex items-center gap-1.5 ${editTimeFilter === 'custom' ? 'lg:col-span-2 xl:col-span-2' : ''}`}>
+                            <div className="relative flex-shrink-0 flex-1">
+                                <History className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${editTimeFilter !== 'all' ? 'text-rose-500' : 'text-slate-400'}`} size={14} />
+                                <select
+                                    value={editTimeFilter}
+                                    onChange={(e: any) => {
+                                        const val = e.target.value;
+                                        setEditTimeFilter(val);
+                                        if (val !== 'custom') {
+                                            setEditStartDate('');
+                                            setEditEndDate('');
+                                        }
+                                    }}
+                                    className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${editTimeFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                                >
+                                    <option value="all">Sửa gần nhất: Tất cả</option>
+                                    <option value="today">Sửa: Hôm nay</option>
+                                    <option value="week">Sửa: 7 ngày qua</option>
+                                    <option value="month">Sửa: Tháng này</option>
+                                    <option value="custom">Sửa: Tùy chọn...</option>
+                                </select>
+                            </div>
+
+                            {editTimeFilter === 'custom' && (
+                                <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2 h-[28px] flex-1">
+                                    <input
+                                        type="date"
+                                        value={editStartDate}
+                                        onChange={(e) => setEditStartDate(e.target.value)}
+                                        className="bg-transparent border-none text-[9px] font-black text-slate-700 outline-none flex-1 px-0"
+                                    />
+                                    <ArrowRight size={10} className="text-slate-300 flex-shrink-0" />
+                                    <input
+                                        type="date"
+                                        value={editEndDate}
+                                        onChange={(e) => setEditEndDate(e.target.value)}
+                                        className="bg-transparent border-none text-[9px] font-black text-slate-700 outline-none flex-1 px-0"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                        {/* Order Confirmation Date Filter */}
+                        <div className={`flex items-center gap-1.5 ${confirmedTimeFilter === 'custom' ? 'lg:col-span-2 xl:col-span-2' : ''}`}>
+                            <div className="relative flex-shrink-0 flex-1">
+                                <CheckCircle className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${confirmedTimeFilter !== 'all' ? 'text-rose-500' : 'text-slate-400'}`} size={14} />
+                                <select
+                                    value={confirmedTimeFilter}
+                                    onChange={(e: any) => {
+                                        const val = e.target.value;
+                                        setConfirmedTimeFilter(val);
+                                        if (val !== 'custom') {
+                                            setConfirmedStartDate('');
+                                            setConfirmedEndDate('');
+                                        }
+                                    }}
+                                    className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${confirmedTimeFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                                >
+                                    <option value="all">Xác nhận: Tất cả</option>
+                                    <option value="today">XN: Hôm nay</option>
+                                    <option value="week">XN: 7 ngày qua</option>
+                                    <option value="month">XN: Tháng này</option>
+                                    <option value="custom">XN: Tùy chọn...</option>
+                                </select>
+                            </div>
+
+                            {confirmedTimeFilter === 'custom' && (
+                                <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2 h-[28px] flex-1">
+                                    <input
+                                        type="date"
+                                        value={confirmedStartDate}
+                                        onChange={(e) => setConfirmedStartDate(e.target.value)}
+                                        className="bg-transparent border-none text-[9px] font-black text-slate-700 outline-none flex-1 px-0"
+                                    />
+                                    <ArrowRight size={10} className="text-slate-300 flex-shrink-0" />
+                                    <input
+                                        type="date"
+                                        value={confirmedEndDate}
+                                        onChange={(e) => setConfirmedEndDate(e.target.value)}
+                                        className="bg-transparent border-none text-[9px] font-black text-slate-700 outline-none flex-1 px-0"
+                                    />
+                                </div>
+                            )}
                         </div>
 
                         {/* Delivery Type Filter */}
@@ -1191,6 +1310,11 @@ function OrdersPageContent() {
                                                                             <Check size={12} strokeWidth={4} />
                                                                         </div>
                                                                         <span className="text-[8px] font-black text-emerald-600 uppercase tracking-tighter">Đã xác nhận</span>
+                                                                        {order.confirmedAt && (
+                                                                            <span className="text-[7px] text-slate-400 font-bold whitespace-nowrap leading-none mt-0.5">
+                                                                                {formatDateTime(new Date(order.confirmedAt))}
+                                                                            </span>
+                                                                        )}
                                                                     </div>
                                                                 );
                                                             }

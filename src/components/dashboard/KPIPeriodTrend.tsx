@@ -57,9 +57,16 @@ export default function KPIPeriodTrend({ periodStats }: { periodStats: any[] }) 
 
                                 <div className="space-y-2">
                                     <div className="flex justify-between items-end">
-                                        <div>
-                                            <p className="text-xs font-black text-slate-800">{formatCurrency(period.revenue)}</p>
-                                            <p className="text-[8px] text-slate-400 font-medium tracking-tight">Mục tiêu: {formatCurrency(period.target)}</p>
+                                        <div className="flex flex-col gap-1">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1 rounded uppercase min-w-[30px] text-center">Bán</span>
+                                                <p className="text-xs font-bold text-slate-600">{formatCurrency(period.salesRevenue || 0)}</p>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1 rounded uppercase min-w-[30px] text-center">Thực</span>
+                                                <p className="text-xs font-black text-slate-800">{formatCurrency(period.revenue)}</p>
+                                            </div>
+                                            <p className="text-[8px] text-slate-400 font-medium tracking-tight mt-1">Mục tiêu: {formatCurrency(period.target)}</p>
                                         </div>
                                         <div className="text-right">
                                             <p className={`text-xs font-black ${isAchieved ? 'text-emerald-600' : isFailed ? 'text-rose-600' : 'text-amber-600'}`}>

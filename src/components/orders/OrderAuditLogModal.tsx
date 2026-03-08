@@ -186,8 +186,13 @@ export default function OrderAuditLogModal({ orderId, onClose }: OrderAuditLogMo
                                                     {log.action === 'create' ? <PlusCircle size={10} /> : <Edit3 size={10} />}
                                                     {log.action === 'create' ? 'Tạo mới' : 'Cập nhật'}
                                                 </div>
-                                                <span className="text-xs font-bold text-slate-500">
+                                                <span className="text-xs font-bold text-slate-500 flex items-center gap-1">
                                                     {formatDateTime(log.changedAt)}
+                                                    {log.changedByUser && (
+                                                        <span className="text-[11px] font-normal text-slate-400">
+                                                            bởi <span className="font-bold text-slate-600">{log.changedByUser.employee?.fullName || log.changedByUser.username}</span>
+                                                        </span>
+                                                    )}
                                                 </span>
                                             </div>
                                             <div className="hidden sm:flex items-center gap-1 text-[10px] font-black text-blue-600 uppercase group-hover:text-blue-700 transition-colors">

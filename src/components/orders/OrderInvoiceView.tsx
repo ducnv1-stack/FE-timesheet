@@ -70,6 +70,19 @@ export default function OrderInvoiceView({ order, onBack }: OrderInvoiceViewProp
                         const user = storedUser ? JSON.parse(storedUser) : null;
                         const userRole = user ? (typeof user.role === 'object' ? (user.role.code || user.role.name) : user.role) : '';
                         if (userRole === 'DRIVER' || userRole === 'DIRECTOR' || userRole === 'DELIVERY_STAFF') return null;
+
+                        const canEditConfirmed = ['ADMIN', 'DIRECTOR', 'MANAGER', 'CHIEF_ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'ACCOUNTANT'].includes(userRole);
+                        if (order.isPaymentConfirmed && !canEditConfirmed) {
+                            return (
+                                <button
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-300 text-slate-500 rounded-lg text-[11px] font-bold cursor-not-allowed"
+                                    title="Đơn hàng đã được xác nhận, bạn không có quyền sửa."
+                                >
+                                    <Edit3 size={13} /> Sửa hóa đơn
+                                </button>
+                            );
+                        }
+
                         return (
                             <button
                                 onClick={() => router.push(`/orders/edit/${order.id}`)}

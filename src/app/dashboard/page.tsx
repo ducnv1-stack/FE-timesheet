@@ -396,10 +396,11 @@ function BranchRevenueChart({ chartData }: { chartData: any[] }) {
                         <YAxis fontSize={10} tickLine={false} axisLine={false} tickFormatter={(val) => `${(val / 1000000).toFixed(0)}tr`} />
                         <Tooltip
                             labelFormatter={(label) => `Chi nhánh: ${label}`}
-                            formatter={(value: any) => [formatCurrency(value), "Doanh thu"]}
+                            formatter={(value: any, name: any) => [formatCurrency(value), name]}
                             contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                         />
-                        <Bar name="Doanh thu" dataKey="revenue" fill="#be123c" radius={[6, 6, 0, 0]} barSize={barSize} />
+                        <Bar name="Doanh số bán" dataKey="salesRevenue" fill="#3b82f6" radius={[6, 6, 0, 0]} barSize={barSize} />
+                        <Bar name="Đã hoàn thành" dataKey="revenue" fill="#be123c" radius={[6, 6, 0, 0]} barSize={barSize} />
                     </BarChart>
                 </ResponsiveContainer>
             </div>
@@ -638,10 +639,11 @@ function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, us
                                             if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
                                             return label;
                                         }}
-                                        formatter={(value: any) => [formatCurrency(value), "Doanh thu"]}
+                                        formatter={(value: any, name: any) => [formatCurrency(value), name === 'salesRevenue' ? "Doanh số bán" : "Doanh số HT"]}
                                         contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                                     />
-                                    <Line type="monotone" dataKey="revenue" stroke="#e11d48" strokeWidth={2} dot={{ r: 2.5, fill: '#fff', strokeWidth: 2 }} activeDot={{ r: 5 }} />
+                                    <Line name="salesRevenue" type="monotone" dataKey="salesRevenue" stroke="#3b82f6" strokeWidth={2} dot={{ r: 2 }} activeDot={{ r: 4 }} />
+                                    <Line name="revenue" type="monotone" dataKey="revenue" stroke="#e11d48" strokeWidth={2} dot={{ r: 2.5, fill: '#fff', strokeWidth: 2 }} activeDot={{ r: 5 }} />
                                 </LineChart>
                             </ResponsiveContainer>
                         </div>
@@ -751,11 +753,12 @@ function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, us
                             <thead>
                                 <tr className="border-b border-slate-50 whitespace-nowrap">
                                     <th className="pb-3 pr-6 text-[10px] font-black text-slate-400 uppercase tracking-wider text-left">Chi nhánh</th>
-                                    <th className="pb-3 pr-6 text-[10px] font-black text-slate-400 uppercase tracking-wider text-right">Doanh thu</th>
-                                    <th className="pb-3 pr-6 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Đơn hàng</th>
+                                    <th className="pb-3 pr-6 text-[10px] font-black text-slate-400 uppercase tracking-wider text-right">Doanh số bán</th>
+                                    <th className="pb-3 pr-6 text-[10px] font-black text-slate-400 uppercase tracking-wider text-right">Doanh số HT</th>
+                                    <th className="pb-3 pr-6 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Đơn bán</th>
+                                    <th className="pb-3 pr-6 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Đơn hoàn thành</th>
                                     <th className="pb-3 pr-6 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Tỷ lệ giá thấp</th>
-                                    <th className="pb-3 pr-6 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Chờ khớp tiền</th>
-                                    <th className="pb-3 pr-6 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Chờ trả góp</th>
+                                    <th className="pb-3 pr-6 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Chờ khớp</th>
                                     <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-wider text-center">Hóa đơn</th>
                                 </tr>
                             </thead>
@@ -763,39 +766,39 @@ function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, us
                                 {data.branchDetails?.map((branch: any, i: number) => (
                                     <tr key={i} className="hover:bg-slate-50/50 transition-colors whitespace-nowrap">
                                         <td className="py-3 pr-6 text-xs font-black text-slate-700 text-left">{branch.name}</td>
+                                        <td className="py-3 pr-6 text-xs font-bold text-blue-600 text-right">{formatCurrency(branch.salesRevenue)}</td>
                                         <td className="py-3 pr-6 text-xs font-black text-emerald-600 text-right">{formatCurrency(branch.revenue)}</td>
-                                        <td className="py-3 pr-6 text-xs font-bold text-slate-600 text-center">
-                                            {branch.totalOrders || branch.orderCount}
-                                            <p className="text-[8px] text-slate-400 -mt-1">({branch.orderCount} đã xác nhận)</p>
-                                        </td>
+                                        <td className="py-3 pr-6 text-xs font-bold text-slate-500 text-center">{branch.salesOrderCount}</td>
+                                        <td className="py-3 pr-6 text-xs font-black text-emerald-600 text-center">{branch.completedOrderCount}</td>
                                         <td className="py-3 pr-6 text-center">
                                             <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${branch.lowPriceRatio > 15 ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'}`}>
                                                 {branch.lowPriceRatio}%
                                             </span>
                                         </td>
                                         <td className="py-3 pr-6 text-center">
-                                            {branch.unconfirmedOrders > 0 ? (
-                                                <span
-                                                    onClick={() => router.push(`/orders?paymentStatus=pending&excludeInstallment=true&branchId=${branch.id}&startDate=${startDate}&endDate=${endDate}`)}
-                                                    className="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100 cursor-pointer hover:bg-amber-600 hover:text-white transition-colors"
-                                                >
-                                                    {branch.unconfirmedOrders} đơn
-                                                </span>
-                                            ) : (
-                                                <CheckCircle size={14} className="text-emerald-500 mx-auto" />
-                                            )}
-                                        </td>
-                                        <td className="py-3 pr-6 text-center">
-                                            {branch.pendingInstallmentOrders > 0 ? (
-                                                <span
-                                                    onClick={() => router.push(`/orders?tab=installment&paymentStatus=pending&branchId=${branch.id}&startDate=${startDate}&endDate=${endDate}`)}
-                                                    className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 cursor-pointer hover:bg-indigo-600 hover:text-white transition-colors"
-                                                >
-                                                    {branch.pendingInstallmentOrders} đơn
-                                                </span>
-                                            ) : (
-                                                <CheckCircle size={14} className="text-emerald-500 mx-auto" />
-                                            )}
+                                            <div className="flex flex-col items-center gap-1">
+                                                {branch.unconfirmedOrders > 0 && (
+                                                    <span
+                                                        onClick={() => router.push(`/orders?paymentStatus=pending&excludeInstallment=true&branchId=${branch.id}&startDate=${startDate}&endDate=${endDate}`)}
+                                                        className="text-[9px] font-black text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full border border-amber-100 cursor-pointer hover:bg-amber-600 hover:text-white transition-colors"
+                                                        title="Chờ khớp tiền thường"
+                                                    >
+                                                        {branch.unconfirmedOrders} CK
+                                                    </span>
+                                                )}
+                                                {branch.pendingInstallmentOrders > 0 && (
+                                                    <span
+                                                        onClick={() => router.push(`/orders?tab=installment&paymentStatus=pending&branchId=${branch.id}&startDate=${startDate}&endDate=${endDate}`)}
+                                                        className="text-[9px] font-black text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-full border border-indigo-100 cursor-pointer hover:bg-indigo-600 hover:text-white transition-colors"
+                                                        title="Chờ duyệt trả góp"
+                                                    >
+                                                        {branch.pendingInstallmentOrders} TG
+                                                    </span>
+                                                )}
+                                                {branch.unconfirmedOrders === 0 && branch.pendingInstallmentOrders === 0 && (
+                                                    <CheckCircle size={14} className="text-emerald-500" />
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="py-3 text-center">
                                             {branch.pendingInvoices > 0 ? (
@@ -1151,10 +1154,11 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
                                         if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
                                         return label;
                                     }}
-                                    formatter={(value: any) => [formatCurrency(value), "Doanh thu"]}
+                                    formatter={(value: any, name: any) => [formatCurrency(value), name === 'salesRevenue' ? "Doanh số bán" : "Doanh số HT"]}
                                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                                 />
-                                <Line type="monotone" dataKey="revenue" stroke="#e11d48" strokeWidth={2} dot={{ r: 2.5, fill: '#fff', strokeWidth: 2 }} activeDot={{ r: 5 }} />
+                                <Line name="salesRevenue" type="monotone" dataKey="salesRevenue" stroke="#3b82f6" strokeWidth={2} dot={{ r: 2 }} activeDot={{ r: 4 }} />
+                                <Line name="revenue" type="monotone" dataKey="revenue" stroke="#e11d48" strokeWidth={2} dot={{ r: 2.5, fill: '#fff', strokeWidth: 2 }} activeDot={{ r: 5 }} />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
@@ -1709,20 +1713,36 @@ function TelesaleDashboard({ data, startDate, endDate }: { data: any, startDate:
                 <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
                     {/* Left: Revenue */}
                     <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2 opacity-80">
-                            <TrendingUp size={14} />
-                            <h3 className="text-[10px] font-black uppercase tracking-widest text-rose-100">Doanh số toàn hệ thống</h3>
-                        </div>
-                        <p className="text-3xl md:text-4xl font-black truncate tracking-tight">
-                            {formatCurrency(systemRevenue)}
-                        </p>
-                        <div className="mt-3 flex flex-wrap gap-2">
-                            <span className="text-[10px] font-bold bg-black/20 px-3 py-1 rounded-full border border-white/5">
-                                Tổng đơn: {totalOrderCount}
-                            </span>
-                            <span className="text-[10px] font-bold bg-emerald-500/20 px-3 py-1 rounded-full border border-emerald-400/20 text-emerald-300">
-                                Lương cứng: {formatCurrency(baseSalary)}
-                            </span>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <div className="flex items-center gap-2 mb-1 opacity-80">
+                                    <TrendingUp size={12} className="text-blue-300" />
+                                    <h3 className="text-[9px] font-black uppercase tracking-widest text-blue-100">Doanh số bán hệ thống</h3>
+                                </div>
+                                <p className="text-2xl md:text-3xl font-black truncate tracking-tight text-blue-50">
+                                    {formatCurrency(data.systemSalesRevenue || 0)}
+                                </p>
+                                <span className="text-[9px] font-bold bg-blue-500/20 px-2 py-0.5 rounded-full border border-blue-400/20 text-blue-200 mt-2 inline-block">
+                                    Đơn bán: {data.totalOrderCount || 0}
+                                </span>
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-2 mb-1 opacity-80">
+                                    <TrendingUp size={12} className="text-emerald-300" />
+                                    <h3 className="text-[9px] font-black uppercase tracking-widest text-emerald-100">Tiền về hệ thống</h3>
+                                </div>
+                                <p className="text-2xl md:text-3xl font-black truncate tracking-tight">
+                                    {formatCurrency(systemRevenue)}
+                                </p>
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                    <span className="text-[9px] font-bold bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-400/20 text-emerald-300">
+                                        Đơn hoàn thành: {data.completedOrderCount || 0}
+                                    </span>
+                                    <span className="text-[9px] font-bold bg-black/20 px-2 py-0.5 rounded-full border border-white/5">
+                                        Lương cứng: {formatCurrency(baseSalary)}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

@@ -295,7 +295,7 @@ export default function PaymentForm({ payments, totalOrderAmount, onChange, avai
             {/* Modal Preview Image */}
             {previewImage && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+                    className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-sm p-4"
                     onClick={() => setPreviewImage(null)}
                 >
                     <div className="relative max-w-4xl max-h-[90vh] bg-white rounded-xl overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
