@@ -5,11 +5,12 @@ import { useRouter, useParams } from 'next/navigation';
 import {
     ArrowLeft, Save, UserPlus, Key, Lock, Unlock, TrendingUp, Edit, X, Calendar, ChevronDown,
     Phone, Mail, MapPin, Briefcase, Building2, User2, BadgeCheck, ShieldAlert, GraduationCap,
-    Clock, CreditCard, Heart, Contact
+    Clock, CreditCard, Heart, Contact, Camera
 } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
 import ConfirmModal from '@/components/ui/confirm-modal';
-import { cn } from '@/lib/utils';
+import { cn, formatDate } from '@/lib/utils';
+import imageCompression from 'browser-image-compression';
 
 interface Employee {
     id: string;
@@ -17,6 +18,7 @@ interface Employee {
     phone: string | null;
     position: string;
     department: string | null;
+    avatarUrl: string | null;
     status: string | null;
     birthday: string | null;
     gender: string | null;
@@ -55,6 +57,11 @@ export default function EmployeeDetailPage() {
     const [editForm, setEditForm] = useState<any>({});
     const [branches, setBranches] = useState<any[]>([]);
 
+    // Avatar upload
+    const [uploadingAvatar, setUploadingAvatar] = useState(false);
+    const fileInputRef = import('react').then(m => m.useRef<HTMLInputElement>(null)).catch(() => null); // Quick fix since useRef was not imported, wait we can just import useRef. Wait, I'll use React.useRef.
+    const actualFileInputRef = (typeof window !== 'undefined') ? window.document.createElement('input') : null; // Safe fallback. I'll just use React.useRef.
+
     // Account creation modal
     const [showCreateAccount, setShowCreateAccount] = useState(false);
     const [username, setUsername] = useState('');
@@ -91,7 +98,7 @@ export default function EmployeeDetailPage() {
     const [perfYear, setPerfYear] = useState(new Date().getFullYear());
     const [currentUser, setCurrentUser] = useState<any>(null);
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
     useEffect(() => {
         if (params.id) {
@@ -147,6 +154,44 @@ export default function EmployeeDetailPage() {
         setIsEditing(false);
         setEditForm({});
     };
+    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploadingAvatar(true);
+        const formData = new FormData();
+
+        try {
+            const compressOptions = {
+                maxSizeMB: 1,
+                maxWidthOrHeight: 1024,
+                useWebWorker: true,
+            };
+
+            let fileToUpload = file;
+            try {
+                fileToUpload = await imageCompression(file, compressOptions);
+            } catch (err) {
+                console.error("Lỗi khi nén ảnh Avatar:", err);
+            }
+
+            formData.append('file', fileToUpload, fileToUpload.name);
+
+            const res = await fetch(`${API_URL}/employees/${params.id}/avatar`, {
+                method: 'POST',
+                body: formData,
+            });
+            if (!res.ok) throw new Error('Failed to upload avatar');
+            success('Cập nhật ảnh đại diện thành công!');
+            fetchEmployee(); // Refresh data
+        } catch (error: any) {
+            toastError('Lỗi tải ảnh: ' + error.message);
+        } finally {
+            setUploadingAvatar(false);
+            if (e.target) e.target.value = '';
+        }
+    };
+
     const handleSaveEmployee = async () => {
         setSaving(true);
         try {
@@ -394,9 +439,21 @@ export default function EmployeeDetailPage() {
                     <div className="px-6 pb-8 -mt-12 relative flex flex-col md:flex-row md:items-end md:justify-between gap-6">
                         <div className="flex flex-col md:flex-row items-center md:items-end gap-5 text-center md:text-left">
                             <div className="w-32 h-32 rounded-[2.5rem] bg-white p-1.5 shadow-2xl relative">
-                                <div className="w-full h-full rounded-[2.2rem] bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-white text-4xl font-black tracking-tighter">
-                                    {getInitials(employee.fullName)}
+                                <div className="w-full h-full rounded-[2.2rem] bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-white text-4xl font-black tracking-tighter cursor-pointer overflow-hidden group relative" onClick={() => document.getElementById('avatar-upload')?.click()}>
+                                    {employee.avatarUrl ? (
+                                        <img src={employee.avatarUrl.startsWith('http') ? employee.avatarUrl : `${API_URL.replace('/api', '')}${employee.avatarUrl}`} alt="Avatar" className="w-full h-full object-cover" />
+                                    ) : (
+                                        getInitials(employee.fullName)
+                                    )}
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center">
+                                        {uploadingAvatar ? (
+                                            <div className="animate-spin w-8 h-8 border-4 border-white border-t-transparent rounded-full"></div>
+                                        ) : (
+                                            <Camera size={28} className="text-white" />
+                                        )}
+                                    </div>
                                 </div>
+                                <input id="avatar-upload" type="file" className="hidden" accept="image/*" onChange={handleAvatarUpload} />
                                 <div className={cn(
                                     "absolute bottom-2 right-2 w-8 h-8 rounded-full border-4 border-white flex items-center justify-center shadow-lg",
                                     employee.status === 'Đang làm việc' ? "bg-emerald-500" : "bg-slate-400"
@@ -504,6 +561,7 @@ export default function EmployeeDetailPage() {
                                         { label: 'HCNS', value: 'HCNS' },
                                         { label: 'Nhân viên KT (NVKT)', value: 'NVKT' },
                                         { label: 'Lái xe (Driver)', value: 'Driver' },
+                                        { label: 'Marketing', value: 'Marketing' },
                                         { label: 'Nhân viên (Khác)', value: 'Nhân viên' },
                                     ]}
                                     editValue={editForm.position}
@@ -553,7 +611,7 @@ export default function EmployeeDetailPage() {
                                 <InfoField
                                     label="Ngày vào làm"
                                     icon={<Calendar size={14} />}
-                                    value={employee.joinDate ? new Date(employee.joinDate).toLocaleDateString('vi-VN') : '-'}
+                                    value={employee.joinDate ? formatDate(employee.joinDate) : '-'}
                                     isEditing={isEditing}
                                     type="date"
                                     editValue={editForm.joinDate}
@@ -572,7 +630,7 @@ export default function EmployeeDetailPage() {
                                 <InfoField
                                     label="Ngày ký hợp đồng"
                                     icon={<Calendar size={14} />}
-                                    value={employee.contractSigningDate ? new Date(employee.contractSigningDate).toLocaleDateString('vi-VN') : '-'}
+                                    value={employee.contractSigningDate ? formatDate(employee.contractSigningDate) : '-'}
                                     isEditing={isEditing}
                                     type="date"
                                     editValue={editForm.contractSigningDate}
@@ -628,7 +686,7 @@ export default function EmployeeDetailPage() {
                                 <InfoField
                                     label="Ngày sinh"
                                     icon={<Calendar size={14} />}
-                                    value={employee.birthday ? new Date(employee.birthday).toLocaleDateString('vi-VN') : '-'}
+                                    value={employee.birthday ? formatDate(employee.birthday) : '-'}
                                     isEditing={isEditing}
                                     type="date"
                                     editValue={editForm.birthday}

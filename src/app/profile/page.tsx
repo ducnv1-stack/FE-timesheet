@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import {
     User, Building2, Briefcase, Phone, Mail, Calendar, MapPin, CreditCard,
     BadgeCheck, Clock, Contact, Heart, Shield, Key, Eye, EyeOff, Save, ArrowLeft,
-    Pencil, ChevronRight
+    Pencil, ChevronRight, Trash2
 } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
-import { cn } from '@/lib/utils';
+import { cn, formatDate } from '@/lib/utils';
+import imageCompression from 'browser-image-compression';
+import ConfirmModal from '@/components/ui/confirm-modal';
 
 interface UserProfile {
     id: string;
@@ -20,6 +22,7 @@ interface UserProfile {
         fullName: string;
         phone: string | null;
         email: string | null;
+        avatarUrl: string | null;
         dateOfBirth: string | null;
         gender: string | null;
         idCardNumber: string | null;
@@ -42,6 +45,8 @@ export default function ProfilePage() {
     const { success, error: toastError } = useToast();
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
+    const [uploadingAvatar, setUploadingAvatar] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     // Edit states
     const [isEditingUsername, setIsEditingUsername] = useState(false);
@@ -111,6 +116,88 @@ export default function ProfilePage() {
             toastError(err.message);
         } finally {
             setSavingUsername(false);
+        }
+    };
+
+    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !profile?.employee) return;
+
+        setUploadingAvatar(true);
+        const formData = new FormData();
+
+        try {
+            const compressOptions = {
+                maxSizeMB: 1,
+                maxWidthOrHeight: 1024,
+                useWebWorker: true,
+            };
+
+            let fileToUpload = file;
+            try {
+                fileToUpload = await imageCompression(file, compressOptions);
+            } catch (err) {
+                console.error("Lỗi khi nén ảnh Avatar:", err);
+            }
+
+            formData.append('file', fileToUpload, fileToUpload.name);
+
+            const res = await fetch(`${apiUrl}/employees/${profile.employee.id}/avatar`, {
+                method: 'POST',
+                body: formData,
+            });
+            if (!res.ok) throw new Error('Failed to upload avatar');
+            success('Cập nhật ảnh đại diện thành công!');
+
+            // Refresh data
+            await fetchProfile();
+
+            // Sync to local storage for Navbar to update
+            const resMe = await fetch(`${apiUrl}/employees/${profile.employee.id}`);
+            if (resMe.ok) {
+                const updatedEmp = await resMe.json();
+                const storedUser = localStorage.getItem('user');
+                if (storedUser) {
+                    const user = JSON.parse(storedUser);
+                    user.employee = updatedEmp;
+                    localStorage.setItem('user', JSON.stringify(user));
+                    window.dispatchEvent(new Event('user-avatar-updated'));
+                }
+            }
+        } catch (error: any) {
+            toastError('Lỗi tải ảnh: ' + error.message);
+        } finally {
+            setUploadingAvatar(false);
+            if (e.target) e.target.value = '';
+        }
+    };
+
+    const handleDeleteAvatar = async () => {
+        if (!profile?.employee) return;
+        try {
+            const res = await fetch(`${apiUrl}/employees/${profile.employee.id}/avatar`, {
+                method: 'DELETE',
+            });
+            if (!res.ok) throw new Error('Failed to delete avatar');
+            success('Đã gỡ ảnh đại diện.');
+
+            // Refresh local state and global Navbar
+            await fetchProfile();
+            const resMe = await fetch(`${apiUrl}/employees/${profile.employee.id}`);
+            if (resMe.ok) {
+                const updatedEmp = await resMe.json();
+                const storedUser = localStorage.getItem('user');
+                if (storedUser) {
+                    const user = JSON.parse(storedUser);
+                    user.employee = updatedEmp;
+                    localStorage.setItem('user', JSON.stringify(user));
+                    window.dispatchEvent(new Event('user-avatar-updated'));
+                }
+            }
+        } catch (error: any) {
+            toastError('Lỗi xóa ảnh: ' + error.message);
+        } finally {
+            setShowDeleteConfirm(false);
         }
     };
 
@@ -185,10 +272,41 @@ export default function ProfilePage() {
                 <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.03)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.03)_50%,rgba(255,255,255,0.03)_75%,transparent_75%)] bg-[length:40px_40px]" />
 
                 <div className="relative px-8 py-10 flex flex-col sm:flex-row items-center gap-6">
-                    <div className="w-28 h-28 rounded-[2rem] bg-white p-1.5 shadow-2xl shrink-0">
-                        <div className="w-full h-full rounded-[1.7rem] bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-white text-3xl font-black tracking-tighter">
-                            {emp ? getInitials(emp.fullName) : profile.username.substring(0, 2).toUpperCase()}
+                    <div className="w-28 h-28 rounded-[2rem] bg-white p-1.5 shadow-2xl shrink-0 relative">
+                        <div
+                            className="w-full h-full rounded-[1.7rem] bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-white text-3xl font-black tracking-tighter cursor-pointer overflow-hidden group relative"
+                            onClick={() => emp && document.getElementById('profile-avatar-upload')?.click()}
+                        >
+                            {emp?.avatarUrl ? (
+                                <img src={emp.avatarUrl.startsWith('http') ? emp.avatarUrl : `${apiUrl.replace('/api', '')}${emp.avatarUrl}`} alt="Avatar" className="w-full h-full object-cover" />
+                            ) : (
+                                emp ? getInitials(emp.fullName) : profile.username.substring(0, 2).toUpperCase()
+                            )}
+                            {emp && (
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center">
+                                    {uploadingAvatar ? (
+                                        <div className="animate-spin w-8 h-8 border-4 border-white border-t-transparent rounded-full"></div>
+                                    ) : (
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" /><circle cx="12" cy="13" r="3" /></svg>
+                                    )}
+                                </div>
+                            )}
                         </div>
+                        {emp && emp.avatarUrl && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowDeleteConfirm(true);
+                                }}
+                                className="absolute -top-2 -right-2 p-2 bg-rose-100 text-rose-600 hover:bg-rose-600 hover:text-white rounded-full transition-all shadow-md z-10 cursor-pointer"
+                                title="Xóa ảnh đại diện"
+                            >
+                                <Trash2 size={16} />
+                            </button>
+                        )}
+                        {emp && (
+                            <input id="profile-avatar-upload" type="file" className="hidden" accept="image/*" onChange={handleAvatarUpload} />
+                        )}
                     </div>
                     <div className="text-center sm:text-left">
                         <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-2">
@@ -383,9 +501,9 @@ export default function ProfilePage() {
                                     <InfoItem label="Phòng ban" value={emp.department} icon={<Contact size={13} />} />
                                     <InfoItem label="Trạng thái" value={emp.status} icon={<Clock size={13} />} highlight={emp.status === 'Đang làm việc' ? 'green' : 'red'} />
                                     <InfoItem label="Loại công việc" value={emp.workingType} icon={<Clock size={13} />} />
-                                    <InfoItem label="Ngày vào làm" value={emp.joinDate ? new Date(emp.joinDate).toLocaleDateString('vi-VN') : null} icon={<Calendar size={13} />} />
+                                    <InfoItem label="Ngày vào làm" value={emp.joinDate ? formatDate(emp.joinDate) : null} icon={<Calendar size={13} />} />
                                     <InfoItem label="Loại hợp đồng" value={emp.contractType} icon={<BadgeCheck size={13} />} />
-                                    <InfoItem label="Ngày ký hợp đồng" value={emp.contractSigningDate ? new Date(emp.contractSigningDate).toLocaleDateString('vi-VN') : null} icon={<Calendar size={13} />} />
+                                    <InfoItem label="Ngày ký hợp đồng" value={emp.contractSigningDate ? formatDate(emp.contractSigningDate) : null} icon={<Calendar size={13} />} />
                                     {emp.isInternalDriver && (
                                         <div className="sm:col-span-2">
                                             <span className="px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-wider border border-emerald-100 inline-flex items-center gap-1.5">
@@ -406,7 +524,7 @@ export default function ProfilePage() {
                                 </div>
                                 <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
                                     <InfoItem label="Số điện thoại" value={emp.phone} icon={<Phone size={13} />} />
-                                    <InfoItem label="Ngày sinh" value={emp.dateOfBirth ? new Date(emp.dateOfBirth).toLocaleDateString('vi-VN') : null} icon={<Calendar size={13} />} />
+                                    <InfoItem label="Ngày sinh" value={emp.dateOfBirth ? formatDate(emp.dateOfBirth) : null} icon={<Calendar size={13} />} />
                                     <InfoItem label="Giới tính" value={emp.gender} icon={<User size={13} />} />
                                     <InfoItem label="CMND/CCCD" value={emp.idCardNumber} icon={<CreditCard size={13} />} />
                                     <InfoItem label="Email" value={emp.email} icon={<Mail size={13} />} />
@@ -420,6 +538,17 @@ export default function ProfilePage() {
                     )}
                 </div>
             </div>
+
+            <ConfirmModal
+                isOpen={showDeleteConfirm}
+                onCancel={() => setShowDeleteConfirm(false)}
+                onConfirm={handleDeleteAvatar}
+                title="Xóa ảnh đại diện?"
+                message="Bạn có chắc chắn muốn gỡ ảnh đại diện của mình không? Hành động này không thể hoàn tác."
+                confirmLabel="Xóa Ảnh"
+                cancelLabel="Hủy"
+                isDanger={true}
+            />
         </div>
     );
 }

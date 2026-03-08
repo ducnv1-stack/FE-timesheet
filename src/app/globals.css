@@ -32,6 +32,7 @@ body {
   nav,
   header,
   footer,
+  aside,
   .print-hide {
     display: none !important;
   }
@@ -41,13 +42,37 @@ body {
     position: relative !important;
     width: 100% !important;
     max-width: none !important;
-    margin: 0 !important;
+    margin: 0 auto !important;
     padding: 10mm !important;
-    /* Restore some padding for breathing room */
     border: none !important;
     box-shadow: none !important;
     background: white !important;
     visibility: visible !important;
+  }
+
+  /* Căn viền theo trình duyệt */
+  @page {
+    margin: 0;
+    size: A4 portrait;
+  }
+
+  /* Ẩn Header Footer nhưng giữ lại Margin */
+  @media print {
+    @page {
+      margin: 0;
+    }
+
+    body {
+      padding: 5mm;
+    }
+  }
+
+  /* Prevent text/items from splitting across pages */
+  #invoice-paper table,
+  #invoice-paper tr,
+  #invoice-paper .break-inside-avoid {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   body,
@@ -56,6 +81,7 @@ body {
     margin: 0 !important;
     padding: 0 !important;
     height: auto !important;
+    min-height: 0 !important;
     overflow: visible !important;
   }
 
@@ -75,11 +101,6 @@ body {
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-  }
-
-  @page {
-    margin: 5mm;
-    size: A4 portrait;
   }
 
   /* Global print fixes for forms in invoice */

@@ -86,7 +86,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             />
 
             <div className={cn(
-                "flex-1 min-w-0 transition-all duration-300 min-h-screen flex flex-col print:ml-0",
+                "flex-1 min-w-0 transition-all duration-300 min-h-screen flex flex-col print:min-h-0 print:ml-0",
                 "ml-0 lg:ml-20", // Clear margin on mobile
                 !isCollapsed && "lg:ml-64" // Margin for expanded state on desktop
             )}>

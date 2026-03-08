@@ -12,10 +12,19 @@ export default function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
     const [user, setUser] = useState<any>(null);
 
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        }
+        const loadUser = () => {
+            const storedUser = localStorage.getItem('user');
+            if (storedUser) {
+                setUser(JSON.parse(storedUser));
+            }
+        };
+
+        loadUser();
+        window.addEventListener('user-avatar-updated', loadUser);
+
+        return () => {
+            window.removeEventListener('user-avatar-updated', loadUser);
+        };
     }, []);
 
     if (isLoginPage) return null;
@@ -58,8 +67,12 @@ export default function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
                                     {typeof user.role === 'object' ? user.role.name : user.role}
                                 </span>
                             </div>
-                            <div className="w-8 h-8 bg-rose-600 rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-sm group-hover:shadow-md group-hover:scale-105 transition-all">
-                                {(user.employee?.fullName || user.username).substring(0, 2).toUpperCase()}
+                            <div className="w-8 h-8 bg-rose-600 rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-sm group-hover:shadow-md group-hover:scale-105 transition-all overflow-hidden shrink-0">
+                                {user.employee?.avatarUrl ? (
+                                    <img src={user.employee.avatarUrl.startsWith('http') ? user.employee.avatarUrl : `${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace('/api', '')}${user.employee.avatarUrl}`} alt="Avatar" className="w-full h-full object-cover" />
+                                ) : (
+                                    (user.employee?.fullName || user.username).substring(0, 2).toUpperCase()
+                                )}
                             </div>
                         </div>
                     )}

@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { ScrollText, Search, Filter, ChevronLeft, ArrowRight, User as UserIcon, Calendar, Clock, Eye } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { formatCurrency, cn } from '@/lib/utils';
+import { formatCurrency, cn, formatDate } from '@/lib/utils';
 import { useToast } from '@/components/ui/toast';
+import { format as formatDateFns } from 'date-fns';
 import LogDetailModal from '@/components/logs/LogDetailModal';
 
 export default function LogsPage() {
@@ -121,11 +122,11 @@ export default function LogsPage() {
                                             <div className="flex flex-col">
                                                 <span className="text-xs md:text-sm font-bold text-slate-700 flex items-center gap-1 md:gap-1.5 whitespace-nowrap">
                                                     <Calendar size={10} className="text-slate-400 md:size-[12px]" />
-                                                    {new Date(log.changedAt).toLocaleDateString('vi-VN')}
+                                                    {formatDate(log.changedAt)}
                                                 </span>
                                                 <span className="text-[9px] md:text-[10px] text-slate-400 font-medium flex items-center gap-1 md:gap-1.5 mt-0.5">
                                                     <Clock size={10} className="text-slate-300 md:size-[12px]" />
-                                                    {new Date(log.changedAt).toLocaleTimeString('vi-VN')}
+                                                    {formatDateFns(new Date(log.changedAt), 'HH:mm:ss')}
                                                 </span>
                                             </div>
                                         </td>

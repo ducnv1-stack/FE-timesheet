@@ -5,7 +5,7 @@ import { Save, ShoppingCart, User, Info, CreditCard, Users } from 'lucide-react'
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/toast';
 
-import { formatCurrency, cn } from '@/lib/utils';
+import { formatCurrency, cn, formatDateTime } from '@/lib/utils';
 import ItemGrid from '@/components/orders/ItemGrid';
 import GiftGrid from '@/components/orders/GiftGrid';
 import SplitManager from '@/components/orders/SplitManager';
@@ -291,7 +291,7 @@ export default function NewOrderPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-3 xl:gap-4 print:block">
                 {/* Main Invoice Section */}
-                <div id="invoice-paper" className="bg-white border-2 border-slate-800 p-4 md:p-6 shadow-2xl relative print:p-0 print:border-none print:shadow-none print:w-full">
+                <div id="invoice-paper" className="w-full max-w-[210mm] bg-white border-2 p-4 md:p-6 shadow-2xl relative overflow-hidden print:shadow-none print:p-[10mm] print:border-none print:m-auto transition-all">
                     {/* Top decoration line: Absolute for UI, Static for Print to ensure no overlap */}
                     <div className="absolute top-0 left-0 w-full h-1.5 bg-rose-700 print:hidden"></div>
                     <div className="hidden print:block w-full h-3 bg-rose-700 mb-8"></div>
@@ -588,7 +588,7 @@ export default function NewOrderPage() {
 
                         <div className="mt-12 pt-8 flex justify-between items-start italic text-[10px] text-slate-400 border-t border-slate-100">
                             <div>
-                                * Ngày in: {isMounted ? `${new Date().toLocaleDateString('vi-VN')} ${new Date().toLocaleTimeString('vi-VN')}` : '...'}
+                                * Ngày in: {isMounted ? formatDateTime(new Date()) : '...'}
                             </div>
                             <div className="text-right">Hệ thống quản lý Ohari</div>
                         </div>

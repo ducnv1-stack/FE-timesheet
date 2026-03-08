@@ -52,7 +52,7 @@ export default function OrderInvoiceView({ order, onBack }: OrderInvoiceViewProp
     const statusBadge = getStatusBadge(order.status);
 
     return (
-        <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-300 print:shadow-none print:border-none print:rounded-none print:overflow-visible">
             {/* Action Bar */}
             <div className="bg-slate-900 px-4 py-2.5 flex items-center justify-between no-print">
                 <div className="flex items-center gap-2.5">
@@ -97,7 +97,7 @@ export default function OrderInvoiceView({ order, onBack }: OrderInvoiceViewProp
             </div>
 
             {/* Invoice Content */}
-            <div className="p-4 md:p-6 bg-[#fafafa] flex justify-center">
+            <div className="p-4 md:p-6 bg-[#fafafa] flex justify-center print:p-0 print:bg-white">
                 <InvoicePaper order={order} />
             </div>
         </div>

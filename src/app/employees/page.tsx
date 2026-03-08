@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import { Users, Plus, Search, Filter, FileSpreadsheet, Download } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
 import * as XLSX from 'xlsx';
+import { formatDate } from '@/lib/utils';
 
 interface Employee {
     id: string;
+    avatarUrl: string | null;
     fullName: string;
     phone: string | null;
     position: string;
@@ -99,13 +101,13 @@ export default function EmployeesPage() {
                 'Số điện thoại': emp.phone || '',
                 'Email': emp.email || '',
                 'CCCD/CMND': emp.idCardNumber || '',
-                'Ngày sinh': emp.birthday ? new Date(emp.birthday).toLocaleDateString('vi-VN') : '',
+                'Ngày sinh': emp.birthday ? formatDate(emp.birthday) : '',
                 'Giới tính': (emp as any).gender || '',
                 'Chi nhánh': emp.branch.name,
                 'Phòng ban': emp.department || '',
                 'Chức vụ': emp.position,
                 'Trạng thái': emp.status || '',
-                'Ngày vào làm': emp.joinDate ? new Date(emp.joinDate).toLocaleDateString('vi-VN') : '',
+                'Ngày vào làm': emp.joinDate ? formatDate(emp.joinDate) : '',
                 'Hợp đồng': (emp as any).contractType || '',
                 'Tên đăng nhập': emp.user?.username || 'Chưa có',
                 'Mật khẩu (mã hóa)': emp.user?.passwordHash || '',
@@ -134,7 +136,7 @@ export default function EmployeesPage() {
                 { wch: 15 }  // TK Status
             ];
 
-            XLSX.writeFile(wb, `Danh_sach_Nhan_vien_Ohari_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '-')}.xlsx`);
+            XLSX.writeFile(wb, `Danh_sach_Nhan_vien_Ohari_${formatDate(new Date()).replace(/\//g, '-')}.xlsx`);
         } catch (error: any) {
             console.error('Export error:', error);
             toastError(error.message || 'Lỗi khi xuất file');
@@ -445,6 +447,7 @@ export default function EmployeesPage() {
                             <table className="w-full text-xs">
                                 <thead className="bg-gradient-to-r from-slate-700 to-slate-800 text-white">
                                     <tr className="whitespace-nowrap">
+                                        <th className="px-2 py-1.5 text-center w-10"></th>
                                         <th className="px-2 py-1.5 pr-6 text-left font-bold text-[9px] uppercase tracking-wider">Tên Nhân Viên</th>
                                         <th className="px-2 py-1.5 pr-6 text-left font-bold text-[9px] uppercase tracking-wider">SĐT</th>
                                         <th className="px-2 py-1.5 pr-6 text-left font-bold text-[9px] uppercase tracking-wider">Chi Nhánh</th>
@@ -465,6 +468,21 @@ export default function EmployeesPage() {
                                     ) : (
                                         filteredEmployees.map((emp) => (
                                             <tr key={emp.id} className="hover:bg-slate-50 transition-colors whitespace-nowrap">
+                                                <td className="px-2 py-1.5 text-center">
+                                                    <div className="w-7 h-7 rounded-sm overflow-hidden border border-slate-200 bg-slate-100 mx-auto flex items-center justify-center shrink-0">
+                                                        {emp.avatarUrl ? (
+                                                            <img
+                                                                src={emp.avatarUrl.startsWith('http') ? emp.avatarUrl : `${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace('/api', '')}${emp.avatarUrl}`}
+                                                                alt="Avatar"
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <span className="text-[9px] font-bold text-slate-400">
+                                                                {emp.fullName.substring(0, 2).toUpperCase()}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </td>
                                                 <td className="px-2 py-1.5 pr-6 font-semibold text-slate-900 text-[11px] text-left">{emp.fullName}</td>
                                                 <td className="px-2 py-1.5 pr-6 text-slate-600 text-[11px] text-left">{emp.phone || '-'}</td>
                                                 <td className="px-2 py-1.5 pr-6 text-slate-600 font-medium text-[11px] text-left">{emp.branch.name}</td>

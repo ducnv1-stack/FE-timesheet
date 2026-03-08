@@ -1,7 +1,7 @@
 "use client";
 
 import { Gift, CreditCard, CheckCircle2 } from 'lucide-react';
-import { formatCurrency, cn } from '@/lib/utils';
+import { formatCurrency, cn, formatDate, formatDateTime } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 
 interface InvoicePaperProps {
@@ -127,7 +127,7 @@ export default function InvoicePaper({ order, className, type, isCreate, scale, 
                 <div className="grid grid-cols-[120px_1fr] items-center border-b border-slate-100 py-1">
                     <span className="font-bold text-slate-600">Ngày tháng:</span>
                     <span className="font-medium text-slate-900">
-                        {order.orderDate ? new Date(order.orderDate).toLocaleDateString('vi-VN') : '---'}
+                        {order.orderDate ? formatDate(order.orderDate) : '---'}
                     </span>
                 </div>
                 <div className="grid grid-cols-[120px_1fr] items-center border-b border-slate-100 py-1">
@@ -155,7 +155,7 @@ export default function InvoicePaper({ order, className, type, isCreate, scale, 
                 <div className="grid grid-cols-[120px_1fr] items-center border-b border-slate-100 py-1">
                     <span className="font-bold text-slate-600">Ngày cấp:</span>
                     <span className="font-medium text-slate-700">
-                        {order.customerCardIssueDate ? new Date(order.customerCardIssueDate).toLocaleDateString('vi-VN') : '---'}
+                        {order.customerCardIssueDate ? formatDate(order.customerCardIssueDate) : '---'}
                     </span>
                 </div>
 
@@ -336,7 +336,7 @@ export default function InvoicePaper({ order, className, type, isCreate, scale, 
                                                 })()}
                                             </span>
                                             <span className="text-[10px] text-slate-400 font-medium tracking-tight">
-                                                ({p.paidAt ? new Date(p.paidAt).toLocaleDateString('vi-VN') : '---'})
+                                                ({p.paidAt ? formatDate(p.paidAt) : '---'})
                                             </span>
                                         </div>
                                         <span className="text-xs font-black text-slate-800">{formatCurrency(Number(p.amount))}</span>
@@ -349,7 +349,7 @@ export default function InvoicePaper({ order, className, type, isCreate, scale, 
                                     <div className="flex items-center gap-2 bg-emerald-50 px-2 py-1 rounded border border-emerald-100 shadow-sm">
                                         <span className="text-[8px] font-black text-emerald-600 uppercase">✓ KT xác nhận:</span>
                                         <span className="text-[8px] font-bold text-emerald-800 italic">
-                                            {order.confirmer?.fullName || order.confirmer?.employee?.fullName || 'Hệ thống'} - {order.confirmedAt ? new Date(order.confirmedAt).toLocaleDateString('vi-VN') : '---'}
+                                            {order.confirmer?.fullName || order.confirmer?.employee?.fullName || 'Hệ thống'} - {order.confirmedAt ? formatDate(order.confirmedAt) : '---'}
                                         </span>
                                     </div>
                                 ) : (
@@ -403,7 +403,7 @@ export default function InvoicePaper({ order, className, type, isCreate, scale, 
             {/* Footer */}
             <div className="mt-12 pt-8 flex justify-between items-start italic text-[10px] text-slate-400 border-t border-slate-100">
                 <div>
-                    * Ngày in: {isMounted ? `${new Date().toLocaleDateString('vi-VN')} ${new Date().toLocaleTimeString('vi-VN')}` : '...'}
+                    * Ngày in: {isMounted ? formatDateTime(new Date()) : '...'}
                 </div>
                 <div className="text-right">Hệ thống quản lý Ohari</div>
             </div>

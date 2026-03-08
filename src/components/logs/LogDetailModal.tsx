@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useMemo } from 'react';
-import { X, ArrowRight, CheckCircle2, Activity, User, Phone, Banknote, FileText, Globe, MapPin, Box, Gift, Users, Truck, Calendar, ShieldCheck, Mail, Map } from 'lucide-react';
-import { formatCurrency, cn } from '@/lib/utils';
+import { X, ArrowRight, CheckCircle2, Activity, User, Phone, Banknote, FileText, Globe, MapPin, Box, Gift, Users, Truck, Calendar, ShieldCheck, Mail, Map, CreditCard } from 'lucide-react';
+import { formatCurrency, cn, formatDate } from '@/lib/utils';
 import InvoicePaper from '../orders/InvoicePaper';
 
 interface LogDetailModalProps {
@@ -60,7 +60,7 @@ export default function LogDetailModal({ log, onClose }: LogDetailModalProps) {
                 const format = (v: any) => {
                     if (!v) return '---';
                     if (isCurrency) return formatCurrency(Number(v));
-                    if (isDate) return new Date(v).toLocaleDateString('vi-VN');
+                    if (isDate) return formatDate(v);
                     return String(v);
                 };
                 list.push({
@@ -154,6 +154,22 @@ export default function LogDetailModal({ log, onClose }: LogDetailModalProps) {
         }
         checkField('totalAmount', 'Tổng tiền đơn', <Banknote size={18} />, 'text-emerald-500', 'bg-emerald-50', true);
         checkField('note', 'Ghi chú', <FileText size={18} />, 'text-amber-500', 'bg-amber-50');
+
+        // 4.5 Payments
+        const getPaymentsKey = (payments: any[]) => (payments || []).map((p: any) => `${p.amount}-${p.paymentMethod}`).sort().join('|');
+        if (getPaymentsKey(oldData?.payments) !== getPaymentsKey(newData?.payments)) {
+            const oldPaid = (oldData?.payments || []).reduce((sum: number, p: any) => sum + Number(p.amount || 0), 0);
+            const newPaid = (newData?.payments || []).reduce((sum: number, p: any) => sum + Number(p.amount || 0), 0);
+
+            list.push({
+                label: 'Thanh toán',
+                old: formatCurrency(oldPaid),
+                new: formatCurrency(newPaid),
+                icon: <CreditCard size={18} />,
+                color: 'text-indigo-500',
+                bgColor: 'bg-indigo-50'
+            });
+        }
 
         // 5. Gifts & Splits
         const getGiftsKey = (gifts: any[]) => (gifts || []).map((g: any) => `${g.giftId}-${g.quantity}`).sort().join('|');

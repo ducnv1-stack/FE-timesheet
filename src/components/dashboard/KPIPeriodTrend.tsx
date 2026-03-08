@@ -1,5 +1,6 @@
 import React from 'react';
 import { formatCurrency } from '@/lib/utils';
+import { format as formatDateFns } from 'date-fns';
 import { CheckCircle, AlertCircle, Clock, TrendingUp } from 'lucide-react';
 
 export default function KPIPeriodTrend({ periodStats }: { periodStats: any[] }) {
@@ -37,8 +38,8 @@ export default function KPIPeriodTrend({ periodStats }: { periodStats: any[] }) 
 
                         return (
                             <div key={idx} className={`p-4 rounded-2xl border transition-all ${isOngoing ? 'bg-amber-50/30 border-amber-100 shadow-sm' :
-                                    isAchieved ? 'bg-emerald-50/20 border-emerald-100' :
-                                        isFailed ? 'bg-rose-50/20 border-rose-100' : 'bg-slate-50/30 border-slate-100'
+                                isAchieved ? 'bg-emerald-50/20 border-emerald-100' :
+                                    isFailed ? 'bg-rose-50/20 border-rose-100' : 'bg-slate-50/30 border-slate-100'
                                 }`}>
                                 <div className="flex justify-between items-start mb-3">
                                     <div>
@@ -46,7 +47,7 @@ export default function KPIPeriodTrend({ periodStats }: { periodStats: any[] }) 
                                             {period.label} {isOngoing && '(Hôm nay)'}
                                         </p>
                                         <p className="text-[9px] text-slate-500 font-bold">
-                                            {new Date(period.startDate).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })} - {new Date(period.endDate).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                            {formatDateFns(new Date(period.startDate), 'dd/MM')} - {formatDateFns(new Date(period.endDate), 'dd/MM/yyyy')}
                                         </p>
                                     </div>
                                     {isAchieved && <CheckCircle size={16} className="text-emerald-500" />}
