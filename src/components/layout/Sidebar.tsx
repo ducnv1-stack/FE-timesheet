@@ -16,7 +16,8 @@ import {
     Users,
     Building2,
     Menu,
-    X
+    X,
+    Truck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -105,7 +106,14 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         //     icon: Building2,
         //     href: '/branches',
         //     active: pathname === '/branches',
-        //     roleAccess: ['DIRECTOR', 'MANAGER']
+        //     roleAccess: ['DIRECTOR', 'MANAGER', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT']
+        // },
+        // {
+        //     label: 'Cấu hình phí ship',
+        //     icon: Truck,
+        //     href: '/settings/delivery-fees',
+        //     active: pathname === '/settings/delivery-fees',
+        //     roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT']
         // },
         {
             label: 'Cài đặt',

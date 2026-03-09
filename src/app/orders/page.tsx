@@ -25,8 +25,10 @@ import {
     Clock,
     Car,
     History,
+    FileSpreadsheet,
     Image as ImageIcon
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { formatCurrency, cn, formatDate, formatDateTime } from '@/lib/utils';
 import { format as formatDateFns } from 'date-fns';
 import { useToast } from '@/components/ui/toast';
@@ -88,6 +90,7 @@ function OrdersPageContent() {
     const [refreshing, setRefreshing] = useState(false);
     const [showMobileFilters, setShowMobileFilters] = useState(false);
     const [viewingHistoryOrderId, setViewingHistoryOrderId] = useState<string | null>(null);
+    const [isExporting, setIsExporting] = useState(false);
 
     const { error: toastError, success } = useToast();
     const router = useRouter();
@@ -180,6 +183,200 @@ function OrdersPageContent() {
             fetchOrders();
         } catch (err: any) {
             toastError('Lỗi khi xác nhận: ' + err.message);
+        }
+    };
+
+    const handleExportExcel = async () => {
+        if (!user || isExporting) return;
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+        try {
+            setIsExporting(true);
+            const userRole = typeof user.role === 'object' ? (user.role.code || user.role.name) : user.role;
+            const userBranchId = user.employee?.branchId;
+            const GLOBAL_ROLES = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MARKETING'];
+
+            const params = new URLSearchParams();
+            params.append('userId', user.id);
+            if (userRole) params.append('roleCode', userRole);
+
+            // Filters
+            if (selectedBranchId !== 'all') {
+                params.append('branchId', selectedBranchId);
+            } else if (userBranchId && !GLOBAL_ROLES.includes(userRole)) {
+                params.append('branchId', userBranchId);
+            }
+
+            if (selectedEmployeeId !== 'all') params.append('employeeId', selectedEmployeeId);
+            if (statusFilter !== 'all') params.append('status', statusFilter);
+            if (paymentStatusFilter && paymentStatusFilter !== 'all') params.append('paymentStatus', paymentStatusFilter);
+            if (paymentMethodFilter !== 'all') params.append('paymentMethod', paymentMethodFilter);
+            if (invoiceStatusFilter && invoiceStatusFilter !== 'all') params.append('invoiceStatus', invoiceStatusFilter);
+            if (excludeInstallment) params.append('excludeInstallment', 'true');
+
+            if (startDate && endDate) {
+                params.append('startDate', startDate);
+                params.append('endDate', endDate);
+            } else if (timeFilter !== 'all' && timeFilter !== 'custom') {
+                params.append('timeFilter', timeFilter);
+            }
+
+            if (activeTab !== 'all') params.append('tab', activeTab);
+            if (showLowPriceOnly) params.append('lowPrice', 'true');
+            if (deliveryTypeFilter !== 'all') params.append('deliveryType', deliveryTypeFilter);
+
+            // Edit Date filters
+            if (editStartDate && editEndDate) {
+                params.append('editStartDate', editStartDate);
+                params.append('editEndDate', editEndDate);
+            } else if (editTimeFilter !== 'all' && editTimeFilter !== 'custom') {
+                params.append('editTimeFilter', editTimeFilter);
+            }
+
+            // Confirmed Date filters
+            if (confirmedStartDate && confirmedEndDate) {
+                params.append('confirmedStartDate', confirmedStartDate);
+                params.append('confirmedEndDate', confirmedEndDate);
+            } else if (confirmedTimeFilter !== 'all' && confirmedTimeFilter !== 'custom') {
+                params.append('confirmedTimeFilter', confirmedTimeFilter);
+            }
+
+            // High limit to fetch all filtered records
+            params.append('page', '1');
+            params.append('limit', '5000');
+            if (debouncedSearch) params.append('search', debouncedSearch);
+
+            const res = await fetch(`${apiUrl}/orders?${params.toString()}`);
+            if (!res.ok) throw new Error('Failed to fetch data for export');
+            const result = await res.json();
+            const rawOrders = result.data || [];
+
+            if (rawOrders.length === 0) {
+                toastError('Không có dữ liệu để xuất');
+                return;
+            }
+
+            // Flat data for Excel
+            const exportData = rawOrders.map((o: any) => {
+                const totalPaid = o.payments?.reduce((sum: number, p: any) => sum + Number(p.amount), 0) || 0;
+                const remaining = Number(o.totalAmount) - totalPaid;
+
+                // Products string
+                const productList = o.items?.map((i: any) => `${i.product?.name || 'SP'} (SL: ${i.quantity})`).join(', ') || '';
+                const productSellPrices = o.items?.map((i: any) => new Intl.NumberFormat('vi-VN').format(Number(i.unitPrice))).join(', ') || '';
+                const productMinPrices = o.items?.map((i: any) => new Intl.NumberFormat('vi-VN').format(Number(i.minPriceAtSale))).join(', ') || '';
+
+                // Gifts string
+                const giftList = o.gifts?.map((g: any) => `${g.gift?.name || 'Quà'} (SL: ${g.quantity})`).join(', ') || '';
+
+                // Staff Split string
+                const staffSplits = o.splits?.map((s: any) => `${s.employee?.fullName} (${s.splitPercent}%)`).join(', ') || '';
+
+                // Address
+                const fullAddress = [
+                    o.customerAddress,
+                    o.ward?.name,
+                    o.province?.name
+                ].filter(Boolean).join(', ');
+
+                // Status mapping
+                const statusMap: any = {
+                    'pending': 'Chờ giao',
+                    'assigned': 'Đã điều xe',
+                    'delivered': 'Đã giao',
+                    'canceled': 'Đã hủy',
+                    'rejected': 'Từ chối'
+                };
+
+                // Payment method mapping
+                const paymentMethodMap: any = {
+                    'CASH': 'Tiền mặt',
+                    'TRANSFER': 'Chuyển khoản',
+                    'INSTALLMENT': 'Trả góp',
+                    'CARD': 'Thẻ',
+                    'TRANSFER_COMPANY': 'Chuyển khoản công ty',
+                    'TRANSFER_PERSONAL': 'Chuyển khoản cá nhân'
+                };
+
+                // Delivery category mapping
+                const deliveryCategoryMap: any = {
+                    'COMPANY_DRIVER': 'Tài xế công ty',
+                    'EXTERNAL_DRIVER': 'Tài xế ngoài',
+                    'STAFF_DELIVERER': 'Nhân viên giao',
+                    'SELLING_SALE': 'Sale tự giao',
+                    'OTHER_SALE': 'Sale khác',
+                };
+
+                // Separate driver deliveries vs staff deliveries
+                const driverDeliveries = o.deliveries?.filter((d: any) => d.role === 'DRIVER' || d.category === 'COMPANY_DRIVER' || d.category === 'EXTERNAL_DRIVER') || [];
+                const staffDeliveries = o.deliveries?.filter((d: any) => d.role === 'STAFF' || d.category === 'STAFF_DELIVERER' || d.category === 'SELLING_SALE' || d.category === 'OTHER_SALE') || [];
+
+                // Driver info
+                const driverNames = driverDeliveries.map((d: any) => d.driver?.fullName || 'N/A').join(', ');
+                const driverFees = driverDeliveries.reduce((sum: number, d: any) => sum + Number(d.deliveryFee), 0);
+
+                // Staff delivery info
+                const staffDeliveryNames = staffDeliveries.map((d: any) => {
+                    const name = d.driver?.fullName || 'N/A';
+                    const roleLabel = d.category === 'SELLING_SALE' || d.category === 'OTHER_SALE' ? 'Sale' : 'NVGH';
+                    return `${name} [${roleLabel}]`;
+                }).join(', ');
+                const staffDeliveryFees = staffDeliveries.reduce((sum: number, d: any) => sum + Number(d.deliveryFee), 0);
+
+                // Total shipping fee
+                const totalShipFee = o.deliveries?.reduce((sum: number, d: any) => sum + Number(d.deliveryFee), 0) || 0;
+
+                // Delivery categories in Vietnamese
+                const deliveryCategories = Array.from(new Set(o.deliveries?.map((d: any) => deliveryCategoryMap[d.category] || d.category))).join(', ');
+
+                // Payment methods in Vietnamese
+                const paymentMethods = Array.from(new Set(o.payments?.map((p: any) => paymentMethodMap[p.paymentMethod] || p.paymentMethod))).join(', ');
+
+                return {
+                    'Mã đơn hàng': o.id,
+                    'Ngày tạo': formatDateTime(o.createdAt),
+                    'Ngày cập nhật': formatDateTime(o.updatedAt),
+                    'Họ tên khách hàng': o.customerName,
+                    'Số điện thoại': o.customerPhone,
+                    'Địa chỉ chi tiết': o.customerAddress || '',
+                    'Xã/Phường': o.ward?.name || '',
+                    'Tỉnh/Thành phố': o.province?.name || '',
+                    'CCCD/CMND khách': o.customerCardNumber || '',
+                    'Ngày cấp CCCD': o.customerCardIssueDate ? formatDate(o.customerCardIssueDate) : '',
+                    'Đơn giá dưới Min': o.items?.some((i: any) => i.isBelowMin) ? 'CÓ' : 'Không',
+                    'Người tạo đơn': `${o.creator?.employee?.fullName || 'N/A'} [${o.creator?.employee?.position || ''}]`,
+                    'Nhân viên được chia': staffSplits,
+                    'Danh sách sản phẩm': productList,
+                    'Đơn giá bán': productSellPrices,
+                    'Giá bán tối thiểu (Min)': productMinPrices,
+                    'Danh sách quà tặng': giftList,
+                    'Ghi chú': o.note || '',
+                    'Tổng tiền đơn': Number(o.totalAmount),
+                    'Đã thanh toán': totalPaid,
+                    'Còn nợ': remaining,
+                    'Phương thức thanh toán': paymentMethods,
+                    'Xác nhận tiền': o.isPaymentConfirmed ? 'Đã xác nhận' : 'Chưa',
+                    'Hóa đơn VAT': o.isInvoiceIssued ? 'Đã xuất' : 'Chưa',
+                    'Hình thức giao': deliveryCategories,
+                    'Tài xế': driverNames,
+                    'Chi phí tài xế': driverFees,
+                    'Nhân viên giao': staffDeliveryNames,
+                    'Phí ship nhân viên': staffDeliveryFees,
+                    'Tổng phí ship': totalShipFee,
+                    'Trạng thái đơn hàng': statusMap[o.status] || o.status
+                };
+            });
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Orders");
+            XLSX.writeFile(wb, `Bao_cao_don_hang_${formatDate(new Date()).replace(/\//g, '-')}.xlsx`);
+
+            success('Xuất file Excel thành công');
+        } catch (err: any) {
+            toastError('Lỗi khi xuất file: ' + err.message);
+        } finally {
+            setIsExporting(false);
         }
     };
 
@@ -510,6 +707,16 @@ function OrdersPageContent() {
                         <p className="text-[11px] text-slate-500">Quản lý và tra cứu các hóa đơn.</p>
                     </div>
                     <div className="flex items-center gap-2">
+                        {user && ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'].includes(typeof user.role === 'object' ? user.role.code : user.role) && (
+                            <button
+                                onClick={handleExportExcel}
+                                disabled={isExporting}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white font-bold text-[10px] rounded-lg shadow-sm hover:bg-emerald-700 transition-all cursor-pointer disabled:opacity-50"
+                            >
+                                <FileSpreadsheet size={14} className={isExporting ? "animate-bounce" : ""} />
+                                {isExporting ? "ĐANG XUẤT..." : "Xuất Excel"}
+                            </button>
+                        )}
                         <div className="bg-white px-3 py-1.5 rounded-xl shadow-sm border border-slate-100 flex items-center gap-2">
                             <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
                                 <ShoppingBag size={14} />

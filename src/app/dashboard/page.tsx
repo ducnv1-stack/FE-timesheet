@@ -465,24 +465,37 @@ function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, us
                         <p className="text-lg font-black text-blue-700">{formatCurrency(data.salesRevenue || 0)}</p>
                         <p className="text-[9px] text-slate-400 mt-0.5">{data.salesOrderCount || 0} đơn trong kỳ</p>
                     </div>
-                    {(data.pendingRevenueTotal || 0) > 0 ? (
-                        <div className="p-3 bg-amber-50 rounded-2xl border border-amber-200 shadow-sm">
-                            <div className="flex items-center gap-3 mb-2">
-                                <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600">
+                    <div
+                        onClick={() => router.push(`/orders?paymentStatus=pending&startDate=${startDate}&endDate=${endDate}`)}
+                        className={`p-3 rounded-2xl border shadow-sm transition-all cursor-pointer group ${(data.debtStats?.remainingAmount || data.pendingRevenueTotal || 0) > 0 ? 'bg-amber-50 border-amber-200 hover:bg-amber-100 hover:shadow-md' : 'bg-white border-slate-100'}`}
+                    >
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                                <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${(data.debtStats?.remainingAmount || data.pendingRevenueTotal || 0) > 0 ? 'bg-amber-100 text-amber-600 group-hover:bg-amber-200' : 'bg-slate-50 text-slate-400'}`}>
                                     <Clock size={18} />
                                 </div>
-                                <p className="text-[10px] font-black text-amber-700 uppercase">Chờ thanh toán</p>
+                                <p className={`text-[10px] font-black uppercase ${(data.debtStats?.remainingAmount || data.pendingRevenueTotal || 0) > 0 ? 'text-amber-700' : 'text-slate-400'}`}>Khách còn nợ</p>
                             </div>
-                            <p className="text-lg font-black text-amber-700">{formatCurrency(data.pendingRevenueTotal)}</p>
-                            <p className="text-[9px] text-amber-600 mt-0.5">⚠️ Chưa xác nhận đủ tiền</p>
+                            <ArrowRight size={14} className="text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
-                    ) : (
-                        <StatCard
-                            title="Tiền mặt đã thu"
-                            value={formatCurrency(data.paymentSummary?.cash || 0)}
-                            icon={<Wallet size={20} className="text-blue-600" />}
-                        />
-                    )}
+                        <p className={`text-lg font-black ${(data.debtStats?.remainingAmount || data.pendingRevenueTotal || 0) > 0 ? 'text-amber-700' : 'text-slate-400'}`}>
+                            {formatCurrency(data.debtStats?.totalAmount || data.debtStats?.remainingAmount || data.pendingRevenueTotal || 0)}
+                        </p>
+                        <div className="flex flex-col gap-0.5 mt-1.5 border-t border-amber-100/50 pt-1.5">
+                            <div className="flex justify-between items-center text-[9px] font-bold">
+                                <span className="text-slate-400 uppercase">Số đơn nợ:</span>
+                                <span className="text-slate-700">{data.debtStats?.count || (data.unconfirmedCount + data.pendingInstallmentCount) || 0} đơn</span>
+                            </div>
+                            <div className="flex justify-between items-center text-[9px] font-bold">
+                                <span className="text-slate-400 uppercase">Đã trả:</span>
+                                <span className="text-emerald-600 font-black">{formatCurrency(data.debtStats?.paidAmount || 0)}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-[9px] font-bold">
+                                <span className="text-slate-400 uppercase">Còn thiếu:</span>
+                                <span className="text-rose-600 font-black">{formatCurrency(data.debtStats?.remainingAmount || data.pendingRevenueTotal || 0)}</span>
+                            </div>
+                        </div>
+                    </div>
                     <StatCard
                         title="Tổng đơn hàng"
                         value={String(data.totalOrders || 0)}
@@ -878,15 +891,36 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
                     <p className="text-[9px] text-slate-400 mt-0.5">Tổng giá trị bán hàng</p>
                 </div>
 
-                <div className="p-3 bg-rose-50 rounded-2xl border border-rose-100 shadow-sm">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="w-9 h-9 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600">
-                            <Clock size={18} />
+                <div
+                    onClick={() => router.push(`/orders?paymentStatus=pending&startDate=${startDate}&endDate=${endDate}`)}
+                    className={`p-3 rounded-2xl border shadow-sm transition-all cursor-pointer group ${(data.debtStats?.remainingAmount || branchPendingRevenue) > 0 ? 'bg-amber-50 border-amber-200 hover:bg-amber-100 hover:shadow-md' : 'bg-white border-slate-100'}`}
+                >
+                    <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${(data.debtStats?.remainingAmount || branchPendingRevenue) > 0 ? 'bg-amber-100 text-amber-600 group-hover:bg-amber-200' : 'bg-slate-50 text-slate-400'}`}>
+                                <Clock size={18} />
+                            </div>
+                            <p className={`text-[10px] font-black uppercase ${(data.debtStats?.remainingAmount || branchPendingRevenue) > 0 ? 'text-amber-700' : 'text-slate-400'}`}>Khách còn nợ</p>
                         </div>
-                        <p className="text-[10px] font-black text-rose-700 uppercase">Chờ xử lý</p>
+                        <ArrowRight size={14} className="text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
-                    <p className="text-lg font-black text-rose-700">{formatCurrency(branchPendingRevenue)}</p>
-                    <p className="text-[9px] text-rose-600 mt-0.5">⚠️ Đơn hàng chờ khớp tiền</p>
+                    <p className={`text-lg font-black ${(data.debtStats?.remainingAmount || branchPendingRevenue) > 0 ? 'text-amber-700' : 'text-slate-400'}`}>
+                        {formatCurrency(data.debtStats?.totalAmount || data.debtStats?.remainingAmount || branchPendingRevenue)}
+                    </p>
+                    <div className="flex flex-col gap-0.5 mt-1.5 border-t border-amber-100/50 pt-1.5">
+                        <div className="flex justify-between items-center text-[9px] font-bold">
+                            <span className="text-slate-400 uppercase">Số đơn nợ:</span>
+                            <span className="text-slate-700">{data.debtStats?.count || (data.unconfirmedCount + data.pendingInstallmentCount) || 0} đơn</span>
+                        </div>
+                        <div className="flex justify-between items-center text-[9px] font-bold">
+                            <span className="text-slate-400 uppercase">Đã trả:</span>
+                            <span className="text-emerald-600 font-black">{formatCurrency(data.debtStats?.paidAmount || 0)}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-[9px] font-bold">
+                            <span className="text-slate-400 uppercase">Còn thiếu:</span>
+                            <span className="text-rose-600 font-black">{formatCurrency(data.debtStats?.remainingAmount || branchPendingRevenue)}</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 shadow-sm">
@@ -1377,6 +1411,7 @@ function ActionButton({ icon, title, href }: { icon: React.ReactNode, title: str
 }
 
 function SaleDashboard({ data, startDate, endDate }: { data: any, startDate: string, endDate: string }) {
+    const router = useRouter();
     // Force 200M base target as requested (100% = 200tr)
     const KPI_TARGET = 200000000;
     const salesRevenue = data.salesRevenue || 0;
@@ -1451,9 +1486,14 @@ function SaleDashboard({ data, startDate, endDate }: { data: any, startDate: str
                                 <div className="text-[10px] bg-white/10 px-2 py-0.5 rounded-full border border-white/10">
                                     <span className="text-rose-200">DS Bán:</span> <span className="text-white font-bold">{formatCurrency(salesRevenue)}</span>
                                 </div>
-                                {pendingRevenue > 0 && (
-                                    <div className="text-[10px] bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-400/30">
-                                        <span className="text-amber-200">⚠️ Chờ TT:</span> <span className="text-amber-300 font-bold">{formatCurrency(pendingRevenue)}</span>
+                                {(data.debtStats?.remainingAmount || pendingRevenue) > 0 && (
+                                    <div
+                                        onClick={() => router.push(`/orders?paymentStatus=pending&startDate=${startDate}&endDate=${endDate}`)}
+                                        className="text-[10px] bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-400/30 cursor-pointer hover:bg-amber-500/40 transition-colors flex items-center gap-1"
+                                    >
+                                        <Clock size={10} className="text-amber-200" />
+                                        <span className="text-amber-200">Nợ:</span> <span className="text-amber-300 font-bold">{formatCurrency(data.debtStats?.remainingAmount || pendingRevenue)}</span>
+                                        <span className="text-amber-100/60 ml-1">({data.debtStats?.count || 0} đơn)</span>
                                     </div>
                                 )}
                             </div>
@@ -1866,7 +1906,10 @@ function DriverDashboard({ data, startDate, endDate }: { data: any, startDate: s
                             <h3 className="text-[9px] font-black uppercase tracking-widest text-rose-100">Thu nhập vận chuyển tháng này</h3>
                         </div>
                         <p className="text-3xl font-black tracking-tight">
-                            {formatCurrency(data.monthlyStats?.shippingFees || 0)}
+                            {formatCurrency(data.monthlyStats?.completedShippingFees || 0)}
+                        </p>
+                        <p className="text-[10px] text-rose-200 mt-0.5 opacity-80">
+                            Ước tính: {formatCurrency(data.monthlyStats?.estimatedShippingFees || 0)}
                         </p>
                         <div className="mt-2 flex gap-2">
                             <span className="text-[9px] font-bold bg-black/20 px-2.5 py-0.5 rounded-full border border-white/5">
@@ -1943,7 +1986,9 @@ function DriverDashboard({ data, startDate, endDate }: { data: any, startDate: s
                                     <ShoppingBag size={18} />
                                 </div>
                                 <div>
-                                    <p className="text-xs font-black text-slate-700">Đơn hàng #{delivery.orderId.slice(0, 8)}</p>
+                                    <p className="text-xs font-black text-slate-700">
+                                        {delivery.customerName || `Đơn #${delivery.orderId.slice(0, 8)}`}
+                                    </p>
                                     <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">
                                         {formatDate(delivery.date)}
                                     </p>
@@ -1953,9 +1998,11 @@ function DriverDashboard({ data, startDate, endDate }: { data: any, startDate: s
                                 <p className="text-sm font-black text-slate-800">{formatCurrency(delivery.fee)}</p>
                                 <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase ${delivery.status === 'delivered'
                                     ? 'bg-emerald-100 text-emerald-700'
-                                    : 'bg-amber-100 text-amber-700'
+                                    : delivery.status === 'assigned'
+                                        ? 'bg-blue-100 text-blue-700'
+                                        : 'bg-amber-100 text-amber-700'
                                     }`}>
-                                    {delivery.status === 'delivered' ? 'Đã giao' : 'Đang xử lý'}
+                                    {delivery.status === 'delivered' ? 'Đã giao' : delivery.status === 'assigned' ? 'Đang giao' : 'Chờ giao'}
                                 </span>
                             </div>
                         </div>

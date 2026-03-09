@@ -20,8 +20,30 @@ export default function BranchesPage() {
     const [saving, setSaving] = useState<string | null>(null);
     const { success, error: toastError } = useToast();
     const [searchTerm, setSearchTerm] = useState('');
+    const [userRole, setUserRole] = useState<string>('');
+    const [selectedBranch, setSelectedBranch] = useState<string>('');
+    const [userBranchId, setUserBranchId] = useState<string>('');
+    const [userBranchName, setUserBranchName] = useState<string>('');
 
     useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            try {
+                const user = JSON.parse(storedUser);
+                setUserRole(user.role?.code || '');
+
+                const bId = user.employee?.branchId || user.branchId || '';
+                setUserBranchId(bId);
+                setUserBranchName(user.employee?.branch?.name || 'Chi nhánh của tôi');
+
+                // If user is a MANAGER, lock filter to their branch
+                if (user.role?.code === 'MANAGER' && bId) {
+                    setSelectedBranch(bId);
+                }
+            } catch (e) {
+                console.error("Error parsing user from localStorage", e);
+            }
+        }
         fetchBranches();
     }, []);
 
@@ -89,9 +111,13 @@ export default function BranchesPage() {
         );
     };
 
-    const filteredBranches = branches.filter(b =>
-        b.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredBranches = branches.filter(b => {
+        const matchSearch = b.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchBranch = selectedBranch ? b.id === selectedBranch : true;
+        return matchSearch && matchBranch;
+    });
+
+    const isManagerLocked = userRole === 'MANAGER';
 
     return (
         <div className="p-6 space-y-8 max-w-6xl mx-auto">
@@ -100,20 +126,48 @@ export default function BranchesPage() {
                 <div className="space-y-1">
                     <h1 className="text-3xl font-black text-slate-900 font-outfit uppercase tracking-tight flex items-center gap-3">
                         <Building2 className="text-rose-600" size={32} />
-                        QUẢN LÝ CHI NHÁNH
+                        Quản lý chi nhánh
                     </h1>
                     <p className="text-slate-500 font-medium">Cấu hình tọa độ GPS và thông tin vận hành</p>
                 </div>
 
-                <div className="relative group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-rose-500 transition-colors" size={18} />
-                    <input
-                        type="text"
-                        placeholder="Tìm tên chi nhánh..."
-                        className="pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl w-full md:w-80 shadow-sm focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none transition-all font-medium"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
+                <div className="flex flex-col sm:flex-row gap-3">
+                    {/* Select Branch */}
+                    <select
+                        value={selectedBranch}
+                        onChange={(e) => setSelectedBranch(e.target.value)}
+                        disabled={isManagerLocked}
+                        className={cn(
+                            "px-4 py-3 bg-white border border-slate-200 rounded-2xl md:w-48 shadow-sm focus:ring-2 outline-none font-medium text-sm transition-all",
+                            isManagerLocked
+                                ? "bg-slate-50 text-slate-500 cursor-not-allowed border-slate-100"
+                                : "focus:ring-rose-500/20 focus:border-rose-500"
+                        )}
+                    >
+                        {isManagerLocked ? (
+                            <option value={userBranchId}>
+                                {branches.length > 0 ? (branches.find(b => b.id === userBranchId)?.name || userBranchName) : userBranchName}
+                            </option>
+                        ) : (
+                            <>
+                                <option value="">Tất cả chi nhánh</option>
+                                {branches.map(b => (
+                                    <option key={b.id} value={b.id}>{b.name}</option>
+                                ))}
+                            </>
+                        )}
+                    </select>
+
+                    <div className="relative group">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-rose-500 transition-colors" size={18} />
+                        <input
+                            type="text"
+                            placeholder="Tìm tên chi nhánh..."
+                            className="pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl w-full md:w-64 shadow-sm focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none transition-all font-medium text-sm"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
                 </div>
             </div>
 

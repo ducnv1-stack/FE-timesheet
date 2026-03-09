@@ -25,6 +25,7 @@ export default function NewOrderPage() {
     const [products, setProducts] = useState<Product[]>([]);
     const [allEmployees, setAllEmployees] = useState<Employee[]>([]);
     const [allGifts, setAllGifts] = useState<Gift[]>([]);
+    const [deliveryFeeRules, setDeliveryFeeRules] = useState<any[]>([]);
     const [driverTab, setDriverTab] = useState<'staff' | 'driver'>('driver');
 
     const [order, setOrder] = useState<FullOrder>({
@@ -52,21 +53,24 @@ export default function NewOrderPage() {
         const fetchInitialData = async () => {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
             try {
-                const [branchesRes, productsRes, employeesRes, giftsRes] = await Promise.all([
+                const [branchesRes, productsRes, employeesRes, giftsRes, feeRulesRes] = await Promise.all([
                     fetch(`${apiUrl}/branches`),
                     fetch(`${apiUrl}/products`),
                     fetch(`${apiUrl}/employees`),
-                    fetch(`${apiUrl}/gifts`)
+                    fetch(`${apiUrl}/gifts`),
+                    fetch(`${apiUrl}/delivery-fee-rules`)
                 ]);
                 const branchesData = await branchesRes.json();
                 const productsData = await productsRes.json();
                 const employeesData = await employeesRes.json();
                 const giftsData = await giftsRes.json();
+                const feeRulesData = await feeRulesRes.json();
 
                 setBranches(branchesData);
                 setProducts(productsData);
                 setAllEmployees(employeesData);
                 setAllGifts(giftsData);
+                if (Array.isArray(feeRulesData)) setDeliveryFeeRules(feeRulesData);
 
                 // Auto-fill from logged-in user
                 const storedUser = localStorage.getItem('user');
@@ -460,8 +464,14 @@ export default function NewOrderPage() {
                                     className="bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[10px] font-bold text-slate-700 w-full outline-none focus:ring-1 focus:ring-rose-200 appearance-none print:appearance-none print:bg-transparent print:border-none print:p-0 print:text-[11px] cursor-pointer"
                                 >
                                     <option value="none">-- Không --</option>
-                                    <option value="external">🚚 Lái xe ngoài (+0k)</option>
-                                    <option value="company">🏢 Lái xe công ty (+50k)</option>
+                                    <option value="external">🚚 Lái xe ngoài (+{(() => {
+                                        const rule = deliveryFeeRules.find(r => r.deliveryCategory === 'EXTERNAL_DRIVER' && (r.branchId === order.branchId || !r.branchId) && r.isActive);
+                                        return rule ? new Intl.NumberFormat('vi-VN').format(Number(rule.feeAmount)) : '0';
+                                    })()}đ)</option>
+                                    <option value="company">🏢 Lái xe công ty (+{(() => {
+                                        const rule = deliveryFeeRules.find(r => r.deliveryCategory === 'COMPANY_DRIVER' && (r.branchId === order.branchId || !r.branchId) && r.isActive);
+                                        return rule ? new Intl.NumberFormat('vi-VN').format(Number(rule.feeAmount)) : '0';
+                                    })()}đ)</option>
                                 </select>
 
                                 {order.deliveries?.some(d => d.category === 'COMPANY_DRIVER') && (

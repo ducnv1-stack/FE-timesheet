@@ -27,6 +27,7 @@ export default function EditOrderPage() {
     const [products, setProducts] = useState<Product[]>([]);
     const [allEmployees, setAllEmployees] = useState<Employee[]>([]);
     const [allGifts, setAllGifts] = useState<any[]>([]);
+    const [deliveryFeeRules, setDeliveryFeeRules] = useState<any[]>([]);
     const [driverTab, setDriverTab] = useState<'staff' | 'driver'>('driver');
     const [removedImages, setRemovedImages] = useState<string[]>([]);
     const [systemImages, setSystemImages] = useState<string[]>([]);
@@ -58,13 +59,14 @@ export default function EditOrderPage() {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
             try {
                 // 1. Fetch reference data
-                const [branchesRes, productsRes, employeesRes, giftsRes, orderRes, systemImagesRes] = await Promise.all([
+                const [branchesRes, productsRes, employeesRes, giftsRes, orderRes, systemImagesRes, feeRulesRes] = await Promise.all([
                     fetch(`${apiUrl}/branches`),
                     fetch(`${apiUrl}/products`),
                     fetch(`${apiUrl}/employees`),
                     fetch(`${apiUrl}/gifts`),
                     fetch(`${apiUrl}/orders/${orderId}`),
-                    fetch(`${apiUrl}/orders/${orderId}/system-images`).catch(() => ({ json: () => [] }))
+                    fetch(`${apiUrl}/orders/${orderId}/system-images`).catch(() => ({ json: () => [] })),
+                    fetch(`${apiUrl}/delivery-fee-rules`)
                 ]);
 
                 const branchesData = await branchesRes.json();
@@ -73,11 +75,13 @@ export default function EditOrderPage() {
                 const giftsData = await giftsRes.json();
                 const orderData = await orderRes.json();
                 const sysImagesData = await systemImagesRes.json();
+                const feeRulesData = await feeRulesRes.json();
 
                 setBranches(branchesData);
                 setProducts(productsData);
                 setAllEmployees(employeesData);
                 setAllGifts(giftsData);
+                if (Array.isArray(feeRulesData)) setDeliveryFeeRules(feeRulesData);
                 if (Array.isArray(sysImagesData)) {
                     setSystemImages(sysImagesData);
                 }
@@ -520,8 +524,14 @@ export default function EditOrderPage() {
                                     className="bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[10px] font-bold text-slate-700 w-full outline-none focus:ring-1 focus:ring-rose-200 cursor-pointer"
                                 >
                                     <option value="none">-- Không --</option>
-                                    <option value="external">🚚 Lái xe ngoài (+0k)</option>
-                                    <option value="company">🏢 Lái xe công ty (+50k)</option>
+                                    <option value="external">🚚 Lái xe ngoài (+{(() => {
+                                        const rule = deliveryFeeRules.find(r => r.deliveryCategory === 'EXTERNAL_DRIVER' && (r.branchId === order.branchId || !r.branchId) && r.isActive);
+                                        return rule ? new Intl.NumberFormat('vi-VN').format(Number(rule.feeAmount)) : '0';
+                                    })()}đ)</option>
+                                    <option value="company">🏢 Lái xe công ty (+{(() => {
+                                        const rule = deliveryFeeRules.find(r => r.deliveryCategory === 'COMPANY_DRIVER' && (r.branchId === order.branchId || !r.branchId) && r.isActive);
+                                        return rule ? new Intl.NumberFormat('vi-VN').format(Number(rule.feeAmount)) : '0';
+                                    })()}đ)</option>
                                 </select>
 
                                 {order.deliveries?.some(d => d.category === 'COMPANY_DRIVER') && (
