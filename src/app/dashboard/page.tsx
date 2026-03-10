@@ -234,10 +234,11 @@ export default function DashboardPage() {
                         userId={user.id}
                         startDate={startDate}
                         endDate={endDate}
+                        branchId={branchId}
                     />
                 )}
-                {data.role === 'MANAGER' && <ManagerDashboard data={data} startDate={startDate} endDate={endDate} />}
-                {data.role === 'SALE' && <SaleDashboard data={data} startDate={startDate} endDate={endDate} />}
+                {data.role === 'MANAGER' && <ManagerDashboard data={data} startDate={startDate} endDate={endDate} branchId={branchId} />}
+                {data.role === 'SALE' && <SaleDashboard data={data} startDate={startDate} endDate={endDate} branchId={branchId} />}
                 {data.role === 'TELESALE' && <TelesaleDashboard data={data} startDate={startDate} endDate={endDate} />}
                 {data.role === 'MARKETING' && <MarketingDashboard data={data} startDate={startDate} endDate={endDate} />}
                 {(data.role === 'DRIVER' || data.role === 'DELIVERY_STAFF') && <DriverDashboard data={data} startDate={startDate} endDate={endDate} />}
@@ -421,7 +422,7 @@ function BranchRevenueChart({ chartData }: { chartData: any[] }) {
 
 // ------------------- Role Components -------------------
 
-function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, userId: string, startDate: string, endDate: string }) {
+function DirectorDashboard({ data, userId, startDate, endDate, branchId }: { data: any, userId: string, startDate: string, endDate: string, branchId: string }) {
     const router = useRouter();
     const [selectedViolationBranch, setSelectedViolationBranch] = useState<any>(null);
 
@@ -470,7 +471,7 @@ function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, us
                         <p className="text-[9px] text-slate-400 mt-0.5">{data.salesOrderCount || 0} đơn trong kỳ</p>
                     </div>
                     <div
-                        onClick={() => router.push(`/orders?paymentStatus=pending&startDate=${startDate}&endDate=${endDate}`)}
+                        onClick={() => router.push(`/orders?paymentStatus=pending&startDate=${startDate}&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
                         className={`p-3 rounded-2xl border shadow-sm transition-all cursor-pointer group ${(data.debtStats?.remainingAmount || data.pendingRevenueTotal || 0) > 0 ? 'bg-amber-50 border-amber-200 hover:bg-amber-100 hover:shadow-md' : 'bg-white border-slate-100'}`}
                     >
                         <div className="flex items-center justify-between mb-2">
@@ -510,7 +511,7 @@ function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, us
                 {/* Financial Alerts & Status */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div
-                        onClick={() => router.push(`/orders?paymentStatus=pending&excludeInstallment=true&startDate=${startDate}&endDate=${endDate}`)}
+                        onClick={() => router.push(`/orders?paymentStatus=pending&excludeInstallment=true&startDate=${startDate}&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
                         className="p-3 bg-amber-50 rounded-2xl border border-amber-100 flex items-center gap-3 cursor-pointer hover:bg-amber-100 transition-colors group"
                     >
                         <div className="w-10 h-10 bg-amber-100 group-hover:bg-amber-200 rounded-xl flex items-center justify-center text-amber-600">
@@ -524,7 +525,7 @@ function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, us
                     </div>
 
                     <div
-                        onClick={() => router.push(`/orders?tab=installment&paymentStatus=pending&startDate=${startDate}&endDate=${endDate}`)}
+                        onClick={() => router.push(`/orders?tab=installment&paymentStatus=pending&startDate=${startDate}&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
                         className="p-3 bg-indigo-50 rounded-2xl border border-indigo-100 flex items-center gap-3 cursor-pointer hover:bg-indigo-100 transition-colors group"
                     >
                         <div className="w-10 h-10 bg-indigo-100 group-hover:bg-indigo-200 rounded-xl flex items-center justify-center text-indigo-600">
@@ -538,7 +539,7 @@ function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, us
                     </div>
 
                     <div
-                        onClick={() => router.push(`/orders?tab=invoice&invoiceStatus=pending&startDate=${startDate}&endDate=${endDate}`)}
+                        onClick={() => router.push(`/orders?tab=invoice&invoiceStatus=pending&startDate=${startDate}&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
                         className="p-3 bg-blue-50 rounded-2xl border border-blue-100 flex items-center gap-3 cursor-pointer hover:bg-blue-100 transition-colors group"
                     >
                         <div className="w-10 h-10 bg-blue-100 group-hover:bg-blue-200 rounded-xl flex items-center justify-center text-blue-600">
@@ -850,7 +851,7 @@ function DirectorDashboard({ data, userId, startDate, endDate }: { data: any, us
     );
 }
 
-function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: string, endDate: string }) {
+function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, startDate: string, endDate: string, branchId: string }) {
     const router = useRouter();
     const branchRevenue = data.branchRevenue || 0;
     const branchSalesRevenue = data.branchSalesRevenue || 0;
@@ -1075,7 +1076,7 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
                 </div>
 
                 <div
-                    onClick={() => router.push(`/orders?paymentStatus=pending&startDate=${startDate}&endDate=${endDate}`)}
+                    onClick={() => router.push(`/orders?paymentStatus=pending&startDate=${startDate}&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
                     className={`p-3 rounded-2xl border shadow-sm transition-all cursor-pointer group ${(data.debtStats?.remainingAmount || branchPendingRevenue) > 0 ? 'bg-amber-50 border-amber-200 hover:bg-amber-100 hover:shadow-md' : 'bg-white border-slate-100'}`}
                 >
                     <div className="flex items-center justify-between mb-2">
@@ -1284,7 +1285,7 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                 {/* Chờ khớp tiền */}
                 <div
-                    onClick={() => router.push(`/orders?paymentStatus=pending&startDate=${startDate}&endDate=${endDate}`)}
+                    onClick={() => router.push(`/orders?paymentStatus=pending&startDate=${startDate}&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
                     className={`p-4 rounded-2xl border cursor-pointer hover:shadow-md transition-all ${(data.unconfirmedCount || 0) > 0 ? 'bg-amber-50 border-amber-200' : 'bg-white border-slate-100'} shadow-sm`}
                 >
                     <div className="flex items-center gap-2 mb-2">
@@ -1301,7 +1302,7 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
 
                 {/* Chờ duyệt trả góp */}
                 <div
-                    onClick={() => router.push(`/orders?tab=installment&paymentStatus=pending&startDate=${startDate}&endDate=${endDate}`)}
+                    onClick={() => router.push(`/orders?tab=installment&paymentStatus=pending&startDate=${startDate}&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
                     className={`p-4 rounded-2xl border cursor-pointer hover:shadow-md transition-all ${(data.pendingInstallmentCount || 0) > 0 ? 'bg-indigo-50 border-indigo-200' : 'bg-white border-slate-100'} shadow-sm`}
                 >
                     <div className="flex items-center gap-2 mb-2">
@@ -1318,7 +1319,7 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
 
                 {/* Chờ xuất hóa đơn */}
                 <div
-                    onClick={() => router.push(`/orders?tab=invoice&invoiceStatus=pending&startDate=${startDate}&endDate=${endDate}`)}
+                    onClick={() => router.push(`/orders?tab=invoice&invoiceStatus=pending&startDate=${startDate}&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
                     className={`p-4 rounded-2xl border cursor-pointer hover:shadow-md transition-all ${(data.unissuedInvoiceCount || 0) > 0 ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-100'} shadow-sm`}
                 >
                     <div className="flex items-center gap-2 mb-2">
@@ -1653,7 +1654,7 @@ function RankingCard({ type, rank, total, branchRank, icon, color }: { type: str
     );
 }
 
-function SaleDashboard({ data, startDate, endDate }: { data: any, startDate: string, endDate: string }) {
+function SaleDashboard({ data, startDate, endDate, branchId }: { data: any, startDate: string, endDate: string, branchId: string }) {
     const router = useRouter();
     // Force 200M base target as requested (100% = 200tr)
     const KPI_TARGET = 200000000;
@@ -1840,7 +1841,7 @@ function SaleDashboard({ data, startDate, endDate }: { data: any, startDate: str
                                 </div>
                                 {(data.debtStats?.remainingAmount || pendingRevenue) > 0 && (
                                     <div
-                                        onClick={() => router.push(`/orders?paymentStatus=pending&startDate=${startDate}&endDate=${endDate}`)}
+                                        onClick={() => router.push(`/orders?paymentStatus=pending&startDate=${startDate}&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
                                         className="text-[10px] bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-400/30 cursor-pointer hover:bg-amber-500/40 transition-colors flex items-center gap-1"
                                     >
                                         <Clock size={10} className="text-amber-200" />

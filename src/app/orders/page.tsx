@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
     Search,
@@ -91,6 +91,7 @@ function OrdersPageContent() {
     const [showMobileFilters, setShowMobileFilters] = useState(false);
     const [viewingHistoryOrderId, setViewingHistoryOrderId] = useState<string | null>(null);
     const [isExporting, setIsExporting] = useState(false);
+    const lastRequestId = useRef(0);
 
     const { error: toastError, success } = useToast();
     const router = useRouter();
@@ -107,23 +108,29 @@ function OrdersPageContent() {
         const excludeInstallmentParam = searchParams.get('excludeInstallment');
         const employeeParam = searchParams.get('employeeId');
 
-        if (paymentParam) setPaymentStatusFilter(paymentParam === 'pending' ? 'pending' : 'all');
-        if (invoiceParam) setInvoiceStatusFilter(invoiceParam === 'pending' ? 'pending' : 'all');
-        if (branchParam) setSelectedBranchId(branchParam || 'all');
-        if (employeeParam) setSelectedEmployeeId(employeeParam);
-        if (tabParam) setActiveTab(tabParam as any);
-        if (excludeInstallmentParam === 'true') {
-            setExcludeInstallment(true);
-            setPaymentMethodFilter('all');
-        }
+        // Reset to default if param is missing (prevent sticky filters)
+        setPaymentStatusFilter(paymentParam === 'pending' ? 'pending' : (paymentParam === 'confirmed' ? 'confirmed' : 'all'));
+        setInvoiceStatusFilter(invoiceParam === 'pending' ? 'pending' : (invoiceParam === 'issued' ? 'issued' : 'all'));
+        setSelectedBranchId(branchParam || 'all');
+        setSelectedEmployeeId(employeeParam || 'all');
+        setActiveTab((tabParam as any) || 'all');
+        setExcludeInstallment(excludeInstallmentParam === 'true');
 
         if (startParam && endParam) {
             setStartDate(startParam);
             setEndDate(endParam);
             setTimeFilter('custom');
+        } else {
+            // Only reset time filter if it came from a dashboard drill-down that *should* have had dates
+            // or if we want to be strict. Let's be strict for consistency.
+            if (!startParam && !endParam && (paymentParam || invoiceParam || branchParam || tabParam)) {
+                setStartDate('');
+                setEndDate('');
+                setTimeFilter('all');
+            }
         }
 
-        // Logic for Manager: Auto-select branch
+        // Logic for Manager: Auto-select branch if not provided in URL
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
             const userData = JSON.parse(storedUser);
@@ -393,6 +400,7 @@ function OrdersPageContent() {
     };
 
     const fetchOrders = async () => {
+        const requestId = ++lastRequestId.current;
         const storedUser = localStorage.getItem('user');
         if (!storedUser) {
             router.push('/login');
@@ -482,7 +490,9 @@ function OrdersPageContent() {
             if (!orderRes.ok) throw new Error('Failed to fetch orders');
             const result = await orderRes.json();
 
-            // Result is now { data, meta }
+            if (requestId !== lastRequestId.current) {
+                return;
+            }
             setOrders(result.data || []);
             setTotal(result.meta?.total || 0);
             setTotalPages(result.meta?.totalPages || 0);
@@ -544,7 +554,8 @@ function OrdersPageContent() {
         confirmedTimeFilter,
         confirmedStartDate,
         confirmedEndDate,
-        searchParams  // Re-fetch when URL params change (drill-down from dashboard)
+        // Removed searchParams to avoid stale fetch. 
+        // State updates from searchParams sync already trigger fetch via dependencies above.
     ]);
 
     const handleDeleteOrder = async () => {
