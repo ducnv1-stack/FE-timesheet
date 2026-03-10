@@ -25,7 +25,16 @@ export default function AttendancePage() {
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [gpsError, setGpsError] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
+    const [imageError, setImageError] = useState(false);
     const { success, error: toastError } = useToast();
+
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+    const getFullImageUrl = (path: string | null) => {
+        if (!path) return null;
+        if (path.startsWith('http')) return path;
+        return `${API_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+    };
 
     useEffect(() => {
         const userStr = localStorage.getItem('user');
@@ -195,8 +204,19 @@ export default function AttendancePage() {
         <div className="max-w-md mx-auto p-4 space-y-6 pt-10">
             {/* User Info Header */}
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-600">
-                    <User size={32} />
+                <div className="w-16 h-16 rounded-2xl bg-rose-50 border border-rose-100 overflow-hidden shrink-0 flex items-center justify-center text-rose-600">
+                    {(currentUser?.employee?.avatarUrl && !imageError) ? (
+                        <img
+                            src={getFullImageUrl(currentUser.employee.avatarUrl)!}
+                            alt={currentUser.employee.fullName}
+                            className="w-full h-full object-cover"
+                            onError={() => setImageError(true)}
+                        />
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center text-rose-500 font-black text-xl uppercase">
+                            {currentUser?.employee?.fullName?.split(' ').pop()?.charAt(0) || <User size={32} />}
+                        </div>
+                    )}
                 </div>
                 <div>
                     <h2 className="text-xl font-bold font-outfit">{currentUser?.employee?.fullName || 'Nhân viên'}</h2>

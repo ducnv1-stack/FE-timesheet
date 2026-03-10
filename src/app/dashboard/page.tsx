@@ -188,6 +188,9 @@ export default function DashboardPage() {
                             type="date"
                             value={startDate}
                             onChange={(e) => setStartDate(e.target.value)}
+                            onClick={(e) => {
+                                if ('showPicker' in e.currentTarget) (e.currentTarget as any).showPicker();
+                            }}
                             className="bg-transparent border-none text-[10px] font-black text-slate-700 outline-none px-2 cursor-pointer focus:text-rose-600"
                         />
                         <ArrowRight size={12} className="text-slate-300" />
@@ -195,6 +198,9 @@ export default function DashboardPage() {
                             type="date"
                             value={endDate}
                             onChange={(e) => setEndDate(e.target.value)}
+                            onClick={(e) => {
+                                if ('showPicker' in e.currentTarget) (e.currentTarget as any).showPicker();
+                            }}
                             className="bg-transparent border-none text-[10px] font-black text-slate-700 outline-none px-2 cursor-pointer focus:text-rose-600"
                         />
                     </div>
@@ -702,7 +708,7 @@ function DirectorDashboard({ data, userId, startDate, endDate, branchId }: { dat
                             </div>
                             <div>
                                 <h3 className="font-black text-slate-800 text-xs uppercase tracking-wider">Top Nhân Sự</h3>
-                                <p className="text-[9px] text-slate-400 font-bold uppercase">Doanh số cao nhất</p>
+                                <p className="text-[9px] text-slate-400 font-bold uppercase">Doanh số bán cao nhất</p>
                             </div>
                         </div>
                         <div className="space-y-2 flex-1">
@@ -2424,14 +2430,20 @@ function ViolatedOrdersDialog({ branch, onClose, userId, startDate, endDate }: a
     }, [branch.id, userId, startDate, endDate]);
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-            <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm cursor-pointer"
+            onClick={onClose}
+        >
+            <div
+                className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] cursor-default"
+                onClick={(e) => e.stopPropagation()}
+            >
                 <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                     <div>
                         <h2 className="text-lg font-black text-slate-800 uppercase tracking-tight">Đơn hàng vi phạm giá Min</h2>
                         <p className="text-[10px] text-slate-500 font-bold uppercase mt-1">Chi nhánh: {branch.name}</p>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+                    <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full transition-colors cursor-pointer">
                         <X size={20} className="text-slate-400" />
                     </button>
                 </div>

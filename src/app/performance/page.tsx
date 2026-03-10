@@ -43,6 +43,7 @@ interface PerformanceRecord {
     department: string | null; // New
     branchId: string;         // New
     status: string;           // New
+    avatarUrl: string | null; // New
 }
 
 interface Branch {
@@ -143,10 +144,21 @@ export default function PerformancePage() {
     const [managerBranchId, setManagerBranchId] = useState<string | null>(null);
     const [managerBranchName, setManagerBranchName] = useState<string>('');
     const [selectedEmployeeForOrders, setSelectedEmployeeForOrders] = useState<PerformanceRecord | null>(null);
+    const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
     const { error: toastError } = useToast();
     const router = useRouter();
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+    const getFullImageUrl = (path: string | null) => {
+        if (!path) return null;
+        if (path.startsWith('http')) return path;
+        return `${API_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+    };
+
+    const handleImageError = (key: string) => {
+        setImageErrors(prev => ({ ...prev, [key]: true }));
+    };
 
     useEffect(() => {
         const user = localStorage.getItem('user');
@@ -429,6 +441,8 @@ export default function PerformancePage() {
                                 <table className="w-full text-left border-collapse">
                                     <thead className="sticky top-0 z-20 shadow-sm">
                                         <tr className="bg-slate-100 border-b-2 border-slate-300 whitespace-nowrap">
+                                            <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase border-r border-slate-200 text-center">STT</th>
+                                            <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase border-r border-slate-200 text-center">Ảnh</th>
                                             <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase border-r border-slate-200">Nhân viên</th>
                                             <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase border-r border-slate-200">Chi nhánh</th>
                                             <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase border-r border-slate-200">Chức vụ</th>
@@ -450,12 +464,31 @@ export default function PerformancePage() {
                                         {loading ? (
                                             [1, 2, 3].map(i => (
                                                 <tr key={i} className="animate-pulse">
-                                                    <td colSpan={colCount} className="px-6 py-8 bg-slate-50/30"></td>
+                                                    <td colSpan={colCount + 2} className="px-6 py-8 bg-slate-50/30"></td>
                                                 </tr>
                                             ))
                                         ) : filteredRecords.length > 0 ? (
-                                            filteredRecords.map((r) => (
+                                            filteredRecords.map((r, idx) => (
                                                 <tr key={r.employeeId} className="hover:bg-slate-50 transition-colors group text-[12px] border-b border-slate-100">
+                                                    <td className="px-2 py-2 text-center border-r border-slate-100 font-bold text-slate-400">{idx + 1}</td>
+                                                    <td className="px-2 py-2 border-r border-slate-100">
+                                                        <div className="flex justify-center">
+                                                            <div className="w-8 h-8 rounded-full overflow-hidden bg-rose-50 border border-slate-100 shrink-0 flex items-center justify-center">
+                                                                {(r.avatarUrl && !imageErrors[`perf-${r.employeeId}`]) ? (
+                                                                    <img
+                                                                        src={getFullImageUrl(r.avatarUrl)!}
+                                                                        alt={r.fullName}
+                                                                        className="w-full h-full object-cover"
+                                                                        onError={() => handleImageError(`perf-${r.employeeId}`)}
+                                                                    />
+                                                                ) : (
+                                                                    <div className="w-full h-full flex items-center justify-center text-rose-500 font-black text-[10px] uppercase">
+                                                                        {r.fullName.split(' ').pop()?.charAt(0)}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </td>
                                                     <td className="px-2 py-2 whitespace-nowrap font-bold border-r border-slate-100 group-hover:bg-rose-50/50 transition-colors">
                                                         <button
                                                             onClick={() => setSelectedEmployeeForOrders(r)}
@@ -544,7 +577,7 @@ export default function PerformancePage() {
                                             ))
                                         ) : (
                                             <tr>
-                                                <td colSpan={colCount} className="px-6 py-20 text-center">
+                                                <td colSpan={colCount + 2} className="px-6 py-20 text-center">
                                                     <div className="flex flex-col items-center gap-2 opacity-50">
                                                         <FileSpreadsheet size={48} className="text-slate-300" />
                                                         <p className="font-bold text-slate-400">Không tìm thấy dữ liệu phù hợp</p>
@@ -556,7 +589,7 @@ export default function PerformancePage() {
                                     {filteredRecords.length > 0 && (
                                         <tfoot className="sticky bottom-0 z-30 shadow-[0_-2px_4px_rgba(0,0,0,0.05)]">
                                             <tr className="bg-slate-50 border-t-2 border-slate-300 text-[11px] font-black text-slate-700">
-                                                <td colSpan={3} className="px-4 py-3 text-left bg-slate-100 border-r border-slate-200 uppercase tracking-wider">TỔNG CỘNG</td>
+                                                <td colSpan={5} className="px-4 py-3 text-left bg-slate-100 border-r border-slate-200 uppercase tracking-wider">TỔNG CỘNG</td>
                                                 <td className="px-2 py-3 text-center border-r border-slate-200 text-rose-600">{totals.totalOrders}</td>
                                                 <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 font-black text-rose-600 bg-rose-50/50">{formatCurrency(totals.grossRevenue)}</td>
                                                 <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 font-black text-emerald-600 bg-emerald-50/50">{formatCurrency(totals.totalRevenue)}</td>

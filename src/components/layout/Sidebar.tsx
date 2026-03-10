@@ -11,6 +11,7 @@ import {
     LogOut,
     ChevronLeft,
     ChevronRight,
+    ChevronDown,
     ShoppingBag,
     ScrollText,
     Users,
@@ -18,7 +19,12 @@ import {
     Menu,
     X,
     Truck,
-    Trophy
+    Trophy,
+    Fingerprint,
+    ClipboardList,
+    Activity,
+    BarChart3,
+    LayoutGrid
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -31,6 +37,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
     const pathname = usePathname();
     const isLoginPage = pathname === '/login';
     const [currentUser, setCurrentUser] = useState<any>(null);
+    const [openMenus, setOpenMenus] = useState<string[]>([]);
 
     useEffect(() => {
         const user = localStorage.getItem('user');
@@ -38,6 +45,29 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             setCurrentUser(JSON.parse(user));
         }
     }, []);
+
+    // Auto open parent menu if child is active
+    useEffect(() => {
+        const activeGroup = navItems.find(item =>
+            item.children?.some(child => child.active)
+        );
+        if (activeGroup && !openMenus.includes(activeGroup.label)) {
+            setOpenMenus(prev => [...prev, activeGroup.label]);
+        }
+    }, [pathname]);
+
+    const toggleMenu = (label: string) => {
+        if (isCollapsed) {
+            onToggle();
+            setOpenMenus([label]);
+            return;
+        }
+        setOpenMenus(prev =>
+            prev.includes(label)
+                ? prev.filter(i => i !== label)
+                : [...prev, label]
+        );
+    };
 
     if (isLoginPage) return null;
 
@@ -49,81 +79,99 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             active: pathname === '/dashboard'
         },
         {
-            label: 'Tạo đơn mới',
-            icon: PlusCircle,
-            href: '/orders/new',
-            active: pathname === '/orders/new',
-            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'SALE', 'ADMIN']
+            label: 'Kinh doanh',
+            icon: ShoppingBag,
+            children: [
+                {
+                    label: 'Tạo đơn mới',
+                    icon: PlusCircle,
+                    href: '/orders/new',
+                    active: pathname === '/orders/new',
+                    roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'SALE', 'ADMIN']
+                },
+                {
+                    label: 'Lịch sử đơn',
+                    icon: History,
+                    href: '/orders',
+                    active: pathname === '/orders',
+                    roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'SALE', 'DRIVER', 'ADMIN']
+                },
+                {
+                    label: 'Báo cáo doanh số',
+                    icon: BarChart3,
+                    href: '/performance',
+                    active: pathname === '/performance',
+                    roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER', 'ADMIN']
+                },
+            ]
         },
         {
-            label: 'Lịch sử đơn',
-            icon: History,
-            href: '/orders',
-            active: pathname === '/orders',
-            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'SALE', 'DRIVER', 'ADMIN']
+            label: 'Nhân sự',
+            icon: Users,
+            children: [
+                {
+                    label: 'Quản lý nhân viên',
+                    icon: Users,
+                    href: '/employees',
+                    active: pathname.startsWith('/employees') && !pathname.includes('/attendance') && !pathname.includes('/timesheet'),
+                    roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR', 'ADMIN']
+                },
+                {
+                    label: 'Chấm công',
+                    icon: Fingerprint,
+                    href: '/employees/attendance',
+                    active: pathname === '/employees/attendance',
+                    roleAccess: ['ADMIN'] //, 'HR', 'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'MANAGER', 'SALE', 'TELESALE', 'DRIVER', 'COMPANY_DRIVER', 'DELIVERY_STAFF']
+                },
+                {
+                    label: 'Bảng công tháng',
+                    icon: ClipboardList,
+                    href: '/employees/timesheet',
+                    active: pathname === '/employees/timesheet',
+                    roleAccess: ['ADMIN'] //, 'HR', 'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'MANAGER',  'SALE', 'TELESALE', 'DRIVER', 'COMPANY_DRIVER', 'DELIVERY_STAFF']
+                },
+            ]
         },
         {
-            label: 'Báo cáo doanh số',
-            icon: ScrollText,
-            href: '/performance',
-            active: pathname === '/performance',
-            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER', 'ADMIN']
+            label: 'Hệ thống',
+            icon: LayoutGrid,
+            children: [
+                {
+                    label: 'Quản lý sản phẩm',
+                    icon: ShoppingBag,
+                    href: '/products',
+                    active: pathname === '/products',
+                    roleAccess: ['ADMIN'] //, 'MANAGER', 'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'
+                },
+                {
+                    label: 'Quản lý chi nhánh',
+                    icon: Building2,
+                    href: '/branches',
+                    active: pathname === '/branches',
+                    roleAccess: ['ADMIN'] //, 'MANAGER', 'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'
+                },
+                {
+                    label: 'Cấu hình phí ship',
+                    icon: Truck,
+                    href: '/settings/delivery-fees',
+                    active: pathname === '/settings/delivery-fees',
+                    roleAccess: ['ADMIN'] //, 'MANAGER', 'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'
+                },
+            ]
         },
         {
             label: 'Bảng xếp hạng',
             icon: Trophy,
             href: '/leaderboard',
             active: pathname === '/leaderboard',
-            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER', 'TELESALE', 'ADMIN']
+            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER', 'ADMIN']
         },
         {
             label: 'Log hệ thống',
-            icon: ScrollText,
+            icon: Activity,
             href: '/logs',
             active: pathname === '/logs',
             roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'DRIVER', 'SALE', 'ADMIN']
-        },
-        {
-            label: 'Quản lý nhân viên',
-            icon: Users,
-            href: '/employees',
-            active: pathname.startsWith('/employees') && !pathname.includes('/attendance') && !pathname.includes('/timesheet'),
-            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR', 'ADMIN']
-        },
-        {
-            label: 'Chấm công',
-            icon: LayoutDashboard,
-            href: '/employees/attendance',
-            active: pathname === '/employees/attendance',
-            roleAccess: ['ADMIN'] //'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 
-        },
-        {
-            label: 'Bảng công tháng',
-            icon: ScrollText,
-            href: '/employees/timesheet',
-            active: pathname === '/employees/timesheet',
-            roleAccess: ['ADMIN'] //'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 
-        },
-        {
-            label: 'Quản lý sản phẩm',
-            icon: ShoppingBag,
-            href: '/products',
-            active: pathname === '/products',
-            roleAccess: ['ADMIN'] //'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 
-        },
-        {
-            label: 'Quản lý chi nhánh',
-            icon: Building2,
-            href: '/branches',
-            active: pathname === '/branches',
-            roleAccess: ['ADMIN'] //'DIRECTOR', 'MANAGER', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT', 
-        },
-        {
-            label: 'Cấu hình phí ship',
-            icon: Truck,
-            href: '/settings/delivery-fees',
-            active: pathname === '/settings/delivery-fees',
-            roleAccess: ['ADMIN'] //'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 
         },
         {
             label: 'Cài đặt',
@@ -134,11 +182,19 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
     ];
 
     // Filter menu items based on role access
-    const visibleNavItems = navItems.filter((item: any) => {
-        if (!item.roleAccess) return true; // No restriction
+    const checkAccess = (item: any) => {
+        if (!item.roleAccess) return true;
         if (!currentUser?.role?.code) return false;
-        if (currentUser.role.code === 'ADMIN') return true; // ADMIN có thể xem mọi thứ
+        if (currentUser.role.code === 'ADMIN') return true;
         return item.roleAccess.includes(currentUser.role.code);
+    };
+
+    const visibleNavItems = navItems.filter((item: any) => {
+        if (item.children) {
+            item.visibleChildren = item.children.filter(checkAccess);
+            return item.visibleChildren.length > 0;
+        }
+        return checkAccess(item);
     });
 
     const handleLogout = () => {
@@ -172,32 +228,96 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             </div>
 
             {/* Nav Items */}
-            <div className="py-6 px-3 space-y-2 overflow-y-auto h-[calc(100%-120px)]">
-                {visibleNavItems.map((item) => (
-                    <Link
-                        key={item.href}
-                        href={item.href}
-                        className={cn(
-                            "group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 cursor-pointer",
-                            item.active
-                                ? "bg-rose-50 text-rose-700 shadow-sm"
-                                : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
-                        )}
-                    >
-                        <item.icon size={20} className={cn(
-                            "shrink-0",
-                            item.active ? "text-rose-700" : "text-slate-400 group-hover:text-slate-600"
-                        )} />
-                        {!isCollapsed && (
-                            <span className="font-medium text-sm whitespace-nowrap overflow-hidden text-ellipsis">
-                                {item.label}
-                            </span>
-                        )}
-                        {item.active && !isCollapsed && (
-                            <div className="ml-auto w-1.5 h-1.5 rounded-full bg-rose-500" />
-                        )}
-                    </Link>
-                ))}
+            <div className="py-6 px-3 space-y-2 overflow-y-auto h-[calc(100%-120px)] scrollbar-hide">
+                {visibleNavItems.map((item: any) => {
+                    const hasChildren = item.visibleChildren && item.visibleChildren.length > 0;
+                    const isOpen = openMenus.includes(item.label);
+                    const isAnyChildActive = hasChildren && item.visibleChildren.some((child: any) => child.active);
+
+                    if (hasChildren) {
+                        return (
+                            <div key={item.label} className="space-y-1">
+                                <button
+                                    onClick={() => toggleMenu(item.label)}
+                                    className={cn(
+                                        "group flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all duration-200 cursor-pointer",
+                                        isAnyChildActive ? "text-rose-700 bg-rose-50/50" : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                                    )}
+                                >
+                                    <item.icon size={20} className={cn(
+                                        "shrink-0",
+                                        isAnyChildActive ? "text-rose-700" : "text-slate-400 group-hover:text-slate-600"
+                                    )} />
+                                    {!isCollapsed && (
+                                        <>
+                                            <span className="font-bold text-sm whitespace-nowrap overflow-hidden text-ellipsis flex-1 text-left">
+                                                {item.label}
+                                            </span>
+                                            <ChevronDown
+                                                size={16}
+                                                className={cn(
+                                                    "transition-transform duration-200",
+                                                    isOpen ? "rotate-180" : ""
+                                                )}
+                                            />
+                                        </>
+                                    )}
+                                </button>
+
+                                {isOpen && !isCollapsed && (
+                                    <div className="ml-4 pl-4 border-l border-slate-100 space-y-1 animate-in slide-in-from-top-2 duration-200">
+                                        {item.visibleChildren.map((child: any) => (
+                                            <Link
+                                                key={child.href}
+                                                href={child.href}
+                                                className={cn(
+                                                    "group flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 cursor-pointer",
+                                                    child.active
+                                                        ? "text-rose-600 font-bold"
+                                                        : "text-slate-400 hover:text-slate-700"
+                                                )}
+                                            >
+                                                <child.icon size={16} className={cn(
+                                                    "shrink-0",
+                                                    child.active ? "text-rose-600" : "group-hover:text-slate-600"
+                                                )} />
+                                                <span className="text-[13px] whitespace-nowrap overflow-hidden text-ellipsis">
+                                                    {child.label}
+                                                </span>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    }
+
+                    return (
+                        <Link
+                            key={item.href}
+                            href={item.href}
+                            className={cn(
+                                "group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 cursor-pointer",
+                                item.active
+                                    ? "bg-rose-50 text-rose-700 shadow-sm"
+                                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                            )}
+                        >
+                            <item.icon size={20} className={cn(
+                                "shrink-0",
+                                item.active ? "text-rose-700" : "text-slate-400 group-hover:text-slate-600"
+                            )} />
+                            {!isCollapsed && (
+                                <span className="font-bold text-sm whitespace-nowrap overflow-hidden text-ellipsis">
+                                    {item.label}
+                                </span>
+                            )}
+                            {item.active && !isCollapsed && (
+                                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-rose-500" />
+                            )}
+                        </Link>
+                    );
+                })}
             </div>
 
             {/* Bottom Actions */}

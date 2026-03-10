@@ -447,6 +447,7 @@ export default function EmployeesPage() {
                             <table className="w-full text-xs">
                                 <thead className="bg-gradient-to-r from-slate-700 to-slate-800 text-white">
                                     <tr className="whitespace-nowrap">
+                                        <th className="px-2 py-1.5 text-center font-bold text-[9px] uppercase tracking-wider w-10 border-r border-slate-600">STT</th>
                                         <th className="px-2 py-1.5 text-center w-10"></th>
                                         <th className="px-2 py-1.5 pr-6 text-left font-bold text-[9px] uppercase tracking-wider">Tên Nhân Viên</th>
                                         <th className="px-2 py-1.5 pr-6 text-left font-bold text-[9px] uppercase tracking-wider">SĐT</th>
@@ -461,13 +462,14 @@ export default function EmployeesPage() {
                                 <tbody className="divide-y divide-slate-200">
                                     {filteredEmployees.length === 0 ? (
                                         <tr>
-                                            <td colSpan={8} className="px-3 py-6 text-center text-slate-500 italic text-[11px]">
+                                            <td colSpan={9} className="px-3 py-6 text-center text-slate-500 italic text-[11px]">
                                                 Không tìm thấy nhân viên nào
                                             </td>
                                         </tr>
                                     ) : (
-                                        filteredEmployees.map((emp) => (
+                                        filteredEmployees.map((emp, idx) => (
                                             <tr key={emp.id} className="hover:bg-slate-50 transition-colors whitespace-nowrap">
+                                                <td className="px-2 py-1.5 text-center border-r border-slate-200 font-bold text-slate-400">{idx + 1}</td>
                                                 <td className="px-2 py-1.5 text-center">
                                                     <div className="w-7 h-7 rounded-sm overflow-hidden border border-slate-200 bg-slate-100 mx-auto flex items-center justify-center shrink-0">
                                                         {emp.avatarUrl ? (

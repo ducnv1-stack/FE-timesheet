@@ -132,12 +132,22 @@ export default function LeaderboardPage() {
 
                 {/* Filters */}
                 <div className="flex items-center gap-2 flex-wrap">
-                    <div className="flex items-center gap-1.5 bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-sm shrink min-w-0">
-                        <Calendar size={14} className="text-slate-400 shrink-0" />
+                    <div className="flex items-center gap-1.5 bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-sm shrink min-w-0 hover:border-rose-300 transition-colors">
+                        <Calendar
+                            size={14}
+                            className="text-slate-400 shrink-0 cursor-pointer"
+                            onClick={(e) => {
+                                const input = (e.currentTarget.parentElement as HTMLElement)?.querySelector('input');
+                                if (input && 'showPicker' in input) (input as any).showPicker();
+                            }}
+                        />
                         <input
                             type="date"
                             value={startDate}
                             onChange={(e) => setStartDate(e.target.value)}
+                            onClick={(e) => {
+                                if ('showPicker' in e.currentTarget) (e.currentTarget as any).showPicker();
+                            }}
                             className="text-[11px] font-bold border-none focus:ring-0 cursor-pointer p-0 bg-transparent text-slate-800 outline-none min-w-0 w-[95px]"
                         />
                         <span className="text-slate-300">—</span>
@@ -145,6 +155,9 @@ export default function LeaderboardPage() {
                             type="date"
                             value={endDate}
                             onChange={(e) => setEndDate(e.target.value)}
+                            onClick={(e) => {
+                                if ('showPicker' in e.currentTarget) (e.currentTarget as any).showPicker();
+                            }}
                             className="text-[11px] font-bold border-none focus:ring-0 cursor-pointer p-0 bg-transparent text-slate-800 outline-none min-w-0 w-[95px]"
                         />
                     </div>
@@ -232,7 +245,7 @@ export default function LeaderboardPage() {
                         <button
                             onClick={() => setActiveTab('employees')}
                             className={cn(
-                                "flex items-center gap-1.5 px-3 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-black transition-all whitespace-nowrap",
+                                "flex items-center gap-1.5 px-3 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-black transition-all whitespace-nowrap cursor-pointer",
                                 activeTab === 'employees'
                                     ? "bg-white text-rose-600 shadow-sm"
                                     : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
@@ -244,7 +257,7 @@ export default function LeaderboardPage() {
                         <button
                             onClick={() => setActiveTab('branches')}
                             className={cn(
-                                "flex items-center gap-1.5 px-3 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-black transition-all whitespace-nowrap",
+                                "flex items-center gap-1.5 px-3 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-black transition-all whitespace-nowrap cursor-pointer",
                                 activeTab === 'branches'
                                     ? "bg-white text-rose-600 shadow-sm"
                                     : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
@@ -260,7 +273,7 @@ export default function LeaderboardPage() {
                         <button
                             onClick={() => setMetric('sales')}
                             className={cn(
-                                "flex-1 sm:flex-initial px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-all whitespace-nowrap",
+                                "flex-1 sm:flex-initial px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-all whitespace-nowrap cursor-pointer",
                                 metric === 'sales' ? "bg-blue-600 text-white shadow-lg" : "text-slate-500 hover:bg-slate-50"
                             )}
                         >
@@ -270,7 +283,7 @@ export default function LeaderboardPage() {
                         <button
                             onClick={() => setMetric('completed')}
                             className={cn(
-                                "flex-1 sm:flex-initial px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-all whitespace-nowrap",
+                                "flex-1 sm:flex-initial px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-all whitespace-nowrap cursor-pointer",
                                 metric === 'completed' ? "bg-rose-600 text-white shadow-lg" : "text-slate-500 hover:bg-slate-50"
                             )}
                         >
@@ -303,7 +316,10 @@ export default function LeaderboardPage() {
                                         {activeTab === 'employees' ? 'Nhân viên' : 'Chi nhánh'}
                                     </th>
                                     {activeTab === 'employees' && (
-                                        <th className="px-3 py-2 text-[10px] font-black uppercase text-slate-500 tracking-wider whitespace-nowrap">Chi nhánh</th>
+                                        <>
+                                            <th className="px-3 py-2 text-[10px] font-black uppercase text-slate-500 tracking-wider whitespace-nowrap">Chức vụ</th>
+                                            <th className="px-3 py-2 text-[10px] font-black uppercase text-slate-500 tracking-wider whitespace-nowrap">Chi nhánh</th>
+                                        </>
                                     )}
                                     <th className="px-3 py-2 text-[10px] font-black uppercase text-slate-500 tracking-wider text-right whitespace-nowrap">Giá trị đạt được</th>
                                     <th className="px-3 py-2 text-[10px] font-black uppercase text-slate-500 tracking-wider text-center whitespace-nowrap">Tình trạng</th>
@@ -367,11 +383,18 @@ export default function LeaderboardPage() {
                                                 </div>
                                             </td>
                                             {activeTab === 'employees' && (
-                                                <td className="px-3 py-2 whitespace-nowrap">
-                                                    <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md text-[10px] font-bold">
-                                                        {item.branchName || '—'}
-                                                    </span>
-                                                </td>
+                                                <>
+                                                    <td className="px-3 py-2 whitespace-nowrap">
+                                                        <span className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded-md text-[10px] font-bold border border-blue-100 uppercase">
+                                                            {item.position || 'Sale'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-3 py-2 whitespace-nowrap">
+                                                        <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md text-[10px] font-bold">
+                                                            {item.branchName || '—'}
+                                                        </span>
+                                                    </td>
+                                                </>
                                             )}
                                             <td className="px-3 py-2 whitespace-nowrap text-right">
                                                 <div className="flex flex-col items-end">
@@ -433,7 +456,7 @@ export default function LeaderboardPage() {
                 </div>
                 <button
                     onClick={() => router.push('/dashboard')}
-                    className="flex items-center justify-center gap-1.5 bg-white text-rose-600 px-5 py-3 rounded-xl font-black text-[11px] hover:scale-105 active:scale-95 transition-all shadow-xl shadow-black/10 relative z-10 shrink-0 w-full md:w-auto"
+                    className="flex items-center justify-center gap-1.5 bg-white text-rose-600 px-5 py-3 rounded-xl font-black text-[11px] hover:scale-105 active:scale-95 transition-all shadow-xl shadow-black/10 relative z-10 shrink-0 w-full md:w-auto cursor-pointer"
                 >
                     Về Dashboard
                     <ChevronRight size={14} />
