@@ -90,39 +90,39 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             active: pathname.startsWith('/employees') && !pathname.includes('/attendance') && !pathname.includes('/timesheet'),
             roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR', 'ADMIN']
         },
-        {
-            label: 'Chấm công',
-            icon: LayoutDashboard,
-            href: '/employees/attendance',
-            active: pathname === '/employees/attendance',
-        },
-        {
-            label: 'Bảng công tháng',
-            icon: ScrollText,
-            href: '/employees/timesheet',
-            active: pathname === '/employees/timesheet',
-        },
-        {
-            label: 'Quản lý sản phẩm',
-            icon: ShoppingBag,
-            href: '/products',
-            active: pathname === '/products',
-            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'ADMIN']
-        },
-        {
-            label: 'Quản lý chi nhánh',
-            icon: Building2,
-            href: '/branches',
-            active: pathname === '/branches',
-            roleAccess: ['DIRECTOR', 'MANAGER', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT', 'ADMIN']
-        },
-        {
-            label: 'Cấu hình phí ship',
-            icon: Truck,
-            href: '/settings/delivery-fees',
-            active: pathname === '/settings/delivery-fees',
-            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'ADMIN']
-        },
+        // {
+        //     label: 'Chấm công',
+        //     icon: LayoutDashboard,
+        //     href: '/employees/attendance',
+        //     active: pathname === '/employees/attendance',
+        // },
+        // {
+        //     label: 'Bảng công tháng',
+        //     icon: ScrollText,
+        //     href: '/employees/timesheet',
+        //     active: pathname === '/employees/timesheet',
+        // },
+        // {
+        //     label: 'Quản lý sản phẩm',
+        //     icon: ShoppingBag,
+        //     href: '/products',
+        //     active: pathname === '/products',
+        //     roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'ADMIN']
+        // },
+        // {
+        //     label: 'Quản lý chi nhánh',
+        //     icon: Building2,
+        //     href: '/branches',
+        //     active: pathname === '/branches',
+        //     roleAccess: ['DIRECTOR', 'MANAGER', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT', 'ADMIN']
+        // },
+        // {
+        //     label: 'Cấu hình phí ship',
+        //     icon: Truck,
+        //     href: '/settings/delivery-fees',
+        //     active: pathname === '/settings/delivery-fees',
+        //     roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'ADMIN']
+        // },
         {
             label: 'Cài đặt',
             icon: Settings,
