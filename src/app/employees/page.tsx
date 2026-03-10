@@ -67,7 +67,7 @@ export default function EmployeesPage() {
 
         // RBAC: Only allowed roles can access this page
         const roleCode = parsedUser.role?.code;
-        const allowedRoles = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR'];
+        const allowedRoles = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR', 'ADMIN'];
 
         if (!allowedRoles.includes(roleCode)) {
             router.push('/dashboard');
@@ -212,7 +212,7 @@ export default function EmployeesPage() {
 
     // Check permissions
     const userRole = currentUser?.role?.code;
-    const isGlobal = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR'].includes(userRole);
+    const isGlobal = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR', 'ADMIN'].includes(userRole);
     const isBranch = ['MANAGER'].includes(userRole);
 
     const canCreate = isGlobal || isBranch;

@@ -255,7 +255,11 @@ export default function EmployeeDetailPage() {
                 body: JSON.stringify({ username, password, roleId }),
             });
 
-            if (!res.ok) throw new Error('Failed to create account');
+            if (!res.ok) {
+                const errorData = await res.json();
+                const errorMessage = Array.isArray(errorData.message) ? errorData.message[0] : errorData.message || 'Tạo tài khoản thất bại';
+                throw new Error(errorMessage);
+            }
 
             success('Tạo tài khoản thành công!');
             setShowCreateAccount(false);
@@ -281,7 +285,11 @@ export default function EmployeeDetailPage() {
                 body: JSON.stringify({ newPassword }),
             });
 
-            if (!res.ok) throw new Error('Failed to reset password');
+            if (!res.ok) {
+                const errorData = await res.json();
+                const errorMessage = Array.isArray(errorData.message) ? errorData.message[0] : errorData.message || 'Reset mật khẩu thất bại';
+                throw new Error(errorMessage);
+            }
 
             success('Reset mật khẩu thành công!');
             setShowResetPassword(false);
@@ -379,7 +387,7 @@ export default function EmployeeDetailPage() {
         if (userStr) {
             const user = JSON.parse(userStr);
             setCurrentUser(user);
-            if (['DIRECTOR', 'CHIEF_ACCOUNTANT', 'HR'].includes(user.role?.code)) {
+            if (['DIRECTOR', 'CHIEF_ACCOUNTANT', 'HR', 'ADMIN'].includes(user.role?.code)) {
                 fetchPerformanceStats();
             }
         }

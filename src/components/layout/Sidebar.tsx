@@ -17,7 +17,8 @@ import {
     Building2,
     Menu,
     X,
-    Truck
+    Truck,
+    Trophy
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -52,69 +53,76 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             icon: PlusCircle,
             href: '/orders/new',
             active: pathname === '/orders/new',
-            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'SALE']
+            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'SALE', 'ADMIN']
         },
         {
             label: 'Lịch sử đơn',
             icon: History,
             href: '/orders',
             active: pathname === '/orders',
-            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'SALE', 'DRIVER']
+            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'SALE', 'DRIVER', 'ADMIN']
         },
         {
             label: 'Báo cáo doanh số',
             icon: ScrollText,
             href: '/performance',
             active: pathname === '/performance',
-            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER']
+            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER', 'ADMIN']
+        },
+        {
+            label: 'Bảng xếp hạng',
+            icon: Trophy,
+            href: '/leaderboard',
+            active: pathname === '/leaderboard',
+            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER', 'SALE', 'TELESALE', 'ADMIN']
         },
         {
             label: 'Log hệ thống',
             icon: ScrollText,
             href: '/logs',
             active: pathname === '/logs',
-            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'DRIVER', 'SALE']
+            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'DRIVER', 'SALE', 'ADMIN']
         },
         {
             label: 'Quản lý nhân viên',
             icon: Users,
             href: '/employees',
             active: pathname.startsWith('/employees') && !pathname.includes('/attendance') && !pathname.includes('/timesheet'),
-            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR']
+            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR', 'ADMIN']
         },
-        // {
-        //     label: 'Chấm công',
-        //     icon: LayoutDashboard,
-        //     href: '/employees/attendance',
-        //     active: pathname === '/employees/attendance',
-        // },
-        // {
-        //     label: 'Bảng công tháng',
-        //     icon: ScrollText,
-        //     href: '/employees/timesheet',
-        //     active: pathname === '/employees/timesheet',
-        // },
-        // {
-        //     label: 'Quản lý sản phẩm',
-        //     icon: ShoppingBag,
-        //     href: '/products',
-        //     active: pathname === '/products',
-        //     roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT']
-        // },
-        // {
-        //     label: 'Quản lý chi nhánh',
-        //     icon: Building2,
-        //     href: '/branches',
-        //     active: pathname === '/branches',
-        //     roleAccess: ['DIRECTOR', 'MANAGER', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT']
-        // },
-        // {
-        //     label: 'Cấu hình phí ship',
-        //     icon: Truck,
-        //     href: '/settings/delivery-fees',
-        //     active: pathname === '/settings/delivery-fees',
-        //     roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT']
-        // },
+        {
+            label: 'Chấm công',
+            icon: LayoutDashboard,
+            href: '/employees/attendance',
+            active: pathname === '/employees/attendance',
+        },
+        {
+            label: 'Bảng công tháng',
+            icon: ScrollText,
+            href: '/employees/timesheet',
+            active: pathname === '/employees/timesheet',
+        },
+        {
+            label: 'Quản lý sản phẩm',
+            icon: ShoppingBag,
+            href: '/products',
+            active: pathname === '/products',
+            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'ADMIN']
+        },
+        {
+            label: 'Quản lý chi nhánh',
+            icon: Building2,
+            href: '/branches',
+            active: pathname === '/branches',
+            roleAccess: ['DIRECTOR', 'MANAGER', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT', 'ADMIN']
+        },
+        {
+            label: 'Cấu hình phí ship',
+            icon: Truck,
+            href: '/settings/delivery-fees',
+            active: pathname === '/settings/delivery-fees',
+            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'ADMIN']
+        },
         {
             label: 'Cài đặt',
             icon: Settings,
@@ -127,6 +135,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
     const visibleNavItems = navItems.filter((item: any) => {
         if (!item.roleAccess) return true; // No restriction
         if (!currentUser?.role?.code) return false;
+        if (currentUser.role.code === 'ADMIN') return true; // ADMIN có thể xem mọi thứ
         return item.roleAccess.includes(currentUser.role.code);
     });
 

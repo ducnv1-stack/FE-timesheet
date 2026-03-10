@@ -63,7 +63,7 @@ export default function DeliveryFeesPage() {
         if (stored) {
             const u = JSON.parse(stored);
             const role = typeof u.role === 'object' ? u.role.code : u.role;
-            if (!['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT'].includes(role)) {
+            if (!['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'ADMIN'].includes(role)) {
                 router.push('/dashboard');
                 return;
             }

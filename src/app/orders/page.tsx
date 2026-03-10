@@ -133,11 +133,6 @@ function OrdersPageContent() {
                 setSelectedBranchId(userBranchId);
             }
         }
-
-        // Clean up URL parameters after consuming them to avoid "stuck" filters when switching tabs
-        if (paymentParam || invoiceParam || branchParam || employeeParam || tabParam || startParam || endParam || excludeInstallmentParam) {
-            router.replace('/orders');
-        }
     }, [searchParams]);
 
     const handleConfirmDelivery = async (orderId: string) => {
@@ -194,7 +189,7 @@ function OrdersPageContent() {
             setIsExporting(true);
             const userRole = typeof user.role === 'object' ? (user.role.code || user.role.name) : user.role;
             const userBranchId = user.employee?.branchId;
-            const GLOBAL_ROLES = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MARKETING'];
+            const GLOBAL_ROLES = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MARKETING', 'ADMIN'];
 
             const params = new URLSearchParams();
             params.append('userId', user.id);
@@ -416,7 +411,7 @@ function OrdersPageContent() {
 
             const userRole = typeof userData.role === 'object' ? (userData.role.code || userData.role.name) : userData.role;
             const userBranchId = userData.employee?.branchId;
-            const GLOBAL_ROLES = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MARKETING'];
+            const GLOBAL_ROLES = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MARKETING', 'ADMIN'];
 
             const orderParams = new URLSearchParams();
             orderParams.append('userId', userData.id);
@@ -629,7 +624,7 @@ function OrdersPageContent() {
     };
 
     const userRole = user ? (typeof user.role === 'object' ? (user.role.code || user.role.name) : user.role) : '';
-    const GLOBAL_ROLES = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MARKETING'];
+    const GLOBAL_ROLES = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MARKETING', 'ADMIN'];
     const isGlobalRole = GLOBAL_ROLES.includes(userRole);
     const isManager = userRole === 'MANAGER';
     const isDirector = userRole === 'DIRECTOR';
@@ -707,7 +702,7 @@ function OrdersPageContent() {
                         <p className="text-[11px] text-slate-500">Quản lý và tra cứu các hóa đơn.</p>
                     </div>
                     <div className="flex items-center gap-2">
-                        {user && ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'].includes(typeof user.role === 'object' ? user.role.code : user.role) && (
+                        {user && ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'ADMIN'].includes(typeof user.role === 'object' ? user.role.code : user.role) && (
                             <button
                                 onClick={handleExportExcel}
                                 disabled={isExporting}

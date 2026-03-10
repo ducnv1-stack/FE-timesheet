@@ -12,7 +12,7 @@ import {
     FileText, CheckCircle, AlertCircle, Wallet, LucideIcon,
     PieChart as PieChartIcon, X,
     ZoomIn, ZoomOut, Maximize2, ChevronLeft, ChevronRight,
-    MapPin
+    MapPin, Trophy
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils'; // Ensure this exists or reimplement locally if simpler
 import KPIPeriodTrend from '@/components/dashboard/KPIPeriodTrend';
@@ -49,8 +49,14 @@ export default function DashboardPage() {
         setUser(parsedUser);
 
         // Fetch branches for global roles
-        if (['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT'].includes(parsedUser.role?.code)) {
+        const isGlobal = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'ADMIN'].includes(parsedUser.role?.code);
+        if (isGlobal) {
             fetchBranches();
+        }
+
+        // Set initial branchId for MANAGERS
+        if (parsedUser.role?.code === 'MANAGER' && parsedUser.employee?.branchId) {
+            setBranchId(parsedUser.employee.branchId);
         }
 
         // Sử dụng debounce để tránh load liên tục khi người dùng đổi tháng ở date picker
@@ -193,24 +199,22 @@ export default function DashboardPage() {
                         />
                     </div>
 
-                    {/* Branch Filter */}
-                    <div className="flex items-center gap-2 bg-slate-50 p-1 pl-3 rounded-2xl border border-slate-100 group focus-within:border-rose-200 transition-colors h-10 w-full sm:w-auto">
-                        <MapPin size={14} className="text-slate-400 group-focus-within:text-rose-500" />
-                        <select
-                            value={branchId}
-                            onChange={(e) => setBranchId(e.target.value)}
-                            disabled={user?.role?.code === 'MANAGER'}
-                            className="bg-transparent border-none text-[10px] md:text-[11px] font-black text-slate-700 outline-none pr-2 py-1.5 cursor-pointer max-w-[120px] sm:max-w-[150px] truncate disabled:opacity-60 disabled:cursor-not-allowed uppercase"
-                        >
-                            <option value="">Tất cả chi nhánh</option>
-                            {branches.map(b => (
-                                <option key={b.id} value={b.id}>{b.name}</option>
-                            ))}
-                            {user?.role?.code === 'MANAGER' && branches.length === 0 && (
-                                <option value={user?.employee?.branchId || ''}>{user?.employee?.branch?.name || 'Chi nhánh của bạn'}</option>
-                            )}
-                        </select>
-                    </div>
+                    {/* Branch Filter - Only visible for Global/Accounting roles */}
+                    {['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'ADMIN'].includes(user?.role?.code) && (
+                        <div className="flex items-center gap-2 bg-slate-50 p-1 pl-3 rounded-2xl border border-slate-100 group focus-within:border-rose-200 transition-colors h-10 w-full sm:w-auto">
+                            <MapPin size={14} className="text-slate-400 group-focus-within:text-rose-500" />
+                            <select
+                                value={branchId}
+                                onChange={(e) => setBranchId(e.target.value)}
+                                className="bg-transparent border-none text-[10px] md:text-[11px] font-black text-slate-700 outline-none pr-2 py-1.5 cursor-pointer max-w-[120px] sm:max-w-[150px] truncate uppercase"
+                            >
+                                <option value="">Tất cả chi nhánh</option>
+                                {branches.map(b => (
+                                    <option key={b.id} value={b.id}>{b.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
 
                     <button
                         onClick={() => setQuickRange('month')}
@@ -224,7 +228,7 @@ export default function DashboardPage() {
 
             <main className="max-w-7xl mx-auto space-y-6">
                 {/* Role Based Content */}
-                {['DIRECTOR', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT', 'BRANCH_ACCOUNTANT'].includes(data.role) && (
+                {['DIRECTOR', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'ADMIN'].includes(data.role) && (
                     <DirectorDashboard
                         data={data}
                         userId={user.id}
@@ -865,8 +869,187 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
     const nextMilestone = milestones.find((m: any) => Number(m.targetRevenue) > branchRevenue) || milestones[milestones.length - 1];
     const missingAmount = nextMilestone ? Math.max(0, Number(nextMilestone.targetRevenue) - branchRevenue) : 0;
 
+    const ranking = data.ranking?.branch;
+    const branchTopStaff = data.ranking?.branchTopStaff;
+    const serverTopStaff = data.ranking?.serverTopStaff;
+    const getFullAvatarUrl = (path: string | null | undefined) => {
+        if (!path) return undefined;
+        if (path.startsWith('http')) return path;
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        return `${apiUrl}${path.startsWith('/') ? '' : '/'}${path}`;
+    };
+
     return (
         <div className="space-y-4">
+            {/* Branch Position & Recognition */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Branch Position */}
+                <div className="p-4 bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 rounded-3xl text-white shadow-lg relative overflow-hidden group">
+                    <div className="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform duration-500">
+                        <Trophy size={80} />
+                    </div>
+                    <div className="relative z-10">
+                        <div className="flex items-center gap-2 mb-2">
+                            <div className="p-1 bg-white/10 rounded-lg backdrop-blur-sm">
+                                <Trophy size={12} className="text-indigo-300" />
+                            </div>
+                            <p className="text-[9px] font-black uppercase tracking-widest text-indigo-200">Vị thế chi nhánh</p>
+                        </div>
+                        <div className="flex items-baseline gap-1">
+                            <span className="text-2xl font-black">Hạng {ranking?.completed?.rank || '—'}</span>
+                            <span className="text-indigo-300 font-bold text-xs">/ {ranking?.completed?.totalCount || '—'}</span>
+                        </div>
+                        <p className="text-[8px] mt-0.5 text-indigo-200 font-medium uppercase tracking-tight opacity-70">toàn hệ thống</p>
+                        <div className="mt-3 pt-3 border-t border-white/5 opacity-80 group-hover:opacity-100 transition-opacity">
+                            <p className="text-[9px] text-indigo-100 italic leading-tight">
+                                "{data.branchName} đang đứng thứ {ranking?.completed?.rank || '—'} hệ thống."
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Top Performer - Server Rankings */}
+                <div className="relative group overflow-hidden bg-white p-4 rounded-3xl border border-slate-100 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 flex flex-col justify-center">
+                    <div className="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <Trophy size={40} className="text-blue-600" />
+                    </div>
+                    <div className="relative z-10 h-full flex flex-col">
+                        <div className="flex items-center gap-2 mb-3">
+                            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 transition-colors group-hover:bg-blue-100">
+                                <Trophy size={16} />
+                            </div>
+                            <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">Top Sales Server</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
+                            {/* Top Sales Server Employee */}
+                            <div className="flex items-center gap-3">
+                                <div className="relative shrink-0">
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-md overflow-hidden border-2 border-white">
+                                        <UserAvatar
+                                            src={getFullAvatarUrl(serverTopStaff?.sales?.avatarUrl)}
+                                            fallbackIcon={<Users size={16} />}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                    <div className="absolute -bottom-1 -right-1 px-1 py-0.5 rounded-md bg-blue-600 shadow-sm flex items-center justify-center border border-white">
+                                        <span className="text-[7px] text-white font-black">Hạng {serverTopStaff?.sales?.rank || '—'}</span>
+                                    </div>
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <h4 className="text-[10px] font-black text-slate-800 truncate mb-0">
+                                        {serverTopStaff?.sales?.name || (serverTopStaff?.sales?.id ? `NV #${serverTopStaff.sales.id.slice(-4)}` : 'Đang cập nhật')}
+                                    </h4>
+                                    <div className="flex flex-col">
+                                        <p className="text-[10px] font-black text-blue-700 leading-none">
+                                            {formatCurrency(serverTopStaff?.sales?.amount || 0)}
+                                        </p>
+                                        <span className="text-[7px] text-slate-400 font-bold uppercase tracking-tighter">Top Doanh số bán</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Top Completed Server Employee */}
+                            <div className="flex items-center gap-3 lg:pt-0 lg:border-t-0 pt-1 border-t border-slate-50">
+                                <div className="relative shrink-0">
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-md overflow-hidden border-2 border-white">
+                                        <UserAvatar
+                                            src={getFullAvatarUrl(serverTopStaff?.completed?.avatarUrl)}
+                                            fallbackIcon={<Users size={16} />}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                    <div className="absolute -bottom-1 -right-1 px-1 py-0.5 rounded-md bg-emerald-600 shadow-sm flex items-center justify-center border border-white text-white">
+                                        <span className="text-[7px] font-black">Hạng {serverTopStaff?.completed?.rank || '—'}</span>
+                                    </div>
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <h4 className="text-[10px] font-black text-slate-800 truncate mb-0.5">
+                                        {serverTopStaff?.completed?.name || (serverTopStaff?.completed?.id ? `NV #${serverTopStaff.completed.id.slice(-4)}` : 'Đang cập nhật')}
+                                    </h4>
+                                    <div className="flex flex-col">
+                                        <p className="text-[10px] font-black text-emerald-700 leading-none">
+                                            {formatCurrency(serverTopStaff?.completed?.amount || 0)}
+                                        </p>
+                                        <span className="text-[7px] text-slate-400 font-bold uppercase tracking-tighter">Top Hoàn thành</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Top Performer - Branch Rankings */}
+                <div className="relative group overflow-hidden bg-white p-4 rounded-3xl border border-slate-100 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 flex flex-col justify-center">
+                    <div className="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <MapPin size={40} className="text-rose-600" />
+                    </div>
+                    <div className="relative z-10 h-full flex flex-col">
+                        <div className="flex items-center gap-2 mb-3">
+                            <div className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center text-rose-600 transition-colors group-hover:bg-rose-100">
+                                <Users size={16} />
+                            </div>
+                            <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">Top Sales Chi nhánh</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
+                            {/* Top Sales Branch Employee */}
+                            <div className="flex items-center gap-3">
+                                <div className="relative shrink-0">
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-white shadow-md overflow-hidden border-2 border-white">
+                                        <UserAvatar
+                                            src={getFullAvatarUrl(branchTopStaff?.sales?.avatarUrl)}
+                                            fallbackIcon={<Users size={16} />}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                    <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-lg bg-rose-600 shadow-lg flex items-center justify-center border-2 border-white">
+                                        <Trophy size={8} className="text-white" />
+                                    </div>
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <h4 className="text-[10px] font-black text-slate-800 truncate mb-0.5">
+                                        {branchTopStaff?.sales?.name || (branchTopStaff?.sales?.id ? `NV #${branchTopStaff.sales.id.slice(-4)}` : 'Đang cập nhật')}
+                                    </h4>
+                                    <div className="flex flex-col">
+                                        <p className="text-[10px] font-black text-rose-700 leading-none">
+                                            {formatCurrency(branchTopStaff?.sales?.amount || 0)}
+                                        </p>
+                                        <span className="text-[7px] text-slate-400 font-bold uppercase tracking-tighter">Top Doanh số bán</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Top Completed Branch Employee */}
+                            <div className="flex items-center gap-3 lg:pt-0 lg:border-t-0 pt-1 border-t border-slate-50">
+                                <div className="relative shrink-0">
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-md overflow-hidden border-2 border-white">
+                                        <UserAvatar
+                                            src={getFullAvatarUrl(branchTopStaff?.completed?.avatarUrl)}
+                                            fallbackIcon={<Users size={16} />}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                    <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-lg bg-amber-600 shadow-lg flex items-center justify-center border-2 border-white text-white">
+                                        <CheckCircle size={8} className="text-white" />
+                                    </div>
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <h4 className="text-[10px] font-black text-slate-800 truncate mb-0.5">
+                                        {branchTopStaff?.completed?.name || (branchTopStaff?.completed?.id ? `NV #${branchTopStaff.completed.id.slice(-4)}` : 'Đang cập nhật')}
+                                    </h4>
+                                    <div className="flex flex-col">
+                                        <p className="text-[10px] font-black text-amber-700 leading-none">
+                                            {formatCurrency(branchTopStaff?.completed?.amount || 0)}
+                                        </p>
+                                        <span className="text-[7px] text-slate-400 font-bold uppercase tracking-tighter">Top Hoàn thành</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             {/* Main Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="p-3 bg-white rounded-2xl border border-slate-100 shadow-sm hover:border-rose-100 transition-colors">
@@ -1395,6 +1578,19 @@ function ManagerDashboard({ data, startDate, endDate }: { data: any, startDate: 
 }
 
 
+function UserAvatar({ src, fallbackIcon, className }: { src: string | undefined, fallbackIcon: React.ReactNode, className?: string }) {
+    const [error, setError] = useState(false);
+    if (!src || error) return <div className={className + " flex items-center justify-center italic"}>{fallbackIcon}</div>;
+    return (
+        <img
+            src={src}
+            alt=""
+            className={className}
+            onError={() => setError(true)}
+        />
+    );
+}
+
 function ActionButton({ icon, title, href }: { icon: React.ReactNode, title: string, href: string }) {
     return (
         <a
@@ -1407,6 +1603,53 @@ function ActionButton({ icon, title, href }: { icon: React.ReactNode, title: str
             <span className="font-bold text-slate-700 group-hover:text-rose-700">{title}</span>
             <ArrowRight size={16} className="ml-auto text-slate-400 group-hover:text-rose-600" />
         </a>
+    );
+}
+
+function RankingCard({ type, rank, total, branchRank, icon, color }: { type: string, rank: number | null, total: number, branchRank: number | null, icon: React.ReactNode, color: 'blue' | 'rose' | 'amber' }) {
+    const getMotivationalMessage = (rank: number | null, type: string) => {
+        if (!rank) return `Bạn đang nỗ lực đạt thứ hạng đầu (${type}). Hãy bứt phá mạnh mẽ hơn nữa nhé! 💪`;
+        if (rank === 1) return `Xin chúc mừng! Bạn đang xuất sắc đứng Top 1 Server (${type}). Hãy giữ vững phong độ nhé! 🏆`;
+        if (rank <= 5) return `Tuyệt vời! Bạn đang nằm trong Top 5 Server (${type}). Chỉ một chút nỗ lực nữa là chạm tới ngôi đầu! 🚀`;
+        return `Bạn đang ở vị trí thứ ${rank} Server (${type}). Hãy bứt phá mạnh mẽ hơn nữa nhé! 💪`;
+    };
+
+    const colorClasses = {
+        blue: 'bg-blue-50 border-blue-100 text-blue-600',
+        rose: 'bg-rose-50 border-rose-100 text-rose-600',
+        amber: 'bg-amber-50 border-amber-100 text-amber-600',
+    };
+
+    const iconClasses = {
+        blue: 'bg-blue-100 text-blue-600',
+        rose: 'bg-rose-100 text-rose-600',
+        amber: 'bg-amber-100 text-amber-600',
+    };
+
+    return (
+        <div className={`p-4 rounded-2xl border ${colorClasses[color]} shadow-sm hover:shadow-md transition-all`}>
+            <div className="flex items-center gap-3 mb-2">
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${iconClasses[color]}`}>
+                    {icon}
+                </div>
+                <div className="flex-1">
+                    <p className="text-[10px] font-black uppercase opacity-70">{type}</p>
+                    <div className="flex items-center justify-between">
+                        <p className="text-sm font-black">
+                            Hạng {rank || '—'} / {total || '—'}
+                        </p>
+                        {branchRank && (
+                            <span className="text-[10px] font-black bg-white/50 px-1.5 py-0.5 rounded border border-current/10">
+                                CN: #{branchRank}
+                            </span>
+                        )}
+                    </div>
+                </div>
+            </div>
+            <p className="text-[11px] font-medium leading-relaxed italic opacity-90 border-t border-current/10 pt-2 mt-2">
+                "{getMotivationalMessage(rank, type)}"
+            </p>
+        </div>
     );
 }
 
@@ -1455,8 +1698,117 @@ function SaleDashboard({ data, startDate, endDate }: { data: any, startDate: str
     // Progress bar max scale (show a bit more than 100% or current max)
     const maxScale = Math.max(150, Math.ceil(currentPercent / 50) * 50 + 50);
 
+    const ranking = data.ranking?.employee;
+    const showRanking = ranking && (ranking.sales.rank || ranking.completed.rank);
+
     return (
         <div className="space-y-4">
+            {/* Leaderboard Section */}
+            {showRanking && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {/* System wide status */}
+                    <div className="group relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-50/50 p-4 rounded-3xl border border-blue-100 shadow-sm transition-all duration-500 hover:shadow-xl hover:shadow-blue-200/40 hover:-translate-y-1 flex flex-col justify-between">
+                        <div className="absolute -top-8 -right-8 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition-all duration-700"></div>
+                        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-all duration-500 rotate-12 group-hover:rotate-0">
+                            <Trophy size={40} className="text-blue-600" />
+                        </div>
+                        <div className="flex items-center gap-2.5 mb-3.5 relative z-10">
+                            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-200">
+                                <Trophy size={16} />
+                            </div>
+                            <div>
+                                <p className="text-[9px] font-black uppercase tracking-[0.15em] text-blue-600/60 leading-none mb-0.5">Hệ thống</p>
+                                <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-tight">Top Server</h3>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4 mb-4 relative z-10">
+                            <div className="flex flex-col">
+                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Doanh số bán</span>
+                                <div className="flex items-baseline gap-1">
+                                    <p className="text-xl font-black text-slate-800 tracking-tighter">
+                                        #{ranking.sales.rank || '—'}
+                                    </p>
+                                    <span className="text-[10px] text-slate-400 font-bold uppercase transition-colors group-hover:text-blue-500">/ {ranking.sales.totalCount}</span>
+                                </div>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Hoàn thành</span>
+                                <div className="flex items-baseline gap-1">
+                                    <p className="text-xl font-black text-slate-800 tracking-tighter">
+                                        #{ranking.completed.rank || '—'}
+                                    </p>
+                                    <span className="text-[10px] text-slate-400 font-bold uppercase transition-colors group-hover:text-blue-500">/ {ranking.completed.totalCount}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-auto relative z-10">
+                            <div className="bg-gradient-to-r from-blue-600/5 to-transparent border-l-3 border-blue-500 p-2.5 rounded-r-xl">
+                                <p className="text-[11px] font-bold leading-relaxed italic text-blue-900 drop-shadow-sm">
+                                    "{(() => {
+                                        const bestRank = Math.min(...[ranking.sales.rank, ranking.completed.rank].filter(r => r !== null) as number[]);
+                                        if (!bestRank || bestRank > 10) return "Hãy nỗ lực bứt phá để vinh danh toàn hệ thống nhé! 💪";
+                                        if (bestRank === 1) return "Bạn là số 1 toàn hệ thống. Hãy giữ vững ngôi vương nhé! 👑";
+                                        return `Bạn đang dẫn đầu toàn hệ thống (Hạng ${bestRank}). Tiến lên! 🚀`;
+                                    })()}"
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Branch status */}
+                    <div className="group relative overflow-hidden bg-gradient-to-br from-rose-50 via-white to-pink-50/50 p-4 rounded-3xl border border-rose-100 shadow-sm transition-all duration-500 hover:shadow-xl hover:shadow-rose-200/40 hover:-translate-y-1 flex flex-col justify-between">
+                        <div className="absolute -top-8 -right-8 w-24 h-24 bg-rose-500/5 rounded-full blur-2xl group-hover:bg-rose-500/10 transition-all duration-700"></div>
+                        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-all duration-500 rotate-12 group-hover:rotate-0">
+                            <MapPin size={40} className="text-rose-600" />
+                        </div>
+                        <div className="flex items-center gap-2.5 mb-3.5 relative z-10">
+                            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose-500 to-rose-600 flex items-center justify-center text-white shadow-md shadow-rose-200">
+                                <MapPin size={16} />
+                            </div>
+                            <div>
+                                <p className="text-[9px] font-black uppercase tracking-[0.15em] text-rose-600/60 leading-none mb-0.5">Địa phương</p>
+                                <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-tight">Top Chi nhánh</h3>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4 mb-4 relative z-10">
+                            <div className="flex flex-col">
+                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Doanh số bán</span>
+                                <div className="flex items-baseline gap-1">
+                                    <p className="text-xl font-black text-slate-800 tracking-tighter">
+                                        #{ranking.branchSales.rank || '—'}
+                                    </p>
+                                    <span className="text-[10px] text-slate-400 font-bold uppercase transition-colors group-hover:text-rose-500">/ {ranking.branchSales.totalCount}</span>
+                                </div>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Hoàn thành</span>
+                                <div className="flex items-baseline gap-1">
+                                    <p className="text-xl font-black text-slate-800 tracking-tighter">
+                                        #{ranking.branchCompleted.rank || '—'}
+                                    </p>
+                                    <span className="text-[10px] text-slate-400 font-bold uppercase transition-colors group-hover:text-rose-500">/ {ranking.branchCompleted.totalCount}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-auto relative z-10">
+                            <div className="bg-gradient-to-r from-rose-600/5 to-transparent border-l-3 border-rose-500 p-2.5 rounded-r-xl">
+                                <p className="text-[11px] font-bold leading-relaxed italic text-rose-900 drop-shadow-sm">
+                                    "{(() => {
+                                        const bestBranchRank = Math.min(...[ranking.branchSales.rank, ranking.branchCompleted.rank].filter(r => r !== null) as number[]);
+                                        if (!bestBranchRank || bestBranchRank === 1) return "Bạn là chiến binh số 1 của chi nhánh! 🌟";
+                                        if (bestBranchRank <= 3) return "Rất xuất sắc! Bạn thuộc Top 3 chi nhánh. 🏆";
+                                        return "Sắp chạm tới vị trí dẫn đầu rồi. Cố lên! 🔥";
+                                    })()}"
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
             {/* KPI Card */}
             <div className="bg-gradient-to-br from-rose-700 to-rose-900 rounded-3xl p-4 md:p-5 text-white shadow-xl relative overflow-hidden">
                 {/* Decoration */}

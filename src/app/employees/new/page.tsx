@@ -46,7 +46,7 @@ export default function NewEmployeePage() {
         }
         const parsedUser = JSON.parse(user);
         const roleCode = parsedUser.role?.code;
-        const allowedRoles = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR'];
+        const allowedRoles = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR', 'ADMIN'];
         if (!allowedRoles.includes(roleCode)) {
             router.push('/dashboard');
             return;

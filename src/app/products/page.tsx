@@ -100,7 +100,7 @@ export default function ProductsPage() {
             return;
         }
         const parsedUser = JSON.parse(user);
-        const allowedRoles = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'];
+        const allowedRoles = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'ADMIN'];
         if (!allowedRoles.includes(parsedUser.role?.code)) {
             router.push('/dashboard');
             return;
