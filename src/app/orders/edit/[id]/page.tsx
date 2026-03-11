@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Save, ChevronLeft, ShoppingCart, User, Info, CreditCard, Users } from 'lucide-react';
+import { Save, ChevronLeft, ShoppingCart, User, Info, CreditCard, Users, Calendar } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
 import { useToast } from '@/components/ui/toast';
+import FixedDatePicker from '@/components/ui/FixedDatePicker';
 
 import { formatCurrency, cn, formatDate, formatDateTime } from '@/lib/utils';
 import ItemGrid from '@/components/orders/ItemGrid';
@@ -179,7 +180,8 @@ export default function EditOrderPage() {
         const rates = new Set(validRateItems.map(item => {
             const p = products.find(prod => prod.id === item.productId);
             if (!p) return 1.8;
-            return item.unitPrice < Number(p.minPrice) ? 1 : 1.8;
+            const effectivePrice = Number(item.unitPrice) + (order.isUpgrade ? Number(order.oldOrderAmount || 0) : 0);
+            return effectivePrice < Number(p.minPrice) ? 1 : 1.8;
         }));
 
         if (rates.has(1) && rates.has(1.8)) commissionLabel = "Hoa hồng (1% - 1.8%)";
@@ -440,11 +442,10 @@ export default function EditOrderPage() {
                         </div>
                         <div className="grid grid-cols-[120px_1fr] items-center border-b border-slate-100 py-1">
                             <span className="font-bold text-slate-600">Ngày tháng:</span>
-                            <input
-                                type="date"
+                            <FixedDatePicker
                                 value={order.orderDate}
-                                onChange={(e) => setOrder({ ...order, orderDate: e.target.value })}
-                                className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 cursor-pointer"
+                                onChange={(val) => setOrder({ ...order, orderDate: val })}
+                                className="border-none !p-0 h-auto"
                             />
                         </div>
                         <div className="grid grid-cols-[120px_1fr] items-center border-b border-slate-100 py-1">
@@ -487,11 +488,10 @@ export default function EditOrderPage() {
                         </div>
                         <div className="grid grid-cols-[120px_1fr] items-center border-b border-slate-100 py-1">
                             <span className="font-bold text-slate-600">Ngày cấp:</span>
-                            <input
-                                type="date"
+                            <FixedDatePicker
                                 value={order.customerCardIssueDate || ''}
-                                onChange={(e) => setOrder({ ...order, customerCardIssueDate: e.target.value })}
-                                className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 cursor-pointer"
+                                onChange={(val) => setOrder({ ...order, customerCardIssueDate: val })}
+                                className="border-none !p-0 h-auto"
                             />
                         </div>
                         <div className="grid grid-cols-[120px_1fr] items-start border-b border-slate-100 py-2">
@@ -739,6 +739,14 @@ export default function EditOrderPage() {
                                     })()}
                                 </span>
                             </div>
+                            {totalGiftAmount > 0 && (
+                                <div className="flex justify-between items-center pb-3 border-b border-slate-100 italic">
+                                    <span className="text-rose-500 font-bold text-[10px] uppercase tracking-tight">Chi phí quà tặng</span>
+                                    <span className="font-bold text-sm text-rose-600">
+                                        -{formatCurrency(totalGiftAmount)}
+                                    </span>
+                                </div>
+                            )}
                             {/* Commission Row */}
                             <div className="flex justify-between items-center pb-3 border-b border-slate-100">
                                 <span className="text-slate-500 font-bold text-[11px] uppercase tracking-tight">{commissionLabel}</span>
@@ -747,12 +755,15 @@ export default function EditOrderPage() {
                                         const totalComm = order.items.reduce((sum, item) => {
                                             const p = products.find(prod => prod.id === item.productId);
                                             if (!p) return sum;
-                                            const rate = item.unitPrice < Number(p.minPrice) ? 0.01 : 0.018;
+                                            const effectivePrice = Number(item.unitPrice) + (order.isUpgrade ? Number(order.oldOrderAmount || 0) : 0);
+                                            const rate = effectivePrice < Number(p.minPrice) ? 0.01 : 0.018;
                                             return sum + (item.quantity * item.unitPrice * rate);
                                         }, 0);
                                         const othersTotal = order.splits.reduce((sum, s) => sum + s.splitAmount, 0);
                                         const myPercent = totalAmount > 0 ? (totalAmount - othersTotal) / totalAmount : 1;
-                                        return formatCurrency(totalComm * myPercent);
+                                        const netRevenue = totalAmount - totalGiftAmount;
+                                        const commissionFactor = totalAmount > 0 ? (netRevenue / totalAmount) : 1;
+                                        return formatCurrency(totalComm * myPercent * commissionFactor);
                                     })()}
                                 </span>
                             </div>

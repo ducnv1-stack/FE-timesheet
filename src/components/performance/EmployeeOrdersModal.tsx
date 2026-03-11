@@ -39,7 +39,7 @@ export default function EmployeeOrdersModal({ employee, month, year, onClose }: 
             const items = data.data || [];
 
             // Sort by createdAt desc
-            items.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+            items.sort((a: any, b: any) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
 
             setOrders(items);
         } catch (error: any) {
@@ -109,8 +109,8 @@ export default function EmployeeOrdersModal({ employee, month, year, onClose }: 
                                             <tr key={order.id} className="hover:bg-rose-50/30 transition-colors group">
                                                 {/* Thời gian */}
                                                 <td className="px-3 py-2 whitespace-nowrap border-r border-slate-100 align-top">
-                                                    <div className="font-bold text-slate-700">{formatDate(order.createdAt)}</div>
-                                                    <div className="text-[10px] text-slate-500 font-medium">{formatDateTime(order.createdAt).split(' ')[1]}</div>
+                                                    <div className="font-bold text-slate-700">{formatDate(order.orderDate)}</div>
+                                                    <div className="text-[10px] text-slate-500 font-medium">{formatDateTime(order.orderDate).split(' ')[1]}</div>
                                                 </td>
                                                 {/* Khách hàng */}
                                                 <td className="px-3 py-2 whitespace-nowrap font-bold text-slate-800 border-r border-slate-100 align-top">

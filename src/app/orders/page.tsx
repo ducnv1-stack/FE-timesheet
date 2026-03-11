@@ -26,7 +26,9 @@ import {
     Car,
     History,
     FileSpreadsheet,
-    Image as ImageIcon
+    Image as ImageIcon,
+    RefreshCw,
+    ArrowUpRight
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { formatCurrency, cn, formatDate, formatDateTime } from '@/lib/utils';
@@ -38,6 +40,7 @@ import OrderAuditLogModal from '../../components/orders/OrderAuditLogModal';
 import OrderImagesModal from '../../components/orders/OrderImagesModal';
 import ConfirmModal from '@/components/ui/confirm-modal';
 import SearchableSelect from '@/components/ui/SearchableSelect';
+import FixedDatePicker from '@/components/ui/FixedDatePicker';
 
 const LoadingBarStyle = () => (
     <style jsx global>{`
@@ -336,7 +339,7 @@ function OrdersPageContent() {
 
                 return {
                     'Mã đơn hàng': o.id,
-                    'Ngày tạo': formatDateTime(o.createdAt),
+                    'Ngày đơn hàng': formatDate(o.orderDate),
                     'Ngày cập nhật': formatDateTime(o.updatedAt),
                     'Họ tên khách hàng': o.customerName,
                     'Số điện thoại': o.customerPhone,
@@ -820,18 +823,16 @@ function OrdersPageContent() {
 
                             {timeFilter === 'custom' && (
                                 <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2 h-[28px] flex-1">
-                                    <input
-                                        type="date"
+                                    <FixedDatePicker
                                         value={startDate}
-                                        onChange={(e) => setStartDate(e.target.value)}
-                                        className="bg-transparent border-none text-[9px] font-black text-slate-700 outline-none flex-1 px-0"
+                                        onChange={setStartDate}
+                                        className="h-full border-none !bg-transparent !p-0 text-[10px]"
                                     />
                                     <ArrowRight size={10} className="text-slate-300 flex-shrink-0" />
-                                    <input
-                                        type="date"
+                                    <FixedDatePicker
                                         value={endDate}
-                                        onChange={(e) => setEndDate(e.target.value)}
-                                        className="bg-transparent border-none text-[9px] font-black text-slate-700 outline-none flex-1 px-0"
+                                        onChange={setEndDate}
+                                        className="h-full border-none !bg-transparent !p-0 text-[10px]"
                                     />
                                 </div>
                             )}
@@ -914,18 +915,16 @@ function OrdersPageContent() {
 
                             {editTimeFilter === 'custom' && (
                                 <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2 h-[28px] flex-1">
-                                    <input
-                                        type="date"
+                                    <FixedDatePicker
                                         value={editStartDate}
-                                        onChange={(e) => setEditStartDate(e.target.value)}
-                                        className="bg-transparent border-none text-[9px] font-black text-slate-700 outline-none flex-1 px-0"
+                                        onChange={setEditStartDate}
+                                        className="h-full border-none !bg-transparent !p-0 text-[10px]"
                                     />
                                     <ArrowRight size={10} className="text-slate-300 flex-shrink-0" />
-                                    <input
-                                        type="date"
+                                    <FixedDatePicker
                                         value={editEndDate}
-                                        onChange={(e) => setEditEndDate(e.target.value)}
-                                        className="bg-transparent border-none text-[9px] font-black text-slate-700 outline-none flex-1 px-0"
+                                        onChange={setEditEndDate}
+                                        className="h-full border-none !bg-transparent !p-0 text-[10px]"
                                     />
                                 </div>
                             )}
@@ -956,18 +955,16 @@ function OrdersPageContent() {
 
                             {confirmedTimeFilter === 'custom' && (
                                 <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2 h-[28px] flex-1">
-                                    <input
-                                        type="date"
+                                    <FixedDatePicker
                                         value={confirmedStartDate}
-                                        onChange={(e) => setConfirmedStartDate(e.target.value)}
-                                        className="bg-transparent border-none text-[9px] font-black text-slate-700 outline-none flex-1 px-0"
+                                        onChange={setConfirmedStartDate}
+                                        className="h-full border-none !bg-transparent !p-0 text-[10px]"
                                     />
                                     <ArrowRight size={10} className="text-slate-300 flex-shrink-0" />
-                                    <input
-                                        type="date"
+                                    <FixedDatePicker
                                         value={confirmedEndDate}
-                                        onChange={(e) => setConfirmedEndDate(e.target.value)}
-                                        className="bg-transparent border-none text-[9px] font-black text-slate-700 outline-none flex-1 px-0"
+                                        onChange={(val) => setConfirmedEndDate(val)}
+                                        className="h-full border-none !bg-transparent !p-0 text-[10px]"
                                     />
                                 </div>
                             )}
@@ -1206,6 +1203,7 @@ function OrdersPageContent() {
                             <thead>
                                 <tr className="bg-slate-50/50 border-b border-slate-100">
                                     <th className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none whitespace-nowrap">Ngày tạo</th>
+                                    <th className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none whitespace-nowrap">Ngày lên đơn</th>
                                     <th className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none whitespace-nowrap">Khách hàng</th>
                                     {isGlobalRole && <th className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none whitespace-nowrap">Chi nhánh</th>}
                                     {(isGlobalRole || isManager) && <th className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none whitespace-nowrap">Nhân viên</th>}
@@ -1268,6 +1266,11 @@ function OrdersPageContent() {
                                                     </div>
                                                 </td>
                                                 <td className="px-2 py-1.5">
+                                                    <span className="text-[12px] font-bold text-slate-700 leading-tight whitespace-nowrap">
+                                                        {formatDate(order.orderDate)}
+                                                    </span>
+                                                </td>
+                                                <td className="px-2 py-1.5">
                                                     <div className="flex flex-col gap-0.5">
                                                         <div className="flex items-center gap-1.5">
                                                             <span className="text-[12px] font-black text-slate-800 leading-none whitespace-nowrap">{order.customerName}</span>
@@ -1276,6 +1279,18 @@ function OrdersPageContent() {
                                                                 {order.items?.some((item: any) => item.isBelowMin) && (
                                                                     <span className="px-1 py-[0.5px] rounded text-[8px] font-black bg-amber-50 text-amber-600 border border-amber-100 whitespace-nowrap" title="Bán dưới giá Min">
                                                                         Min
+                                                                    </span>
+                                                                )}
+                                                                {order.isUpgrade && (
+                                                                    <span className="px-1.5 py-[1px] rounded text-[9px] font-semibold bg-rose-50/80 text-rose-600 border border-rose-200 whitespace-nowrap flex items-center gap-1 shadow-sm" title={`Nâng cấp từ đơn: ${order.oldOrderCode || order.oldOrderId?.split('-')[0] || '...'}`}>
+                                                                        <RefreshCw size={10} className="text-rose-500" />
+                                                                        Nâng cấp từ { (order.oldOrderCode || order.oldOrderId?.split('-')[0]) ? `#${order.oldOrderCode || order.oldOrderId?.split('-')[0]}` : ''}
+                                                                    </span>
+                                                                )}
+                                                                {order.upgradedFrom && order.upgradedFrom.length > 0 && (
+                                                                    <span className="px-1.5 py-[1px] rounded text-[9px] font-semibold bg-purple-50/80 text-purple-600 border border-purple-200 whitespace-nowrap flex items-center gap-1 shadow-sm" title={`Đã nâng cấp lên đơn: ${order.upgradedFrom[0].orderCode || order.upgradedFrom[0].id.split('-')[0]}`}>
+                                                                        <ArrowUpRight size={10} className="text-purple-500" />
+                                                                        Đã lên { (order.upgradedFrom[0].orderCode || order.upgradedFrom[0].id.split('-')[0]) ? `#${order.upgradedFrom[0].orderCode || order.upgradedFrom[0].id.split('-')[0]}` : ''}
                                                                     </span>
                                                                 )}
                                                                 {isOrderCreatedByUser(order) && (
@@ -1326,6 +1341,11 @@ function OrdersPageContent() {
 
                                                 <td className="px-2 py-1.5">
                                                     <div className="flex flex-wrap gap-1">
+                                                        {order.isUpgrade && (
+                                                            <span className="text-[10px] font-bold text-rose-600 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded whitespace-nowrap italic italic-faint">
+                                                                Từ: {order.oldOrderProductName || 'SP cũ'}
+                                                            </span>
+                                                        )}
                                                         {order.items?.map((item: any, idx: number) => (
                                                             <span key={idx} className="text-[10px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded whitespace-nowrap">
                                                                 {item.product?.name || 'SP'} x{item.quantity}

@@ -131,4 +131,17 @@ export interface FullOrder {
         employee?: Employee;
     };
     images?: string[];
+    isUpgrade?: boolean;
+    oldOrderProductName?: string;
+    oldOrderAmount?: number;
+    oldOrderDate?: string;
+    oldOrderCustomerName?: string;
+    oldOrderCustomerPhone?: string;
+    oldOrderCustomerAddress?: string;
+    oldOrderProvinceId?: string;
+    oldOrderWardId?: string;
+    oldOrderCustomerCardNumber?: string;
+    oldOrderCustomerCardIssueDate?: string;
+    oldOrderId?: string;
+    oldOrderCode?: string;
 }

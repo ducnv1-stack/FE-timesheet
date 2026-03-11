@@ -13,6 +13,7 @@ import {
     ChevronRight,
     ChevronDown,
     ShoppingBag,
+    ShoppingCart,
     ScrollText,
     Users,
     Building2,
@@ -87,6 +88,13 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     icon: PlusCircle,
                     href: '/orders/new',
                     active: pathname === '/orders/new',
+                    roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'SALE', 'ADMIN']
+                },
+                {
+                    label: 'Nâng cấp sản phẩm',
+                    icon: ShoppingCart,
+                    href: '/orders/upgrade',
+                    active: pathname === '/orders/upgrade',
                     roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'SALE', 'ADMIN']
                 },
                 {

@@ -9,9 +9,11 @@ interface ItemGridProps {
     items: OrderItem[];
     products: Product[];
     onChange: (items: OrderItem[]) => void;
+    isUpgrade?: boolean;
+    oldOrderAmount?: number;
 }
 
-export default function ItemGrid({ items, products, onChange }: ItemGridProps) {
+export default function ItemGrid({ items, products, onChange, isUpgrade, oldOrderAmount }: ItemGridProps) {
     const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const addItem = () => {
@@ -51,7 +53,8 @@ export default function ItemGrid({ items, products, onChange }: ItemGridProps) {
                     <tbody className="divide-y-2 divide-slate-800">
                         {items.map((item, index) => {
                             const selectedProduct = products.find(p => p.id === item.productId);
-                            const isBelowMin = selectedProduct && item.unitPrice < selectedProduct.minPrice;
+                            const effectivePrice = Number(item.unitPrice) + (isUpgrade ? Number(oldOrderAmount || 0) : 0);
+                            const isBelowMin = selectedProduct && effectivePrice < selectedProduct.minPrice;
 
                             // Calculate Commission
                             let commissionPercent = 0;
@@ -68,7 +71,7 @@ export default function ItemGrid({ items, products, onChange }: ItemGridProps) {
 
                             if (isHighEnd && bonusRules) {
                                 const applicableRules = (bonusRules as any[])
-                                    .filter(rule => Number(item.unitPrice) >= Number(rule.minSellPrice || rule.min_sell_price))
+                                    .filter(rule => Number(effectivePrice) >= Number(rule.minSellPrice || rule.min_sell_price))
                                     .sort((a, b) => Number(b.minSellPrice || b.min_sell_price) - Number(a.minSellPrice || a.min_sell_price));
 
                                 if (applicableRules.length > 0) {

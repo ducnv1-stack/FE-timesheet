@@ -1,6 +1,6 @@
 "use client";
 
-import { Printer, X, Edit3, Gift } from 'lucide-react';
+import { Printer, X, Edit3, Gift, ArrowUpCircle } from 'lucide-react';
 import { formatCurrency, cn } from '@/lib/utils';
 import InvoicePaper from './InvoicePaper';
 import { useEffect, useState } from 'react';
@@ -54,17 +54,29 @@ export default function OrderInvoiceView({ order, onBack }: OrderInvoiceViewProp
     return (
         <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-300 print:shadow-none print:border-none print:rounded-none print:overflow-visible">
             {/* Action Bar */}
-            <div className="bg-slate-900 px-4 py-2.5 flex items-center justify-between no-print">
-                <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 bg-rose-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-rose-900/20">
-                        <Printer size={16} />
+            <div className="bg-slate-900 px-3 md:px-4 py-2.5 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-0 no-print rounded-t-2xl">
+                <div className="flex items-center justify-between w-full md:w-auto">
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 bg-rose-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-rose-900/20 shrink-0">
+                            <Printer size={16} />
+                        </div>
+                        <div>
+                            <h3 className="text-white font-bold text-xs">Xem chi tiết hóa đơn</h3>
+                            <p className="text-slate-400 text-[9px] uppercase font-bold tracking-wider">#{order.id.substring(0, 8)}</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3 className="text-white font-bold text-xs">Xem chi tiết hóa đơn</h3>
-                        <p className="text-slate-400 text-[9px] uppercase font-bold tracking-wider">#{order.id.substring(0, 8)}</p>
-                    </div>
+                    {/* Mode X ra đây trên mobile */}
+                    {onBack && (
+                        <button
+                            onClick={onBack}
+                            className="w-8 h-8 flex md:hidden items-center justify-center bg-white/10 hover:bg-rose-600 text-white rounded-lg transition-all cursor-pointer shrink-0"
+                        >
+                            <X size={16} />
+                        </button>
+                    )}
                 </div>
-                <div className="flex items-center gap-2">
+                
+                <div className="flex flex-wrap items-center justify-center md:justify-end gap-2 w-full md:w-auto">
                     {(() => {
                         const storedUser = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
                         const user = storedUser ? JSON.parse(storedUser) : null;
@@ -72,36 +84,46 @@ export default function OrderInvoiceView({ order, onBack }: OrderInvoiceViewProp
                         if (userRole === 'DRIVER' || userRole === 'DIRECTOR' || userRole === 'DELIVERY_STAFF') return null;
 
                         const canEditConfirmed = ['ADMIN', 'DIRECTOR', 'MANAGER', 'CHIEF_ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'ACCOUNTANT'].includes(userRole);
-                        if (order.isPaymentConfirmed && !canEditConfirmed) {
-                            return (
-                                <button
-                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-300 text-slate-500 rounded-lg text-[11px] font-bold cursor-not-allowed"
-                                    title="Đơn hàng đã được xác nhận, bạn không có quyền sửa."
-                                >
-                                    <Edit3 size={13} /> Sửa hóa đơn
-                                </button>
-                            );
-                        }
-
+                        
                         return (
-                            <button
-                                onClick={() => router.push(`/orders/edit/${order.id}`)}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[11px] font-bold transition-all active:scale-95 cursor-pointer"
-                            >
-                                <Edit3 size={13} /> Sửa hóa đơn
-                            </button>
+                            <>
+                                {(!order.isUpgrade) && (
+                                    <button
+                                        onClick={() => router.push(`/orders/upgrade?from=${order.id}`)}
+                                        className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg text-[11px] font-bold transition-all active:scale-95 cursor-pointer shadow-sm flex-1 md:flex-none whitespace-nowrap"
+                                    >
+                                        <ArrowUpCircle size={13} /> Nâng cấp đơn
+                                    </button>
+                                )}
+
+                                {order.isPaymentConfirmed && !canEditConfirmed ? (
+                                    <button
+                                        className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-slate-300 text-slate-500 rounded-lg text-[11px] font-bold cursor-not-allowed flex-1 md:flex-none whitespace-nowrap"
+                                        title="Đơn hàng đã được xác nhận, bạn không có quyền sửa."
+                                    >
+                                        <Edit3 size={13} /> Sửa hóa đơn
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => router.push(`/orders/edit/${order.id}`)}
+                                        className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[11px] font-bold transition-all active:scale-95 cursor-pointer flex-1 md:flex-none whitespace-nowrap"
+                                    >
+                                        <Edit3 size={13} /> Sửa hóa đơn
+                                    </button>
+                                )}
+                            </>
                         );
                     })()}
                     <button
                         onClick={() => window.print()}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-[11px] font-bold transition-all active:scale-95 cursor-pointer"
+                        className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-[11px] font-bold transition-all active:scale-95 cursor-pointer flex-1 md:flex-none whitespace-nowrap"
                     >
                         <Printer size={13} /> In hóa đơn
                     </button>
                     {onBack && (
                         <button
                             onClick={onBack}
-                            className="w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-rose-600 text-white rounded-lg transition-all cursor-pointer"
+                            className="hidden md:flex w-8 h-8 items-center justify-center bg-white/10 hover:bg-rose-600 text-white rounded-lg transition-all cursor-pointer shrink-0"
                         >
                             <X size={16} />
                         </button>

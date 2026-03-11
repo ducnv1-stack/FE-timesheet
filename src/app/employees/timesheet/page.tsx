@@ -14,12 +14,19 @@ import {
     ArrowLeft,
     Briefcase,
     RotateCcw,
-    X
+    X,
+    Settings,
+    Plus,
+    Pencil,
+    Trash2,
+    Save,
+    Banknote
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/components/ui/toast';
+import SalarySettingsTab from '@/components/timesheet/SalarySettingsTab';
 
-type ActiveTab = 'MY' | 'EMPLOYEES';
+type ActiveTab = 'MY' | 'EMPLOYEES' | 'SETTINGS' | 'SALARY_SETTINGS';
 type ViewMode = 'LIST' | 'DETAIL'; // LIST is summary, DETAIL is individual daily view
 
 export default function TimesheetPage() {
@@ -35,11 +42,20 @@ export default function TimesheetPage() {
     const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
     const { error: toastError } = useToast();
 
-    // Filters
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedBranch, setSelectedBranch] = useState('');
     const [selectedPosition, setSelectedPosition] = useState('');
     const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+
+    // Settings tab state
+    const [shifts, setShifts] = useState<any[]>([]);
+    const [showShiftForm, setShowShiftForm] = useState(false);
+    const [editingShift, setEditingShift] = useState<any>(null);
+    const [shiftForm, setShiftForm] = useState({
+        branchId: '', name: '', startTime: '08:00', endTime: '17:30',
+        breakMinutes: 0, lateThreshold: 15, lateSeriousThreshold: 30, earlyLeaveThreshold: 15
+    });
+    const [savingShift, setSavingShift] = useState(false);
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -102,6 +118,8 @@ export default function TimesheetPage() {
             } else if (selectedEmployee) {
                 fetchDetail();
             }
+        } else if (activeTab === 'SETTINGS') {
+            fetchShifts();
         } else {
             fetchMyDetail();
         }
@@ -198,7 +216,75 @@ export default function TimesheetPage() {
 
     const roleCode = currentUser?.role?.code;
     const canViewOthers = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'MANAGER', 'ADMIN'].includes(roleCode);
+    const canManageSettings = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER', 'ADMIN'].includes(roleCode);
     const isManager = roleCode === 'MANAGER';
+
+    // ========== SHIFT CRUD ==========
+    const fetchShifts = async () => {
+        try {
+            const res = await fetch(`${API_URL}/attendance/shifts`);
+            const data = await res.json();
+            setShifts(data);
+        } catch (error) { }
+    };
+
+    const resetShiftForm = () => {
+        setShiftForm({ branchId: '', name: '', startTime: '08:00', endTime: '17:30', breakMinutes: 0, lateThreshold: 15, lateSeriousThreshold: 30, earlyLeaveThreshold: 15 });
+        setEditingShift(null);
+        setShowShiftForm(false);
+    };
+
+    const openEditShift = (shift: any) => {
+        setShiftForm({
+            branchId: shift.branchId, name: shift.name, startTime: shift.startTime, endTime: shift.endTime,
+            breakMinutes: shift.breakMinutes, lateThreshold: shift.lateThreshold,
+            lateSeriousThreshold: shift.lateSeriousThreshold, earlyLeaveThreshold: shift.earlyLeaveThreshold
+        });
+        setEditingShift(shift);
+        setShowShiftForm(true);
+    };
+
+    const handleSaveShift = async () => {
+        if (!shiftForm.branchId || !shiftForm.name) return;
+        setSavingShift(true);
+        try {
+            const url = editingShift
+                ? `${API_URL}/attendance/shifts/${editingShift.id}`
+                : `${API_URL}/attendance/shifts`;
+            const method = editingShift ? 'PATCH' : 'POST';
+            await fetch(url, {
+                method, headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(shiftForm)
+            });
+            resetShiftForm();
+            fetchShifts();
+        } catch (error) {
+            toastError('Lỗi khi lưu ca làm việc');
+        } finally { setSavingShift(false); }
+    };
+
+    const handleDeleteShift = async (id: string) => {
+        if (!confirm('Bạn có chắc muốn xóa ca làm việc này?')) return;
+        try {
+            const res = await fetch(`${API_URL}/attendance/shifts/${id}`, { method: 'DELETE' });
+            if (!res.ok) {
+                const err = await res.json();
+                toastError(err.message || 'Không thể xóa');
+                return;
+            }
+            fetchShifts();
+        } catch (error) { toastError('Lỗi khi xóa'); }
+    };
+
+    const handleToggleShift = async (shift: any) => {
+        try {
+            await fetch(`${API_URL}/attendance/shifts/${shift.id}`, {
+                method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isActive: !shift.isActive })
+            });
+            fetchShifts();
+        } catch (error) { toastError('Lỗi khi cập nhật'); }
+    };
 
     const currentStats = {
         totalWorkDays: detailData.filter(d => d.checkInTime).length,
@@ -317,6 +403,40 @@ export default function TimesheetPage() {
                                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-600"></div>
                             )}
                         </button>
+                        {canManageSettings && (
+                            <>
+                                <button
+                                    onClick={() => setActiveTab('SETTINGS')}
+                                    className={cn(
+                                        "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5",
+                                        activeTab === 'SETTINGS'
+                                            ? "text-rose-600 bg-rose-50 cursor-pointer font-black"
+                                            : "text-slate-600 hover:bg-slate-50 cursor-pointer"
+                                    )}
+                                >
+                                    <Settings size={13} />
+                                    <span className="uppercase tracking-wider">Cài đặt Ca</span>
+                                    {activeTab === 'SETTINGS' && (
+                                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-600"></div>
+                                    )}
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('SALARY_SETTINGS')}
+                                    className={cn(
+                                        "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5",
+                                        activeTab === 'SALARY_SETTINGS'
+                                            ? "text-rose-600 bg-rose-50 cursor-pointer font-black"
+                                            : "text-slate-600 hover:bg-slate-50 cursor-pointer"
+                                    )}
+                                >
+                                    <Banknote size={13} />
+                                    <span className="uppercase tracking-wider">Cài đặt Lương</span>
+                                    {activeTab === 'SALARY_SETTINGS' && (
+                                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-600"></div>
+                                    )}
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
             )}
@@ -478,7 +598,7 @@ export default function TimesheetPage() {
                         </table>
                     </div>
                 </div>
-            ) : (
+            ) : (activeTab === 'MY' || (activeTab === 'EMPLOYEES' && viewMode === 'DETAIL')) ? (
                 <>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                         <StatCard label="Ngày công" value={currentStats.totalWorkDays} icon={CheckCircle2} color="text-emerald-600" bg="bg-emerald-50" />
@@ -565,6 +685,168 @@ export default function TimesheetPage() {
                         </div>
                     </div>
                 </>
+            ) : null}
+
+            {/* ========== SETTINGS TAB ========== */}
+            {activeTab === 'SETTINGS' && (
+                <div className="space-y-4">
+                    {/* Header + Add Button */}
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h2 className="text-lg font-black text-slate-800 uppercase tracking-tight flex items-center gap-2">
+                                <Settings size={18} className="text-rose-600" />
+                                Quản lý ca làm việc
+                            </h2>
+                            <p className="text-[10px] text-slate-500 font-medium mt-0.5">Cấu hình giờ vào/ra, ngưỡng muộn/sớm cho từng chi nhánh</p>
+                        </div>
+                        <button
+                            onClick={() => { resetShiftForm(); setShowShiftForm(true); }}
+                            className="flex items-center gap-1.5 px-4 py-2 bg-rose-600 text-white rounded-xl text-[11px] font-black uppercase tracking-wider hover:bg-rose-700 transition-all shadow-lg shadow-rose-200 cursor-pointer"
+                        >
+                            <Plus size={14} /> Thêm ca
+                        </button>
+                    </div>
+
+                    {/* Add/Edit Form */}
+                    {showShiftForm && (
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 space-y-3 animate-in slide-in-from-top-2 duration-300">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-sm font-black text-slate-800">{editingShift ? 'Sửa ca làm việc' : 'Thêm ca làm việc mới'}</h3>
+                                <button onClick={resetShiftForm} className="p-1 hover:bg-slate-100 rounded-lg cursor-pointer"><X size={16} /></button>
+                            </div>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <div>
+                                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Chi nhánh *</label>
+                                    <select value={shiftForm.branchId} onChange={e => setShiftForm({...shiftForm, branchId: e.target.value})}
+                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100">
+                                        <option value="">Chọn chi nhánh</option>
+                                        {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Tên ca *</label>
+                                    <input value={shiftForm.name} onChange={e => setShiftForm({...shiftForm, name: e.target.value})}
+                                        placeholder="VD: Ca hành chính" className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100" />
+                                </div>
+                                <div>
+                                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Giờ vào</label>
+                                    <input type="time" value={shiftForm.startTime} onChange={e => setShiftForm({...shiftForm, startTime: e.target.value})}
+                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100" />
+                                </div>
+                                <div>
+                                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Giờ ra</label>
+                                    <input type="time" value={shiftForm.endTime} onChange={e => setShiftForm({...shiftForm, endTime: e.target.value})}
+                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100" />
+                                </div>
+                                <div>
+                                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Nghỉ giữa ca (phút)</label>
+                                    <input type="number" value={shiftForm.breakMinutes} onChange={e => setShiftForm({...shiftForm, breakMinutes: parseInt(e.target.value) || 0})}
+                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100" />
+                                </div>
+                                <div>
+                                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Muộn (phút)</label>
+                                    <input type="number" value={shiftForm.lateThreshold} onChange={e => setShiftForm({...shiftForm, lateThreshold: parseInt(e.target.value) || 0})}
+                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100" />
+                                </div>
+                                <div>
+                                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Muộn nghiêm trọng (phút)</label>
+                                    <input type="number" value={shiftForm.lateSeriousThreshold} onChange={e => setShiftForm({...shiftForm, lateSeriousThreshold: parseInt(e.target.value) || 0})}
+                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100" />
+                                </div>
+                                <div>
+                                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Về sớm (phút)</label>
+                                    <input type="number" value={shiftForm.earlyLeaveThreshold} onChange={e => setShiftForm({...shiftForm, earlyLeaveThreshold: parseInt(e.target.value) || 0})}
+                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100" />
+                                </div>
+                            </div>
+                            <div className="flex justify-end gap-2 pt-2">
+                                <button onClick={resetShiftForm} className="px-4 py-2 text-[11px] font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition-all cursor-pointer">Hủy</button>
+                                <button onClick={handleSaveShift} disabled={savingShift || !shiftForm.branchId || !shiftForm.name}
+                                    className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 text-white rounded-lg text-[11px] font-black uppercase tracking-wider hover:bg-emerald-700 transition-all disabled:opacity-50 cursor-pointer">
+                                    <Save size={13} /> {savingShift ? 'Đang lưu...' : (editingShift ? 'Cập nhật' : 'Tạo mới')}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Shifts Table */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-slate-50/50 border-b border-slate-100">
+                                        <th className="px-4 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">STT</th>
+                                        <th className="px-4 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest">Chi nhánh</th>
+                                        <th className="px-4 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest">Tên ca</th>
+                                        <th className="px-4 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Giờ vào</th>
+                                        <th className="px-4 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Giờ ra</th>
+                                        <th className="px-4 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Nghỉ</th>
+                                        <th className="px-4 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Muộn</th>
+                                        <th className="px-4 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Muộn NT</th>
+                                        <th className="px-4 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Về sớm</th>
+                                        <th className="px-4 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Trạng thái</th>
+                                        <th className="px-4 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50">
+                                    {shifts.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={11} className="px-6 py-16 text-center text-slate-400 font-medium italic">
+                                                Chưa có ca làm việc nào. Nhấn "Thêm ca" để tạo mới.
+                                            </td>
+                                        </tr>
+                                    ) : shifts.map((shift, i) => (
+                                        <tr key={shift.id} className="hover:bg-slate-50/50 transition-colors group">
+                                            <td className="px-4 py-3 text-center"><span className="text-[11px] font-bold text-slate-400">{i + 1}</span></td>
+                                            <td className="px-4 py-3"><span className="text-[12px] font-bold text-slate-700">{shift.branch?.name}</span></td>
+                                            <td className="px-4 py-3"><span className="text-[12px] font-black text-slate-800">{shift.name}</span></td>
+                                            <td className="px-4 py-3 text-center"><span className="text-[13px] font-black text-emerald-600">{shift.startTime}</span></td>
+                                            <td className="px-4 py-3 text-center"><span className="text-[13px] font-black text-rose-600">{shift.endTime}</span></td>
+                                            <td className="px-4 py-3 text-center"><span className="text-[11px] font-bold text-slate-500">{shift.breakMinutes}p</span></td>
+                                            <td className="px-4 py-3 text-center"><span className="text-[11px] font-bold text-amber-600">{shift.lateThreshold}p</span></td>
+                                            <td className="px-4 py-3 text-center"><span className="text-[11px] font-bold text-rose-600">{shift.lateSeriousThreshold}p</span></td>
+                                            <td className="px-4 py-3 text-center"><span className="text-[11px] font-bold text-blue-600">{shift.earlyLeaveThreshold}p</span></td>
+                                            <td className="px-4 py-3 text-center">
+                                                <button onClick={() => handleToggleShift(shift)}
+                                                    className={cn("px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-tighter border cursor-pointer transition-all",
+                                                        shift.isActive ? "bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100" : "bg-slate-50 text-slate-400 border-slate-100 hover:bg-slate-100")}>
+                                                    {shift.isActive ? 'Hoạt động' : 'Tắt'}
+                                                </button>
+                                            </td>
+                                            <td className="px-4 py-3 text-center">
+                                                <div className="flex items-center justify-center gap-1">
+                                                    <button onClick={() => openEditShift(shift)}
+                                                        className="p-1.5 hover:bg-blue-50 text-blue-500 rounded-lg transition-all cursor-pointer" title="Sửa">
+                                                        <Pencil size={13} />
+                                                    </button>
+                                                    <button onClick={() => handleDeleteShift(shift.id)}
+                                                        className="p-1.5 hover:bg-rose-50 text-rose-500 rounded-lg transition-all cursor-pointer" title="Xóa">
+                                                        <Trash2 size={13} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'SALARY_SETTINGS' && canManageSettings && (
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h2 className="text-lg font-black text-slate-800 uppercase tracking-tight flex items-center gap-2">
+                                <Banknote size={18} className="text-rose-600" />
+                                Quản lý Lương Cơ Bản
+                            </h2>
+                            <p className="text-[10px] text-slate-500 font-medium mt-0.5">Cấu hình mức lương chuẩn cho Chức vụ và Ngoại lệ riêng cho Cá nhân</p>
+                        </div>
+                    </div>
+                    <SalarySettingsTab />
+                </div>
             )}
         </div>
     );

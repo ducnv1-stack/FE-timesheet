@@ -14,8 +14,9 @@ import {
     ZoomIn, ZoomOut, Maximize2, ChevronLeft, ChevronRight,
     MapPin, Trophy
 } from 'lucide-react';
-import { formatCurrency, formatDate } from '@/lib/utils'; // Ensure this exists or reimplement locally if simpler
+import { formatCurrency, formatDate } from '@/lib/utils';
 import KPIPeriodTrend from '@/components/dashboard/KPIPeriodTrend';
+import FixedDatePicker from '@/components/ui/FixedDatePicker';
 
 const formatLocalDate = (date: Date): string => {
     const y = date.getFullYear();
@@ -182,26 +183,17 @@ export default function DashboardPage() {
 
                     <div className="h-8 w-[1px] bg-slate-200 hidden lg:block"></div>
 
-                    {/* Custom Range Picker */}
-                    <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-2xl border border-slate-100 group focus-within:border-rose-200 transition-colors h-10">
-                        <input
-                            type="date"
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                            onClick={(e) => {
-                                if ('showPicker' in e.currentTarget) (e.currentTarget as any).showPicker();
-                            }}
-                            className="bg-transparent border-none text-[10px] font-black text-slate-700 outline-none px-2 cursor-pointer focus:text-rose-600"
+                    <div className="flex items-center gap-1.5 bg-slate-50 p-1 rounded-2xl border border-slate-100 group focus-within:border-rose-200 transition-colors h-10">
+                        <FixedDatePicker 
+                            value={startDate} 
+                            onChange={setStartDate} 
+                            className="w-[110px] border-none !p-0 text-[11px]"
                         />
-                        <ArrowRight size={12} className="text-slate-300" />
-                        <input
-                            type="date"
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                            onClick={(e) => {
-                                if ('showPicker' in e.currentTarget) (e.currentTarget as any).showPicker();
-                            }}
-                            className="bg-transparent border-none text-[10px] font-black text-slate-700 outline-none px-2 cursor-pointer focus:text-rose-600"
+                        <ArrowRight size={12} className="text-slate-300 shrink-0" />
+                        <FixedDatePicker 
+                            value={endDate} 
+                            onChange={setEndDate} 
+                            className="w-[110px] border-none !p-0 text-[11px]"
                         />
                     </div>
 
@@ -2464,7 +2456,7 @@ function ViolatedOrdersDialog({ branch, onClose, userId, startDate, endDate }: a
                                         </div>
                                         <div className="text-right">
                                             <p className="text-sm font-black text-slate-700">{formatCurrency(order.totalAmount)}</p>
-                                            <p className="text-[9px] text-slate-400 font-bold uppercase">{formatDate(order.createdAt)}</p>
+                                            <p className="text-[9px] text-slate-400 font-bold uppercase">{formatDate(order.orderDate)}</p>
                                         </div>
                                     </div>
                                     <div className="bg-white rounded-xl border border-slate-100 p-3 space-y-2">

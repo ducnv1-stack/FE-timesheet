@@ -203,6 +203,36 @@ export default function InvoicePaper({ order, className, type, isCreate, scale, 
                 </div>
             </div>
 
+            {/* Upgrade Info Section */}
+            {order.isUpgrade && (
+                <div className="mb-6 bg-rose-50 border-2 border-rose-200 rounded-xl p-4 animate-in slide-in-from-top-2 duration-500">
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="px-2 py-0.5 bg-rose-600 text-white text-[10px] font-black rounded uppercase">Đơn hàng nâng cấp</span>
+                        {(order.oldOrderCode || order.oldOrderId) && (
+                            <span className="text-xs font-bold text-rose-900">Gốc: #{order.oldOrderCode || order.oldOrderId?.split('-')[0]}</span>
+                        )}
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 text-xs">
+                        <div className="flex justify-between border-b border-rose-100 py-1">
+                            <span className="text-slate-500 font-medium">Sản phẩm cũ:</span>
+                            <span className="font-bold text-slate-800">{order.oldOrderProductName || '---'}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-rose-100 py-1">
+                            <span className="text-slate-500 font-medium">Giá trị cũ:</span>
+                            <span className="font-bold text-rose-600">{formatCurrency(Number(order.oldOrderAmount || 0))}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-rose-100 py-1">
+                            <span className="text-slate-500 font-medium">Ngày đơn cũ:</span>
+                            <span className="font-bold text-slate-800">{order.oldOrderDate ? formatDate(order.oldOrderDate) : '---'}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-rose-100 py-1">
+                            <span className="text-slate-500 font-medium">Khách hàng cũ:</span>
+                            <span className="font-bold text-slate-800">{order.oldOrderCustomerName || '---'}</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Items Table */}
             <div className="bg-white border-2 border-slate-800 overflow-hidden shadow-lg mb-6">
                 <div className="bg-rose-50 border-b-2 border-slate-800 p-2 text-center">

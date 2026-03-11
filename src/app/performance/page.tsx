@@ -35,13 +35,18 @@ interface PerformanceRecord {
     hotBonus: number;         // New
     commission: number;       // New
     shippingFee: number;      // New
-    baseSalary: number;       // New
-    netIncome: number;        // New
+    diligentSalary: number;    // New
+    allowance: number;         // New
+    baseSalary: number;        // New
+    netIncome: number;         // New
     isPenalty: boolean;
     isClemency: boolean;
     position: string;         // New
     department: string | null; // New
     branchId: string;         // New
+    actualWorkingDays: number;
+    effectiveStandardDays: number;
+    effectiveBaseSalary: number;
     status: string;           // New
     avatarUrl: string | null; // New
 }
@@ -240,6 +245,9 @@ export default function PerformancePage() {
                 'Mốc doanh số': r.milestone,
                 'Thưởng mốc (gốc)': r.baseReward,
                 'Thưởng mốc (thực tế)': r.actualReward,
+                'Số công': `${r.actualWorkingDays}/${r.effectiveStandardDays}`,
+                'Chuyên cần': r.diligentSalary,
+                'Phụ cấp': r.allowance,
                 'Lương cơ bản': r.baseSalary,
                 'Thực nhận': r.netIncome,
                 'Trạng thái': r.isClemency ? 'Khoan hồng' : (r.isPenalty ? 'Bị phạt' : 'Bình thường')
@@ -250,7 +258,7 @@ export default function PerformancePage() {
         const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
 
         if (!isManager) {
-            const currencyCols = [4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15];
+            const currencyCols = [4, 5, 6, 7, 8, 9, 13, 16, 17, 18, 19];
             for (let R = range.s.r + 1; R <= range.e.r; ++R) {
                 currencyCols.forEach(C => {
                     const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
@@ -263,7 +271,7 @@ export default function PerformancePage() {
             ws['!cols'] = [
                 { wch: 20 }, { wch: 15 }, { wch: 15 }, { wch: 12 }, { wch: 15 },
                 { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 12 }, { wch: 15 }, { wch: 12 },
-                { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }
+                { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }
             ];
         } else {
             const currencyCols = [4, 5, 6];
@@ -420,6 +428,8 @@ export default function PerformancePage() {
                         shippingFee: acc.shippingFee + (Number(r.shippingFee) || 0),
                         lowPriceValue: acc.lowPriceValue + (Number(r.lowPriceValue) || 0),
                         baseSalary: acc.baseSalary + (Number(r.baseSalary) || 0),
+                        diligentSalary: acc.diligentSalary + (Number(r.diligentSalary) || 0),
+                        allowance: acc.allowance + (Number(r.allowance) || 0),
                         netIncome: acc.netIncome + (Number(r.netIncome) || 0),
                     }), {
                         totalOrders: 0,
@@ -430,10 +440,12 @@ export default function PerformancePage() {
                         shippingFee: 0,
                         lowPriceValue: 0,
                         baseSalary: 0,
+                        diligentSalary: 0,
+                        allowance: 0,
                         netIncome: 0
                     });
 
-                    const colCount = isManager ? 8 : 15;
+                    const colCount = isManager ? 8 : 16;
 
                     return (
                         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6">
@@ -455,6 +467,9 @@ export default function PerformancePage() {
                                             <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Đơn dưới Min</th>
                                             <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-center border-r border-slate-200">Tỷ lệ</th>
                                             {!isManager && <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Mốc thưởng</th>}
+                                            {!isManager && <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-center border-r border-slate-200">Số công</th>}
+                                            {!isManager && <th className="px-2 py-2 text-[10px] font-black text-amber-600 uppercase text-right border-r border-slate-200">Chuyên cần</th>}
+                                            {!isManager && <th className="px-2 py-2 text-[10px] font-black text-emerald-600 uppercase text-right border-r border-slate-200">Phụ cấp</th>}
                                             {!isManager && <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Lương CB</th>}
                                             {!isManager && <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Thực nhận</th>}
                                             {!isManager && <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-center">Trạng thái</th>}
@@ -541,6 +556,25 @@ export default function PerformancePage() {
                                                             )}
                                                         </td>
                                                     )}
+                                                    {!isManager && (
+                                                        <td className="px-2 py-2 text-center border-r border-slate-100 whitespace-nowrap">
+                                                            <div className="font-bold text-slate-700">
+                                                                {r.actualWorkingDays || 0} <span className="text-slate-400 text-[10px]">/ {r.effectiveStandardDays || 27}</span>
+                                                            </div>
+                                                            {r.effectiveBaseSalary > 0 && r.effectiveBaseSalary !== r.baseSalary && (
+                                                                <div className="text-[9px] text-rose-500 font-bold mt-0.5 line-through decoration-rose-300">
+                                                                    {formatCurrency(r.effectiveBaseSalary)}
+                                                                </div>
+                                                            )}
+                                                            {r.effectiveBaseSalary > 0 && r.effectiveBaseSalary === r.baseSalary && (
+                                                                <div className="text-[9px] text-slate-400 font-bold mt-0.5">
+                                                                    {formatCurrency(r.effectiveBaseSalary)}
+                                                                </div>
+                                                            )}
+                                                        </td>
+                                                    )}
+                                                    {!isManager && <td className="px-2 py-2 text-right font-medium text-amber-600 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.diligentSalary)}</td>}
+                                                    {!isManager && <td className="px-2 py-2 text-right font-medium text-emerald-600 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.allowance)}</td>}
                                                     {!isManager && <td className="px-2 py-2 text-right font-bold text-slate-700 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.baseSalary)}</td>}
                                                     {!isManager && (
                                                         <td className="px-2 py-2 text-right border-r border-slate-100">
@@ -599,6 +633,9 @@ export default function PerformancePage() {
                                                 <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 text-slate-500">{formatCurrency(totals.lowPriceValue)}</td>
                                                 <td className="px-2 py-3 border-r border-slate-200 bg-slate-100/30"></td>
                                                 {!isManager && <td className="px-2 py-3 border-r border-slate-200 bg-slate-100/30"></td>}
+                                                {!isManager && <td className="px-2 py-3 border-r border-slate-200 bg-slate-100/30"></td>}
+                                                {!isManager && <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 text-amber-600">{formatCurrency(totals.diligentSalary)}</td>}
+                                                {!isManager && <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 text-emerald-600">{formatCurrency(totals.allowance)}</td>}
                                                 {!isManager && <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 text-slate-700">{formatCurrency(totals.baseSalary)}</td>}
                                                 {!isManager && <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 text-emerald-700 bg-emerald-50/30">{formatCurrency(totals.netIncome)}</td>}
                                                 {!isManager && <td className="px-2 py-3 bg-slate-100/30"></td>}

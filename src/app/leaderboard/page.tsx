@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowUpRight, Award, Calendar, ChevronRight, Crown, DollarSign, Medal, Search, ShoppingBag, Trophy, Users, Building2, User as UserIcon, ChevronDown } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { cn } from '@/lib/utils';
+import FixedDatePicker from '@/components/ui/FixedDatePicker';
 
 function formatLocalDate(date: Date): string {
     const year = date.getFullYear();
@@ -133,32 +134,16 @@ export default function LeaderboardPage() {
                 {/* Filters */}
                 <div className="flex items-center gap-2 flex-wrap">
                     <div className="flex items-center gap-1.5 bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-sm shrink min-w-0 hover:border-rose-300 transition-colors">
-                        <Calendar
-                            size={14}
-                            className="text-slate-400 shrink-0 cursor-pointer"
-                            onClick={(e) => {
-                                const input = (e.currentTarget.parentElement as HTMLElement)?.querySelector('input');
-                                if (input && 'showPicker' in input) (input as any).showPicker();
-                            }}
-                        />
-                        <input
-                            type="date"
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                            onClick={(e) => {
-                                if ('showPicker' in e.currentTarget) (e.currentTarget as any).showPicker();
-                            }}
-                            className="text-[11px] font-bold border-none focus:ring-0 cursor-pointer p-0 bg-transparent text-slate-800 outline-none min-w-0 w-[95px]"
+                        <FixedDatePicker 
+                            value={startDate} 
+                            onChange={setStartDate} 
+                            className="w-[110px] border-none !p-0 text-[11px]"
                         />
                         <span className="text-slate-300">—</span>
-                        <input
-                            type="date"
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                            onClick={(e) => {
-                                if ('showPicker' in e.currentTarget) (e.currentTarget as any).showPicker();
-                            }}
-                            className="text-[11px] font-bold border-none focus:ring-0 cursor-pointer p-0 bg-transparent text-slate-800 outline-none min-w-0 w-[95px]"
+                        <FixedDatePicker 
+                            value={endDate} 
+                            onChange={setEndDate} 
+                            className="w-[110px] border-none !p-0 text-[11px]"
                         />
                     </div>
 

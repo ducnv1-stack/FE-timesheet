@@ -4,6 +4,7 @@ import { Plus, Trash2, CreditCard, Banknote, Image as ImageIcon, X, FolderOpen, 
 import { OrderPayment } from '@/types/order';
 import { formatCurrency, formatNumber, parseNumber, cn } from '@/lib/utils';
 import { useRef, useState } from 'react';
+import FixedDatePicker from '@/components/ui/FixedDatePicker';
 
 interface PaymentFormProps {
     payments: OrderPayment[];
@@ -116,11 +117,10 @@ export default function PaymentForm({ payments, totalOrderAmount, onChange, avai
 
                             {/* Row 2: Date & Amount stacked */}
                             <div className="grid grid-cols-2 gap-2">
-                                <input
-                                    type="date"
+                                <FixedDatePicker
                                     value={payment.paidAt}
-                                    onChange={(e) => updatePayment(index, 'paidAt', e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-rose-500 rounded p-1.5 text-[10px] cursor-pointer"
+                                    onChange={(val) => updatePayment(index, 'paidAt', val)}
+                                    className="!bg-slate-50 border border-slate-200 !rounded p-0 h-[30px] text-xs"
                                 />
                                 <input
                                     type="text"

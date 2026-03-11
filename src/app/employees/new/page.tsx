@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Save } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
+import FixedDatePicker from '@/components/ui/FixedDatePicker';
 
 interface Branch {
     id: string;
@@ -358,11 +359,10 @@ function FormField({
                     ))}
                 </select>
             ) : type === 'date' ? (
-                <input
-                    type="date"
+                <FixedDatePicker
                     value={value}
-                    onChange={(e) => onChange(e.target.value)}
-                    className="w-full px-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent cursor-pointer"
+                    onChange={(val) => onChange(val)}
+                    className="h-[34px] text-[11px]"
                 />
             ) : (
                 <input

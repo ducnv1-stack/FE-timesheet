@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
 import ConfirmModal from '@/components/ui/confirm-modal';
+import FixedDatePicker from '@/components/ui/FixedDatePicker';
 import { cn, formatDate } from '@/lib/utils';
 import imageCompression from 'browser-image-compression';
 
@@ -1089,11 +1090,10 @@ function InfoField({
                     )}
                     {type === 'date' && (
                         <div className="relative">
-                            <input
-                                type="date"
+                            <FixedDatePicker
                                 value={editValue || ''}
-                                onChange={(e) => onChange?.(e.target.value)}
-                                className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-100 rounded-xl focus:bg-white focus:border-rose-500 outline-none transition-all font-bold text-slate-900 text-xs cursor-pointer"
+                                onChange={(val) => onChange?.(val)}
+                                className="h-[38px] !rounded-xl text-xs font-bold"
                             />
                         </div>
                     )}
