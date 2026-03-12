@@ -143,43 +143,43 @@ export default function AttendancePage() {
         switch (state) {
             case 'INITIAL':
                 return (
-                    <button onClick={handleAction} disabled={loading} className={cn(baseClass, "bg-rose-600 hover:bg-rose-700 text-white")}>
+                    <button onClick={handleAction} disabled={loading} className={cn(baseClass, "bg-primary hover:bg-primary/90 text-white shadow-primary-light/50")}>
                         {loading ? <RefreshCcw className="animate-spin" size={32} /> : <MapPin size={32} />}
-                        <span className="text-xl font-bold">BẮT ĐẦU CHẤM CÔNG</span>
-                        <span className="text-sm opacity-80 uppercase">Vào ca làm việc</span>
+                        <span className="text-xl font-bold">Bắt đầu chấm công</span>
+                        <span className="text-sm opacity-80">Vào ca làm việc</span>
                     </button>
                 );
             case 'SUCCESS':
             case 'LATE':
                 return (
-                    <button onClick={handleAction} disabled={loading} className={cn(baseClass, "bg-emerald-600 hover:bg-emerald-700 text-white")}>
+                    <button onClick={handleAction} disabled={loading} className={cn(baseClass, "bg-accent hover:bg-accent/90 text-white shadow-accent/20")}>
                         {loading ? <RefreshCcw className="animate-spin" size={32} /> : <CheckCircle2 size={32} />}
-                        <span className="text-xl font-bold">ĐÃ CHECK-IN</span>
-                        <span className="text-sm opacity-80 uppercase">NHẤN ĐỂ CHECK-OUT KHI VỀ</span>
+                        <span className="text-xl font-bold">Đã check-in</span>
+                        <span className="text-sm opacity-80">Nhấn để check-out khi về</span>
                     </button>
                 );
             case 'RETRY':
                 return (
-                    <button onClick={handleAction} disabled={loading} className={cn(baseClass, "bg-amber-500 hover:bg-amber-600 text-white")}>
+                    <button onClick={handleAction} disabled={loading} className={cn(baseClass, "bg-warning hover:bg-warning/90 text-white shadow-warning/20")}>
                         {loading ? <RefreshCcw className="animate-spin" size={32} /> : <RefreshCcw size={32} />}
-                        <span className="text-xl font-bold uppercase">THỬ LẠI</span>
-                        <span className="text-sm opacity-80 uppercase">NGOÀI PHẠM VI CHO PHÉP</span>
+                        <span className="text-xl font-bold">Thử lại</span>
+                        <span className="text-sm opacity-80">Ngoài phạm vi cho phép</span>
                     </button>
                 );
             case 'LOCKED':
                 return (
                     <div className={cn(baseClass, "bg-slate-200 text-slate-500 cursor-not-allowed")}>
                         <AlertCircle size={32} strokeWidth={2.5} />
-                        <span className="text-xl font-bold">ĐÃ KHÓA CHẤM CÔNG</span>
-                        <span className="text-sm opacity-80 pointer-events-none">VƯỢT QUÁ SỐ LẦN THỬ GPS</span>
+                        <span className="text-xl font-bold">Đã khóa chấm công</span>
+                        <span className="text-sm opacity-80 pointer-events-none">Vượt quá số lần thử GPS</span>
                     </div>
                 );
             case 'FINISHED':
                 return (
-                    <div className={cn(baseClass, "bg-blue-600 text-white shadow-none opacity-80")}>
+                    <div className={cn(baseClass, "bg-indigo-600 text-white shadow-none opacity-80")}>
                         <CheckCircle2 size={32} strokeWidth={2.5} />
-                        <span className="text-xl font-bold">HOÀN THÀNH NGÀY CÔNG</span>
-                        <span className="text-sm opacity-80">HẸN GẶP LẠI VÀO NGÀY MAI!</span>
+                        <span className="text-xl font-bold">Hoàn thành ngày công</span>
+                        <span className="text-sm opacity-80">Hẹn gặp lại vào ngày mai!</span>
                     </div>
                 );
             default:
@@ -187,8 +187,8 @@ export default function AttendancePage() {
                     return (
                         <button onClick={() => { setGpsError(false); handleAction(); }} className={cn(baseClass, "bg-slate-800 hover:bg-slate-900 text-white animate-in zoom-in-95 duration-300")}>
                             <MapPin className="animate-pulse" size={32} />
-                            <span className="text-xl font-bold uppercase">BẬT GPS / THỬ LẠI</span>
-                            <span className="text-sm opacity-80 uppercase text-center px-4">Hệ thống cần vị trí để xác thực</span>
+                            <span className="text-xl font-bold">Bật GPS / thử lại</span>
+                            <span className="text-sm opacity-80 text-center px-4">Hệ thống cần vị trí để xác thực</span>
                         </button>
                     );
                 }
@@ -204,7 +204,7 @@ export default function AttendancePage() {
         <div className="max-w-md mx-auto p-4 space-y-6 pt-10">
             {/* User Info Header */}
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-rose-50 border border-rose-100 overflow-hidden shrink-0 flex items-center justify-center text-rose-600">
+                <div className="w-16 h-16 rounded-2xl bg-primary-light border border-primary/20 overflow-hidden shrink-0 flex items-center justify-center text-primary">
                     {(currentUser?.employee?.avatarUrl && !imageError) ? (
                         <img
                             src={getFullImageUrl(currentUser.employee.avatarUrl)!}
@@ -213,7 +213,7 @@ export default function AttendancePage() {
                             onError={() => setImageError(true)}
                         />
                     ) : (
-                        <div className="w-full h-full flex items-center justify-center text-rose-500 font-black text-xl uppercase">
+                        <div className="w-full h-full flex items-center justify-center text-primary font-black text-xl uppercase">
                             {currentUser?.employee?.fullName?.split(' ').pop()?.charAt(0) || <User size={32} />}
                         </div>
                     )}
@@ -230,7 +230,7 @@ export default function AttendancePage() {
             {/* Main Action Area */}
             <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-slate-50 space-y-8">
                 <div className="text-center space-y-2">
-                    <h1 className="text-2xl font-black text-slate-900 tracking-tight">CHẤM CÔNG GPS</h1>
+                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Chấm công GPS</h1>
                     <p className="text-slate-500 text-sm">Hệ thống tự động xác thực vị trí chi nhánh</p>
                 </div>
 
@@ -239,7 +239,7 @@ export default function AttendancePage() {
                 </div>
 
                 {errorMsg && (
-                    <div className="bg-rose-50 text-rose-600 p-4 rounded-2xl text-sm flex gap-3 animate-in fade-in slide-in-from-top-2">
+                    <div className="bg-primary-light/50 text-primary p-4 rounded-2xl text-sm flex gap-3 animate-in fade-in slide-in-from-top-2 border border-primary/10">
                         <AlertCircle className="shrink-0" size={18} />
                         <p className="font-medium leading-tight">{errorMsg}</p>
                     </div>
@@ -258,9 +258,9 @@ export default function AttendancePage() {
                         {todayData?.checkInStatus && (
                             <span className={cn(
                                 "text-[10px] font-bold px-2 py-0.5 rounded-full",
-                                todayData.checkInStatus === 'ON_TIME' ? "bg-emerald-100 text-emerald-600" : "bg-rose-100 text-rose-600"
+                                todayData.checkInStatus === 'ON_TIME' ? "bg-accent/10 text-accent" : "bg-primary-light text-primary"
                             )}>
-                                {todayData.checkInStatus === 'ON_TIME' ? 'ĐÚNG GIỜ' : 'MUỘN'}
+                                {todayData.checkInStatus === 'ON_TIME' ? 'Đúng giờ' : 'Muộn'}
                             </span>
                         )}
                     </div>
@@ -275,11 +275,11 @@ export default function AttendancePage() {
                         {todayData?.checkOutStatus && (
                             <span className={cn(
                                 "text-[10px] font-bold px-2 py-0.5 rounded-full",
-                                todayData.checkOutStatus === 'OVERTIME' ? "bg-blue-100 text-blue-600" :
-                                    todayData.checkOutStatus === 'ON_TIME' ? "bg-emerald-100 text-emerald-600" : "bg-amber-100 text-amber-600"
+                                todayData.checkOutStatus === 'OVERTIME' ? "bg-indigo-100 text-indigo-600" :
+                                    todayData.checkOutStatus === 'ON_TIME' ? "bg-accent/10 text-accent" : "bg-warning/10 text-warning"
                             )}>
-                                {todayData.checkOutStatus === 'OVERTIME' ? 'TĂNG CA' :
-                                    todayData.checkOutStatus === 'ON_TIME' ? 'ĐÚNG GIỜ' : 'VỀ SỚM'}
+                                {todayData.checkOutStatus === 'OVERTIME' ? 'Tăng ca' :
+                                    todayData.checkOutStatus === 'ON_TIME' ? 'Đúng giờ' : 'Về sớm'}
                             </span>
                         )}
                     </div>
@@ -287,12 +287,12 @@ export default function AttendancePage() {
             </div>
 
             {/* Note Section */}
-            <div className="bg-amber-50/50 rounded-2xl p-5 border border-amber-100/50">
-                <h3 className="text-amber-800 font-bold text-sm mb-2 flex items-center gap-2">
+            <div className="bg-warning/10 rounded-2xl p-5 border border-warning/20">
+                <h3 className="text-warning font-bold text-sm mb-2 flex items-center gap-2">
                     <AlertCircle size={16} />
                     Lưu ý quan trọng
                 </h3>
-                <ul className="text-amber-700/80 text-xs space-y-1.5 leading-relaxed font-medium">
+                <ul className="text-warning/80 text-xs space-y-1.5 leading-relaxed font-medium">
                     <li>• Vui lòng bật GPS và cho phép trình duyệt truy cập vị trí.</li>
                     <li>• Khoảng cách cho phép tối đa là 70 mét tính từ tâm chi nhánh.</li>
                     <li>• Nếu sai lệch GPS, hãy di chuyển ra nơi thoáng đãng và thử lại.</li>

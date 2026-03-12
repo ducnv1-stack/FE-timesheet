@@ -20,11 +20,13 @@ import {
     Pencil,
     Trash2,
     Save,
-    Banknote
+    Banknote,
+    Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/components/ui/toast';
 import SalarySettingsTab from '@/components/timesheet/SalarySettingsTab';
+import ConfirmModal from '@/components/ui/confirm-modal';
 
 type ActiveTab = 'MY' | 'EMPLOYEES' | 'SETTINGS' | 'SALARY_SETTINGS';
 type ViewMode = 'LIST' | 'DETAIL'; // LIST is summary, DETAIL is individual daily view
@@ -56,6 +58,20 @@ export default function TimesheetPage() {
         breakMinutes: 0, lateThreshold: 15, lateSeriousThreshold: 30, earlyLeaveThreshold: 15
     });
     const [savingShift, setSavingShift] = useState(false);
+
+    // Adjustment state
+    const [showAdjustModal, setShowAdjustModal] = useState(false);
+    const [adjustingRecord, setAdjustingRecord] = useState<any>(null);
+    const [savingAdjust, setSavingAdjust] = useState(false);
+    const [adjustForm, setAdjustForm] = useState({
+        checkInTime: '',
+        checkOutTime: '',
+        note: ''
+    });
+
+    // Delete confirmation state
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [shiftToDelete, setShiftToDelete] = useState<string | null>(null);
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -178,6 +194,96 @@ export default function TimesheetPage() {
         }
     };
 
+    const handleAdjust = (record: any) => {
+        setAdjustingRecord(record);
+        
+        const toLocalISO = (dateStr: string | null, fallbackDate: string) => {
+            const d = dateStr ? new Date(dateStr) : new Date(fallbackDate);
+            // Ép về giờ địa phương VN (+7)
+            const dateVN = new Date(d.getTime() + 7 * 3600000);
+            return dateVN.toISOString().slice(0, 16);
+        };
+
+        setAdjustForm({
+            checkInTime: toLocalISO(record.checkInTime, record.date),
+            checkOutTime: toLocalISO(record.checkOutTime, record.date),
+            note: ''
+        });
+        setShowAdjustModal(true);
+    };
+
+    const calculatePreview = () => {
+        if (!adjustingRecord || !adjustingRecord.shift) return null;
+        const shift = adjustingRecord.shift;
+        const { checkInTime, checkOutTime } = adjustForm;
+
+        let late = 0;
+        let early = 0;
+        let ot = 0;
+
+        // Ép tính toán dựa trên Target Date của bản ghi để tránh lệch ngày
+        const targetDate = new Date(adjustingRecord.date);
+        
+        const getMinutesFromStartOfDay = (isoStr: string) => {
+            const d = new Date(isoStr + ':00+07:00');
+            // Tính số phút từ 0h ngày hôm đó (theo giờ VN)
+            const dateVN = new Date(d.getTime() + 7 * 3600000);
+            return dateVN.getUTCHours() * 60 + dateVN.getUTCMinutes();
+        };
+
+        const [sh, sm] = shift.startTime.split(':').map(Number);
+        const shiftStartMins = sh * 60 + sm;
+        const [eh, em] = shift.endTime.split(':').map(Number);
+        const shiftEndMins = eh * 60 + em;
+
+        if (checkInTime) {
+            const inMins = getMinutesFromStartOfDay(checkInTime);
+            const diff = inMins - shiftStartMins;
+            if (diff > shift.lateThreshold) late = diff;
+        }
+
+        if (checkOutTime) {
+            const outMins = getMinutesFromStartOfDay(checkOutTime);
+            const diff = outMins - shiftEndMins;
+            if (diff < -shift.earlyLeaveThreshold) early = Math.abs(diff);
+            else if (diff >= 30) ot = diff;
+        }
+
+        return { late, early, ot };
+    };
+
+    const preview = calculatePreview();
+
+    const submitAdjustment = async () => {
+        if (!adjustingRecord) return;
+        setSavingAdjust(true);
+        try {
+            const res = await fetch(`${API_URL}/attendance/adjust`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    employeeId: selectedEmployee?.id || currentUser?.employee?.id,
+                    date: adjustingRecord.date,
+                    checkInTime: adjustForm.checkInTime || null,
+                    checkOutTime: adjustForm.checkOutTime || null,
+                    note: adjustForm.note
+                })
+            });
+
+            if (!res.ok) throw new Error('Failed to adjust');
+            
+            // Refresh data
+            if (activeTab === 'MY') fetchMyDetail();
+            else fetchDetail();
+            
+            setShowAdjustModal(false);
+        } catch (error) {
+            toastError('Lỗi khi hiệu chỉnh công');
+        } finally {
+            setSavingAdjust(false);
+        }
+    };
+
     const nextMonth = () => {
         setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
     };
@@ -196,11 +302,17 @@ export default function TimesheetPage() {
 
     const formatTime = (dateStr: string | null) => {
         if (!dateStr) return '--:--';
-        return new Date(dateStr).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        const date = new Date(dateStr);
+        return date.toLocaleTimeString('vi-VN', { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            hour12: false,
+            timeZone: 'Asia/Ho_Chi_Minh' 
+        });
     };
 
     const getDayName = (date: Date) => {
-        const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+        const days = ['CN', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy'];
         return days[date.getDay()];
     };
 
@@ -216,7 +328,7 @@ export default function TimesheetPage() {
 
     const roleCode = currentUser?.role?.code;
     const canViewOthers = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'MANAGER', 'ADMIN'].includes(roleCode);
-    const canManageSettings = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER', 'ADMIN'].includes(roleCode);
+    const canManageSettings = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'ADMIN'].includes(roleCode);
     const isManager = roleCode === 'MANAGER';
 
     // ========== SHIFT CRUD ==========
@@ -264,16 +376,25 @@ export default function TimesheetPage() {
     };
 
     const handleDeleteShift = async (id: string) => {
-        if (!confirm('Bạn có chắc muốn xóa ca làm việc này?')) return;
+        setShiftToDelete(id);
+        setShowDeleteConfirm(true);
+    };
+
+    const confirmDeleteShift = async () => {
+        if (!shiftToDelete) return;
         try {
-            const res = await fetch(`${API_URL}/attendance/shifts/${id}`, { method: 'DELETE' });
+            const res = await fetch(`${API_URL}/attendance/shifts/${shiftToDelete}`, { method: 'DELETE' });
             if (!res.ok) {
                 const err = await res.json();
                 toastError(err.message || 'Không thể xóa');
                 return;
             }
             fetchShifts();
-        } catch (error) { toastError('Lỗi khi xóa'); }
+            setShowDeleteConfirm(false);
+            setShiftToDelete(null);
+        } catch (error) { 
+            toastError('Lỗi khi xóa'); 
+        }
     };
 
     const handleToggleShift = async (shift: any) => {
@@ -324,7 +445,7 @@ export default function TimesheetPage() {
                                             onError={() => handleImageError('my-avatar')}
                                         />
                                     ) : (
-                                        <div className="text-rose-500 font-black text-lg">{currentUser?.employee?.fullName?.split(' ').pop()?.charAt(0)}</div>
+                                        <div className="text-primary font-black text-lg">{currentUser?.employee?.fullName?.split(' ').pop()?.charAt(0)}</div>
                                     )
                                 ) : (
                                     (selectedEmployee?.avatarUrl && !imageErrors[`emp-${selectedEmployee.id}`]) ? (
@@ -335,14 +456,14 @@ export default function TimesheetPage() {
                                             onError={() => handleImageError(`emp-${selectedEmployee.id}`)}
                                         />
                                     ) : (
-                                        <div className="text-rose-500 font-black text-lg">{selectedEmployee?.fullName?.split(' ').pop()?.charAt(0)}</div>
+                                        <div className="text-primary font-black text-lg">{selectedEmployee?.fullName?.split(' ').pop()?.charAt(0)}</div>
                                     )
                                 )}
                             </div>
                         )}
                         <div className="space-y-1">
-                            <h1 className="text-xl md:text-2xl font-black text-slate-900 font-outfit uppercase tracking-tight flex items-center gap-2 leading-none">
-                                {!(activeTab === 'MY' || (activeTab === 'EMPLOYEES' && viewMode === 'DETAIL')) && <CalendarDays className="text-rose-600" />}
+                            <h1 className="text-xl md:text-2xl font-bold text-slate-900 font-outfit tracking-tight flex items-center gap-2 leading-none">
+                                {!(activeTab === 'MY' || (activeTab === 'EMPLOYEES' && viewMode === 'DETAIL')) && <CalendarDays className="text-primary" />}
                                 {activeTab === 'MY' ? 'Bảng công cá nhân' : (viewMode === 'LIST' ? 'Tổng hợp công nhân viên' : 'Chi tiết chấm công')}
                             </h1>
                             <p className="text-slate-500 text-[10px] md:text-xs font-medium">
@@ -356,15 +477,15 @@ export default function TimesheetPage() {
 
                 <div className="flex items-center gap-3">
                     <div className="flex items-center bg-white rounded-xl p-1 shadow-sm border border-slate-100 shrink-0 h-[36px]">
-                        <button onClick={prevMonth} className="p-1 px-2 hover:bg-rose-50 hover:text-rose-600 rounded-lg transition-all cursor-pointer">
+                        <button onClick={prevMonth} className="p-1 px-2 hover:bg-primary-light hover:text-primary rounded-lg transition-all cursor-pointer">
                             <ChevronLeft size={16} />
                         </button>
                         <div className="px-3 text-center min-w-[100px]">
-                            <span className="text-[11px] font-black text-slate-900 font-outfit uppercase tracking-wider">
+                            <span className="text-[11px] font-bold text-slate-900 font-outfit tracking-wider">
                                 T{currentDate.getMonth() + 1} / {currentDate.getFullYear()}
                             </span>
                         </div>
-                        <button onClick={nextMonth} className="p-1 px-2 hover:bg-rose-50 hover:text-rose-600 rounded-lg transition-all cursor-pointer">
+                        <button onClick={nextMonth} className="p-1 px-2 hover:bg-primary-light hover:text-primary rounded-lg transition-all cursor-pointer">
                             <ChevronRight size={16} />
                         </button>
                     </div>
@@ -380,13 +501,13 @@ export default function TimesheetPage() {
                             className={cn(
                                 "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5",
                                 activeTab === 'MY'
-                                    ? "text-rose-600 bg-rose-50 cursor-pointer font-black"
+                                    ? "text-primary bg-primary-light cursor-pointer font-black"
                                     : "text-slate-600 hover:bg-slate-50 cursor-pointer"
                             )}
                         >
-                            <span className="uppercase tracking-wider">Công cá nhân</span>
+                            <span className="tracking-wider">Công cá nhân</span>
                             {activeTab === 'MY' && (
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-600"></div>
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
                             )}
                         </button>
                         <button
@@ -394,13 +515,13 @@ export default function TimesheetPage() {
                             className={cn(
                                 "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5",
                                 activeTab === 'EMPLOYEES'
-                                    ? "text-rose-600 bg-rose-50 cursor-pointer font-black"
+                                    ? "text-primary bg-primary-light cursor-pointer font-black"
                                     : "text-slate-600 hover:bg-slate-50 cursor-pointer"
                             )}
                         >
-                            <span className="uppercase tracking-wider">Công nhân viên</span>
+                            <span className="tracking-wider">Công nhân viên</span>
                             {activeTab === 'EMPLOYEES' && (
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-600"></div>
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
                             )}
                         </button>
                         {canManageSettings && (
@@ -410,14 +531,14 @@ export default function TimesheetPage() {
                                     className={cn(
                                         "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5",
                                         activeTab === 'SETTINGS'
-                                            ? "text-rose-600 bg-rose-50 cursor-pointer font-black"
+                                            ? "text-primary bg-primary-light cursor-pointer font-black"
                                             : "text-slate-600 hover:bg-slate-50 cursor-pointer"
                                     )}
                                 >
                                     <Settings size={13} />
-                                    <span className="uppercase tracking-wider">Cài đặt Ca</span>
+                                    <span className="tracking-wider">Cài đặt ca</span>
                                     {activeTab === 'SETTINGS' && (
-                                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-600"></div>
+                                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
                                     )}
                                 </button>
                                 <button
@@ -425,14 +546,14 @@ export default function TimesheetPage() {
                                     className={cn(
                                         "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5",
                                         activeTab === 'SALARY_SETTINGS'
-                                            ? "text-rose-600 bg-rose-50 cursor-pointer font-black"
+                                            ? "text-primary bg-primary-light cursor-pointer font-black"
                                             : "text-slate-600 hover:bg-slate-50 cursor-pointer"
                                     )}
                                 >
                                     <Banknote size={13} />
-                                    <span className="uppercase tracking-wider">Cài đặt Lương</span>
+                                    <span className="tracking-wider">Cài đặt lương</span>
                                     {activeTab === 'SALARY_SETTINGS' && (
-                                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-600"></div>
+                                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
                                     )}
                                 </button>
                             </>
@@ -447,29 +568,29 @@ export default function TimesheetPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-2 items-center">
                         {/* Search */}
                         <div className="relative">
-                            <Search className={cn("absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors", searchTerm ? "text-rose-500" : "text-slate-400")} size={14} />
+                            <Search className={cn("absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors", searchTerm ? "text-primary" : "text-slate-400")} size={14} />
                             <input
                                 type="text"
                                 placeholder="Tìm tên, SĐT..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className={cn(
-                                    "w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none transition-all text-[10.5px] font-medium",
-                                    searchTerm ? "border-rose-300 font-bold" : "border-slate-200"
+                                    "w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all text-[10.5px] font-medium",
+                                    searchTerm ? "border-primary font-bold" : "border-slate-200"
                                 )}
                             />
                         </div>
 
                         {/* Branch */}
                         <div className="relative">
-                            <Building2 className={cn("absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors", selectedBranch ? "text-rose-500" : "text-slate-400")} size={14} />
+                            <Building2 className={cn("absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors", selectedBranch ? "text-primary" : "text-slate-400")} size={14} />
                             <select
                                 value={selectedBranch}
                                 onChange={(e) => setSelectedBranch(e.target.value)}
                                 disabled={isManager}
                                 className={cn(
-                                    "w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer",
-                                    selectedBranch ? "border-rose-300 font-bold" : "border-slate-200",
+                                    "w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer",
+                                    selectedBranch ? "border-primary font-bold" : "border-slate-200",
                                     isManager && "opacity-70 cursor-not-allowed bg-slate-100"
                                 )}
                             >
@@ -482,13 +603,13 @@ export default function TimesheetPage() {
 
                         {/* Position */}
                         <div className="relative">
-                            <Briefcase className={cn("absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors", selectedPosition ? "text-rose-500" : "text-slate-400")} size={14} />
+                            <Briefcase className={cn("absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors", selectedPosition ? "text-primary" : "text-slate-400")} size={14} />
                             <select
                                 value={selectedPosition}
                                 onChange={(e) => setSelectedPosition(e.target.value)}
                                 className={cn(
-                                    "w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer",
-                                    selectedPosition ? "border-rose-300 font-bold" : "border-slate-200"
+                                    "w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer",
+                                    selectedPosition ? "border-primary font-bold" : "border-slate-200"
                                 )}
                             >
                                 <option value="">Chức vụ: Tất cả</option>
@@ -502,7 +623,7 @@ export default function TimesheetPage() {
                         <div className="relative">
                             <button
                                 onClick={resetFilters}
-                                className="w-full h-[28px] flex items-center justify-center gap-1.5 px-3 py-0 rounded-lg text-[10.5px] font-bold transition-all border bg-rose-50 text-rose-500 border-rose-200 hover:bg-rose-500 hover:text-white cursor-pointer"
+                                className="w-full h-[28px] flex items-center justify-center gap-1.5 px-3 py-0 rounded-lg text-[10.5px] font-bold transition-all border bg-primary-light text-primary border-primary/20 hover:bg-primary hover:text-white cursor-pointer"
                                 title="Xoá toàn bộ bộ lọc"
                             >
                                 ✕ Reset
@@ -519,13 +640,13 @@ export default function TimesheetPage() {
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-slate-50/50 border-b border-slate-100">
-                                    <th className="px-4 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none text-center">STT</th>
-                                    <th className="px-6 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Nhân viên</th>
-                                    <th className="px-6 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center leading-none">Ngày công</th>
-                                    <th className="px-6 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center leading-none">Muộn</th>
-                                    <th className="px-6 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center leading-none">Sớm</th>
-                                    <th className="px-6 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center leading-none">TC (H)</th>
-                                    <th className="px-6 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center leading-none">Thao tác</th>
+                                    <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none text-center">STT</th>
+                                    <th className="px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Nhân viên</th>
+                                    <th className="px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Ngày công</th>
+                                    <th className="px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Muộn</th>
+                                    <th className="px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Sớm</th>
+                                    <th className="px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">TC (H)</th>
+                                    <th className="px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">
@@ -551,7 +672,7 @@ export default function TimesheetPage() {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-full overflow-hidden bg-rose-50 border border-slate-100 shrink-0 flex items-center justify-center">
+                                                    <div className="w-10 h-10 rounded-full overflow-hidden bg-primary-light border border-slate-100 shrink-0 flex items-center justify-center">
                                                         {(row.avatarUrl && !imageErrors[`list-${row.employeeId}`]) ? (
                                                             <img
                                                                 src={getFullImageUrl(row.avatarUrl)!}
@@ -560,25 +681,25 @@ export default function TimesheetPage() {
                                                                 onError={() => handleImageError(`list-${row.employeeId}`)}
                                                             />
                                                         ) : (
-                                                            <div className="w-full h-full flex items-center justify-center text-rose-500 font-black text-sm uppercase">
+                                                            <div className="w-full h-full flex items-center justify-center text-primary font-black text-sm uppercase">
                                                                 {row.fullName.split(' ').pop()?.charAt(0)}
                                                             </div>
                                                         )}
                                                     </div>
                                                     <div className="flex flex-col">
-                                                        <span className="text-[13px] font-bold text-slate-800 leading-tight group-hover:text-rose-600 transition-colors">{row.fullName}</span>
+                                                        <span className="text-[13px] font-bold text-slate-800 leading-tight group-hover:text-primary transition-colors">{row.fullName}</span>
                                                         <span className="text-[10px] text-slate-400 font-medium mt-0.5">{row.position} • {row.branchName}</span>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-center">
-                                                <span className="text-sm font-black text-emerald-600">{row.totalWorkDays}</span>
+                                                <span className="text-sm font-black text-accent">{row.totalWorkDays}</span>
                                             </td>
                                             <td className="px-6 py-4 text-center">
-                                                <span className={cn("text-sm font-black", row.lateDays > 0 ? "text-rose-600" : "text-slate-300")}>{row.lateDays || '-'}</span>
+                                                <span className={cn("text-sm font-black", row.lateDays > 0 ? "text-primary" : "text-slate-300")}>{row.lateDays || '-'}</span>
                                             </td>
                                             <td className="px-6 py-4 text-center">
-                                                <span className={cn("text-sm font-black", row.earlyLeaveDays > 0 ? "text-amber-600" : "text-slate-300")}>{row.earlyLeaveDays || '-'}</span>
+                                                <span className={cn("text-sm font-black", row.earlyLeaveDays > 0 ? "text-warning" : "text-slate-300")}>{row.earlyLeaveDays || '-'}</span>
                                             </td>
                                             <td className="px-6 py-4 text-center">
                                                 <span className={cn("text-sm font-black", row.totalOvertimeHours > 0 ? "text-blue-600" : "text-slate-300")}>{row.totalOvertimeHours || '-'}</span>
@@ -586,9 +707,9 @@ export default function TimesheetPage() {
                                             <td className="px-6 py-4 text-center">
                                                 <button
                                                     onClick={() => handleSelectEmployee({ id: row.employeeId, fullName: row.fullName, avatarUrl: row.avatarUrl })}
-                                                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-800 text-white rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-slate-700 transition-all active:scale-95 shadow-sm cursor-pointer"
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-800 text-white rounded-lg text-[10px] font-bold tracking-wider hover:bg-slate-700 transition-all active:scale-95 shadow-sm cursor-pointer"
                                                 >
-                                                    CHI TIẾT
+                                                    Chi tiết
                                                 </button>
                                             </td>
                                         </tr>
@@ -601,9 +722,9 @@ export default function TimesheetPage() {
             ) : (activeTab === 'MY' || (activeTab === 'EMPLOYEES' && viewMode === 'DETAIL')) ? (
                 <>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-                        <StatCard label="Ngày công" value={currentStats.totalWorkDays} icon={CheckCircle2} color="text-emerald-600" bg="bg-emerald-50" />
-                        <StatCard label="Đi muộn" value={currentStats.lateDays} icon={AlertCircle} color="text-rose-600" bg="bg-rose-50" />
-                        <StatCard label="Về sớm" value={currentStats.earlyLeaveDays} icon={Clock} color="text-amber-600" bg="bg-amber-50" />
+                        <StatCard label="Ngày công" value={currentStats.totalWorkDays} icon={CheckCircle2} color="text-accent" bg="bg-emerald-50" />
+                        <StatCard label="Đi muộn" value={currentStats.lateDays} icon={AlertCircle} color="text-primary" bg="bg-primary-light" />
+                        <StatCard label="Về sớm" value={currentStats.earlyLeaveDays} icon={Clock} color="text-warning" bg="bg-amber-50" />
                         <StatCard label="Tăng ca" value={currentStats.totalOvertimeHours} icon={TrendingUp} color="text-blue-600" bg="bg-blue-50" />
                     </div>
 
@@ -612,14 +733,17 @@ export default function TimesheetPage() {
                             <table className="w-full text-left border-collapse">
                                 <thead>
                                     <tr className="bg-slate-50/50 border-b border-slate-100">
-                                        <th className="px-3 md:px-6 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest">Ngày</th>
-                                        <th className="px-3 md:px-6 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest">Thứ</th>
-                                        <th className="px-3 md:px-6 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest">Vào</th>
-                                        <th className="px-3 md:px-6 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest">Ra</th>
-                                        <th className="px-3 md:px-6 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Muộn</th>
-                                        <th className="px-3 md:px-6 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Sớm</th>
-                                        <th className="px-3 md:px-6 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">TC</th>
-                                        <th className="px-3 md:px-6 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Trạng thái</th>
+                                        <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest">Ngày</th>
+                                        <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest">Thứ</th>
+                                        <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest">Vào</th>
+                                        <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest">Ra</th>
+                                        <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Muộn</th>
+                                        <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Sớm</th>
+                                        <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">TC</th>
+                                        <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Trạng thái</th>
+                                        {['ADMIN', 'DIRECTOR', 'MANAGER', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'].includes(currentUser?.role?.code) && (
+                                            <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Thao tác</th>
+                                        )}
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-50">
@@ -646,7 +770,7 @@ export default function TimesheetPage() {
                                                         <span className="text-[12px] font-black text-slate-700">{date.getDate().toString().padStart(2, '0')}/{(date.getMonth() + 1).toString().padStart(2, '0')}</span>
                                                     </td>
                                                     <td className="px-3 md:px-6 py-3 whitespace-nowrap">
-                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{getDayName(date).replace('Thứ ', 'T')}</span>
+                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{getDayName(date)}</span>
                                                     </td>
                                                     <td className="px-3 md:px-6 py-3 whitespace-nowrap">
                                                         <span className={cn("text-xs md:text-[13px] font-black", row.checkInTime ? "text-slate-900" : "text-slate-300")}>
@@ -659,12 +783,12 @@ export default function TimesheetPage() {
                                                         </span>
                                                     </td>
                                                     <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
-                                                        <span className={cn("text-xs md:text-[13px] font-bold", row.lateMinutes > 0 ? "text-rose-600" : "text-slate-300")}>
+                                                        <span className={cn("text-xs md:text-[13px] font-bold", row.lateMinutes > 0 ? "text-primary" : "text-slate-300")}>
                                                             {row.lateMinutes || '-'}
                                                         </span>
                                                     </td>
                                                     <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
-                                                        <span className={cn("text-xs md:text-[13px] font-bold", row.earlyLeaveMinutes > 0 ? "text-amber-600" : "text-slate-300")}>
+                                                        <span className={cn("text-xs md:text-[13px] font-bold", row.earlyLeaveMinutes > 0 ? "text-warning" : "text-slate-300")}>
                                                             {row.earlyLeaveMinutes || '-'}
                                                         </span>
                                                     </td>
@@ -676,6 +800,17 @@ export default function TimesheetPage() {
                                                     <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
                                                         <StatusBadge status={row.dailyStatus} />
                                                     </td>
+                                                    {['ADMIN', 'DIRECTOR', 'MANAGER', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'].includes(currentUser?.role?.code) && (
+                                                        <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
+                                                            <button
+                                                                onClick={() => handleAdjust(row)}
+                                                                className="p-1.5 text-slate-400 hover:text-primary transition-all cursor-pointer"
+                                                                title="Hiệu chỉnh công"
+                                                            >
+                                                                <Pencil size={14} />
+                                                            </button>
+                                                        </td>
+                                                    )}
                                                 </tr>
                                             );
                                         })
@@ -684,6 +819,88 @@ export default function TimesheetPage() {
                             </table>
                         </div>
                     </div>
+
+                    {/* Adjust Modal */}
+                    {showAdjustModal && (
+                        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" onClick={() => setShowAdjustModal(false)}>
+                            <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-8 space-y-6 animate-in zoom-in-95" onClick={e => e.stopPropagation()}>
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
+                                        <RotateCcw size={20} className="text-primary" />
+                                        Hiệu chỉnh ngày công
+                                    </h3>
+                                    <button onClick={() => setShowAdjustModal(false)} className="p-2 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"><X size={20} /></button>
+                                </div>
+                                
+                                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Nhân viên & Ngày</p>
+                                    <p className="text-sm font-bold text-slate-700">{selectedEmployee?.fullName || currentUser?.employee?.fullName}</p>
+                                    <p className="text-[11px] font-bold text-slate-500">{new Date(adjustingRecord?.date).toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}</p>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Giờ vào</label>
+                                        <input 
+                                            type="datetime-local" 
+                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
+                                            value={adjustForm.checkInTime}
+                                            onChange={e => setAdjustForm({ ...adjustForm, checkInTime: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Giờ ra</label>
+                                        <input 
+                                            type="datetime-local" 
+                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
+                                            value={adjustForm.checkOutTime}
+                                            onChange={e => setAdjustForm({ ...adjustForm, checkOutTime: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Lý do hiệu chỉnh</label>
+                                    <textarea 
+                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all h-20 resize-none"
+                                        placeholder="VD: Quên chấm công, lỗi GPS..."
+                                        value={adjustForm.note}
+                                        onChange={e => setAdjustForm({ ...adjustForm, note: e.target.value })}
+                                    />
+                                </div>
+
+                                {/* Results Preview */}
+                                {preview && (
+                                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-around divide-x divide-slate-200">
+                                        <div className="text-center flex-1">
+                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">Muộn</p>
+                                            <p className={cn("text-sm font-black", preview.late > 0 ? "text-primary" : "text-slate-300")}>{preview.late || '-'}</p>
+                                        </div>
+                                        <div className="text-center flex-1">
+                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">Về sớm</p>
+                                            <p className={cn("text-sm font-black", preview.early > 0 ? "text-amber-600" : "text-slate-300")}>{preview.early || '-'}</p>
+                                        </div>
+                                        <div className="text-center flex-1">
+                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">Tăng ca</p>
+                                            <p className={cn("text-sm font-black", preview.ot > 0 ? "text-blue-600" : "text-slate-300")}>{preview.ot || '-'}</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="flex gap-3 pt-2">
+                                    <button onClick={() => setShowAdjustModal(false)} className="flex-1 px-6 py-3 text-slate-500 font-bold text-sm tracking-tight hover:bg-slate-50 rounded-xl transition-all cursor-pointer">Hủy</button>
+                                    <button 
+                                        onClick={submitAdjustment}
+                                        disabled={savingAdjust}
+                                        className="flex-[1.5] px-6 py-3 bg-primary text-white font-bold text-sm tracking-tight rounded-xl shadow-lg shadow-primary-light/50 hover:bg-primary/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                                    >
+                                        {savingAdjust ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
+                                        Xác nhận thay đổi
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </>
             ) : null}
 
@@ -693,15 +910,15 @@ export default function TimesheetPage() {
                     {/* Header + Add Button */}
                     <div className="flex items-center justify-between">
                         <div>
-                            <h2 className="text-lg font-black text-slate-800 uppercase tracking-tight flex items-center gap-2">
-                                <Settings size={18} className="text-rose-600" />
+                            <h2 className="text-lg font-bold text-slate-800 tracking-tight flex items-center gap-2">
+                                <Settings size={18} className="text-primary" />
                                 Quản lý ca làm việc
                             </h2>
                             <p className="text-[10px] text-slate-500 font-medium mt-0.5">Cấu hình giờ vào/ra, ngưỡng muộn/sớm cho từng chi nhánh</p>
                         </div>
                         <button
                             onClick={() => { resetShiftForm(); setShowShiftForm(true); }}
-                            className="flex items-center gap-1.5 px-4 py-2 bg-rose-600 text-white rounded-xl text-[11px] font-black uppercase tracking-wider hover:bg-rose-700 transition-all shadow-lg shadow-rose-200 cursor-pointer"
+                            className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-xl text-[11px] font-bold tracking-wider hover:bg-primary/90 transition-all shadow-lg shadow-primary-light/50 cursor-pointer"
                         >
                             <Plus size={14} /> Thêm ca
                         </button>
@@ -718,7 +935,7 @@ export default function TimesheetPage() {
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Chi nhánh *</label>
                                     <select value={shiftForm.branchId} onChange={e => setShiftForm({...shiftForm, branchId: e.target.value})}
-                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100">
+                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-primary focus:ring-2 focus:ring-primary/10">
                                         <option value="">Chọn chi nhánh</option>
                                         {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                                     </select>
@@ -775,17 +992,17 @@ export default function TimesheetPage() {
                             <table className="w-full text-left border-collapse">
                                 <thead>
                                     <tr className="bg-slate-50/50 border-b border-slate-100">
-                                        <th className="px-4 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">STT</th>
-                                        <th className="px-4 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest">Chi nhánh</th>
-                                        <th className="px-4 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest">Tên ca</th>
-                                        <th className="px-4 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Giờ vào</th>
-                                        <th className="px-4 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Giờ ra</th>
-                                        <th className="px-4 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Nghỉ</th>
-                                        <th className="px-4 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Muộn</th>
-                                        <th className="px-4 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Muộn NT</th>
-                                        <th className="px-4 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Về sớm</th>
-                                        <th className="px-4 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Trạng thái</th>
-                                        <th className="px-4 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Thao tác</th>
+                                        <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">STT</th>
+                                        <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest">Chi nhánh</th>
+                                        <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest">Tên ca</th>
+                                        <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Giờ vào</th>
+                                        <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Giờ ra</th>
+                                        <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Nghỉ</th>
+                                        <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Muộn</th>
+                                        <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Muộn NT</th>
+                                        <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Về sớm</th>
+                                        <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Trạng thái</th>
+                                        <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-50">
@@ -834,11 +1051,26 @@ export default function TimesheetPage() {
                 </div>
             )}
 
+            {/* Confirm Delete Modal */}
+            <ConfirmModal
+                isOpen={showDeleteConfirm}
+                title="Xác nhận xóa"
+                message="Bạn có chắc chắn muốn xóa ca làm việc này không? Hành động này không thể hoàn tác."
+                confirmLabel="Xóa ca"
+                cancelLabel="Hủy"
+                isDanger={true}
+                onConfirm={confirmDeleteShift}
+                onCancel={() => {
+                    setShowDeleteConfirm(false);
+                    setShiftToDelete(null);
+                }}
+            />
+
             {activeTab === 'SALARY_SETTINGS' && canManageSettings && (
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h2 className="text-lg font-black text-slate-800 uppercase tracking-tight flex items-center gap-2">
+                            <h2 className="text-lg font-bold text-slate-800 tracking-tight flex items-center gap-2">
                                 <Banknote size={18} className="text-rose-600" />
                                 Quản lý Lương Cơ Bản
                             </h2>
@@ -870,6 +1102,7 @@ function StatusBadge({ status }: { status: string }) {
     const config: any = {
         'FULL_DAY': { label: 'Đủ công', class: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
         'HALF_DAY': { label: 'Nửa công', class: 'bg-blue-50 text-blue-600 border-blue-100' },
+        'INCOMPLETE': { label: 'Thiếu công', class: 'bg-rose-50 text-rose-600 border-rose-100' },
         'LATE_DAY': { label: 'Đi muộn', class: 'bg-rose-50 text-rose-600 border-rose-100' },
         'ABSENT_UNAPPROVED': { label: 'Vắng (KP)', class: 'bg-slate-50 text-slate-500 border-slate-100' },
         'ABSENT_APPROVED': { label: 'Vắng (CP)', class: 'bg-amber-50 text-amber-600 border-amber-100' },

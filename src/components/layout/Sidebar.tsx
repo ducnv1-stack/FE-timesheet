@@ -25,7 +25,8 @@ import {
     ClipboardList,
     Activity,
     BarChart3,
-    LayoutGrid
+    LayoutGrid,
+    Warehouse
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -114,6 +115,26 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             ]
         },
         {
+            label: 'Quản lý Kho',
+            icon: Warehouse,
+            children: [
+                {
+                    label: 'Tồn kho chi tiết',
+                    icon: LayoutGrid,
+                    href: '/warehouse/inventory',
+                    active: pathname === '/warehouse/inventory',
+                    roleAccess: ['ADMIN'] //'DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 
+                },
+                {
+                    label: 'Lịch sử giao dịch',
+                    icon: History,
+                    href: '/warehouse/transactions',
+                    active: pathname === '/warehouse/transactions',
+                    roleAccess: ['ADMIN'] //'DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 
+                },
+            ]
+        },
+        {
             label: 'Nhân sự',
             icon: Users,
             children: [
@@ -129,14 +150,14 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     icon: Fingerprint,
                     href: '/employees/attendance',
                     active: pathname === '/employees/attendance',
-                    roleAccess: ['ADMIN'] //, 'HR', 'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'MANAGER', 'SALE', 'TELESALE', 'DRIVER', 'COMPANY_DRIVER', 'DELIVERY_STAFF']
+                    roleAccess: ['ADMIN']//, 'SALE', 'MANAGER', 'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR',
                 },
                 {
                     label: 'Bảng công tháng',
                     icon: ClipboardList,
                     href: '/employees/timesheet',
                     active: pathname === '/employees/timesheet',
-                    roleAccess: ['ADMIN'] //, 'HR', 'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'MANAGER',  'SALE', 'TELESALE', 'DRIVER', 'COMPANY_DRIVER', 'DELIVERY_STAFF']
+                    roleAccess: ['ADMIN'] //, 'SALE', 'MANAGER', 'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR',
                 },
             ]
         },
@@ -149,21 +170,21 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     icon: ShoppingBag,
                     href: '/products',
                     active: pathname === '/products',
-                    roleAccess: ['ADMIN'] //, 'MANAGER', 'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'
+                    roleAccess: ['ADMIN']
                 },
                 {
                     label: 'Quản lý chi nhánh',
                     icon: Building2,
                     href: '/branches',
                     active: pathname === '/branches',
-                    roleAccess: ['ADMIN'] //, 'MANAGER', 'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'
+                    roleAccess: ['ADMIN'] //, 'MANAGER', 'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR',
                 },
                 {
                     label: 'Cấu hình phí ship',
                     icon: Truck,
                     href: '/settings/delivery-fees',
                     active: pathname === '/settings/delivery-fees',
-                    roleAccess: ['ADMIN'] //, 'MANAGER', 'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'
+                    roleAccess: ['ADMIN']
                 },
             ]
         },
@@ -213,7 +234,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
     return (
         <aside
             className={cn(
-                "fixed top-0 left-0 h-full z-40 bg-white border-r border-slate-200 transition-all duration-300 no-print",
+                "fixed top-0 left-0 h-full z-40 bg-white border-r border-border-system transition-all duration-300 no-print",
                 "lg:translate-x-0", // Always show on desktop
                 isCollapsed ? "-translate-x-full lg:w-20 lg:translate-x-0" : "translate-x-0 w-64 shadow-2xl lg:shadow-none"
             )}
@@ -222,7 +243,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             <div className="h-16 flex items-center px-4 border-b border-slate-50 justify-between gap-2 overflow-hidden">
                 <button
                     onClick={onToggle}
-                    className="p-2 hover:bg-slate-100 rounded-xl transition-all text-slate-500 hover:text-rose-600 focus:outline-none cursor-pointer"
+                    className="p-2 hover:bg-slate-100 rounded-xl transition-all text-slate-500 hover:text-primary focus:outline-none cursor-pointer"
                     title={isCollapsed ? "Mở menu" : "Thu gọn"}
                 >
                     {isCollapsed ? <Menu size={24} strokeWidth={2.5} /> : <X size={24} strokeWidth={2.5} />}
@@ -249,12 +270,12 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                                     onClick={() => toggleMenu(item.label)}
                                     className={cn(
                                         "group flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all duration-200 cursor-pointer",
-                                        isAnyChildActive ? "text-rose-700 bg-rose-50/50" : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                                        isAnyChildActive ? "text-primary bg-primary-light" : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                                     )}
                                 >
                                     <item.icon size={20} className={cn(
                                         "shrink-0",
-                                        isAnyChildActive ? "text-rose-700" : "text-slate-400 group-hover:text-slate-600"
+                                        isAnyChildActive ? "text-primary" : "text-slate-400 group-hover:text-slate-600"
                                     )} />
                                     {!isCollapsed && (
                                         <>
@@ -281,13 +302,13 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                                                 className={cn(
                                                     "group flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 cursor-pointer",
                                                     child.active
-                                                        ? "text-rose-600 font-bold"
+                                                        ? "text-primary font-bold"
                                                         : "text-slate-400 hover:text-slate-700"
                                                 )}
                                             >
                                                 <child.icon size={16} className={cn(
                                                     "shrink-0",
-                                                    child.active ? "text-rose-600" : "group-hover:text-slate-600"
+                                                    child.active ? "text-primary" : "group-hover:text-slate-600"
                                                 )} />
                                                 <span className="text-[13px] whitespace-nowrap overflow-hidden text-ellipsis">
                                                     {child.label}
@@ -307,13 +328,13 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                             className={cn(
                                 "group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 cursor-pointer",
                                 item.active
-                                    ? "bg-rose-50 text-rose-700 shadow-sm"
+                                    ? "bg-primary-light text-primary shadow-sm"
                                     : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                             )}
                         >
                             <item.icon size={20} className={cn(
                                 "shrink-0",
-                                item.active ? "text-rose-700" : "text-slate-400 group-hover:text-slate-600"
+                                item.active ? "text-primary" : "text-slate-400 group-hover:text-slate-600"
                             )} />
                             {!isCollapsed && (
                                 <span className="font-bold text-sm whitespace-nowrap overflow-hidden text-ellipsis">
@@ -321,7 +342,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                                 </span>
                             )}
                             {item.active && !isCollapsed && (
-                                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-rose-500" />
+                                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
                             )}
                         </Link>
                     );
@@ -333,7 +354,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                 <button
                     onClick={handleLogout}
                     className={cn(
-                        "flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-slate-500 hover:bg-rose-50 hover:text-rose-700 transition-all cursor-pointer",
+                        "flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-slate-500 hover:bg-primary-light hover:text-primary transition-all cursor-pointer",
                         isCollapsed ? "justify-center" : ""
                     )}
                 >

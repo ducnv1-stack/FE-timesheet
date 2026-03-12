@@ -2,12 +2,49 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0f172a;
+  
+  /* Primary - Rose theme */
+  --primary: #e11d48; /* rose-600 */
+  --primary-foreground: #ffffff;
+  --primary-light: #ffe4e6; /* rose-100 */
+  
+  /* Accent - Emerald theme for success/confirmation */
+  --accent: #059669; /* emerald-600 */
+  --accent-foreground: #ffffff;
+  --accent-light: #ecfdf5; /* emerald-50 */
+
+  /* Warning - Amber theme */
+  --warning: #d97706; /* amber-600 */
+  --warning-light: #fffbeb; /* amber-50 */
+
+  /* Danger/Critical */
+  --danger: #dc2626; /* red-600 */
+  --danger-light: #fef2f2; /* red-50 */
+
+  /* Surface/Secondary */
+  --surface: #f8fafc; /* slate-50 */
+  --secondary: #0f172a; /* slate-900 */
+  --border: #e2e8f0; /* slate-200 */
 }
 
-@theme inline {
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-light: var(--primary-light);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-light: var(--accent-light);
+  --color-warning: var(--warning);
+  --color-warning-light: var(--warning-light);
+  --color-danger: var(--danger);
+  --color-danger-light: var(--danger-light);
+  --color-surface: var(--surface);
+  --color-secondary: var(--secondary);
+  --color-border-system: var(--border);
+  
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

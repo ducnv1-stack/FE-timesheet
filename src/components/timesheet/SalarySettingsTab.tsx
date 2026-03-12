@@ -247,8 +247,8 @@ export default function SalarySettingsTab() {
     if (loading) {
         return (
             <div className="py-24 flex flex-col items-center justify-center text-slate-400 gap-4">
-                <div className="w-12 h-12 rounded-full border-4 border-slate-100 border-t-rose-500 animate-spin" />
-                <p className="text-sm font-black uppercase tracking-widest animate-pulse">Đang tải cấu hình lương...</p>
+                <div className="w-12 h-12 rounded-full border-4 border-slate-100 border-t-primary animate-spin" />
+                <p className="text-sm font-bold tracking-wider animate-pulse">Đang tải cấu hình lương...</p>
             </div>
         );
     }
@@ -265,10 +265,10 @@ export default function SalarySettingsTab() {
                         <AlertCircle size={20} className="text-amber-600" />
                     </div>
                     <div className="space-y-1">
-                        <h3 className="text-amber-900 font-black uppercase text-xs tracking-wider">Lưu ý quan trọng về chính sách lương</h3>
+                        <h3 className="text-amber-900 font-bold text-xs tracking-wider">Lưu ý quan trọng về chính sách lương</h3>
                         <div className="text-[11px] text-amber-800/80 font-medium leading-relaxed max-w-3xl">
                             Các thiết lập này sẽ ảnh hưởng trực tiếp đến kết quả tính lương trong <span className="font-bold underline">Báo cáo Doanh số</span>. 
-                            Hệ thống ưu tiên <span className="text-rose-600 font-bold">Mức lương Ngoại lệ</span> trước, nếu không có sẽ lấy theo <span className="font-bold">Mức lương Chức vụ</span>.
+                            Hệ thống ưu tiên <span className="text-primary font-bold">Mức lương Ngoại lệ</span> trước, nếu không có sẽ lấy theo <span className="font-bold">Mức lương Chức vụ</span>.
                             Mọi thay đổi sẽ được áp dụng ngay lập tức cho các chu kỳ lương chưa chốt.
                         </div>
                     </div>
@@ -279,12 +279,12 @@ export default function SalarySettingsTab() {
             <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden transition-all hover:shadow-2xl hover:shadow-slate-200/60">
                 <div className="border-b border-slate-100 bg-slate-50/40 px-6 py-5 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-rose-500 flex items-center justify-center text-white shadow-lg shadow-rose-200">
+                        <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary-light">
                             <BanknoteIcon size={20} />
                         </div>
                         <div>
-                            <h2 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight uppercase leading-none">Mức lương theo Chức vụ</h2>
-                            <p className="text-[9px] sm:text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Cấu hình lương gốc mặc định cho từng bộ phận</p>
+                            <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight leading-none">Mức lương theo Chức vụ</h2>
+                            <p className="text-[9px] sm:text-[10px] text-slate-500 font-semibold mt-1">Cấu hình lương gốc mặc định cho từng bộ phận</p>
                         </div>
                     </div>
                 </div>
@@ -292,12 +292,12 @@ export default function SalarySettingsTab() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-slate-100/80 border-b border-slate-200">
-                                <th className="px-4 py-2 text-[10px] font-black text-slate-700 uppercase tracking-wider">Chức vụ/Hợp đồng</th>
-                                <th className="px-4 py-2 text-[10px] font-black text-slate-700 uppercase tracking-wider w-[180px]">Lương Cơ Bản</th>
-                                <th className="px-4 py-2 text-[10px] font-black text-slate-700 uppercase tracking-wider w-[130px]">Chuyên cần</th>
-                                <th className="px-4 py-2 text-[10px] font-black text-slate-700 uppercase tracking-wider w-[130px]">Phụ cấp</th>
-                                <th className="px-4 py-2 text-[10px] font-black text-slate-700 uppercase tracking-wider w-[100px]">Công chuẩn</th>
-                                <th className="px-4 py-2 text-[10px] font-black text-slate-700 uppercase tracking-wider w-[80px] text-center">Lưu</th>
+                                <th className="px-4 py-3 text-[10px] font-bold text-slate-600 tracking-wider">Chức vụ/Hợp đồng</th>
+                                <th className="px-4 py-3 text-[10px] font-bold text-slate-600 tracking-wider w-[180px]">Lương Cơ Bản</th>
+                                <th className="px-4 py-3 text-[10px] font-bold text-slate-600 tracking-wider w-[130px]">Chuyên cần</th>
+                                <th className="px-4 py-3 text-[10px] font-bold text-slate-600 tracking-wider w-[130px]">Phụ cấp</th>
+                                <th className="px-4 py-3 text-[10px] font-bold text-slate-600 tracking-wider w-[100px]">Công chuẩn</th>
+                                <th className="px-4 py-3 text-[10px] font-bold text-slate-600 tracking-wider w-[80px] text-center">Lưu</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
@@ -305,8 +305,8 @@ export default function SalarySettingsTab() {
                                 <tr key={r.id} className="group hover:bg-rose-50/30 transition-all duration-300">
                                     <td className="px-4 py-1">
                                         <div>
-                                            <div className="font-extrabold text-slate-800 text-[11px] sm:text-xs group-hover:text-rose-600 transition-colors uppercase tracking-tight leading-tight">{r.name}</div>
-                                            <span className="text-[8px] sm:text-[9px] text-slate-400 font-extrabold">{r.code}</span>
+                                            <div className="font-bold text-slate-800 text-[11px] sm:text-xs group-hover:text-primary transition-colors tracking-tight leading-tight">{r.name}</div>
+                                            <span className="text-[8px] sm:text-[9px] text-slate-400 font-bold">{r.code}</span>
                                         </div>
                                     </td>
                                     <td className="px-4 py-1">
@@ -315,7 +315,7 @@ export default function SalarySettingsTab() {
                                                 type="text" 
                                                 value={formatCurrency(roleEdits[r.id]?.baseSalary)}
                                                 onChange={(e) => handleRoleChange(r.id, 'baseSalary', e.target.value)}
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[11px] sm:text-xs font-extrabold text-rose-600 outline-none focus:border-rose-400 focus:ring-4 focus:ring-rose-50 transition-all placeholder:text-[9px] shadow-inner group-hover:bg-white"
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[11px] sm:text-xs font-bold text-primary outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-[9px] shadow-inner group-hover:bg-white"
                                                 placeholder="Nhập..."
                                             />
                                         </div>
@@ -326,7 +326,7 @@ export default function SalarySettingsTab() {
                                                 type="text" 
                                                 value={formatCurrency(roleEdits[r.id]?.diligentSalary)}
                                                 onChange={(e) => handleRoleChange(r.id, 'diligentSalary', e.target.value)}
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[11px] sm:text-xs font-extrabold text-amber-600 outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-50 transition-all placeholder:text-[9px] shadow-inner group-hover:bg-white"
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[11px] sm:text-xs font-bold text-warning outline-none focus:border-warning focus:ring-4 focus:ring-warning/10 transition-all placeholder:text-[9px] shadow-inner group-hover:bg-white"
                                                 placeholder="Nhập..."
                                             />
                                         </div>
@@ -337,7 +337,7 @@ export default function SalarySettingsTab() {
                                                 type="text" 
                                                 value={formatCurrency(roleEdits[r.id]?.allowance)}
                                                 onChange={(e) => handleRoleChange(r.id, 'allowance', e.target.value)}
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[11px] sm:text-xs font-extrabold text-emerald-600 outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-50 transition-all placeholder:text-[9px] shadow-inner group-hover:bg-white"
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[11px] sm:text-xs font-bold text-accent outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all placeholder:text-[9px] shadow-inner group-hover:bg-white"
                                                 placeholder="Nhập..."
                                             />
                                         </div>
@@ -347,7 +347,7 @@ export default function SalarySettingsTab() {
                                             type="number" 
                                             value={roleEdits[r.id]?.standardWorkingDays || ''}
                                             onChange={(e) => handleRoleChange(r.id, 'standardWorkingDays', e.target.value)}
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[11px] sm:text-xs font-extrabold text-slate-800 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50 transition-all group-hover:bg-white shadow-inner"
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[11px] sm:text-xs font-bold text-slate-800 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50 transition-all group-hover:bg-white shadow-inner"
                                             placeholder="27"
                                         />
                                     </td>
@@ -381,28 +381,28 @@ export default function SalarySettingsTab() {
                             <User size={20} />
                         </div>
                         <div>
-                            <h2 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight uppercase leading-none">Mức lương Ngoại lệ (Cá nhân)</h2>
-                            <p className="text-[9px] sm:text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Cài đặt lương riêng biệt cho nhân sự cơ chế ngoại lệ</p>
+                            <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight leading-none">Mức lương Ngoại lệ (Cá nhân)</h2>
+                            <p className="text-[9px] sm:text-[10px] text-slate-500 font-semibold mt-1">Cài đặt lương riêng biệt cho nhân sự cơ chế ngoại lệ</p>
                         </div>
                     </div>
                     
                     <div className="flex items-center gap-3 flex-wrap">
                         {/* Search bar */}
                         <div className="relative group w-full md:w-60">
-                            <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-rose-500 transition-colors" />
+                            <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
                             <input 
                                 type="text" 
                                 placeholder="Tìm trong danh sách..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-[11px] sm:text-xs font-bold outline-none focus:border-rose-400 focus:ring-4 focus:ring-rose-50 transition-all shadow-sm"
+                                className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-[11px] sm:text-xs font-bold outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all shadow-sm"
                             />
                         </div>
 
                         {/* ADD BUTTON */}
                         <button 
                             onClick={() => setShowAddEmployeeList(true)}
-                            className="bg-rose-500 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-rose-200 hover:bg-rose-600 transition-all active:scale-95 flex items-center gap-2 shrink-0"
+                            className="bg-primary text-white px-4 py-2 rounded-xl text-[10px] font-bold shadow-lg shadow-primary-light/50 hover:bg-primary/90 transition-all active:scale-95 flex items-center gap-2 shrink-0 cursor-pointer"
                         >
                             + Thêm nhân sự ngoại lệ
                         </button>
@@ -439,14 +439,14 @@ export default function SalarySettingsTab() {
                                                     />
                                                 ) : null}
                                                 <div className={cn(
-                                                    "w-6 h-6 rounded-md bg-rose-500 text-white flex items-center justify-center font-extrabold text-[8px] border border-rose-400 shadow-md shadow-rose-100",
+                                                    "w-6 h-6 rounded-md bg-primary text-white flex items-center justify-center font-bold text-[8px] border border-primary/20 shadow-md shadow-primary-light",
                                                     e.avatarUrl ? "hidden" : ""
                                                 )}>
                                                     {e.fullName.charAt(0).toUpperCase()}
                                                 </div>
                                                 <div>
-                                                    <div className="font-extrabold text-slate-800 text-[10px] sm:text-[11px] tracking-tight truncate max-w-[120px]">{e.fullName}</div>
-                                                    <div className="text-[8px] text-slate-400 font-bold uppercase tracking-tighter truncate max-w-[120px]">{e.branch?.name || '-'}</div>
+                                                    <div className="font-bold text-slate-800 text-[10px] sm:text-[11px] tracking-tight truncate max-w-[120px]">{e.fullName}</div>
+                                                    <div className="text-[8px] text-slate-400 font-semibold truncate max-w-[120px]">{e.branch?.name || '-'}</div>
                                                 </div>
                                             </div>
                                         </td>
@@ -457,7 +457,7 @@ export default function SalarySettingsTab() {
                                                     placeholder="Tự động..."
                                                     value={formatCurrency(empEdits[e.id]?.customBaseSalary)}
                                                     onChange={(ev) => handleEmpChange(e.id, 'customBaseSalary', ev.target.value)}
-                                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[11px] sm:text-xs font-extrabold text-rose-600 outline-none focus:border-rose-400 focus:ring-4 focus:ring-rose-50 transition-all placeholder:text-[9px] shadow-inner group-hover:bg-white"
+                                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[11px] sm:text-xs font-bold text-primary outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-[9px] shadow-inner group-hover:bg-white"
                                                 />
                                             </div>
                                         </td>
@@ -467,7 +467,7 @@ export default function SalarySettingsTab() {
                                                 placeholder="Tự động..."
                                                 value={formatCurrency(empEdits[e.id]?.customDiligentSalary)}
                                                 onChange={(ev) => handleEmpChange(e.id, 'customDiligentSalary', ev.target.value)}
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[11px] sm:text-xs font-extrabold text-amber-600 outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-50 transition-all placeholder:text-[9px] shadow-inner group-hover:bg-white"
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[11px] sm:text-xs font-bold text-warning outline-none focus:border-warning focus:ring-4 focus:ring-warning/10 transition-all placeholder:text-[9px] shadow-inner group-hover:bg-white"
                                             />
                                         </td>
                                         <td className="px-4 py-1">
@@ -476,7 +476,7 @@ export default function SalarySettingsTab() {
                                                 placeholder="Tự động..."
                                                 value={formatCurrency(empEdits[e.id]?.customAllowance)}
                                                 onChange={(ev) => handleEmpChange(e.id, 'customAllowance', ev.target.value)}
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[11px] sm:text-xs font-extrabold text-emerald-600 outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-50 transition-all placeholder:text-[9px] shadow-inner group-hover:bg-white"
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[11px] sm:text-xs font-bold text-accent outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all placeholder:text-[9px] shadow-inner group-hover:bg-white"
                                             />
                                         </td>
                                         <td className="px-4 py-1">
@@ -485,7 +485,7 @@ export default function SalarySettingsTab() {
                                                 placeholder="VD: 27"
                                                 value={empEdits[e.id]?.customStandardWorkingDays || ''}
                                                 onChange={(ev) => handleEmpChange(e.id, 'customStandardWorkingDays', ev.target.value)}
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[10px] sm:text-[11px] font-extrabold text-slate-800 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50 transition-all group-hover:bg-white shadow-inner"
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[10px] sm:text-[11px] font-bold text-slate-800 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50 transition-all group-hover:bg-white shadow-inner"
                                             />
                                         </td>
                                         <td className="px-4 py-1 text-center relative flex items-center justify-center gap-2">
@@ -494,7 +494,7 @@ export default function SalarySettingsTab() {
                                                 disabled={savingId === e.id}
                                                 className={cn(
                                                     "w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-300 cursor-pointer",
-                                                    savingId === e.id ? "bg-slate-100 text-slate-400" : "bg-white text-emerald-500 border border-emerald-100 hover:bg-emerald-500 hover:text-white hover:shadow-lg hover:shadow-emerald-100 hover:-translate-y-0.5 active:translate-y-0"
+                                                    savingId === e.id ? "bg-slate-100 text-slate-400" : "bg-white text-accent border border-accent/20 hover:bg-accent hover:text-white hover:shadow-lg hover:shadow-accent/10 hover:-translate-y-0.5 active:translate-y-0"
                                                 )}
                                                 title="Lưu cấu hình"
                                             >
@@ -506,14 +506,14 @@ export default function SalarySettingsTab() {
                                                 disabled={savingId === e.id}
                                                 className={cn(
                                                     "w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-300 cursor-pointer",
-                                                    savingId === e.id ? "bg-slate-100 text-slate-400" : "bg-white text-rose-400 border border-rose-100 hover:bg-rose-500 hover:text-white hover:shadow-lg hover:shadow-rose-100 hover:-translate-y-0.5 active:translate-y-0"
+                                                    savingId === e.id ? "bg-slate-100 text-slate-400" : "bg-white text-primary border border-primary/20 hover:bg-primary hover:text-white hover:shadow-lg hover:shadow-primary-light/50 hover:-translate-y-0.5 active:translate-y-0"
                                                 )}
                                                 title="Xóa ngoại lệ"
                                             >
                                                 <Trash2 size={16} />
                                             </button>
 
-                                            <div id={`e-icon-${e.id}`} className="absolute top-1/2 -right-2 -translate-y-1/2 opacity-0 transition-opacity text-emerald-500">
+                                            <div id={`e-icon-${e.id}`} className="absolute top-1/2 -right-2 -translate-y-1/2 opacity-0 transition-opacity text-accent">
                                                 <CheckCircle2 size={16} />
                                             </div>
                                         </td>
@@ -526,10 +526,10 @@ export default function SalarySettingsTab() {
                                     <td colSpan={6} className="px-6 py-20 text-center">
                                         <div className="flex flex-col items-center gap-2 text-slate-300">
                                             <BanknoteIcon size={40} className="mb-2 opacity-20" />
-                                            <p className="text-sm font-black uppercase tracking-widest">Không có nhân sự ngoại lệ nào</p>
+                                            <p className="text-sm font-bold tracking-wider">Không có nhân sự ngoại lệ nào</p>
                                             <button 
                                                 onClick={() => setShowAddEmployeeList(true)}
-                                                className="text-[10px] font-black text-rose-500 underline uppercase tracking-tighter hover:text-rose-600 transition-colors"
+                                                className="text-[10px] font-bold text-primary underline transition-colors cursor-pointer"
                                             >
                                                 Thêm nhân sự ngay
                                             </button>
@@ -559,8 +559,8 @@ export default function SalarySettingsTab() {
                 <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in duration-300">
                         <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-                            <h3 className="text-sm font-black uppercase tracking-widest text-slate-900">Chọn nhân sự thêm ngoại lệ</h3>
-                            <button onClick={() => setShowAddEmployeeList(false)} className="text-slate-400 hover:text-rose-500 font-bold">✕</button>
+                            <h3 className="text-sm font-bold text-slate-900">Chọn nhân sự thêm ngoại lệ</h3>
+                            <button onClick={() => setShowAddEmployeeList(false)} className="text-slate-400 hover:text-primary font-bold cursor-pointer">✕</button>
                         </div>
                         <div className="p-4 bg-slate-50/50">
                             <div className="relative group">
@@ -571,7 +571,7 @@ export default function SalarySettingsTab() {
                                     placeholder="Tìm tên nhân viên..."
                                     value={employeeSearchTerm}
                                     onChange={(e) => setEmployeeSearchTerm(e.target.value)}
-                                    className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs font-bold outline-none focus:border-rose-400 shadow-sm transition-all"
+                                    className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs font-bold outline-none focus:border-primary shadow-sm transition-all"
                                 />
                             </div>
                         </div>
@@ -584,7 +584,7 @@ export default function SalarySettingsTab() {
                                         setShowAddEmployeeList(false);
                                         setEmployeeSearchTerm('');
                                     }}
-                                    className="w-full flex items-center gap-3 p-3 hover:bg-rose-50 rounded-2xl transition-all group border border-transparent hover:border-rose-100 mb-1 text-left"
+                                    className="w-full flex items-center gap-3 p-3 hover:bg-rose-50 rounded-2xl transition-all group border border-transparent hover:border-rose-100 mb-1 text-left cursor-pointer"
                                 >
                                         <div className="relative shrink-0">
                                             {e.avatarUrl ? (
@@ -599,20 +599,20 @@ export default function SalarySettingsTab() {
                                                 />
                                             ) : null}
                                             <div className={cn(
-                                                "w-9 h-9 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center font-black group-hover:bg-white group-hover:text-rose-500 transition-all border border-slate-200",
+                                                "w-9 h-9 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center font-bold group-hover:bg-white group-hover:text-primary transition-all border border-slate-200",
                                                 e.avatarUrl ? "hidden" : ""
                                             )}>
                                                 {e.fullName.charAt(0).toUpperCase()}
                                             </div>
                                         </div>
                                     <div>
-                                        <div className="text-xs font-black text-slate-800 group-hover:text-rose-600 transition-colors uppercase tracking-tight">{e.fullName}</div>
-                                        <div className="text-[9px] text-slate-400 font-bold group-hover:text-rose-400 uppercase tracking-tighter">{e.position} • {e.branch?.name}</div>
+                                        <div className="text-xs font-bold text-slate-800 group-hover:text-primary transition-colors tracking-tight">{e.fullName}</div>
+                                        <div className="text-[9px] text-slate-400 font-semibold group-hover:text-primary/70">{e.position} • {e.branch?.name}</div>
                                     </div>
                                 </button>
                             ))}
                             {availableEmployeesForException.length === 0 && (
-                                <div className="py-12 text-center text-slate-300 text-xs font-black uppercase tracking-widest">
+                                <div className="py-12 text-center text-slate-300 text-xs font-bold tracking-wider">
                                     Không tìm thấy nhân viên phù hợp
                                 </div>
                             )}
@@ -620,7 +620,7 @@ export default function SalarySettingsTab() {
                         <div className="p-4 bg-slate-50 border-t border-slate-100">
                             <button 
                                 onClick={() => setShowAddEmployeeList(false)}
-                                className="w-full py-3 rounded-xl text-slate-500 font-black text-[10px] uppercase tracking-widest hover:bg-white transition-all border border-transparent hover:border-slate-200"
+                                className="w-full py-3 rounded-xl text-slate-500 font-bold text-[10px] hover:bg-white transition-all border border-transparent hover:border-slate-200 cursor-pointer"
                             >
                                 Đóng
                             </button>

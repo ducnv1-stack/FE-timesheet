@@ -51,7 +51,20 @@ export default function EditOrderPage() {
         splits: [],
         payments: [],
         deliveries: [],
-        images: []
+        images: [],
+        isUpgrade: false,
+        oldOrderProductName: '',
+        oldOrderAmount: 0,
+        oldOrderDate: '',
+        oldOrderCustomerName: '',
+        oldOrderCustomerPhone: '',
+        oldOrderCustomerAddress: '',
+        oldOrderProvinceId: '',
+        oldOrderWardId: '',
+        oldOrderCustomerCardNumber: '',
+        oldOrderCustomerCardIssueDate: '',
+        oldOrderId: '',
+        oldOrderCode: ''
     });
 
     // Fetch initial data and order details
@@ -137,7 +150,22 @@ export default function EditOrderPage() {
                         confirmedAt: orderData.confirmedAt,
                         confirmer: orderData.confirmer,
                         note: orderData.note || '',
-                        images: orderData.images || []
+                        images: orderData.images || [],
+                        
+                        // Upgrade fields mapping
+                        isUpgrade: orderData.isUpgrade || false,
+                        oldOrderProductName: orderData.oldOrderProductName || '',
+                        oldOrderAmount: Number(orderData.oldOrderAmount || 0),
+                        oldOrderDate: orderData.oldOrderDate || '',
+                        oldOrderCustomerName: orderData.oldOrderCustomerName || '',
+                        oldOrderCustomerPhone: orderData.oldOrderCustomerPhone || '',
+                        oldOrderCustomerAddress: orderData.oldOrderCustomerAddress || '',
+                        oldOrderProvinceId: orderData.oldOrderProvinceId || '',
+                        oldOrderWardId: orderData.oldOrderWardId || '',
+                        oldOrderCustomerCardNumber: orderData.oldOrderCustomerCardNumber || '',
+                        oldOrderCustomerCardIssueDate: orderData.oldOrderCustomerCardIssueDate || '',
+                        oldOrderId: orderData.oldOrderId || '',
+                        oldOrderCode: orderData.oldOrderCode || ''
                     };
                     setOrder(formattedOrder);
                 }
@@ -247,6 +275,25 @@ export default function EditOrderPage() {
             } else if (!payload.customerCardIssueDate) {
                 delete payload.customerCardIssueDate;
             }
+
+            // Clean UUID fields to avoid empty string errors in database (UUID type)
+            const uuidFields = [
+                'provinceId', 'wardId', 'oldOrderProvinceId', 'oldOrderWardId', 
+                'oldOrderId', 'staffCode', 'branchId'
+            ];
+            uuidFields.forEach(field => {
+                if (payload[field] === "") {
+                    delete payload[field];
+                }
+            });
+
+            // Clean other string fields that might be empty
+            const optionalStrings = ['oldOrderDate', 'oldOrderCustomerName', 'oldOrderCustomerPhone', 'oldOrderCustomerAddress', 'oldOrderCode', 'oldOrderProductName'];
+            optionalStrings.forEach(field => {
+                if (payload[field] === "") {
+                    delete payload[field];
+                }
+            });
             // Clean deliveries to only send DTO-compatible fields
             if (payload.deliveries && payload.deliveries.length > 0) {
                 payload.deliveries = payload.deliveries.map((d: any) => ({
@@ -351,8 +398,8 @@ export default function EditOrderPage() {
 
             success('Cập nhật hóa đơn thành công!');
             router.push('/orders');
-        } catch (error) {
-            toastError('Có lỗi xảy ra khi cập nhật hóa đơn');
+        } catch (error: any) {
+            toastError(error.message || 'Có lỗi xảy ra khi cập nhật hóa đơn');
             console.error(error);
         } finally {
             setLoading(false);
@@ -417,6 +464,39 @@ export default function EditOrderPage() {
                     <h1 className="text-lg md:text-xl font-black text-center text-slate-900 border-b-2 border-slate-800 pb-2.5 mb-5 md:mb-6 uppercase tracking-[0.2em] print:mt-4">
                         Sửa hóa đơn bán hàng
                     </h1>
+
+                    {/* Upgrade Info Banner (Optional) */}
+                    {order.isUpgrade && (
+                        <div className="mb-6 bg-rose-50 border-2 border-rose-200 rounded-xl p-4 md:p-5 animate-in slide-in-from-top-2 duration-500 shadow-sm">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                                <div className="flex items-center gap-2">
+                                    <span className="px-2.5 py-1 bg-rose-600 text-white text-[10px] font-black rounded uppercase tracking-wider">Đơn hàng nâng cấp</span>
+                                    {order.oldOrderCode && (
+                                        <span className="text-xs font-bold text-rose-900 bg-rose-100 px-2 py-0.5 rounded">Mã gốc: #{order.oldOrderCode}</span>
+                                    )}
+                                </div>
+                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Thông tin sản phẩm cũ đã thu hồi</div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-xs">
+                                <div className="flex justify-between items-center border-b border-rose-100/50 py-1.5">
+                                    <span className="text-slate-500 font-medium">Sản phẩm cũ:</span>
+                                    <span className="font-bold text-slate-800">{order.oldOrderProductName || '---'}</span>
+                                </div>
+                                <div className="flex justify-between items-center border-b border-rose-100/50 py-1.5">
+                                    <span className="text-slate-500 font-medium">Giá trị thu hồi:</span>
+                                    <span className="font-bold text-rose-600">{formatCurrency(Number(order.oldOrderAmount || 0))}</span>
+                                </div>
+                                <div className="flex justify-between items-center border-b border-rose-100/50 py-1.5">
+                                    <span className="text-slate-500 font-medium">Ngày mua cũ:</span>
+                                    <span className="font-bold text-slate-800">{order.oldOrderDate ? formatDate(order.oldOrderDate) : '---'}</span>
+                                </div>
+                                <div className="flex justify-between items-center border-b border-rose-100/50 py-1.5">
+                                    <span className="text-slate-500 font-medium">Khách hàng cũ:</span>
+                                    <span className="font-bold text-slate-800">{order.oldOrderCustomerName || '---'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 mb-6 text-xs">
                         <div className="grid grid-cols-[120px_1fr] items-center border-b border-slate-100 py-1">
@@ -603,6 +683,8 @@ export default function EditOrderPage() {
                             items={order.items}
                             products={products}
                             onChange={(items) => setOrder({ ...order, items })}
+                            isUpgrade={order.isUpgrade}
+                            oldOrderAmount={order.oldOrderAmount}
                         />
 
                         <div className="mt-4 no-print print:hidden">
@@ -779,8 +861,9 @@ export default function EditOrderPage() {
 
                                     if (!isHighEnd || !bonusRules) return sum;
 
+                                    const effectivePrice = Number(item.unitPrice) + (order.isUpgrade ? Number(order.oldOrderAmount || 0) : 0);
                                     const rule = (bonusRules as any[])
-                                        .filter(r => Number(item.unitPrice) >= Number(r.minSellPrice || r.min_sell_price))
+                                        .filter(r => Number(effectivePrice) >= Number(r.minSellPrice || r.min_sell_price))
                                         .sort((a, b) => Number(b.minSellPrice || b.min_sell_price) - Number(a.minSellPrice || a.min_sell_price))[0];
                                     return sum + (rule ? Number(rule.bonusAmount || rule.bonus_amount) : 0) * item.quantity;
                                 }, 0);

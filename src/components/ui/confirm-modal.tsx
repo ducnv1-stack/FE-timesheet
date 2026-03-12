@@ -34,10 +34,10 @@ export default function ConfirmModal({
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header with Icon */}
-                <div className="p-6 flex flex-col items-center text-center bg-rose-50">
+                <div className="p-6 flex flex-col items-center text-center bg-primary-light">
                     <div className={cn(
                         "w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-transform hover:scale-110",
-                        isDanger ? "bg-rose-100 text-rose-600" : "bg-rose-100/80 text-rose-500"
+                        isDanger ? "bg-primary-light text-primary border border-primary/20" : "bg-primary-light/80 text-primary/80"
                     )}>
                         <AlertTriangle size={32} />
                     </div>
@@ -63,7 +63,7 @@ export default function ConfirmModal({
                     <button
                         onClick={onConfirm}
                         className={cn(
-                            "flex-1 px-4 py-3 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 active:translate-y-0 cursor-pointer bg-rose-600 hover:bg-rose-700 shadow-rose-200"
+                            "flex-1 px-4 py-3 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 active:translate-y-0 cursor-pointer bg-primary hover:bg-primary/90 shadow-primary-light/50"
                         )}
                     >
                         {confirmLabel}

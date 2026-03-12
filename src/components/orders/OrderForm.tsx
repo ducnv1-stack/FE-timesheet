@@ -380,7 +380,12 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
                 body: JSON.stringify(payload)
             });
 
-            if (!res.ok) throw new Error('Failed to save order');
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                const errorMessage = errorData.message || 'Lỗi lưu đơn hàng';
+                throw new Error(errorMessage);
+            }
+
             const createdOrder = await res.json();
 
             const allFiles: File[] = [];
@@ -935,8 +940,9 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
 
                                     if (!isHighEnd || !bonusRules) return sum;
 
+                                    const effectivePrice = Number(item.unitPrice) + (order.isUpgrade ? Number(order.oldOrderAmount || 0) : 0);
                                     const rule = (bonusRules as any[])
-                                        .filter(r => Number(item.unitPrice) >= Number(r.minSellPrice || r.min_sell_price))
+                                        .filter(r => Number(effectivePrice) >= Number(r.minSellPrice || r.min_sell_price))
                                         .sort((a, b) => Number(b.minSellPrice || b.min_sell_price) - Number(a.minSellPrice || a.min_sell_price))[0];
                                     return sum + (rule ? Number(rule.bonusAmount || rule.bonus_amount) : 0) * item.quantity;
                                 }, 0);
