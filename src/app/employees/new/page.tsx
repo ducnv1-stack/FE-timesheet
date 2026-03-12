@@ -16,11 +16,15 @@ export default function NewEmployeePage() {
     const { success, error: toastError } = useToast();
     const [saving, setSaving] = useState(false);
     const [branches, setBranches] = useState<Branch[]>([]);
+    const [allDepartments, setAllDepartments] = useState<any[]>([]);
+    const [allPositions, setAllPositions] = useState<any[]>([]);
 
     const [form, setForm] = useState({
         fullName: '',
         phone: '',
         branchId: '',
+        positionId: '',
+        departmentId: '',
         position: '',
         department: '',
         birthday: '',
@@ -59,7 +63,29 @@ export default function NewEmployeePage() {
         }
 
         fetchBranches();
+        fetchDepartments();
+        fetchPositions();
     }, []);
+
+    const fetchDepartments = async () => {
+        try {
+            const res = await fetch(`${API_URL}/departments`);
+            const data = await res.json();
+            setAllDepartments(data);
+        } catch (error) {
+            console.error('Error fetching departments:', error);
+        }
+    };
+
+    const fetchPositions = async () => {
+        try {
+            const res = await fetch(`${API_URL}/positions`);
+            const data = await res.json();
+            setAllPositions(data);
+        } catch (error) {
+            console.error('Error fetching positions:', error);
+        }
+    };
 
     const fetchBranches = async () => {
         try {
@@ -80,7 +106,7 @@ export default function NewEmployeePage() {
             toastError('Vui lòng chọn chi nhánh');
             return;
         }
-        if (!form.position) {
+        if (!form.positionId) {
             toastError('Vui lòng chọn chức vụ');
             return;
         }
@@ -91,7 +117,8 @@ export default function NewEmployeePage() {
             const payload: any = {
                 fullName: form.fullName.trim(),
                 branchId: form.branchId,
-                position: form.position,
+                positionId: form.positionId,
+                departmentId: form.departmentId || null,
             };
 
             if (form.phone.trim()) payload.phone = form.phone.trim();
@@ -168,24 +195,9 @@ export default function NewEmployeePage() {
                         <FormField
                             label="Chức vụ *"
                             type="select"
-                            value={form.position}
-                            onChange={(val) => setForm({ ...form, position: val })}
-                            options={[
-                                { label: 'Giám đốc (GĐ)', value: 'GĐ' },
-                                { label: 'Giám đốc KD (GĐKD)', value: 'GĐKD' },
-                                { label: 'Trợ lý Giám đốc', value: 'Trợ lý GĐ' },
-                                { label: 'Quản Lý', value: 'Quản Lý' },
-                                { label: 'Nhân viên bán hàng (NVBH)', value: 'NVBH' },
-                                { label: 'Nhân viên giao hàng (NVGH)', value: 'NVGH' },
-                                { label: 'Kế toán', value: 'Kế toán' },
-                                { label: 'Media', value: 'Media' },
-                                { label: 'ADS', value: 'ADS' },
-                                { label: 'HCNS', value: 'HCNS' },
-                                { label: 'Nhân viên KT (NVKT)', value: 'NVKT' },
-                                { label: 'Lái xe (Driver)', value: 'Driver' },
-                                { label: 'Marketing', value: 'Marketing' },
-                                { label: 'Nhân viên (Khác)', value: 'Nhân viên' },
-                            ]}
+                            value={form.positionId}
+                            onChange={(val) => setForm({ ...form, positionId: val })}
+                            options={allPositions.map(p => ({ label: p.name, value: p.id }))}
                             placeholder="Chọn chức vụ"
                         />
                         <FormField
@@ -201,17 +213,9 @@ export default function NewEmployeePage() {
                         <FormField
                             label="Phòng ban"
                             type="select"
-                            value={form.department}
-                            onChange={(val) => setForm({ ...form, department: val })}
-                            options={[
-                                { label: 'BGĐ', value: 'BGĐ' },
-                                { label: 'MKT', value: 'MKT' },
-                                { label: 'HCKT', value: 'HCKT' },
-                                { label: 'Kỹ Thuật', value: 'Kỹ Thuật' },
-                                { label: 'Kho', value: 'Kho' },
-                                { label: 'Lái xe', value: 'Lái xe' },
-                                { label: 'Phòng KD', value: 'Phòng KD' },
-                            ]}
+                            value={form.departmentId}
+                            onChange={(val) => setForm({ ...form, departmentId: val })}
+                            options={allDepartments.map(d => ({ label: d.name, value: d.id }))}
                             placeholder="Chọn phòng ban"
                         />
                         <FormField

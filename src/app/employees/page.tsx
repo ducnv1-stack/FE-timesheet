@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Users, Plus, Search, Filter, FileSpreadsheet, Download } from 'lucide-react';
+import { Users, Plus, Search, Filter, FileSpreadsheet, Download, Building2, UserCheck, ShieldCheck } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
 import * as XLSX from 'xlsx';
 import { formatDate } from '@/lib/utils';
+import SearchableSelect from '@/components/ui/SearchableSelect';
+import { BadgeCheck, Building2 as BuildingIcon, Contact } from 'lucide-react';
 
 interface Employee {
     id: string;
@@ -24,6 +26,8 @@ interface Employee {
         id: string;
         name: string;
     };
+    pos?: { name: string };
+    dept?: { name: string };
     user: {
         id: string;
         username: string;
@@ -53,6 +57,8 @@ export default function EmployeesPage() {
     const [selectedBranch, setSelectedBranch] = useState('');
     const [selectedPosition, setSelectedPosition] = useState('');
     const [selectedDepartment, setSelectedDepartment] = useState('');
+    const [allDepartments, setAllDepartments] = useState<any[]>([]);
+    const [allPositions, setAllPositions] = useState<any[]>([]);
     const [selectedStatus, setSelectedStatus] = useState('');
     const [hasAccountFilter, setHasAccountFilter] = useState('');
     const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -84,7 +90,8 @@ export default function EmployeesPage() {
         }
 
         fetchBranches();
-        // Don't call fetchEmployees here, let useEffect below handle it
+        fetchDepartments();
+        fetchPositions();
     }, []);
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -153,14 +160,34 @@ export default function EmployeesPage() {
         }
     };
 
+    const fetchDepartments = async () => {
+        try {
+            const res = await fetch(`${API_URL}/departments`);
+            const data = await res.json();
+            setAllDepartments(data);
+        } catch (error) {
+            console.error('Error fetching departments:', error);
+        }
+    };
+
+    const fetchPositions = async () => {
+        try {
+            const res = await fetch(`${API_URL}/positions`);
+            const data = await res.json();
+            setAllPositions(data);
+        } catch (error) {
+            console.error('Error fetching positions:', error);
+        }
+    };
+
     const fetchEmployees = async () => {
         setLoading(true);
         try {
             // Build query parameters
             const params = new URLSearchParams();
             if (selectedBranch) params.append('branchId', selectedBranch);
-            if (selectedPosition) params.append('position', selectedPosition);
-            if (selectedDepartment) params.append('department', selectedDepartment);
+            if (selectedPosition) params.append('positionId', selectedPosition);
+            if (selectedDepartment) params.append('departmentId', selectedDepartment);
             if (selectedStatus) params.append('status', selectedStatus);
             if (hasAccountFilter) params.append('hasAccount', hasAccountFilter);
 
@@ -221,6 +248,10 @@ export default function EmployeesPage() {
 
     // HR can view AND manage (create/edit/delete)
     const canManage = true; // Everyone who can access this page (already filtered by allowedRoles)
+
+    const ChevronDown = ({ className, size = 16 }: { className?: string, size?: number }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m6 9 6 6 6-6"/></svg>
+    );
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-3">
@@ -299,12 +330,11 @@ export default function EmployeesPage() {
                     </div>
 
                     <div className={cn(
-                        "transition-all duration-300 overflow-hidden",
-                        showMobileFilters ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0 lg:max-h-none lg:opacity-100"
+                        "transition-all duration-300",
+                        showMobileFilters ? "max-h-[1000px] opacity-100 overflow-hidden" : "max-h-0 opacity-0 overflow-hidden lg:max-h-none lg:opacity-100 lg:overflow-visible"
                     )}>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-2 pt-1 lg:pt-0">
-                            {/* Search (Desktop Only) */}
-                            <div className="hidden lg:block">
+                            <div className="min-w-0">
                                 <label className="block text-[10px] font-semibold text-slate-700 mb-1">
                                     Tìm kiếm
                                 </label>
@@ -314,112 +344,105 @@ export default function EmployeesPage() {
                                         type="text"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        placeholder="Tên, SĐT..."
-                                        className="w-full pl-8 pr-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                                        placeholder="Tên, SĐT, tài khoản..."
+                                        className="w-full pl-8 pr-3 h-8 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-slate-50 font-medium"
                                     />
                                 </div>
                             </div>
 
                             {/* Branch Filter */}
-                            <div>
+                            <div className="min-w-0">
                                 <label className="block text-[10px] font-semibold text-slate-700 mb-1">
                                     Chi Nhánh
                                 </label>
-                                <select
-                                    value={selectedBranch}
-                                    onChange={(e) => setSelectedBranch(e.target.value)}
-                                    disabled={currentUser?.role?.code === 'MANAGER'}
-                                    className="w-full px-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed cursor-pointer"
-                                >
-                                    <option value="">Tất cả</option>
-                                    {branches.map(b => (
-                                        <option key={b.id} value={b.id}>{b.name}</option>
-                                    ))}
-                                </select>
+                                <div className="relative">
+                                    <Building2 className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                                    <select
+                                        value={selectedBranch}
+                                        onChange={(e) => setSelectedBranch(e.target.value)}
+                                        disabled={currentUser?.role?.code === 'MANAGER'}
+                                        className="w-full pl-8 pr-3 h-8 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed cursor-pointer bg-slate-50 font-medium appearance-none"
+                                    >
+                                        <option value="">Tất cả</option>
+                                        {branches.map(b => (
+                                            <option key={b.id} value={b.id}>{b.name}</option>
+                                        ))}
+                                    </select>
+                                    <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" />
+                                </div>
                                 {currentUser?.role?.code === 'MANAGER' && (
                                     <p className="text-[9px] text-slate-500 mt-0.5 lg:hidden">Bạn chỉ có thể xem nhân viên chi nhánh của mình</p>
                                 )}
                             </div>
 
                             {/* Position Filter */}
-                            <div>
+                            <div className="min-w-0">
                                 <label className="block text-[10px] font-semibold text-slate-700 mb-1">
                                     Chức Vụ
                                 </label>
-                                <select
-                                    value={selectedPosition}
-                                    onChange={(e) => setSelectedPosition(e.target.value)}
-                                    className="w-full px-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent cursor-pointer"
-                                >
-                                    <option value="">Tất cả</option>
-                                    <option value="GĐ">Giám đốc (GĐ)</option>
-                                    <option value="GĐKD">Giám đốc kinh doanh (GĐKD)</option>
-                                    <option value="Trợ lý GĐ">Trợ lý Giám đốc</option>
-                                    <option value="Quản Lý">Quản Lý</option>
-                                    <option value="NVBH">Nhân viên bán hàng (NVBH)</option>
-                                    <option value="NVGH">Nhân viên giao hàng (NVGH)</option>
-                                    <option value="Kế toán">Kế toán</option>
-                                    <option value="Media">Media</option>
-                                    <option value="ADS">ADS</option>
-                                    <option value="HCNS">Hành chính nhân sự (HCNS)</option>
-                                    <option value="NVKT">Nhân viên kỹ thuật (NVKT)</option>
-                                    <option value="Driver">Lái xe (Driver)</option>
-                                    <option value="Marketing">Marketing</option>
-                                    <option value="Nhân viên">Nhân viên (Khác)</option>
-                                </select>
+                                <SearchableSelect
+                                    options={allPositions.map(p => ({ label: p.name, value: p.id }))}
+                                    value={selectedPosition || 'all'}
+                                    onSelect={(val) => setSelectedPosition(val === 'all' ? '' : val)}
+                                    placeholder="Tất cả chức vụ"
+                                    icon={<BadgeCheck />}
+                                    allOption={{ label: 'Tất cả chức vụ', value: 'all' }}
+                                />
                             </div>
 
                             {/* Department Filter */}
-                            <div>
+                            <div className="min-w-0">
                                 <label className="block text-[10px] font-semibold text-slate-700 mb-1">
                                     Phòng Ban
                                 </label>
-                                <select
-                                    value={selectedDepartment}
-                                    onChange={(e) => setSelectedDepartment(e.target.value)}
-                                    className="w-full px-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent cursor-pointer"
-                                >
-                                    <option value="">Tất cả</option>
-                                    <option value="BGĐ">BGĐ</option>
-                                    <option value="MKT">MKT</option>
-                                    <option value="HCKT">HCKT</option>
-                                    <option value="Kỹ Thuật">Kỹ Thuật</option>
-                                    <option value="Kho">Kho</option>
-                                    <option value="Lái xe">Lái xe</option>
-                                    <option value="Phòng KD">Phòng KD</option>
-                                </select>
+                                <SearchableSelect
+                                    options={allDepartments.map(d => ({ label: d.name, value: d.id }))}
+                                    value={selectedDepartment || 'all'}
+                                    onSelect={(val) => setSelectedDepartment(val === 'all' ? '' : val)}
+                                    placeholder="Tất cả phòng ban"
+                                    icon={<Contact />}
+                                    allOption={{ label: 'Tất cả phòng ban', value: 'all' }}
+                                />
                             </div>
 
                             {/* Status Filter */}
-                            <div>
+                            <div className="min-w-0">
                                 <label className="block text-[10px] font-semibold text-slate-700 mb-1">
                                     Trạng Thái
                                 </label>
-                                <select
-                                    value={selectedStatus}
-                                    onChange={(e) => setSelectedStatus(e.target.value)}
-                                    className="w-full px-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent cursor-pointer"
-                                >
-                                    <option value="">Tất cả</option>
-                                    <option value="Đang làm việc">Đang làm việc</option>
-                                    <option value="Nghỉ việc">Nghỉ việc</option>
-                                </select>
+                                <div className="relative">
+                                    <UserCheck className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                                    <select
+                                        value={selectedStatus}
+                                        onChange={(e) => setSelectedStatus(e.target.value)}
+                                        className="w-full pl-8 pr-3 h-8 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent cursor-pointer bg-slate-50 font-medium appearance-none"
+                                    >
+                                        <option value="">Tất cả</option>
+                                        <option value="Đang làm việc">Đang làm việc</option>
+                                        <option value="Nghỉ việc">Nghỉ việc</option>
+                                    </select>
+                                    <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" />
+                                </div>
                             </div>
 
                             {/* Has Account Filter */}
-                            <div>
+                            <div className="min-w-0">
                                 <label className="block text-[10px] font-semibold text-slate-700 mb-1">
                                     Tài Khoản
                                 </label>
-                                <select
-                                    value={hasAccountFilter}
-                                    onChange={(e) => setHasAccountFilter(e.target.value)}
-                                    className="w-full px-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent cursor-pointer"
-                                >
-                                    <option value="">Tất cả</option>
-                                    <option value="true">Có tài khoản</option>
-                                    <option value="false">Chưa có</option>
-                                </select>
+                                <div className="relative">
+                                    <ShieldCheck className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                                    <select
+                                        value={hasAccountFilter}
+                                        onChange={(e) => setHasAccountFilter(e.target.value)}
+                                        className="w-full pl-8 pr-3 h-8 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent cursor-pointer bg-slate-50 font-medium appearance-none"
+                                    >
+                                        <option value="">Tất cả</option>
+                                        <option value="true">Có tài khoản</option>
+                                        <option value="false">Chưa có</option>
+                                    </select>
+                                    <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" />
+                                </div>
                             </div>
 
                             {/* Mobile Reset Button */}
@@ -488,10 +511,10 @@ export default function EmployeesPage() {
                                                 <td className="px-2 py-1.5 pr-6 font-semibold text-slate-900 text-[11px] text-left">{emp.fullName}</td>
                                                 <td className="px-2 py-1.5 pr-6 text-slate-600 text-[11px] text-left">{emp.phone || '-'}</td>
                                                 <td className="px-2 py-1.5 pr-6 text-slate-600 font-medium text-[11px] text-left">{emp.branch.name}</td>
-                                                <td className="px-2 py-1.5 pr-6 text-slate-600 font-medium text-[11px] text-left">{emp.department || '-'}</td>
+                                                <td className="px-2 py-1.5 pr-6 text-slate-600 font-medium text-[11px] text-left">{emp.dept?.name || emp.department || '-'}</td>
                                                 <td className="px-2 py-1.5 pr-6 text-left">
                                                     <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-[10px] font-bold">
-                                                        {emp.position}
+                                                        {emp.pos?.name || emp.position}
                                                     </span>
                                                 </td>
                                                 <td className="px-2 py-1.5 pr-6 text-left">

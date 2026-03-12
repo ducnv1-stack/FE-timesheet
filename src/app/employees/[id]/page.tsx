@@ -32,6 +32,21 @@ interface Employee {
     email: string | null;
     socialInsuranceNumber: string | null;
     isInternalDriver: boolean;
+    pos: {
+        id: string;
+        name: string;
+    } | null;
+    dept: {
+        id: string;
+        name: string;
+    } | null;
+    positionId: string | null;
+    departmentId: string | null;
+    attendancePolicyId: string | null;
+    attendancePolicy?: {
+        id: string;
+        name: string;
+    } | null;
     branch: {
         id: string;
         name: string;
@@ -57,6 +72,9 @@ export default function EmployeeDetailPage() {
     const [isEditing, setIsEditing] = useState(false);
     const [editForm, setEditForm] = useState<any>({});
     const [branches, setBranches] = useState<any[]>([]);
+    const [allDepartments, setAllDepartments] = useState<any[]>([]);
+    const [allPositions, setAllPositions] = useState<any[]>([]);
+    const [allAttendancePolicies, setAllAttendancePolicies] = useState<any[]>([]);
 
     // Avatar upload
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -106,8 +124,41 @@ export default function EmployeeDetailPage() {
             fetchEmployee();
             fetchRoles();
             fetchBranches();
+            fetchDepartments();
+            fetchPositions();
+            fetchAttendancePolicies();
         }
     }, [params.id]);
+
+    const fetchAttendancePolicies = async () => {
+        try {
+            const res = await fetch(`${API_URL}/attendance-policies`);
+            const data = await res.json();
+            setAllAttendancePolicies(data);
+        } catch (error) {
+            console.error('Error fetching attendance policies:', error);
+        }
+    };
+
+    const fetchDepartments = async () => {
+        try {
+            const res = await fetch(`${API_URL}/departments`);
+            const data = await res.json();
+            setAllDepartments(data);
+        } catch (error) {
+            console.error('Error fetching departments:', error);
+        }
+    };
+
+    const fetchPositions = async () => {
+        try {
+            const res = await fetch(`${API_URL}/positions`);
+            const data = await res.json();
+            setAllPositions(data);
+        } catch (error) {
+            console.error('Error fetching positions:', error);
+        }
+    };
 
     const fetchEmployee = async () => {
         try {
@@ -143,7 +194,9 @@ export default function EmployeeDetailPage() {
         if (employee) {
             setEditForm({
                 ...employee,
-                branchId: employee.branch.id,
+                positionId: employee.positionId || '',
+                departmentId: employee.departmentId || '',
+                attendancePolicyId: employee.attendancePolicyId || '',
                 birthday: employee.birthday ? new Date(employee.birthday).toISOString().split('T')[0] : '',
                 joinDate: employee.joinDate ? new Date(employee.joinDate).toISOString().split('T')[0] : '',
                 contractSigningDate: employee.contractSigningDate ? new Date(employee.contractSigningDate).toISOString().split('T')[0] : '',
@@ -197,10 +250,11 @@ export default function EmployeeDetailPage() {
         setSaving(true);
         try {
             const allowedFields = [
-                'fullName', 'phone', 'branchId', 'position', 'department',
+                'fullName', 'phone', 'branchId', 'positionId', 'departmentId',
                 'birthday', 'gender', 'status', 'workingType', 'joinDate',
                 'contractType', 'contractSigningDate', 'idCardNumber',
-                'permanentAddress', 'email', 'socialInsuranceNumber', 'isInternalDriver'
+                'permanentAddress', 'email', 'socialInsuranceNumber', 'isInternalDriver',
+                'attendancePolicyId'
             ];
 
             const updateData: any = {};
@@ -213,7 +267,8 @@ export default function EmployeeDetailPage() {
             // Convert empty strings back to null for better DB consistency
             const optionalFields = [
                 'birthday', 'joinDate', 'contractSigningDate', 'phone',
-                'idCardNumber', 'permanentAddress', 'email', 'socialInsuranceNumber'
+                'idCardNumber', 'permanentAddress', 'email', 'socialInsuranceNumber',
+                'attendancePolicyId'
             ];
 
             optionalFields.forEach(field => {
@@ -486,7 +541,7 @@ export default function EmployeeDetailPage() {
                                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
                                     <span className="px-3 py-1 bg-rose-50 text-rose-600 rounded-full text-[10px] font-black uppercase tracking-wider border border-rose-100 flex items-center gap-1.5">
                                         <Briefcase size={12} />
-                                        {employee.position}
+                                        {employee.pos?.name || employee.position || 'Chưa rõ'}
                                     </span>
                                     <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-black uppercase tracking-wider border border-slate-200 flex items-center gap-1.5">
                                         <Building2 size={12} />
@@ -554,45 +609,35 @@ export default function EmployeeDetailPage() {
                                 <InfoField
                                     label="Chức vụ"
                                     icon={<BadgeCheck size={14} />}
-                                    value={employee.position}
+                                    value={employee.pos?.name || employee.position}
                                     isEditing={isEditing}
                                     type="select"
-                                    options={[
-                                        { label: 'Giám đốc (GĐ)', value: 'GĐ' },
-                                        { label: 'Giám đốc KD (GĐKD)', value: 'GĐKD' },
-                                        { label: 'Trợ lý Giám đốc', value: 'Trợ lý GĐ' },
-                                        { label: 'Quản Lý', value: 'Quản Lý' },
-                                        { label: 'Nhân viên bán hàng (NVBH)', value: 'NVBH' },
-                                        { label: 'Nhân viên giao hàng (NVGH)', value: 'NVGH' },
-                                        { label: 'Kế toán', value: 'Kế toán' },
-                                        { label: 'Media', value: 'Media' },
-                                        { label: 'ADS', value: 'ADS' },
-                                        { label: 'HCNS', value: 'HCNS' },
-                                        { label: 'Nhân viên KT (NVKT)', value: 'NVKT' },
-                                        { label: 'Lái xe (Driver)', value: 'Driver' },
-                                        { label: 'Marketing', value: 'Marketing' },
-                                        { label: 'Nhân viên (Khác)', value: 'Nhân viên' },
-                                    ]}
-                                    editValue={editForm.position}
-                                    onChange={(val) => setEditForm({ ...editForm, position: val })}
+                                    options={allPositions.map(p => ({ label: p.name, value: p.id }))}
+                                    editValue={editForm.positionId}
+                                    onChange={(val) => setEditForm({ ...editForm, positionId: val })}
                                 />
                                 <InfoField
                                     label="Phòng ban"
                                     icon={<Contact size={14} />}
-                                    value={employee.department}
+                                    value={employee.dept?.name || employee.department}
+                                    isEditing={isEditing}
+                                    type="select"
+                                    options={allDepartments.map(d => ({ label: d.name, value: d.id }))}
+                                    editValue={editForm.departmentId}
+                                    onChange={(val) => setEditForm({ ...editForm, departmentId: val })}
+                                />
+                                <InfoField
+                                    label="Chính sách riêng"
+                                    icon={<ShieldAlert size={14} />}
+                                    value={employee.attendancePolicy?.name || 'Theo mặc định'}
                                     isEditing={isEditing}
                                     type="select"
                                     options={[
-                                        { label: 'BGĐ', value: 'BGĐ' },
-                                        { label: 'MKT', value: 'MKT' },
-                                        { label: 'HCKT', value: 'HCKT' },
-                                        { label: 'Kỹ Thuật', value: 'Kỹ Thuật' },
-                                        { label: 'Kho', value: 'Kho' },
-                                        { label: 'Lái xe', value: 'Lái xe' },
-                                        { label: 'Phòng KD', value: 'Phòng KD' },
+                                        { label: '--- Theo Chức vụ ---', value: '' },
+                                        ...allAttendancePolicies.map(p => ({ label: p.name, value: p.id }))
                                     ]}
-                                    editValue={editForm.department}
-                                    onChange={(val) => setEditForm({ ...editForm, department: val })}
+                                    editValue={editForm.attendancePolicyId}
+                                    onChange={(val) => setEditForm({ ...editForm, attendancePolicyId: val })}
                                 />
                                 <InfoField
                                     label="Trạng thái"

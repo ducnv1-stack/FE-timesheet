@@ -97,10 +97,10 @@ function MultiSelect({
             {isOpen && (
                 <>
                     <div
-                        className="fixed inset-0 z-10"
+                        className="fixed inset-0 z-30"
                         onClick={() => setIsOpen(false)}
                     />
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-20 max-h-60 overflow-y-auto p-1 py-2">
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-40 max-h-60 overflow-y-auto p-1 py-2">
                         <div
                             onClick={() => {
                                 onChange([]);
@@ -355,7 +355,7 @@ export default function PerformancePage() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 relative z-30">
                     <div className="relative group col-span-1 md:col-span-1">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-rose-500 transition-colors" size={18} />
                         <input

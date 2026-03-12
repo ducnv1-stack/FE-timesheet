@@ -44,12 +44,12 @@ export default function SearchableSelect({
     }, []);
 
     return (
-        <div className={cn("relative h-[28px]", className)} ref={containerRef}>
+        <div className={cn("relative h-8 w-full min-w-0", className)} ref={containerRef}>
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
                 className={cn(
-                    "w-full pl-8 pr-2 h-full py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none flex items-center justify-between text-[10.5px] font-medium transition-colors group",
+                    "w-full pl-8 pr-2 h-full py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none flex items-center justify-between text-[11px] font-medium transition-colors group",
                     value !== allOption.value ? 'border-rose-300 font-bold bg-white' : 'border-slate-200'
                 )}
             >
@@ -61,7 +61,7 @@ export default function SearchableSelect({
                         })
                     ) : null}
                 </div>
-                <span className="truncate mr-2">
+                <span className="truncate mr-2 flex-1 text-left min-w-0">
                     {selectedOption ? selectedOption.label : placeholder}
                 </span>
                 <ChevronDown size={12} className={cn("text-slate-400 transition-transform shrink-0", isOpen && "rotate-180")} />

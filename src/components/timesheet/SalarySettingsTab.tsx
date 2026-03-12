@@ -5,14 +5,15 @@ import { cn } from '@/lib/utils';
 import ConfirmModal from '@/components/ui/confirm-modal';
 
 export default function SalarySettingsTab() {
-    const [roles, setRoles] = useState<any[]>([]);
+    const [positions, setPositions] = useState<any[]>([]);
     const [employees, setEmployees] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const { error: toastError } = useToast();
     
     // Manage local edits before saving
-    const [roleEdits, setRoleEdits] = useState<Record<string, any>>({});
+    const [posEdits, setPosEdits] = useState<Record<string, any>>({});
     const [empEdits, setEmpEdits] = useState<Record<string, any>>({});
+    const [savingPosId, setSavingPosId] = useState<string | null>(null);
     const [savingId, setSavingId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [showAddEmployeeList, setShowAddEmployeeList] = useState(false);
@@ -42,29 +43,29 @@ export default function SalarySettingsTab() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [rolesRes, empsRes] = await Promise.all([
-                fetch(`${API_URL}/roles`),
+            const [posRes, empsRes] = await Promise.all([
+                fetch(`${API_URL}/positions`),
                 fetch(`${API_URL}/employees`)
             ]);
             
-            const rolesData = await rolesRes.json();
+            const posData = await posRes.json();
             const empsData = await empsRes.json();
             
             const empsList = Array.isArray(empsData) ? empsData : (empsData?.data || []);
             
-            setRoles(rolesData);
+            setPositions(posData);
             setEmployees(empsList.filter((e: any) => e.status !== 'QUITTING'));
             
-            const rEdits: any = {};
-            rolesData.forEach((r: any) => {
-                rEdits[r.id] = { 
-                    baseSalary: r.baseSalary || 0, 
-                    diligentSalary: r.diligentSalary || 0,
-                    allowance: r.allowance || 0,
-                    standardWorkingDays: r.standardWorkingDays || 27 
+            const pEdits: any = {};
+            posData.forEach((p: any) => {
+                pEdits[p.id] = { 
+                    baseSalary: p.baseSalary || 0, 
+                    diligentSalary: p.diligentSalary || 0,
+                    allowance: p.allowance || 0,
+                    standardWorkingDays: p.standardWorkingDays || 27 
                 };
             });
-            setRoleEdits(rEdits);
+            setPosEdits(pEdits);
             
             const eEdits: any = {};
             empsList.forEach((e: any) => {
@@ -116,12 +117,12 @@ export default function SalarySettingsTab() {
         });
     }, [employees, empEdits, employeeSearchTerm]);
 
-    const handleRoleChange = (id: string, field: string, value: string) => {
+    const handlePosChange = (id: string, field: string, value: string) => {
         let finalValue: any = value;
         if (['baseSalary', 'diligentSalary', 'allowance'].includes(field)) {
             finalValue = parseCurrency(value);
         }
-        setRoleEdits(prev => ({
+        setPosEdits(prev => ({
             ...prev,
             [id]: { ...prev[id], [field]: finalValue }
         }));
@@ -138,11 +139,11 @@ export default function SalarySettingsTab() {
         }));
     };
 
-    const saveRole = async (roleId: string) => {
-        setSavingId(roleId);
+    const savePosition = async (posId: string) => {
+        setSavingPosId(posId);
         try {
-            const edit = roleEdits[roleId];
-            const res = await fetch(`${API_URL}/roles/${roleId}`, {
+            const edit = posEdits[posId];
+            const res = await fetch(`${API_URL}/positions/${posId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -154,16 +155,16 @@ export default function SalarySettingsTab() {
             });
             
             if (res.ok) {
-                const rIcon = document.getElementById(`r-icon-${roleId}`);
-                if (rIcon) {
-                    rIcon.style.opacity = '1';
-                    setTimeout(() => { rIcon.style.opacity = '0'; }, 2000);
+                const pIcon = document.getElementById(`p-icon-${posId}`);
+                if (pIcon) {
+                    pIcon.style.opacity = '1';
+                    setTimeout(() => { pIcon.style.opacity = '0'; }, 2000);
                 }
             }
         } catch (error) {
             toastError("Lỗi khi lưu lương Chức vụ");
         } finally {
-            setSavingId(null);
+            setSavingPosId(null);
         }
     };
 
@@ -301,20 +302,20 @@ export default function SalarySettingsTab() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
-                            {roles.map(r => (
-                                <tr key={r.id} className="group hover:bg-rose-50/30 transition-all duration-300">
+                            {positions.map(p => (
+                                <tr key={p.id} className="group hover:bg-rose-50/30 transition-all duration-300">
                                     <td className="px-4 py-1">
                                         <div>
-                                            <div className="font-bold text-slate-800 text-[11px] sm:text-xs group-hover:text-primary transition-colors tracking-tight leading-tight">{r.name}</div>
-                                            <span className="text-[8px] sm:text-[9px] text-slate-400 font-bold">{r.code}</span>
+                                            <div className="font-bold text-slate-800 text-[11px] sm:text-xs group-hover:text-primary transition-colors tracking-tight leading-tight">{p.name}</div>
+                                            <span className="text-[8px] sm:text-[9px] text-slate-400 font-bold">{p.note || 'Mặc định'}</span>
                                         </div>
                                     </td>
                                     <td className="px-4 py-1">
                                         <div className="relative group/input">
                                             <input 
                                                 type="text" 
-                                                value={formatCurrency(roleEdits[r.id]?.baseSalary)}
-                                                onChange={(e) => handleRoleChange(r.id, 'baseSalary', e.target.value)}
+                                                value={formatCurrency(posEdits[p.id]?.baseSalary)}
+                                                onChange={(e) => handlePosChange(p.id, 'baseSalary', e.target.value)}
                                                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[11px] sm:text-xs font-bold text-primary outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-[9px] shadow-inner group-hover:bg-white"
                                                 placeholder="Nhập..."
                                             />
@@ -324,8 +325,8 @@ export default function SalarySettingsTab() {
                                         <div className="relative group/input">
                                             <input 
                                                 type="text" 
-                                                value={formatCurrency(roleEdits[r.id]?.diligentSalary)}
-                                                onChange={(e) => handleRoleChange(r.id, 'diligentSalary', e.target.value)}
+                                                value={formatCurrency(posEdits[p.id]?.diligentSalary)}
+                                                onChange={(e) => handlePosChange(p.id, 'diligentSalary', e.target.value)}
                                                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[11px] sm:text-xs font-bold text-warning outline-none focus:border-warning focus:ring-4 focus:ring-warning/10 transition-all placeholder:text-[9px] shadow-inner group-hover:bg-white"
                                                 placeholder="Nhập..."
                                             />
@@ -335,8 +336,8 @@ export default function SalarySettingsTab() {
                                         <div className="relative group/input">
                                             <input 
                                                 type="text" 
-                                                value={formatCurrency(roleEdits[r.id]?.allowance)}
-                                                onChange={(e) => handleRoleChange(r.id, 'allowance', e.target.value)}
+                                                value={formatCurrency(posEdits[p.id]?.allowance)}
+                                                onChange={(e) => handlePosChange(p.id, 'allowance', e.target.value)}
                                                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[11px] sm:text-xs font-bold text-accent outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all placeholder:text-[9px] shadow-inner group-hover:bg-white"
                                                 placeholder="Nhập..."
                                             />
@@ -345,24 +346,24 @@ export default function SalarySettingsTab() {
                                     <td className="px-4 py-1">
                                         <input 
                                             type="number" 
-                                            value={roleEdits[r.id]?.standardWorkingDays || ''}
-                                            onChange={(e) => handleRoleChange(r.id, 'standardWorkingDays', e.target.value)}
+                                            value={posEdits[p.id]?.standardWorkingDays || ''}
+                                            onChange={(e) => handlePosChange(p.id, 'standardWorkingDays', e.target.value)}
                                             className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[11px] sm:text-xs font-bold text-slate-800 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50 transition-all group-hover:bg-white shadow-inner"
                                             placeholder="27"
                                         />
                                     </td>
                                     <td className="px-4 sm:px-6 py-1 text-center relative">
                                         <button 
-                                            onClick={() => saveRole(r.id)}
-                                            disabled={savingId === r.id}
+                                            onClick={() => savePosition(p.id)}
+                                            disabled={savingPosId === p.id}
                                             className={cn(
                                                 "w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 cursor-pointer mx-auto",
-                                                savingId === r.id ? "bg-slate-100 text-slate-400" : "bg-white text-rose-500 border border-rose-100 hover:bg-rose-500 hover:text-white hover:shadow-lg hover:shadow-rose-100 hover:-translate-y-0.5 active:translate-y-0"
+                                                savingPosId === p.id ? "bg-slate-100 text-slate-400" : "bg-white text-rose-500 border border-rose-100 hover:bg-rose-500 hover:text-white hover:shadow-lg hover:shadow-rose-100 hover:-translate-y-0.5 active:translate-y-0"
                                             )}
                                         >
-                                            {savingId === r.id ? <RefreshCw size={18} className="animate-spin" /> : <Save size={18} />}
+                                            {savingPosId === p.id ? <RefreshCw size={18} className="animate-spin" /> : <Save size={18} />}
                                         </button>
-                                        <div id={`r-icon-${r.id}`} className="absolute top-1/2 -right-2 -translate-y-1/2 opacity-0 transition-opacity text-emerald-500">
+                                        <div id={`p-icon-${p.id}`} className="absolute top-1/2 -right-2 -translate-y-1/2 opacity-0 transition-opacity text-emerald-500">
                                             <CheckCircle2 size={16} />
                                         </div>
                                     </td>
