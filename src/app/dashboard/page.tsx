@@ -184,15 +184,15 @@ export default function DashboardPage() {
                     <div className="h-8 w-[1px] bg-slate-200 hidden lg:block"></div>
 
                     <div className="flex items-center gap-1.5 bg-slate-50 p-1 rounded-2xl border border-slate-100 group focus-within:border-rose-200 transition-colors h-10">
-                        <FixedDatePicker 
-                            value={startDate} 
-                            onChange={setStartDate} 
+                        <FixedDatePicker
+                            value={startDate}
+                            onChange={setStartDate}
                             className="w-[110px] border-none !p-0 text-[11px]"
                         />
                         <ArrowRight size={12} className="text-slate-300 shrink-0" />
-                        <FixedDatePicker 
-                            value={endDate} 
-                            onChange={setEndDate} 
+                        <FixedDatePicker
+                            value={endDate}
+                            onChange={setEndDate}
                             className="w-[110px] border-none !p-0 text-[11px]"
                         />
                     </div>
