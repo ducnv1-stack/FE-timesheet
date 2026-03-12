@@ -150,21 +150,21 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     icon: Fingerprint,
                     href: '/employees/attendance',
                     active: pathname === '/employees/attendance',
-                    roleAccess: ['ADMIN', 'SALE', 'DRIVER']//, 'SALE', 'MANAGER', 'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR',
+                    roleAccess: ['ADMIN']//, 'SALE', 'MANAGER', 'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR',
                 },
                 {
                     label: 'Bảng công tháng',
                     icon: ClipboardList,
                     href: '/employees/timesheet',
                     active: pathname === '/employees/timesheet',
-                    roleAccess: ['ADMIN', 'SALE', 'DRIVER'] //, 'SALE', 'MANAGER', 'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR',
+                    roleAccess: ['ADMIN'] //, 'SALE', 'MANAGER', 'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR',
                 },
                 {
                     label: 'Cấu hình chấm công',
                     icon: Settings,
                     href: '/settings/attendance',
                     active: pathname === '/settings/attendance',
-                    roleAccess: ['ADMIN', 'HR', 'DIRECTOR']
+                    roleAccess: ['ADMIN']//, 'HR', 'DIRECTOR'
                 },
             ]
         },
