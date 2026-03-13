@@ -262,20 +262,29 @@ function OrdersPageContent() {
             }
 
             // Flat data for Excel
-            const exportData = rawOrders.map((o: any) => {
+            const exportData = rawOrders.flatMap((o: any) => {
                 const totalPaid = o.payments?.reduce((sum: number, p: any) => sum + Number(p.amount), 0) || 0;
                 const remaining = Number(o.totalAmount) - totalPaid;
 
-                // Products string
-                const productList = o.items?.map((i: any) => `${i.product?.name || 'SP'} (SL: ${i.quantity})`).join(', ') || '';
-                const productSellPrices = o.items?.map((i: any) => new Intl.NumberFormat('vi-VN').format(Number(i.unitPrice))).join(', ') || '';
-                const productMinPrices = o.items?.map((i: any) => new Intl.NumberFormat('vi-VN').format(Number(i.minPriceAtSale))).join(', ') || '';
-
-                // Gifts string
-                const giftList = o.gifts?.map((g: any) => `${g.gift?.name || 'Quà'} (SL: ${g.quantity})`).join(', ') || '';
-
-                // Staff Split string
-                const staffSplits = o.splits?.map((s: any) => `${s.employee?.fullName} (${s.splitPercent}%)`).join(', ') || '';
+                // Combine products and gifts
+                const allItems = [
+                    ...(o.items || []).map((i: any) => ({
+                        name: i.product?.name || 'SP',
+                        quantity: i.quantity,
+                        unitPrice: Number(i.unitPrice),
+                        minPrice: Number(i.minPriceAtSale),
+                        isBelowMin: i.isBelowMin,
+                        type: 'PRODUCT'
+                    })),
+                    ...(o.gifts || []).map((g: any) => ({
+                        name: g.gift?.name || 'Quà',
+                        quantity: g.quantity,
+                        unitPrice: 0,
+                        minPrice: 0,
+                        isBelowMin: false,
+                        type: 'GIFT'
+                    }))
+                ];
 
                 // Address
                 const fullAddress = [
@@ -337,39 +346,124 @@ function OrdersPageContent() {
                 // Payment methods in Vietnamese
                 const paymentMethods = Array.from(new Set(o.payments?.map((p: any) => paymentMethodMap[p.paymentMethod] || p.paymentMethod))).join(', ');
 
-                return {
-                    'Mã đơn hàng': o.id,
-                    'Ngày đơn hàng': formatDate(o.orderDate),
-                    'Ngày cập nhật': formatDateTime(o.updatedAt),
-                    'Họ tên khách hàng': o.customerName,
-                    'Số điện thoại': o.customerPhone,
-                    'Địa chỉ chi tiết': o.customerAddress || '',
-                    'Xã/Phường': o.ward?.name || '',
-                    'Tỉnh/Thành phố': o.province?.name || '',
-                    'CCCD/CMND khách': o.customerCardNumber || '',
-                    'Ngày cấp CCCD': o.customerCardIssueDate ? formatDate(o.customerCardIssueDate) : '',
-                    'Đơn giá dưới Min': o.items?.some((i: any) => i.isBelowMin) ? 'CÓ' : 'Không',
-                    'Người tạo đơn': `${o.creator?.employee?.fullName || 'N/A'} [${o.creator?.employee?.position || ''}]`,
-                    'Nhân viên được chia': staffSplits,
-                    'Danh sách sản phẩm': productList,
-                    'Đơn giá bán': productSellPrices,
-                    'Giá bán tối thiểu (Min)': productMinPrices,
-                    'Danh sách quà tặng': giftList,
-                    'Ghi chú': o.note || '',
-                    'Tổng tiền đơn': Number(o.totalAmount),
-                    'Đã thanh toán': totalPaid,
-                    'Còn nợ': remaining,
-                    'Phương thức thanh toán': paymentMethods,
-                    'Xác nhận tiền': o.isPaymentConfirmed ? 'Đã xác nhận' : 'Chưa',
-                    'Hóa đơn VAT': o.isInvoiceIssued ? 'Đã xuất' : 'Chưa',
-                    'Hình thức giao': deliveryCategories,
-                    'Tài xế': driverNames,
-                    'Chi phí tài xế': driverFees,
-                    'Nhân viên giao': staffDeliveryNames,
-                    'Phí ship nhân viên': staffDeliveryFees,
-                    'Tổng phí ship': totalShipFee,
-                    'Trạng thái đơn hàng': statusMap[o.status] || o.status
-                };
+                // Create rows for each item and split
+                const rows: any[] = [];
+                const creatorEmployeeId = o.creator?.employee?.id;
+                const splits = o.splits?.length > 0 ? o.splits : [{ employee: o.creator?.employee, splitPercent: 100 }];
+                let isFirstRow = true;
+
+                allItems.forEach((item: any) => {
+                    // Gifts only for creator
+                    if (item.type === 'GIFT') {
+                        const weightedUnitPrice = 0;
+                        const weightedMinPrice = 0;
+                        
+                        rows.push({
+                            'Mã đơn hàng': o.id,
+                            'Ngày đơn hàng': formatDate(o.orderDate),
+                            'Ngày cập nhật': formatDateTime(o.updatedAt),
+                            'Họ tên khách hàng': o.customerName,
+                            'Số điện thoại': o.customerPhone,
+                            'Địa chỉ chi tiết': o.customerAddress || '',
+                            'Xã/Phường': o.ward?.name || '',
+                            'Tỉnh/Thành phố': o.province?.name || '',
+                            'CCCD/CMND khách': o.customerCardNumber || '',
+                            'Ngày cấp CCCD': o.customerCardIssueDate ? formatDate(o.customerCardIssueDate) : '',
+                            'Đơn giá dưới Min': 'Không',
+                            'Người tạo đơn': `${o.creator?.employee?.fullName || 'N/A'} [${o.creator?.employee?.position || ''}]`,
+                            'Nhân viên được chia': `${o.creator?.employee?.fullName || 'N/A'} (Quà tặng)`,
+                            'Danh sách sản phẩm': item.name,
+                            'Số lượng': isFirstRow ? 1 : 0,
+                            'Đơn giá bán': weightedUnitPrice,
+                            'Giá bán tối thiểu (Min)': weightedMinPrice,
+                            'Ghi chú': o.note || '',
+                            'Tổng tiền đơn': isFirstRow ? Number(o.totalAmount) : 0,
+                            'Đã thanh toán': isFirstRow ? totalPaid : 0,
+                            'Còn nợ': isFirstRow ? remaining : 0,
+                            'Phương thức thanh toán': paymentMethods,
+                            'Xác nhận tiền': o.isPaymentConfirmed ? 'Đã xác nhận' : 'Chưa',
+                            'Hóa đơn VAT': o.isInvoiceIssued ? 'Đã xuất' : 'Chưa',
+                            'Hình thức giao': deliveryCategories,
+                            'Tài xế': driverNames,
+                            'Chi phí tài xế': driverFees,
+                            'Nhân viên giao': staffDeliveryNames,
+                            'Phí ship nhân viên': staffDeliveryFees,
+                            'Tổng phí ship': totalShipFee,
+                            'Trạng thái đơn hàng': statusMap[o.status] || o.status
+                        });
+                        isFirstRow = false;
+                        return;
+                    }
+
+                    // Products split among employees
+                    splits.forEach((split: any) => {
+                        const splitPercent = Number(split.splitPercent) || 0;
+                        const weightedUnitPrice = (item.unitPrice * splitPercent) / 100;
+                        const weightedMinPrice = (item.minPrice * splitPercent) / 100;
+
+                        rows.push({
+                            'Mã đơn hàng': o.id,
+                            'Ngày đơn hàng': formatDate(o.orderDate),
+                            'Ngày cập nhật': formatDateTime(o.updatedAt),
+                            'Họ tên khách hàng': o.customerName,
+                            'Số điện thoại': o.customerPhone,
+                            'Địa chỉ chi tiết': o.customerAddress || '',
+                            'Xã/Phường': o.ward?.name || '',
+                            'Tỉnh/Thành phố': o.province?.name || '',
+                            'CCCD/CMND khách': o.customerCardNumber || '',
+                            'Ngày cấp CCCD': o.customerCardIssueDate ? formatDate(o.customerCardIssueDate) : '',
+                            'Đơn giá dưới Min': item.isBelowMin ? 'CÓ' : 'Không',
+                            'Người tạo đơn': `${o.creator?.employee?.fullName || 'N/A'} [${o.creator?.employee?.position || ''}]`,
+                            'Nhân viên được chia': `${split.employee?.fullName || 'N/A'} (${splitPercent}%)`,
+                            'Danh sách sản phẩm': `${item.name} (SL: ${item.quantity})`,
+                            'Số lượng': isFirstRow ? 1 : 0,
+                            'Đơn giá bán': weightedUnitPrice,
+                            'Giá bán tối thiểu (Min)': weightedMinPrice,
+                            'Ghi chú': o.note || '',
+                            'Tổng tiền đơn': isFirstRow ? Number(o.totalAmount) : 0,
+                            'Đã thanh toán': isFirstRow ? totalPaid : 0,
+                            'Còn nợ': isFirstRow ? remaining : 0,
+                            'Phương thức thanh toán': paymentMethods,
+                            'Xác nhận tiền': o.isPaymentConfirmed ? 'Đã xác nhận' : 'Chưa',
+                            'Hóa đơn VAT': o.isInvoiceIssued ? 'Đã xuất' : 'Chưa',
+                            'Hình thức giao': deliveryCategories,
+                            'Tài xế': driverNames,
+                            'Chi phí tài xế': driverFees,
+                            'Nhân viên giao': staffDeliveryNames,
+                            'Phí ship nhân viên': staffDeliveryFees,
+                            'Tổng phí ship': totalShipFee,
+                            'Trạng thái đơn hàng': statusMap[o.status] || o.status
+                        });
+                        isFirstRow = false;
+                    });
+                });
+
+                // If no items/gifts, create at least one row for order info
+                if (rows.length === 0) {
+                     splits.forEach((split: any) => {
+                        const currentIsFirstRow = isFirstRow;
+                        rows.push({
+                            'Mã đơn hàng': o.id,
+                            'Ngày đơn hàng': formatDate(o.orderDate),
+                            'Ngày cập nhật': formatDateTime(o.updatedAt),
+                            'Họ tên khách hàng': o.customerName,
+                            'Số điện thoại': o.customerPhone,
+                            'Địa chỉ chi tiết': o.customerAddress || '',
+                            'Xã/Phường': o.ward?.name || '',
+                            'Tỉnh/Thành phố': o.province?.name || '',
+                            'Người tạo đơn': `${o.creator?.employee?.fullName || 'N/A'} [${o.creator?.employee?.position || ''}]`,
+                            'Nhân viên được chia': `${split.employee?.fullName || 'N/A'} (${split.splitPercent}%)`,
+                            'Số lượng': currentIsFirstRow ? 1 : 0,
+                            'Tổng tiền đơn': currentIsFirstRow ? Number(o.totalAmount) : 0,
+                            'Đã thanh toán': currentIsFirstRow ? totalPaid : 0,
+                            'Còn nợ': currentIsFirstRow ? remaining : 0,
+                            'Trạng thái đơn hàng': statusMap[o.status] || o.status
+                        });
+                        isFirstRow = false;
+                    });
+                }
+
+                return rows;
             });
 
             const ws = XLSX.utils.json_to_sheet(exportData);
