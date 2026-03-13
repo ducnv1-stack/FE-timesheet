@@ -80,11 +80,6 @@ export default function EmployeeSearchSelector({
         return "(+70k)";
     };
 
-    const getSelectedLabel = () => {
-        if (!selectedEmployee) return null;
-        if (selectedEmployee.position === 'NVGH') return 'NVGH';
-        return selectedEmployee.position || 'NV';
-    };
 
     return (
         <div className={cn("relative w-full", isOpen && "z-[50]")} ref={containerRef}>
@@ -101,14 +96,6 @@ export default function EmployeeSearchSelector({
                     {selectedEmployee ? (
                         <>
                             <span className="truncate">{selectedEmployee.fullName}</span>
-                            <span className={cn(
-                                "text-[9px] font-black px-1.5 py-0.5 rounded-full shrink-0",
-                                selectedEmployee.position === 'NVGH'
-                                    ? "bg-amber-100 text-amber-700"
-                                    : "bg-blue-100 text-blue-700"
-                            )}>
-                                {getSelectedLabel()}
-                            </span>
                             {showFee && <span className="text-rose-600 font-bold shrink-0">{getFeeLabel(selectedEmployee)}</span>}
                         </>
                     ) : (

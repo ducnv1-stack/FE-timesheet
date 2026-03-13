@@ -1,5 +1,4 @@
-"use client";
-
+import { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, UserPlus, AlertCircle } from 'lucide-react';
 import { Employee, Branch, OrderSplit } from '@/types/order';
 import { formatCurrency, formatNumber, parseNumber, cn } from '@/lib/utils';
@@ -14,6 +13,20 @@ interface SplitManagerProps {
 }
 
 export default function SplitManager({ splits, employees, branches, totalOrderAmount, onChange }: SplitManagerProps) {
+    const prevTotalRef = useRef(totalOrderAmount);
+
+    // Effect to handle totalOrderAmount changes - prioritize percentages
+    useEffect(() => {
+        if (prevTotalRef.current !== totalOrderAmount && splits.length > 0) {
+            const newSplits = splits.map(split => ({
+                ...split,
+                splitAmount: Number(((split.splitPercent * totalOrderAmount) / 100).toFixed(0))
+            }));
+            onChange(newSplits);
+        }
+        prevTotalRef.current = totalOrderAmount;
+    }, [totalOrderAmount, splits.length, onChange]);
+
     const addSplit = () => {
         onChange([...splits, { employeeId: '', branchId: '', splitPercent: 0, splitAmount: 0 }]);
     };
@@ -31,8 +44,16 @@ export default function SplitManager({ splits, employees, branches, totalOrderAm
             const percent = totalOrderAmount > 0 ? (val / totalOrderAmount) * 100 : 0;
             newSplits[index] = {
                 ...newSplits[index],
-                [field]: val,
+                splitAmount: val,
                 splitPercent: Number(percent.toFixed(2))
+            };
+        } else if (field === 'splitPercent') {
+            val = Number(value);
+            const amount = (val * totalOrderAmount) / 100;
+            newSplits[index] = {
+                ...newSplits[index],
+                splitPercent: val,
+                splitAmount: Number(amount.toFixed(0))
             };
         } else {
             newSplits[index] = { ...newSplits[index], [field]: val };
@@ -114,12 +135,23 @@ export default function SplitManager({ splits, employees, branches, totalOrderAm
                                     type="text"
                                     value={split.splitAmount === 0 ? '' : formatNumber(split.splitAmount)}
                                     onChange={(e) => updateSplit(index, 'splitAmount', parseNumber(e.target.value))}
-                                    className="w-full border-none p-0 text-xs font-bold text-slate-700 focus:ring-0 focus:outline-none bg-transparent"
-                                    placeholder="Doanh số..."
+                                    className="w-full border-none p-0 text-xs font-bold text-slate-700 focus:ring-0 focus:outline-none bg-transparent placeholder:text-[9px] placeholder:font-normal"
+                                    placeholder="Số tiền..."
                                 />
                             </div>
-                            <div className="text-[9px] text-slate-400 font-medium whitespace-nowrap">
-                                {split.splitPercent}%
+                            <div className="w-16 bg-white border border-slate-200 rounded px-2 py-0.5 focus-within:ring-2 focus-within:ring-rose-500 transition-all">
+                                <span className="text-[8px] text-slate-400 font-bold block uppercase tracking-wider">Tỷ lệ</span>
+                                <div className="flex items-center">
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        value={split.splitPercent || ''}
+                                        onChange={(e) => updateSplit(index, 'splitPercent', e.target.value)}
+                                        className="w-full border-none p-0 text-xs font-bold text-slate-700 focus:ring-0 focus:outline-none bg-transparent placeholder:text-[9px] placeholder:font-normal"
+                                        placeholder="VD: 50"
+                                    />
+                                    <span className="text-[10px] font-bold text-slate-400 ml-0.5">%</span>
+                                </div>
                             </div>
                         </div>
                     </div>
