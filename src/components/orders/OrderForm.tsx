@@ -190,9 +190,10 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
                 }
 
                 if (user.employee) {
+                    const userBranchId = user.employee.branchId || user.employee.branch?.id;
                     setOrder(prev => ({
                         ...prev,
-                        branchId: user.employee.branchId || (branchesData.length > 0 ? branchesData[0].id : ''),
+                        branchId: userBranchId || (branchesData.length > 0 ? branchesData[0].id : ''),
                         staffCode: user.employee.id || '',
                     }));
                 } else if (branchesData.length > 0) {

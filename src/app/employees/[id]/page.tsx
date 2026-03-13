@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import {
     ArrowLeft, Save, UserPlus, Key, Lock, Unlock, TrendingUp, Edit, X, Calendar, ChevronDown,
     Phone, Mail, MapPin, Briefcase, Building2, User2, BadgeCheck, ShieldAlert, GraduationCap,
-    Clock, CreditCard, Heart, Contact, Camera
+    Clock, CreditCard, Heart, Contact, Camera, Trash2
 } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
 import ConfirmModal from '@/components/ui/confirm-modal';
@@ -427,6 +427,34 @@ export default function EmployeeDetailPage() {
         });
     };
 
+    const handleDeleteEmployee = () => {
+        if (!employee) return;
+        setConfirmModal({
+            isOpen: true,
+            title: 'Xóa nhân viên',
+            message: `Bạn có chắc chắn muốn xóa nhân viên "${employee.fullName}"? Hành động này sẽ xóa vĩnh viễn toàn bộ dữ liệu liên quan và không thể hoàn tác.`,
+            isDanger: true,
+            onConfirm: async () => {
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                try {
+                    const res = await fetch(`${API_URL}/employees/${params.id}?roleCode=${currentUser?.role?.code}`, {
+                        method: 'DELETE',
+                    });
+
+                    if (!res.ok) {
+                        const errorData = await res.json();
+                        throw new Error(errorData.message || 'Xóa nhân viên thất bại');
+                    }
+
+                    success('Đã xóa nhân viên thành công!');
+                    router.push('/employees');
+                } catch (error: any) {
+                    toastError(error.message);
+                }
+            }
+        });
+    };
+
     const fetchPerformanceStats = async () => {
         try {
             const res = await fetch(`${API_URL}/employees/${params.id}/performance?month=${perfMonth}&year=${perfYear}`);
@@ -561,6 +589,15 @@ export default function EmployeeDetailPage() {
                                         <Edit size={16} />
                                         CHỈNH SỬA
                                     </button>
+                                    {currentUser?.role?.code === 'ADMIN' && (
+                                        <button
+                                            onClick={handleDeleteEmployee}
+                                            className="flex items-center gap-2 px-5 py-3 bg-rose-50 border-2 border-rose-100 text-rose-600 font-black text-xs rounded-2xl hover:bg-rose-600 hover:text-white transition-all shadow-sm active:scale-95 cursor-pointer"
+                                        >
+                                            <Trash2 size={16} />
+                                            XÓA NHÂN VIÊN
+                                        </button>
+                                    )}
                                 </>
                             ) : (
                                 <>

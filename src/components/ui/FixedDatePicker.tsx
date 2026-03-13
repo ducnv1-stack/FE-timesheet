@@ -19,37 +19,15 @@ const FixedDatePicker: React.FC<FixedDatePickerProps> = ({
     placeholder = "Chọn ngày",
     disabled = false
 }) => {
-    const inputRef = useRef<HTMLInputElement>(null);
-
     const displayValue = value ? formatDate(value) : "";
-
-    const handleClick = (e: React.MouseEvent) => {
-        if (disabled) return;
-        
-        const input = inputRef.current as any;
-        if (input) {
-            try {
-                if ('showPicker' in input) {
-                    input.showPicker();
-                } else {
-                    input.focus();
-                    input.click();
-                }
-            } catch (err) {
-                input.focus();
-                input.click();
-            }
-        }
-    };
 
     return (
         <div 
             className={cn(
-                "relative group cursor-pointer flex items-center justify-between bg-white border border-slate-200 rounded px-2 py-0.5 font-medium text-slate-900 hover:border-rose-300 transition-all",
+                "relative group flex items-center justify-between bg-white border border-slate-200 rounded px-2 py-0.5 font-medium text-slate-900 hover:border-rose-300 transition-all",
                 disabled && "opacity-60 cursor-not-allowed",
                 className
             )}
-            onClick={handleClick}
         >
             {/* Lớp hiển thị (UI layer) */}
             <span className={cn(
@@ -60,16 +38,16 @@ const FixedDatePicker: React.FC<FixedDatePickerProps> = ({
             </span>
             <Calendar size={14} className="ml-2 text-slate-400 group-hover:text-rose-500 transition-colors shrink-0" />
 
-            {/* Input gốc (Logic layer - Ẩn nhưng vẫn nhận sự kiện) */}
+            {/* Input gốc (Logic layer - Nằm đè lên trên để nhận click trực tiếp) */}
             <input
-                ref={inputRef}
                 type="date"
                 value={value || ""}
                 onChange={(e) => onChange(e.target.value)}
                 disabled={disabled}
-                className="absolute inset-0 opacity-0 w-full h-full appearance-none pointer-events-none"
-                tabIndex={-1}
-                onClick={(e) => e.stopPropagation()} 
+                className={cn(
+                    "absolute inset-0 opacity-0 w-full h-full appearance-none cursor-pointer z-10",
+                    disabled && "cursor-not-allowed"
+                )}
             />
         </div>
     );

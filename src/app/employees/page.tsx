@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Users, Plus, Search, Filter, FileSpreadsheet, Download, Building2, UserCheck, ShieldCheck } from 'lucide-react';
+import { Users, Plus, Search, Filter, FileSpreadsheet, Download, Building2, UserCheck, ShieldCheck, Trash2 } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
+import ConfirmModal from '@/components/ui/confirm-modal';
 import * as XLSX from 'xlsx';
 import { formatDate } from '@/lib/utils';
 import SearchableSelect from '@/components/ui/SearchableSelect';
@@ -44,24 +45,48 @@ interface Branch {
     name: string;
 }
 
+interface Role {
+    id: string;
+    code: string;
+    name: string;
+    count: number;
+}
+
 export default function EmployeesPage() {
     const router = useRouter();
     const [employees, setEmployees] = useState<Employee[]>([]);
     const [branches, setBranches] = useState<Branch[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentUser, setCurrentUser] = useState<any>(null);
-    const { error: toastError } = useToast();
+    const { success: toastSuccess, error: toastError } = useToast();
 
     // Filters
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedBranch, setSelectedBranch] = useState('');
     const [selectedPosition, setSelectedPosition] = useState('');
     const [selectedDepartment, setSelectedDepartment] = useState('');
+    const [selectedRole, setSelectedRole] = useState('');
+    const [roles, setRoles] = useState<Role[]>([]);
+    const [accountSummary, setAccountSummary] = useState<Role[]>([]);
     const [allDepartments, setAllDepartments] = useState<any[]>([]);
     const [allPositions, setAllPositions] = useState<any[]>([]);
     const [selectedStatus, setSelectedStatus] = useState('');
     const [hasAccountFilter, setHasAccountFilter] = useState('');
     const [showMobileFilters, setShowMobileFilters] = useState(false);
+
+    // Confirm modal state
+    const [confirmModal, setConfirmModal] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+        isDanger?: boolean;
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: () => { },
+    });
 
     useEffect(() => {
         const user = localStorage.getItem('user');
@@ -92,6 +117,8 @@ export default function EmployeesPage() {
         fetchBranches();
         fetchDepartments();
         fetchPositions();
+        fetchRoles();
+        fetchAccountSummary();
     }, []);
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -180,6 +207,26 @@ export default function EmployeesPage() {
         }
     };
 
+    const fetchRoles = async () => {
+        try {
+            const res = await fetch(`${API_URL}/roles`);
+            const data = await res.json();
+            setRoles(data);
+        } catch (error) {
+            console.error('Error fetching roles:', error);
+        }
+    };
+
+    const fetchAccountSummary = async () => {
+        try {
+            const res = await fetch(`${API_URL}/employees/account-summary`);
+            const data = await res.json();
+            setAccountSummary(data);
+        } catch (error) {
+            console.error('Error fetching account summary:', error);
+        }
+    };
+
     const fetchEmployees = async () => {
         setLoading(true);
         try {
@@ -188,6 +235,7 @@ export default function EmployeesPage() {
             if (selectedBranch) params.append('branchId', selectedBranch);
             if (selectedPosition) params.append('positionId', selectedPosition);
             if (selectedDepartment) params.append('departmentId', selectedDepartment);
+            if (selectedRole) params.append('roleId', selectedRole);
             if (selectedStatus) params.append('status', selectedStatus);
             if (hasAccountFilter) params.append('hasAccount', hasAccountFilter);
 
@@ -211,6 +259,7 @@ export default function EmployeesPage() {
         setSearchTerm('');
         setSelectedPosition('');
         setSelectedDepartment('');
+        setSelectedRole('');
         setSelectedStatus('');
         setHasAccountFilter('');
 
@@ -227,13 +276,40 @@ export default function EmployeesPage() {
         if (currentUser) {
             fetchEmployees();
         }
-    }, [currentUser, selectedBranch, selectedPosition, selectedDepartment, selectedStatus, hasAccountFilter]);
+    }, [currentUser, selectedBranch, selectedPosition, selectedDepartment, selectedRole, selectedStatus, hasAccountFilter]);
 
     const filteredEmployees = employees.filter(emp =>
         emp.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         emp.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         emp.user?.username?.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    const handleDeleteEmployee = (id: string, name: string) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Xóa nhân viên',
+            message: `Bạn có chắc chắn muốn xóa nhân viên "${name}"? Hành động này sẽ xóa vĩnh viễn toàn bộ dữ liệu liên quan và không thể hoàn tác.`,
+            isDanger: true,
+            onConfirm: async () => {
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                try {
+                    const res = await fetch(`${API_URL}/employees/${id}?roleCode=${currentUser?.role?.code}`, {
+                        method: 'DELETE',
+                    });
+
+                    if (!res.ok) {
+                        const errorData = await res.json();
+                        throw new Error(errorData.message || 'Xóa nhân viên thất bại');
+                    }
+
+                    toastSuccess('Đã xóa nhân viên thành công!');
+                    fetchEmployees();
+                } catch (error: any) {
+                    toastError(error.message);
+                }
+            }
+        });
+    };
 
     const cn = (...classes: any[]) => classes.filter(Boolean).join(' ');
 
@@ -319,7 +395,7 @@ export default function EmployeesPage() {
                             onClick={() => setShowMobileFilters(!showMobileFilters)}
                             className={cn(
                                 "flex items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all border shrink-0 cursor-pointer",
-                                showMobileFilters || selectedBranch || selectedPosition || selectedDepartment || selectedStatus || hasAccountFilter
+                                showMobileFilters || selectedBranch || selectedPosition || selectedDepartment || selectedRole || selectedStatus || hasAccountFilter
                                     ? "bg-rose-600 text-white border-rose-600 shadow-md"
                                     : "bg-white text-slate-600 border-slate-200"
                             )}
@@ -333,7 +409,7 @@ export default function EmployeesPage() {
                         "transition-all duration-300",
                         showMobileFilters ? "max-h-[1000px] opacity-100 overflow-hidden" : "max-h-0 opacity-0 overflow-hidden lg:max-h-none lg:opacity-100 lg:overflow-visible"
                     )}>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-2 pt-1 lg:pt-0">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-2 pt-1 lg:pt-0">
                             <div className="min-w-0">
                                 <label className="block text-[10px] font-semibold text-slate-700 mb-1">
                                     Tìm kiếm
@@ -344,7 +420,7 @@ export default function EmployeesPage() {
                                         type="text"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        placeholder="Tên, SĐT, tài khoản..."
+                                        placeholder="Họ tên, SĐT..."
                                         className="w-full pl-8 pr-3 h-8 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-slate-50 font-medium"
                                     />
                                 </div>
@@ -424,6 +500,23 @@ export default function EmployeesPage() {
                                     <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" />
                                 </div>
                             </div>
+
+                            {/* Role Filter - ADMIN ONLY */}
+                            {currentUser?.role?.code === 'ADMIN' && (
+                                <div className="min-w-0">
+                                    <label className="block text-[10px] font-semibold text-slate-700 mb-1">
+                                        Vai Trò (Tài khoản)
+                                    </label>
+                                    <SearchableSelect
+                                        options={roles.map(r => ({ label: r.name, value: r.id }))}
+                                        value={selectedRole || 'all'}
+                                        onSelect={(val) => setSelectedRole(val === 'all' ? '' : val)}
+                                        placeholder="Tất cả vai trò"
+                                        icon={<ShieldCheck />}
+                                        allOption={{ label: 'Tất cả vai trò', value: 'all' }}
+                                    />
+                                </div>
+                            )}
 
                             {/* Has Account Filter */}
                             <div className="min-w-0">
@@ -545,6 +638,18 @@ export default function EmployeesPage() {
                                                         >
                                                             Xem
                                                         </button>
+                                                        {currentUser?.role?.code === 'ADMIN' && (
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleDeleteEmployee(emp.id, emp.fullName);
+                                                                }}
+                                                                className="p-1.5 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-600 hover:text-white transition-all cursor-pointer"
+                                                                title="Xóa nhân viên"
+                                                            >
+                                                                <Trash2 className="w-3.5 h-3.5" />
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </td>
                                             </tr>
@@ -556,11 +661,52 @@ export default function EmployeesPage() {
                     )}
                 </div>
 
-                {/* Summary */}
-                <div className="mt-2 text-center text-[11px] text-slate-600">
-                    Tổng số: <span className="font-bold text-slate-900">{filteredEmployees.length}</span> nhân viên
+                {/* Summary & Account Stats - ADMIN ONLY */}
+                <div className="mt-3 flex flex-col md:flex-row items-start justify-between gap-3">
+                    <div className="text-[11px] text-slate-600 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
+                        Tổng số: <span className="font-bold text-slate-900">{filteredEmployees.length}</span> nhân viên
+                    </div>
+
+                    {currentUser?.role?.code === 'ADMIN' && (
+                        <div className="flex-1 w-full bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                            <div className="flex items-center gap-1.5 mb-2 border-b border-slate-100 pb-1.5">
+                                <ShieldCheck className="w-3.5 h-3.5 text-rose-500" />
+                                <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-wider">Thống kê tài khoản (Vai trò)</h3>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {accountSummary.map((role) => (
+                                    <div
+                                        key={role.id}
+                                        className={cn(
+                                            "flex items-center gap-1.5 px-2 py-1 rounded-md border transition-all cursor-pointer",
+                                            selectedRole === role.id
+                                                ? "bg-rose-50 border-rose-200 scale-105 shadow-sm"
+                                                : "bg-slate-50 border-slate-100 hover:bg-slate-100 hover:border-slate-200"
+                                        )}
+                                        onClick={() => setSelectedRole(selectedRole === role.id ? '' : role.id)}
+                                    >
+                                        <span className="text-[10px] font-bold text-slate-700">{role.name}:</span>
+                                        <span className={cn(
+                                            "text-[10px] font-black px-1.5 py-0.5 rounded-full",
+                                            role.count > 0 ? "bg-rose-600 text-white" : "bg-slate-200 text-slate-500"
+                                        )}>
+                                            {role.count}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                isDanger={confirmModal.isDanger}
+                onConfirm={confirmModal.onConfirm}
+                onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+            />
         </div>
     );
 }

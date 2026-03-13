@@ -114,10 +114,13 @@ export default function NewEmployeePage() {
         setSaving(true);
         try {
             // Build payload, convert empty strings to undefined
+            // Find position name for legacy 'position' field
+            const selectedPos = allPositions.find(p => p.id === form.positionId);
             const payload: any = {
                 fullName: form.fullName.trim(),
                 branchId: form.branchId,
                 positionId: form.positionId,
+                position: selectedPos?.name || 'Nhân viên', // Fallback to 'Nhân viên' if not found
                 departmentId: form.departmentId || null,
             };
 
