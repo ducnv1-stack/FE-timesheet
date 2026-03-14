@@ -103,7 +103,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     icon: History,
                     href: '/orders',
                     active: pathname === '/orders',
-                    roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'SALE', 'DRIVER', 'ADMIN']
+                    roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'SALE', 'DRIVER', 'ADMIN', 'TECHNICIAN', 'WAREHOUSE']
                 },
                 {
                     label: 'Báo cáo doanh số',
@@ -123,14 +123,14 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     icon: LayoutGrid,
                     href: '/warehouse/inventory',
                     active: pathname === '/warehouse/inventory',
-                    roleAccess: ['ADMIN'] //'DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 
+                    roleAccess: ['ADMIN', 'WAREHOUSE', 'DIRECTOR', 'MANAGER']
                 },
                 {
                     label: 'Lịch sử giao dịch',
                     icon: History,
                     href: '/warehouse/transactions',
                     active: pathname === '/warehouse/transactions',
-                    roleAccess: ['ADMIN'] //'DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 
+                    roleAccess: ['ADMIN', 'WAREHOUSE', 'DIRECTOR', 'MANAGER']
                 },
             ]
         },
@@ -150,14 +150,14 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     icon: Fingerprint,
                     href: '/employees/attendance',
                     active: pathname === '/employees/attendance',
-                    roleAccess: ['ADMIN']//, 'SALE', 'MANAGER', 'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR',
+                    roleAccess: ['ADMIN', 'TECHNICIAN', 'WAREHOUSE', 'SALE', 'DRIVER', 'MANAGER', 'DIRECTOR']
                 },
                 {
                     label: 'Bảng công tháng',
                     icon: ClipboardList,
                     href: '/employees/timesheet',
                     active: pathname === '/employees/timesheet',
-                    roleAccess: ['ADMIN'] //, 'SALE', 'MANAGER', 'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR',
+                    roleAccess: ['ADMIN', 'TECHNICIAN', 'WAREHOUSE', 'SALE', 'DRIVER', 'MANAGER', 'DIRECTOR']
                 },
                 {
                     label: 'Cấu hình chấm công',

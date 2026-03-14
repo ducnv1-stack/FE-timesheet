@@ -128,8 +128,10 @@ export default function AttendancePage() {
                 let msg = 'Không thể lấy vị trí của bạn';
                 if (error.code === 1) {
                     msg = 'Vui lòng cho phép quyền truy cập vị trí';
-                    setGpsError(true);
+                } else if (error.code === 3) {
+                    msg = 'Thời gian lấy vị trí quá lâu, vui lòng thử lại';
                 }
+                setGpsError(true);
                 toastError(msg);
                 setLoading(false);
             },
@@ -139,6 +141,18 @@ export default function AttendancePage() {
 
     const renderButton = () => {
         const baseClass = "w-full py-6 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all duration-300 shadow-lg active:scale-95 cursor-pointer";
+
+        if (gpsError) {
+            return (
+                <button onClick={() => { setGpsError(false); handleAction(); }} className={cn(baseClass, "bg-slate-800 hover:bg-slate-900 text-white animate-in zoom-in-95 duration-300")}>
+                    <MapPin className="animate-pulse" size={32} />
+                    <span className="text-xl font-bold text-center px-4">Bật GPS / Thử lại lần nữa</span>
+                    <span className="text-xs opacity-80 text-center px-6 leading-relaxed">
+                        Vui lòng cho phép quyền vị trí trong cài đặt trình duyệt để hệ thống có thể xác thực.
+                    </span>
+                </button>
+            );
+        }
 
         switch (state) {
             case 'INITIAL':
@@ -183,15 +197,6 @@ export default function AttendancePage() {
                     </div>
                 );
             default:
-                if (gpsError) {
-                    return (
-                        <button onClick={() => { setGpsError(false); handleAction(); }} className={cn(baseClass, "bg-slate-800 hover:bg-slate-900 text-white animate-in zoom-in-95 duration-300")}>
-                            <MapPin className="animate-pulse" size={32} />
-                            <span className="text-xl font-bold">Bật GPS / thử lại</span>
-                            <span className="text-sm opacity-80 text-center px-4">Hệ thống cần vị trí để xác thực</span>
-                        </button>
-                    );
-                }
                 return (
                     <div className={cn(baseClass, "bg-slate-100 text-slate-400 animate-pulse")}>
                         <RefreshCcw size={32} className="animate-spin" />

@@ -82,6 +82,7 @@ function OrdersPageContent() {
     const [confirmedTimeFilter, setConfirmedTimeFilter] = useState<'all' | 'today' | 'week' | 'month' | 'custom'>('all');
     const [confirmedStartDate, setConfirmedStartDate] = useState<string>('');
     const [confirmedEndDate, setConfirmedEndDate] = useState<string>('');
+    const [debtOnly, setDebtOnly] = useState(false);
 
     // Pagination States
     const [page, setPage] = useState(1);
@@ -110,6 +111,7 @@ function OrdersPageContent() {
         const endParam = searchParams.get('endDate');
         const excludeInstallmentParam = searchParams.get('excludeInstallment');
         const employeeParam = searchParams.get('employeeId');
+        const debtOnlyParam = searchParams.get('debtOnly');
 
         // Reset to default if param is missing (prevent sticky filters)
         setPaymentStatusFilter(paymentParam === 'pending' ? 'pending' : (paymentParam === 'confirmed' ? 'confirmed' : 'all'));
@@ -118,6 +120,7 @@ function OrdersPageContent() {
         setSelectedEmployeeId(employeeParam || 'all');
         setActiveTab((tabParam as any) || 'all');
         setExcludeInstallment(excludeInstallmentParam === 'true');
+        setDebtOnly(debtOnlyParam === 'true');
 
         if (startParam && endParam) {
             setStartDate(startParam);
@@ -564,6 +567,7 @@ function OrdersPageContent() {
             if (effectiveTab !== 'all') orderParams.append('tab', effectiveTab);
             if (showLowPriceOnly) orderParams.append('lowPrice', 'true');
             if (deliveryTypeFilter !== 'all') orderParams.append('deliveryType', deliveryTypeFilter);
+            if (debtOnly) orderParams.append('debtOnly', 'true');
 
             // Edit Date filters
             if (editStartDate && editEndDate) {
@@ -1464,10 +1468,11 @@ function OrdersPageContent() {
                                                                 <span key={i} className={cn(
                                                                     "px-1 py-0.5 rounded text-[8px] font-black uppercase border",
                                                                     (p.paymentMethod === 'CASH' || p.paymentMethod === 'TRANSFER') ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
-                                                                        (p.paymentMethod === 'TRANSFER_COMPANY' || p.paymentMethod === 'TRANSFER_PERSONAL') ? "bg-blue-50 text-blue-700 border-blue-100" :
-                                                                            (p.paymentMethod === 'CARD' || p.paymentMethod === 'CREDIT') ? "bg-amber-50 text-amber-700 border-amber-100" :
-                                                                                p.paymentMethod === 'INSTALLMENT' ? "bg-indigo-50 text-indigo-700 border-indigo-100" :
-                                                                                    "bg-slate-100 text-slate-600 border-slate-200"
+                                                                        p.paymentMethod === 'TRANSFER_COMPANY' ? "bg-blue-50 text-blue-700 border-blue-100" :
+                                                                            p.paymentMethod === 'TRANSFER_PERSONAL' ? "bg-slate-50 text-slate-700 border-slate-100" :
+                                                                                (p.paymentMethod === 'CARD' || p.paymentMethod === 'CREDIT') ? "bg-amber-50 text-amber-700 border-amber-100" :
+                                                                                    p.paymentMethod === 'INSTALLMENT' ? "bg-indigo-50 text-indigo-700 border-indigo-100" :
+                                                                                        "bg-slate-100 text-slate-600 border-slate-200"
                                                                 )}>
                                                                     {(p.paymentMethod === 'CASH' || p.paymentMethod === 'TRANSFER') ? 'TM' :
                                                                         p.paymentMethod === 'TRANSFER_COMPANY' ? 'CK CT' :
@@ -1491,14 +1496,14 @@ function OrdersPageContent() {
                                                                 </div>
                                                             ) : (
                                                                 <>
-                                                                    {/* Non-cash orders that are not issued yet get a RED warning */}
-                                                                    {order.payments?.some((p: any) => p.paymentMethod !== 'CASH' && p.paymentMethod !== 'TRANSFER' && p.paymentMethod !== 'TRANSFER_PERSONAL') ? (
+                                                                    {/* Chỉ các đơn TRANSFER_COMPANY, CARD, INSTALLMENT, CREDIT mới cần xuất hóa đơn */}
+                                                                    {order.payments?.some((p: any) => ['TRANSFER_COMPANY', 'CARD', 'CREDIT', 'INSTALLMENT'].includes(p.paymentMethod)) ? (
                                                                         <span className="px-1 py-0.5 rounded text-[8px] font-black bg-rose-50 text-rose-600 border border-rose-100 whitespace-nowrap animate-pulse uppercase">
                                                                             GẤP
                                                                         </span>
                                                                     ) : (
-                                                                        <span className="px-1 py-0.5 rounded text-[8px] font-black bg-slate-50 text-slate-400 border border-slate-100 whitespace-nowrap italic uppercase">
-                                                                            Chờ
+                                                                        <span className="px-1 py-0.5 rounded text-[8px] font-black bg-slate-50 text-slate-400 border border-slate-100 whitespace-nowrap uppercase">
+                                                                            Không cần
                                                                         </span>
                                                                     )}
                                                                     {(isAccountant && order.payments?.some((p: any) => ['TRANSFER_COMPANY', 'CARD', 'CREDIT', 'INSTALLMENT'].includes(p.paymentMethod))) && (

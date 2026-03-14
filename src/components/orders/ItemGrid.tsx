@@ -41,13 +41,13 @@ export default function ItemGrid({ items, products, onChange, isUpgrade, oldOrde
             <div className="overflow-x-auto">
                 <table className="w-full text-xs border-collapse">
                     <thead>
-                        <tr className="bg-rose-50 border-b-2 border-slate-800">
-                            <th className="px-2 py-2 border-r-2 border-slate-800 text-center w-[40px]">STT</th>
-                            <th className="px-4 py-2 border-r-2 border-slate-800 text-left min-w-[200px]">Tên hàng hóa</th>
-                            <th className="px-2 py-2 border-r-2 border-slate-800 text-center w-[80px]">Số lượng</th>
-                            <th className="px-4 py-2 border-r-2 border-slate-800 text-right w-[140px]">Đơn giá</th>
-                            <th className="px-4 py-2 text-right w-[140px]">Thành tiền</th>
-                            <th className="px-2 py-2 w-[40px] print:hidden"></th>
+                        <tr className="bg-rose-50 border-b-2 border-slate-800 text-slate-900">
+                            <th className="px-2 py-2 border-r-2 border-slate-800 text-center w-[40px] text-slate-900">STT</th>
+                            <th className="px-4 py-2 border-r-2 border-slate-800 text-left min-w-[200px] text-slate-900">Tên hàng hóa</th>
+                            <th className="px-2 py-2 border-r-2 border-slate-800 text-center w-[80px] text-slate-900">Số lượng</th>
+                            <th className="px-4 py-2 border-r-2 border-slate-800 text-right w-[140px] text-slate-900">Đơn giá</th>
+                            <th className="px-4 py-2 text-right w-[140px] text-slate-900">Thành tiền</th>
+                            <th className="px-2 py-2 w-[40px] print:hidden text-slate-900"></th>
                         </tr>
                     </thead>
                     <tbody className="divide-y-2 divide-slate-800">

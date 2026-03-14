@@ -27,8 +27,12 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/components/ui/toast';
 import SalarySettingsTab from '@/components/timesheet/SalarySettingsTab';
 import ConfirmModal from '@/components/ui/confirm-modal';
+import AttendanceExceptionRequestModal from '@/components/timesheet/AttendanceExceptionRequestModal';
+import AttendanceAuditLogModal from '@/components/timesheet/AttendanceAuditLogModal';
+import AttendanceExceptionRequestDetailModal from '@/components/timesheet/AttendanceExceptionRequestDetailModal';
+import { History, FileText, Eye } from 'lucide-react';
 
-type ActiveTab = 'MY' | 'EMPLOYEES' | 'SETTINGS' | 'SALARY_SETTINGS';
+type ActiveTab = 'MY' | 'EMPLOYEES' | 'SETTINGS' | 'SALARY_SETTINGS' | 'EXCEPTION_REQUESTS' | 'AUDIT_LOGS';
 type ViewMode = 'LIST' | 'DETAIL'; // LIST is summary, DETAIL is individual daily view
 
 export default function TimesheetPage() {
@@ -42,7 +46,7 @@ export default function TimesheetPage() {
     const [loading, setLoading] = useState(true);
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
-    const { error: toastError } = useToast();
+    const { error: toastError, success: toastSuccess } = useToast();
 
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedBranch, setSelectedBranch] = useState('');
@@ -68,6 +72,22 @@ export default function TimesheetPage() {
         checkOutTime: '',
         note: ''
     });
+
+    // Exception Request State
+    const [showExceptionModal, setShowExceptionModal] = useState(false);
+    const [requestingRecord, setRequestingRecord] = useState<any>(null);
+
+    // Audit Log State
+    const [showAuditModal, setShowAuditModal] = useState(false);
+    const [viewingAuditRecord, setViewingAuditRecord] = useState<any>(null);
+
+    // Audit Logs List State
+    const [allAuditLogs, setAllAuditLogs] = useState<any[]>([]);
+
+    // Exception Requests List State
+    const [exceptionRequests, setExceptionRequests] = useState<any[]>([]);
+    const [showDetailModal, setShowDetailModal] = useState(false);
+    const [viewingRequestDetail, setViewingRequestDetail] = useState<any>(null);
 
     // Delete confirmation state
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -125,22 +145,6 @@ export default function TimesheetPage() {
         } catch (error) { }
     };
 
-    useEffect(() => {
-        if (!currentUser) return;
-
-        if (activeTab === 'EMPLOYEES') {
-            if (viewMode === 'LIST') {
-                fetchSummary();
-            } else if (selectedEmployee) {
-                fetchDetail();
-            }
-        } else if (activeTab === 'SETTINGS') {
-            fetchShifts();
-        } else {
-            fetchMyDetail();
-        }
-    }, [currentUser, activeTab, viewMode, currentDate, selectedBranch, selectedPosition, selectedEmployee]);
-
     const fetchSummary = async () => {
         setLoading(true);
         try {
@@ -193,6 +197,94 @@ export default function TimesheetPage() {
             setLoading(false);
         }
     };
+
+    const fetchExceptionRequests = async () => {
+        setLoading(true);
+        try {
+            const params = new URLSearchParams();
+            if (activeTab === 'MY' && currentUser?.employee?.id) {
+                params.append('employeeId', currentUser.employee.id);
+            } else if (selectedBranch) {
+                params.append('branchId', selectedBranch);
+            }
+            
+            const res = await fetch(`${API_URL}/attendance-exception-requests?${params.toString()}`);
+            const data = await res.json();
+            setExceptionRequests(data);
+        } catch (error) {
+            toastError('Không thể tải danh sách đơn giải trình');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchAllAuditLogs = async () => {
+        setLoading(true);
+        try {
+            const params = new URLSearchParams();
+            const month = currentDate.getMonth() + 1;
+            const year = currentDate.getFullYear();
+            params.append('month', month.toString());
+            params.append('year', year.toString());
+            
+            if (activeTab === 'AUDIT_LOGS' && selectedBranch) {
+                params.append('branchId', selectedBranch);
+            }
+            if (searchTerm) {
+                params.append('search', searchTerm);
+            }
+
+            const res = await fetch(`${API_URL}/attendance/audit-logs?${params.toString()}`);
+            const data = await res.json();
+            setAllAuditLogs(data);
+        } catch (error) {
+            toastError('Không thể tải lịch sử chỉnh sửa');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleUpdateStatus = async (requestId: string, status: 'APPROVED' | 'REJECTED') => {
+        try {
+            const res = await fetch(`${API_URL}/attendance-exception-requests/${requestId}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    status,
+                    approvedById: currentUser?.id,
+                    note: status === 'APPROVED' ? 'Đã phê duyệt' : 'Từ chối'
+                })
+            });
+
+            if (!res.ok) throw new Error('Cập nhật thất bại');
+            
+            toastSuccess(status === 'APPROVED' ? 'Đã duyệt đơn giải trình' : 'Đã từ chối đơn giải trình');
+            fetchExceptionRequests();
+        } catch (error) {
+            toastError('Lỗi cập nhật trạng thái đơn');
+        }
+    };
+
+    useEffect(() => {
+        if (!currentUser) return;
+
+        if (activeTab === 'EMPLOYEES') {
+            if (viewMode === 'LIST') {
+                fetchSummary();
+            } else if (selectedEmployee) {
+                fetchDetail();
+            }
+        } else if (activeTab === 'SETTINGS') {
+            fetchShifts();
+        } else if (activeTab === 'EXCEPTION_REQUESTS') {
+            fetchExceptionRequests();
+        } else if (activeTab === 'AUDIT_LOGS') {
+            fetchAllAuditLogs();
+        } else {
+            fetchMyDetail();
+        }
+    }, [currentUser, activeTab, viewMode, currentDate, selectedBranch, selectedPosition, selectedEmployee]);
+
 
     const handleAdjust = (record: any) => {
         setAdjustingRecord(record);
@@ -266,7 +358,8 @@ export default function TimesheetPage() {
                     date: adjustingRecord.date,
                     checkInTime: adjustForm.checkInTime || null,
                     checkOutTime: adjustForm.checkOutTime || null,
-                    note: adjustForm.note
+                    note: adjustForm.note,
+                    changedById: currentUser.id
                 })
             });
 
@@ -521,6 +614,36 @@ export default function TimesheetPage() {
                         >
                             <span className="tracking-wider">Công nhân viên</span>
                             {activeTab === 'EMPLOYEES' && (
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
+                            )}
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('EXCEPTION_REQUESTS')}
+                            className={cn(
+                                "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5",
+                                activeTab === 'EXCEPTION_REQUESTS'
+                                    ? "text-primary bg-primary-light cursor-pointer font-black"
+                                    : "text-slate-600 hover:bg-slate-50 cursor-pointer"
+                            )}
+                        >
+                            <FileText size={13} />
+                            <span className="tracking-wider">Đơn giải trình</span>
+                            {activeTab === 'EXCEPTION_REQUESTS' && (
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
+                            )}
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('AUDIT_LOGS')}
+                            className={cn(
+                                "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5",
+                                activeTab === 'AUDIT_LOGS'
+                                    ? "text-primary bg-primary-light cursor-pointer font-black"
+                                    : "text-slate-600 hover:bg-slate-50 cursor-pointer"
+                            )}
+                        >
+                            <History size={13} />
+                            <span className="tracking-wider">Lịch sử sửa</span>
+                            {activeTab === 'AUDIT_LOGS' && (
                                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
                             )}
                         </button>
@@ -802,12 +925,32 @@ export default function TimesheetPage() {
                                                     </td>
                                                     {['ADMIN', 'DIRECTOR', 'MANAGER', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'].includes(currentUser?.role?.code) && (
                                                         <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
+                                                            <div className="flex items-center justify-center gap-1">
+                                                                <button
+                                                                    onClick={() => { setViewingAuditRecord(row); setShowAuditModal(true); }}
+                                                                    className="p-1.5 text-slate-400 hover:text-blue-500 transition-all cursor-pointer"
+                                                                    title="Xem lịch sử chỉnh sửa"
+                                                                >
+                                                                    <History size={14} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleAdjust(row)}
+                                                                    className="p-1.5 text-slate-400 hover:text-primary transition-all cursor-pointer"
+                                                                    title="Hiệu chỉnh công"
+                                                                >
+                                                                    <Pencil size={14} />
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    )}
+                                                    {activeTab === 'MY' && (
+                                                        <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
                                                             <button
-                                                                onClick={() => handleAdjust(row)}
+                                                                onClick={() => { setRequestingRecord(row); setShowExceptionModal(true); }}
                                                                 className="p-1.5 text-slate-400 hover:text-primary transition-all cursor-pointer"
-                                                                title="Hiệu chỉnh công"
+                                                                title="Gửi đơn giải trình"
                                                             >
-                                                                <Pencil size={14} />
+                                                                <FileText size={14} />
                                                             </button>
                                                         </td>
                                                     )}
@@ -1066,6 +1209,209 @@ export default function TimesheetPage() {
                 }}
             />
 
+            {activeTab === 'EXCEPTION_REQUESTS' && (
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h2 className="text-lg font-bold text-slate-800 tracking-tight flex items-center gap-2">
+                                <FileText size={18} className="text-primary" />
+                                Danh sách Đơn giải trình
+                            </h2>
+                            <p className="text-[10px] text-slate-500 font-medium mt-0.5">Theo dõi và phê duyệt các yêu cầu hiệu chỉnh công</p>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-slate-50/50 border-b border-slate-100">
+                                        <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Nhân viên</th>
+                                        <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Ngày</th>
+                                        <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Loại</th>
+                                        <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none px-6">Lý do</th>
+                                        <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none text-center">Trạng thái</th>
+                                        <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none text-center">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50">
+                                    {loading ? (
+                                        Array.from({ length: 5 }).map((_, i) => (
+                                            <tr key={i} className="animate-pulse">
+                                                {Array.from({ length: 6 }).map((_, j) => (
+                                                    <td key={j} className="px-6 py-4"><div className="h-4 bg-slate-100 rounded w-full"></div></td>
+                                                ))}
+                                            </tr>
+                                        ))
+                                    ) : exceptionRequests.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={6} className="px-6 py-16 text-center text-slate-400 font-medium italic">
+                                                Chưa có đơn giải trình nào
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        exceptionRequests.map((req) => (
+                                            <tr key={req.id} className="hover:bg-slate-50/50 transition-colors">
+                                                <td className="px-4 py-3">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[12px] font-bold text-slate-800">{req.employee?.fullName}</span>
+                                                        <span className="text-[9px] text-slate-400">{req.employee?.branch?.name}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3 whitespace-nowrap">
+                                                    <span className="text-[11px] font-bold text-slate-600">
+                                                        {new Date(req.date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <span className="text-[10px] font-bold text-slate-500">
+                                                        {req.type === 'GO_LATE' ? 'Báo muộn' : 
+                                                         req.type === 'LEAVE_EARLY' ? 'Về sớm' : 
+                                                         req.type === 'GPS_ERROR' ? 'Lỗi GPS' : 
+                                                         req.type === 'FORGOT_CHECKIN' ? 'Quên vào' : 'Quên ra'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3 px-6 max-w-xs">
+                                                    <p className="text-[11px] text-slate-600 truncate" title={req.reason}>{req.reason}</p>
+                                                </td>
+                                                <td className="px-4 py-3 text-center">
+                                                    <span className={cn(
+                                                        "px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-tighter border",
+                                                        req.status === 'PENDING' ? "bg-amber-50 text-amber-600 border-amber-100" :
+                                                        req.status === 'APPROVED' ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
+                                                        "bg-rose-50 text-rose-600 border-rose-100"
+                                                    )}>
+                                                        {req.status === 'PENDING' ? 'Chờ duyệt' : 
+                                                         req.status === 'APPROVED' ? 'Đã duyệt' : 'Từ chối'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3 text-center">
+                                                    <div className="flex items-center justify-center gap-1">
+                                                        <button 
+                                                            onClick={() => { setViewingRequestDetail(req); setShowDetailModal(true); }}
+                                                            className="p-1.5 hover:bg-slate-100 text-slate-500 rounded-lg transition-all cursor-pointer" title="Xem chi tiết"
+                                                        >
+                                                            <Eye size={14} />
+                                                        </button>
+                                                        {req.status === 'PENDING' && canViewOthers && (
+                                                            <>
+                                                                <button 
+                                                                    onClick={() => handleUpdateStatus(req.id, 'APPROVED')}
+                                                                    className="px-2 py-1 bg-emerald-600 text-white rounded text-[9px] font-bold hover:bg-emerald-700 transition-all cursor-pointer"
+                                                                >Duyệt</button>
+                                                                <button 
+                                                                    onClick={() => handleUpdateStatus(req.id, 'REJECTED')}
+                                                                    className="px-2 py-1 bg-rose-600 text-white rounded text-[9px] font-bold hover:bg-rose-700 transition-all cursor-pointer"
+                                                                >Từ chối</button>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'AUDIT_LOGS' && canManageSettings && (
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h2 className="text-lg font-bold text-slate-800 tracking-tight flex items-center gap-2">
+                                <History size={18} className="text-primary" />
+                                Lịch sử chỉnh sửa chấm công
+                            </h2>
+                            <p className="text-[10px] text-slate-500 font-medium mt-0.5">Theo dõi lịch sử chỉnh sửa thủ công và giải trình của nhân viên</p>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-slate-50/50 border-b border-slate-100">
+                                        <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Người sửa</th>
+                                        <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Hành động</th>
+                                        <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Nhân viên</th>
+                                        <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none px-6">Dữ liệu thay đổi</th>
+                                        <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none text-right">Thời gian sửa</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50">
+                                    {loading ? (
+                                        Array.from({ length: 5 }).map((_, i) => (
+                                            <tr key={i} className="animate-pulse">
+                                                {Array.from({ length: 5 }).map((_, j) => (
+                                                    <td key={j} className="px-6 py-4"><div className="h-4 bg-slate-100 rounded w-full"></div></td>
+                                                ))}
+                                            </tr>
+                                        ))
+                                    ) : allAuditLogs.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={5} className="px-6 py-16 text-center text-slate-400 font-medium italic">
+                                                Chưa có dữ liệu chỉnh sửa trong tháng này
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        allAuditLogs.map((log) => (
+                                            <tr key={log.id} className="hover:bg-slate-50/50 transition-colors cursor-pointer" onClick={() => { setViewingAuditRecord({id: log.attendanceId, date: log.attendance?.date}); setShowAuditModal(true); }}>
+                                                <td className="px-4 py-3">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[12px] font-bold text-slate-800">{log.user?.employee?.fullName || log.user?.username}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3 whitespace-nowrap">
+                                                    <span className={cn(
+                                                        "text-[11px] font-medium px-2.5 py-1 rounded-md",
+                                                        log.action === 'MANUAL_ADJUST' ? "bg-blue-50 text-blue-700" :
+                                                        log.action === 'EXCEPTION_APPROVED_GO_LATE' ? "bg-amber-50 text-amber-700" :
+                                                        log.action === 'EXCEPTION_APPROVED_LEAVE_EARLY' ? "bg-orange-50 text-orange-700" :
+                                                        log.action === 'EXCEPTION_APPROVED_GPS_ERROR' ? "bg-rose-50 text-rose-700" :
+                                                        log.action === 'EXCEPTION_APPROVED_FORGOT_CHECKIN' ? "bg-indigo-50 text-indigo-700" :
+                                                        log.action === 'EXCEPTION_APPROVED_FORGOT_CHECKOUT' ? "bg-violet-50 text-violet-700" :
+                                                        "bg-slate-50 text-slate-700"
+                                                    )}>
+                                                        {log.action === 'MANUAL_ADJUST' ? 'Hiệu chỉnh thủ công' : 
+                                                         log.action === 'EXCEPTION_APPROVED_GO_LATE' ? 'Phê duyệt đi muộn' :
+                                                         log.action === 'EXCEPTION_APPROVED_LEAVE_EARLY' ? 'Phê duyệt về sớm' :
+                                                         log.action === 'EXCEPTION_APPROVED_GPS_ERROR' ? 'Phê duyệt lỗi GPS' :
+                                                         log.action === 'EXCEPTION_APPROVED_FORGOT_CHECKIN' ? 'Phê duyệt quên check-in' :
+                                                         log.action === 'EXCEPTION_APPROVED_FORGOT_CHECKOUT' ? 'Phê duyệt quên check-out' :
+                                                         log.action.replace('EXCEPTION_APPROVED_', 'Phê duyệt ')}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[11px] font-bold text-slate-700">{log.attendance?.employee?.fullName}</span>
+                                                        <span className="text-[9px] text-slate-400">Ngày công: {new Date(log.attendance?.date).toLocaleDateString('vi-VN')}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3 px-6 max-w-sm">
+                                                    <p className="text-[10px] text-slate-600 truncate italic" title={log.reason}>{log.reason || '-'}</p>
+                                                    <p className="text-[9px] text-emerald-600 font-medium truncate mt-0.5">
+                                                        {log.newData?.checkInTime && `Vào: ${new Date(log.newData.checkInTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})} `}
+                                                        {log.newData?.checkOutTime && `Ra: ${new Date(log.newData.checkOutTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}`}
+                                                    </p>
+                                                </td>
+                                                <td className="px-4 py-3 text-right">
+                                                    <span className="text-[10px] font-bold text-slate-500">
+                                                        {new Date(log.createdAt).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {activeTab === 'SALARY_SETTINGS' && canManageSettings && (
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
@@ -1080,6 +1426,27 @@ export default function TimesheetPage() {
                     <SalarySettingsTab />
                 </div>
             )}
+
+            {/* Modals */}
+            <AttendanceExceptionRequestModal 
+                isOpen={showExceptionModal}
+                onClose={() => { setShowExceptionModal(false); setRequestingRecord(null); }}
+                record={requestingRecord}
+                employeeId={currentUser?.employee?.id}
+                onSuccess={() => {}}
+            />
+
+            <AttendanceAuditLogModal 
+                isOpen={showAuditModal}
+                onClose={() => { setShowAuditModal(false); setViewingAuditRecord(null); }}
+                record={viewingAuditRecord}
+            />
+
+            <AttendanceExceptionRequestDetailModal
+                isOpen={showDetailModal}
+                onClose={() => { setShowDetailModal(false); setViewingRequestDetail(null); }}
+                request={viewingRequestDetail}
+            />
         </div>
     );
 }

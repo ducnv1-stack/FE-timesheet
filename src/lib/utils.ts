@@ -13,13 +13,17 @@ export function formatCurrency(value: number) {
     }).format(value);
 }
 
-export const formatNumber = (val: number | null | undefined) => {
-    if (!val) return '';
-    return new Intl.NumberFormat('vi-VN').format(val);
+export const formatNumber = (val: number | string | null | undefined) => {
+    if (val === null || val === undefined || val === '') return '';
+    const num = Number(val);
+    if (isNaN(num)) return '';
+    return new Intl.NumberFormat('vi-VN').format(num);
 };
 
 export const parseNumber = (val: string) => {
-    return Number(val.replace(/\D/g, '')) || 0;
+    if (!val) return 0;
+    const cleanValue = val.replace(/\D/g, '');
+    return cleanValue === '' ? 0 : Number(cleanValue);
 };
 
 export const formatDate = (date: Date | string | number | null | undefined): string => {

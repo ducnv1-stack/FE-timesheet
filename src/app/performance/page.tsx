@@ -143,6 +143,8 @@ export default function PerformancePage() {
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedBranches, setSelectedBranches] = useState<string[]>([]);
+    const [availablePositions, setAvailablePositions] = useState<string[]>([]);
+    const [availableDepartments, setAvailableDepartments] = useState<string[]>([]);
     const [selectedPositions, setSelectedPositions] = useState<string[]>([]);
     const [selectedDepartments, setSelectedDepartments] = useState<string[]>([]);
     const [isManager, setIsManager] = useState(false);
@@ -183,10 +185,34 @@ export default function PerformancePage() {
             setManagerBranchId(parsedUser.employee.branchId);
             setManagerBranchName(parsedUser.employee.branch?.name || '');
         }
+    }, []);
 
+    useEffect(() => {
         fetchBranches();
+        fetchPositions();
+        fetchDepartments();
         fetchReport();
     }, [month, year]);
+
+    const fetchPositions = async () => {
+        try {
+            const res = await fetch(`${API_URL}/employees/positions`);
+            const data = await res.json();
+            setAvailablePositions(data);
+        } catch (error) {
+            console.error('Error fetching positions:', error);
+        }
+    };
+
+    const fetchDepartments = async () => {
+        try {
+            const res = await fetch(`${API_URL}/employees/departments`);
+            const data = await res.json();
+            setAvailableDepartments(data);
+        } catch (error) {
+            console.error('Error fetching departments:', error);
+        }
+    };
 
     const fetchBranches = async () => {
         try {
@@ -302,7 +328,7 @@ export default function PerformancePage() {
         const matchSearch = r.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
             r.branchName?.toLowerCase().includes(searchTerm.toLowerCase());
         const matchBranch = selectedBranches.length === 0 || selectedBranches.includes(r.branchId);
-        const matchPosition = selectedPositions.length === 0 || selectedPositions.includes(r.position);
+        const matchPosition = selectedPositions.length === 0 || (r.position && selectedPositions.includes(r.position));
         const matchDepartment = selectedDepartments.length === 0 || (r.department && selectedDepartments.includes(r.department));
 
         return matchSearch && matchBranch && matchPosition && matchDepartment;
@@ -355,7 +381,7 @@ export default function PerformancePage() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 relative z-30">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 relative z-50">
                     <div className="relative group col-span-1 md:col-span-1">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-rose-500 transition-colors" size={18} />
                         <input
@@ -385,15 +411,7 @@ export default function PerformancePage() {
                     <MultiSelect
                         label="Phòng ban"
                         placeholder="Tất cả phòng ban"
-                        options={[
-                            { label: 'BGĐ', value: 'BGĐ' },
-                            { label: 'MKT', value: 'MKT' },
-                            { label: 'HCKT', value: 'HCKT' },
-                            { label: 'Kỹ Thuật', value: 'Kỹ Thuật' },
-                            { label: 'Kho', value: 'Kho' },
-                            { label: 'Lái xe', value: 'Lái xe' },
-                            { label: 'Phòng KD', value: 'Phòng KD' },
-                        ]}
+                        options={availableDepartments.map(d => ({ label: d, value: d }))}
                         selected={selectedDepartments}
                         onChange={setSelectedDepartments}
                     />
@@ -401,17 +419,7 @@ export default function PerformancePage() {
                     <MultiSelect
                         label="Chức vụ"
                         placeholder="Tất cả chức vụ"
-                        options={[
-                            { label: 'Giám đốc (GĐ)', value: 'GĐ' },
-                            { label: 'Giám đốc kinh doanh (GĐKD)', value: 'GĐKD' },
-                            { label: 'Nhân viên bán hàng (NVBH)', value: 'NVBH' },
-                            { label: 'Nhân viên giao hàng (NVGH)', value: 'NVGH' },
-                            { label: 'Quản Lý', value: 'Quản Lý' },
-                            { label: 'Kế toán', value: 'Kế toán' },
-                            { label: 'Nhân viên kỹ thuật (NVKT)', value: 'NVKT' },
-                            { label: 'Lái xe (Driver)', value: 'Driver' },
-                            { label: 'Marketing', value: 'Marketing' },
-                        ]}
+                        options={availablePositions.map(p => ({ label: p, value: p }))}
                         selected={selectedPositions}
                         onChange={setSelectedPositions}
                     />

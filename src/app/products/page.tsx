@@ -289,13 +289,17 @@ export default function ProductsPage() {
 }
 
 // --- Helpers ---
-const formatNumber = (val: number | null | undefined) => {
-    if (!val) return '';
-    return new Intl.NumberFormat('vi-VN').format(val);
+const formatNumber = (val: number | string | null | undefined) => {
+    if (val === null || val === undefined || val === '') return '';
+    const num = Number(val);
+    if (isNaN(num)) return '';
+    return new Intl.NumberFormat('vi-VN').format(num);
 };
 
 const parseNumber = (val: string) => {
-    return Number(val.replace(/\D/g, '')) || 0;
+    if (!val) return 0;
+    const cleanValue = val.replace(/\D/g, '');
+    return cleanValue === '' ? 0 : Number(cleanValue);
 };
 
 // --- Sub-components ---
@@ -425,20 +429,18 @@ function PremiumBonusView({ products, onUpdateBonus }: { products: Product[], on
                             {product.bonusRules.length > 0 ? (
                                 [...product.bonusRules].sort((a, b) => a.minSellPrice - b.minSellPrice).map((rule, idx) => (
                                     <div key={rule.id || idx} className="flex items-center justify-between bg-white/60 backdrop-blur-sm p-2.5 md:p-3 rounded-xl md:rounded-2xl border border-white shadow-sm transition-all hover:scale-[1.02]">
-                                        <div className="flex items-center gap-2 md:gap-3">
-                                            <div className="flex flex-col">
-                                                <span className="text-[7px] md:text-[8px] font-black text-slate-400 uppercase tracking-tight">Giá ≥</span>
-                                                <span className="text-[10px] md:text-xs font-bold text-slate-700">
-                                                    {new Intl.NumberFormat('vi-VN').format(rule.minSellPrice)}
-                                                </span>
-                                            </div>
-                                            <ChevronRight className="w-2.5 md:w-3 h-2.5 md:h-3 text-slate-300" />
-                                            <div className="flex flex-col">
-                                                <span className="text-[7px] md:text-[8px] font-black text-rose-400 uppercase tracking-tight">Thưởng</span>
-                                                <span className="text-[10px] md:text-xs font-black text-rose-600">
-                                                    {new Intl.NumberFormat('vi-VN').format(rule.bonusAmount)}
-                                                </span>
-                                            </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-[7px] md:text-[8px] font-black text-slate-400 uppercase tracking-tight">Giá ≥</span>
+                                            <span className="text-[10px] md:text-xs font-bold text-slate-700">
+                                                {new Intl.NumberFormat('vi-VN').format(rule.minSellPrice)}
+                                            </span>
+                                        </div>
+                                        <ChevronRight className="w-2.5 md:w-3 h-2.5 md:h-3 text-slate-300" />
+                                        <div className="flex flex-col">
+                                            <span className="text-[7px] md:text-[8px] font-black text-rose-400 uppercase tracking-tight">Thưởng</span>
+                                            <span className="text-[10px] md:text-xs font-black text-rose-600">
+                                                {new Intl.NumberFormat('vi-VN').format(rule.bonusAmount)}
+                                            </span>
                                         </div>
                                         <div className="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
                                     </div>
@@ -460,9 +462,9 @@ function PremiumBonusView({ products, onUpdateBonus }: { products: Product[], on
 
 function ProductModal({ isOpen, onClose, onSuccess, product }: { isOpen: boolean, onClose: () => void, onSuccess: () => void, product?: Product | null }) {
     const [name, setName] = useState(product?.name || '');
-    const [minPrice, setMinPrice] = useState(product?.minPrice || 0);
+    const [minPrice, setMinPrice] = useState(product?.minPrice?.toString() || '0');
     const [isHighEnd, setIsHighEnd] = useState(product?.isHighEnd || false);
-    const [hotBonus, setHotBonus] = useState(product?.hotBonus || 0);
+    const [hotBonus, setHotBonus] = useState(product?.hotBonus?.toString() || '0');
     const [submitting, setSubmitting] = useState(false);
     const { success, error } = useToast();
 
@@ -514,11 +516,11 @@ function ProductModal({ isOpen, onClose, onSuccess, product }: { isOpen: boolean
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Giá tối thiểu</label>
-                            <input type="text" required value={formatNumber(minPrice)} onChange={e => setMinPrice(parseNumber(e.target.value))} className="w-full px-4 py-3 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-rose-500 font-mono text-sm font-bold" placeholder="Nhập giá..." />
+                            <input type="text" required value={formatNumber(minPrice)} onChange={e => setMinPrice(parseNumber(e.target.value).toString())} className="w-full px-4 py-3 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-rose-500 font-mono text-sm font-bold" placeholder="Nhập giá..." />
                         </div>
                         <div>
                             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Thưởng nóng (nếu có)</label>
-                            <input type="text" value={formatNumber(hotBonus)} onChange={e => setHotBonus(parseNumber(e.target.value))} className="w-full px-4 py-3 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-rose-500 font-mono text-sm font-bold" placeholder="Nhập mức thưởng..." />
+                            <input type="text" value={formatNumber(hotBonus)} onChange={e => setHotBonus(parseNumber(e.target.value).toString())} className="w-full px-4 py-3 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-rose-500 font-mono text-sm font-bold" placeholder="Nhập mức thưởng..." />
                         </div>
                     </div>
                     <div className="flex items-center gap-3 p-4 bg-rose-50/50 rounded-2xl border border-rose-100/50">
@@ -540,7 +542,7 @@ function ProductModal({ isOpen, onClose, onSuccess, product }: { isOpen: boolean
 
 function GiftModal({ isOpen, onClose, onSuccess, gift }: { isOpen: boolean, onClose: () => void, onSuccess: () => void, gift?: Gift | null }) {
     const [name, setName] = useState(gift?.name || '');
-    const [price, setPrice] = useState(gift?.price || 0);
+    const [price, setPrice] = useState(gift?.price?.toString() || '0');
     const [submitting, setSubmitting] = useState(false);
     const { success, error } = useToast();
 
@@ -589,7 +591,7 @@ function GiftModal({ isOpen, onClose, onSuccess, gift }: { isOpen: boolean, onCl
                     </div>
                     <div>
                         <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Giá trị quy đổi</label>
-                        <input type="text" required value={formatNumber(price)} onChange={e => setPrice(parseNumber(e.target.value))} className="w-full px-4 py-3 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-rose-500 font-mono text-sm font-bold" placeholder="Nhập giá trị..." />
+                        <input type="text" required value={formatNumber(price)} onChange={e => setPrice(parseNumber(e.target.value).toString())} className="w-full px-4 py-3 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-rose-500 font-mono text-sm font-bold" placeholder="Nhập giá trị..." />
                     </div>
                     <div className="pt-2">
                         <button disabled={submitting} className="w-full py-4 bg-rose-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-rose-100 hover:bg-rose-700 transition-all flex items-center justify-center gap-2 cursor-pointer">
@@ -604,15 +606,15 @@ function GiftModal({ isOpen, onClose, onSuccess, gift }: { isOpen: boolean, onCl
 }
 
 function BonusModal({ product, onClose, onSuccess }: { product: Product, onClose: () => void, onSuccess: () => void }) {
-    const [rules, setRules] = useState<BonusRule[]>(() =>
-        [...(product.bonusRules || [])].sort((a, b) => a.minSellPrice - b.minSellPrice)
+    const [rules, setRules] = useState<any[]>(() =>
+        [...(product.bonusRules || [])].sort((a, b) => a.minSellPrice - b.minSellPrice).map(r => ({ ...r, minSellPrice: r.minSellPrice.toString(), bonusAmount: r.bonusAmount.toString() }))
     );
     const [submitting, setSubmitting] = useState(false);
     const [deletingIdx, setDeletingIdx] = useState<number | null>(null);
     const { success, error } = useToast();
 
     const addRule = () => {
-        setRules([...rules, { minSellPrice: 0, bonusAmount: 0 }]);
+        setRules([...rules, { minSellPrice: '0', bonusAmount: '0' }]);
     };
 
     const removeRule = (idx: number) => {
@@ -626,7 +628,7 @@ function BonusModal({ product, onClose, onSuccess }: { product: Product, onClose
         }
     };
 
-    const updateRule = (idx: number, field: keyof BonusRule, value: number) => {
+    const updateRule = (idx: number, field: string, value: string) => {
         const newRules = [...rules];
         newRules[idx] = { ...newRules[idx], [field]: value };
         setRules(newRules);
@@ -685,11 +687,11 @@ function BonusModal({ product, onClose, onSuccess }: { product: Product, onClose
                                 <div key={idx} className="flex items-center gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100 group">
                                     <div className="flex-1">
                                         <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Giá bán từ (đ)</label>
-                                        <input type="text" value={formatNumber(rule.minSellPrice)} onChange={e => updateRule(idx, 'minSellPrice', parseNumber(e.target.value))} className="w-full px-3 py-2 bg-white rounded-xl border-none focus:ring-1 focus:ring-rose-500 font-mono text-xs font-bold shadow-sm" placeholder="Nhập giá..." />
+                                        <input type="text" value={formatNumber(rule.minSellPrice)} onChange={e => updateRule(idx, 'minSellPrice', parseNumber(e.target.value).toString())} className="w-full px-3 py-2 bg-white rounded-xl border-none focus:ring-1 focus:ring-rose-500 font-mono text-xs font-bold shadow-sm" placeholder="Nhập giá..." />
                                     </div>
                                     <div className="flex-1">
                                         <label className="block text-[8px] font-black text-rose-400 uppercase tracking-widest mb-1 ml-1">Mức thưởng (đ)</label>
-                                        <input type="text" value={formatNumber(rule.bonusAmount)} onChange={e => updateRule(idx, 'bonusAmount', parseNumber(e.target.value))} className="w-full px-3 py-2 bg-rose-50/30 rounded-xl border-none focus:ring-1 focus:ring-rose-500 font-mono text-xs font-black text-rose-600 shadow-sm" placeholder="Nhập thưởng..." />
+                                        <input type="text" value={formatNumber(rule.bonusAmount)} onChange={e => updateRule(idx, 'bonusAmount', parseNumber(e.target.value).toString())} className="w-full px-3 py-2 bg-rose-50/30 rounded-xl border-none focus:ring-1 focus:ring-rose-500 font-mono text-xs font-black text-rose-600 shadow-sm" placeholder="Nhập thưởng..." />
                                     </div>
                                     <button type="button" onClick={() => removeRule(idx)} className="mt-4 p-2 text-slate-300 hover:text-rose-500 hover:bg-white rounded-lg transition-all shadow-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 cursor-pointer">
                                         <Trash2 className="w-3.5 md:w-4 h-3.5 md:h-4" />

@@ -239,7 +239,7 @@ export default function DashboardPage() {
                 {data.role === 'SALE' && <SaleDashboard data={data} startDate={startDate} endDate={endDate} branchId={branchId} />}
                 {data.role === 'TELESALE' && <TelesaleDashboard data={data} startDate={startDate} endDate={endDate} />}
                 {data.role === 'MARKETING' && <MarketingDashboard data={data} startDate={startDate} endDate={endDate} />}
-                {(data.role === 'DRIVER' || data.role === 'DELIVERY_STAFF') && <DriverDashboard data={data} startDate={startDate} endDate={endDate} />}
+                {(data.role === 'DRIVER' || data.role === 'DELIVERY_STAFF' || data.role === 'TECHNICIAN' || data.role === 'WAREHOUSE') && <DriverDashboard data={data} startDate={startDate} endDate={endDate} />}
             </main>
         </div>
     );
@@ -469,7 +469,7 @@ function DirectorDashboard({ data, userId, startDate, endDate, branchId }: { dat
                         <p className="text-[9px] text-slate-400 mt-0.5">{data.salesOrderCount || 0} đơn trong kỳ</p>
                     </div>
                     <div
-                        onClick={() => router.push(`/orders?paymentStatus=pending&startDate=${startDate}&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
+                        onClick={() => router.push(`/orders?debtOnly=true&paymentStatus=pending&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
                         className={`p-3 rounded-2xl border shadow-sm transition-all cursor-pointer group ${(data.debtStats?.remainingAmount || data.pendingRevenueTotal || 0) > 0 ? 'bg-amber-50 border-amber-200 hover:bg-amber-100 hover:shadow-md' : 'bg-white border-slate-100'}`}
                     >
                         <div className="flex items-center justify-between mb-2">
@@ -482,12 +482,12 @@ function DirectorDashboard({ data, userId, startDate, endDate, branchId }: { dat
                             <ArrowRight size={14} className="text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
                         <p className={`text-lg font-black ${(data.debtStats?.remainingAmount || data.pendingRevenueTotal || 0) > 0 ? 'text-amber-700' : 'text-slate-400'}`}>
-                            {formatCurrency(data.debtStats?.totalAmount || data.debtStats?.remainingAmount || data.pendingRevenueTotal || 0)}
+                            {formatCurrency(data.debtStats?.remainingAmount || data.pendingRevenueTotal || 0)}
                         </p>
                         <div className="flex flex-col gap-0.5 mt-1.5 border-t border-amber-100/50 pt-1.5">
                             <div className="flex justify-between items-center text-[9px] font-bold">
                                 <span className="text-slate-400 uppercase">Số đơn nợ:</span>
-                                <span className="text-slate-700">{data.debtStats?.count || (data.unconfirmedCount + data.pendingInstallmentCount) || 0} đơn</span>
+                                <span className="text-slate-700">{data.debtStats?.count ?? (data.unconfirmedCount + data.pendingInstallmentCount)} đơn</span>
                             </div>
                             <div className="flex justify-between items-center text-[9px] font-bold">
                                 <span className="text-slate-400 uppercase">Đã trả:</span>
@@ -509,7 +509,7 @@ function DirectorDashboard({ data, userId, startDate, endDate, branchId }: { dat
                 {/* Financial Alerts & Status */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div
-                        onClick={() => router.push(`/orders?paymentStatus=pending&excludeInstallment=true&startDate=${startDate}&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
+                        onClick={() => router.push(`/orders?paymentStatus=pending&excludeInstallment=true&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
                         className="p-3 bg-amber-50 rounded-2xl border border-amber-100 flex items-center gap-3 cursor-pointer hover:bg-amber-100 transition-colors group"
                     >
                         <div className="w-10 h-10 bg-amber-100 group-hover:bg-amber-200 rounded-xl flex items-center justify-center text-amber-600">
@@ -523,7 +523,7 @@ function DirectorDashboard({ data, userId, startDate, endDate, branchId }: { dat
                     </div>
 
                     <div
-                        onClick={() => router.push(`/orders?tab=installment&paymentStatus=pending&startDate=${startDate}&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
+                        onClick={() => router.push(`/orders?tab=installment&paymentStatus=pending&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
                         className="p-3 bg-indigo-50 rounded-2xl border border-indigo-100 flex items-center gap-3 cursor-pointer hover:bg-indigo-100 transition-colors group"
                     >
                         <div className="w-10 h-10 bg-indigo-100 group-hover:bg-indigo-200 rounded-xl flex items-center justify-center text-indigo-600">
@@ -537,7 +537,7 @@ function DirectorDashboard({ data, userId, startDate, endDate, branchId }: { dat
                     </div>
 
                     <div
-                        onClick={() => router.push(`/orders?tab=invoice&invoiceStatus=pending&startDate=${startDate}&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
+                        onClick={() => router.push(`/orders?tab=invoice&invoiceStatus=pending&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
                         className="p-3 bg-blue-50 rounded-2xl border border-blue-100 flex items-center gap-3 cursor-pointer hover:bg-blue-100 transition-colors group"
                     >
                         <div className="w-10 h-10 bg-blue-100 group-hover:bg-blue-200 rounded-xl flex items-center justify-center text-blue-600">
@@ -1074,25 +1074,25 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
                 </div>
 
                 <div
-                    onClick={() => router.push(`/orders?paymentStatus=pending&startDate=${startDate}&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
-                    className={`p-3 rounded-2xl border shadow-sm transition-all cursor-pointer group ${(data.debtStats?.remainingAmount || branchPendingRevenue) > 0 ? 'bg-amber-50 border-amber-200 hover:bg-amber-100 hover:shadow-md' : 'bg-white border-slate-100'}`}
+                    onClick={() => router.push(`/orders?debtOnly=true&paymentStatus=pending&startDate=${startDate}&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
+                    className={`p-3 rounded-2xl border shadow-sm transition-all cursor-pointer group ${(data.debtStats?.remainingAmount || branchPendingRevenue || 0) > 0 ? 'bg-amber-50 border-amber-200 hover:bg-amber-100 hover:shadow-md' : 'bg-white border-slate-100'}`}
                 >
                     <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
-                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${(data.debtStats?.remainingAmount || branchPendingRevenue) > 0 ? 'bg-amber-100 text-amber-600 group-hover:bg-amber-200' : 'bg-slate-50 text-slate-400'}`}>
+                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${(data.debtStats?.remainingAmount || branchPendingRevenue || 0) > 0 ? 'bg-amber-100 text-amber-600 group-hover:bg-amber-200' : 'bg-slate-50 text-slate-400'}`}>
                                 <Clock size={18} />
                             </div>
-                            <p className={`text-[10px] font-black uppercase ${(data.debtStats?.remainingAmount || branchPendingRevenue) > 0 ? 'text-amber-700' : 'text-slate-400'}`}>Khách còn nợ</p>
+                            <p className={`text-[10px] font-black uppercase ${(data.debtStats?.remainingAmount || branchPendingRevenue || 0) > 0 ? 'text-amber-700' : 'text-slate-400'}`}>Khách còn nợ</p>
                         </div>
                         <ArrowRight size={14} className="text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
-                    <p className={`text-lg font-black ${(data.debtStats?.remainingAmount || branchPendingRevenue) > 0 ? 'text-amber-700' : 'text-slate-400'}`}>
+                    <p className={`text-lg font-black ${(data.debtStats?.remainingAmount || branchPendingRevenue || 0) > 0 ? 'text-amber-700' : 'text-slate-400'}`}>
                         {formatCurrency(data.debtStats?.totalAmount || data.debtStats?.remainingAmount || branchPendingRevenue)}
                     </p>
                     <div className="flex flex-col gap-0.5 mt-1.5 border-t border-amber-100/50 pt-1.5">
                         <div className="flex justify-between items-center text-[9px] font-bold">
                             <span className="text-slate-400 uppercase">Số đơn nợ:</span>
-                            <span className="text-slate-700">{data.debtStats?.count || (data.unconfirmedCount + data.pendingInstallmentCount) || 0} đơn</span>
+                            <span className="text-slate-700">{data.debtStats?.count ?? (data.unconfirmedCount + data.pendingInstallmentCount)} đơn</span>
                         </div>
                         <div className="flex justify-between items-center text-[9px] font-bold">
                             <span className="text-slate-400 uppercase">Đã trả:</span>
@@ -1283,7 +1283,7 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                 {/* Chờ khớp tiền */}
                 <div
-                    onClick={() => router.push(`/orders?paymentStatus=pending&startDate=${startDate}&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
+                    onClick={() => router.push(`/orders?paymentStatus=pending&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
                     className={`p-4 rounded-2xl border cursor-pointer hover:shadow-md transition-all ${(data.unconfirmedCount || 0) > 0 ? 'bg-amber-50 border-amber-200' : 'bg-white border-slate-100'} shadow-sm`}
                 >
                     <div className="flex items-center gap-2 mb-2">
@@ -1300,7 +1300,7 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
 
                 {/* Chờ duyệt trả góp */}
                 <div
-                    onClick={() => router.push(`/orders?tab=installment&paymentStatus=pending&startDate=${startDate}&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
+                    onClick={() => router.push(`/orders?tab=installment&paymentStatus=pending&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
                     className={`p-4 rounded-2xl border cursor-pointer hover:shadow-md transition-all ${(data.pendingInstallmentCount || 0) > 0 ? 'bg-indigo-50 border-indigo-200' : 'bg-white border-slate-100'} shadow-sm`}
                 >
                     <div className="flex items-center gap-2 mb-2">
@@ -1317,7 +1317,7 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
 
                 {/* Chờ xuất hóa đơn */}
                 <div
-                    onClick={() => router.push(`/orders?tab=invoice&invoiceStatus=pending&startDate=${startDate}&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
+                    onClick={() => router.push(`/orders?tab=invoice&invoiceStatus=pending&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
                     className={`p-4 rounded-2xl border cursor-pointer hover:shadow-md transition-all ${(data.unissuedInvoiceCount || 0) > 0 ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-100'} shadow-sm`}
                 >
                     <div className="flex items-center gap-2 mb-2">
@@ -1837,16 +1837,21 @@ function SaleDashboard({ data, startDate, endDate, branchId }: { data: any, star
                                 <div className="text-[10px] bg-white/10 px-2 py-0.5 rounded-full border border-white/10">
                                     <span className="text-rose-200">DS Bán:</span> <span className="text-white font-bold">{formatCurrency(salesRevenue)}</span>
                                 </div>
-                                {(data.debtStats?.remainingAmount || pendingRevenue) > 0 && (
-                                    <div
-                                        onClick={() => router.push(`/orders?paymentStatus=pending&startDate=${startDate}&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
-                                        className="text-[10px] bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-400/30 cursor-pointer hover:bg-amber-500/40 transition-colors flex items-center gap-1"
-                                    >
-                                        <Clock size={10} className="text-amber-200" />
-                                        <span className="text-amber-200">Nợ:</span> <span className="text-amber-300 font-bold">{formatCurrency(data.debtStats?.remainingAmount || pendingRevenue)}</span>
-                                        <span className="text-amber-100/60 ml-1">({data.debtStats?.count || 0} đơn)</span>
-                                    </div>
-                                )}
+                                <div
+                                    onClick={() => router.push(`/orders?debtOnly=true&paymentStatus=pending&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
+                                    className={`text-[10px] px-2 py-0.5 rounded-full border transition-colors flex items-center gap-1 cursor-pointer ${
+                                        (data.debtStats?.remainingAmount || pendingRevenue) > 0 
+                                        ? "bg-amber-500/20 border-amber-400/30 hover:bg-amber-500/40" 
+                                        : "bg-white/5 border-white/10 opacity-50"
+                                    }`}
+                                >
+                                    <Clock size={10} className={(data.debtStats?.remainingAmount || pendingRevenue) > 0 ? "text-amber-200" : "text-white/40"} />
+                                    <span className={(data.debtStats?.remainingAmount || pendingRevenue) > 0 ? "text-amber-200" : "text-white/40"}>Nợ:</span> 
+                                    <span className={(data.debtStats?.remainingAmount || pendingRevenue) > 0 ? "text-amber-300 font-bold" : "text-white/60"}>
+                                        {formatCurrency(data.debtStats?.remainingAmount || pendingRevenue)}
+                                    </span>
+                                    <span className="text-white/40 ml-1">({data.debtStats?.count || 0} đơn)</span>
+                                </div>
                             </div>
                         </div>
                         <div className="text-right">
@@ -2459,14 +2464,25 @@ function ViolatedOrdersDialog({ branch, onClose, userId, startDate, endDate }: a
                                             <p className="text-[9px] text-slate-400 font-bold uppercase">{formatDate(order.orderDate)}</p>
                                         </div>
                                     </div>
-                                    <div className="bg-white rounded-xl border border-slate-100 p-3 space-y-2">
+                                    <div className="space-y-2">
                                         {order.violatedItems.map((item: any, idx: number) => (
-                                            <div key={idx} className="flex justify-between items-center text-[10px]">
-                                                <span className="font-bold text-slate-600">{item.productName} (x{item.quantity})</span>
-                                                <div className="flex gap-3 items-center">
-                                                    <span className="text-slate-400 line-through">{formatCurrency(item.minPrice)}</span>
-                                                    <span className="font-black text-rose-600">{formatCurrency(item.unitPrice)}</span>
+                                            <div key={idx} className="bg-white rounded-xl border border-slate-100 p-3">
+                                                <div className="flex justify-between items-center text-[10px]">
+                                                    <span className="font-bold text-slate-600">{item.productName} (x{item.quantity})</span>
+                                                    <div className="flex gap-3 items-center">
+                                                        <span className="text-slate-400 line-through">{formatCurrency(item.minPrice)}</span>
+                                                        <span className="font-black text-rose-600">{formatCurrency(item.unitPrice)}</span>
+                                                    </div>
                                                 </div>
+                                                {order.isSplit && (
+                                                    <div className="flex justify-between items-center text-[9px] mt-1 pt-1 border-t border-dashed border-slate-100 text-slate-500 italic">
+                                                        <span>Giá chia ({order.branchSharePercent}%):</span>
+                                                        <div className="flex gap-3 items-center">
+                                                            <span>Min: {formatCurrency(item.splitMinPrice)}</span>
+                                                            <span className="font-bold text-rose-500">Bán: {formatCurrency(item.splitUnitPrice)}</span>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         ))}
                                     </div>

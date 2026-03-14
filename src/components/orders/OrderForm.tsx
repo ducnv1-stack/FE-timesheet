@@ -447,7 +447,7 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-3 xl:gap-4 print:block">
-                <div id="invoice-paper" className="w-full max-w-[210mm] bg-white border-2 p-4 md:p-6 shadow-2xl relative overflow-hidden print:shadow-none print:p-[10mm] print:border-none print:m-auto transition-all">
+                <div id="invoice-paper" className="w-full max-w-[210mm] bg-white border-2 p-4 md:p-6 shadow-xl shadow-slate-200/50 relative overflow-hidden print:shadow-none print:p-[10mm] print:border-none print:m-auto transition-all text-slate-900">
                     <div className="absolute top-0 left-0 w-full h-1.5 bg-rose-700 print:hidden"></div>
                     <div className="hidden print:block w-full h-3 bg-rose-700 mb-8"></div>
 
