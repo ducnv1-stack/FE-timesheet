@@ -79,7 +79,7 @@ export default function LeaderboardPage() {
         fetchData();
     }, [fetchData]);
 
-    const isHighLevelRole = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'ADMIN'].includes(user?.role?.code);
+    const isHighLevelRole = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'ADMIN', 'TELESALE'].includes(user?.role?.code);
     const isManager = user?.role?.code === 'MANAGER';
 
     const getRankColor = (rank: number) => {

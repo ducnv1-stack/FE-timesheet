@@ -48,7 +48,7 @@ export default function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
                             <ChevronLeft size={20} />
                         </button>
                     )}
-                    <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
+                    <h2 className="text-sm font-bold text-slate-800 tracking-wider">
                         {pathname === '/dashboard' ? 'Báo cáo tổng quan' : pathname === '/orders/new' ? 'Tạo đơn hàng mới' : 'Hệ thống Ohari'}
                     </h2>
                 </div>
@@ -63,11 +63,11 @@ export default function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
                         >
                             <div className="flex flex-col items-end">
                                 <span className="text-[10px] font-bold text-slate-900 leading-tight group-hover:text-primary transition-colors">{user.employee?.fullName || user.username}</span>
-                                <span className="text-[8px] text-slate-500 uppercase font-medium">
+                                <span className="text-[8px] text-slate-500 font-medium">
                                     {typeof user.role === 'object' ? user.role.name : user.role}
                                 </span>
                             </div>
-                            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-sm group-hover:shadow-md group-hover:scale-105 transition-all overflow-hidden shrink-0">
+                            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-[10px] font-bold shadow-sm group-hover:shadow-md group-hover:scale-105 transition-all overflow-hidden shrink-0">
                                 {user.employee?.avatarUrl ? (
                                     <img src={user.employee.avatarUrl.startsWith('http') ? user.employee.avatarUrl : `${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001')}${user.employee.avatarUrl}`} alt="Avatar" className="w-full h-full object-cover" />
                                 ) : (

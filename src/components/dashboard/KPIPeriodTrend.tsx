@@ -16,13 +16,13 @@ export default function KPIPeriodTrend({ periodStats }: { periodStats: any[] }) 
                         <TrendingUp size={18} />
                     </div>
                     <div>
-                        <h3 className="font-black text-slate-800 text-sm uppercase tracking-wider">Tiến độ KPI theo kỳ</h3>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase">Chia làm 3 kỳ (1-10, 11-20, 21-hết tháng)</p>
+                        <h3 className="font-bold text-slate-800 text-sm tracking-wider">Tiến độ KPI theo kỳ</h3>
+                        <p className="text-[10px] text-slate-400 font-bold">Chia làm 3 kỳ (1-10, 11-20, 21-hết tháng)</p>
                     </div>
                 </div>
                 <div className="text-right">
-                    <p className="text-[10px] text-slate-400 font-bold uppercase mb-0.5">Thưởng kỳ (Tạm tính)</p>
-                    <p className={`text-sm font-black ${totalBonus >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                    <p className="text-[10px] text-slate-400 font-bold mb-0.5">Thưởng kỳ (Tạm tính)</p>
+                    <p className={`text-sm font-bold ${totalBonus >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
                         {totalBonus > 0 ? `+${formatCurrency(totalBonus)}` : formatCurrency(totalBonus)}
                     </p>
                 </div>
@@ -43,7 +43,7 @@ export default function KPIPeriodTrend({ periodStats }: { periodStats: any[] }) 
                                 }`}>
                                 <div className="flex justify-between items-start mb-3">
                                     <div>
-                                        <p className={`text-[10px] font-black uppercase tracking-wider ${isOngoing ? 'text-amber-600' : 'text-slate-400'}`}>
+                                        <p className={`text-[10px] font-bold tracking-wider ${isOngoing ? 'text-amber-600' : 'text-slate-400'}`}>
                                             {period.label} {isOngoing && '(Hôm nay)'}
                                         </p>
                                         <p className="text-[9px] text-slate-500 font-bold">
@@ -59,12 +59,12 @@ export default function KPIPeriodTrend({ periodStats }: { periodStats: any[] }) 
                                     <div className="flex justify-between items-end">
                                         <div className="flex flex-col gap-1">
                                             <div className="flex items-center gap-2">
-                                                <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1 rounded uppercase min-w-[30px] text-center">Bán</span>
+                                                <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1 rounded min-w-[30px] text-center">Bán</span>
                                                 <p className="text-xs font-bold text-slate-600">{formatCurrency(period.salesRevenue || 0)}</p>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1 rounded uppercase min-w-[30px] text-center">Thực</span>
-                                                <p className="text-xs font-black text-slate-800">{formatCurrency(period.revenue)}</p>
+                                                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1 rounded min-w-[30px] text-center">Thực</span>
+                                                <p className="text-xs font-bold text-slate-800">{formatCurrency(period.revenue)}</p>
                                             </div>
                                             <p className="text-[8px] text-slate-400 font-medium tracking-tight mt-1">Mục tiêu: {formatCurrency(period.target)}</p>
                                         </div>
@@ -84,10 +84,10 @@ export default function KPIPeriodTrend({ periodStats }: { periodStats: any[] }) 
                                     </div>
 
                                     <div className="flex justify-between items-center pt-2 mt-2 border-t border-slate-100/50">
-                                        <p className="text-[9px] text-slate-400 font-bold uppercase">
+                                        <p className="text-[9px] text-slate-400 font-bold">
                                             {period.status === 'upcoming' ? 'Trạng thái' : 'Thưởng/Phạt'}
                                         </p>
-                                        <p className={`text-[10px] font-black ${period.bonus > 0 ? 'text-emerald-600' : (period.bonus < 0 ? 'text-rose-600' : 'text-slate-400')}`}>
+                                        <p className={`text-[10px] font-bold ${period.bonus > 0 ? 'text-emerald-600' : (period.bonus < 0 ? 'text-rose-600' : 'text-slate-400')}`}>
                                             {period.status === 'upcoming' ? 'Chưa đến' : (period.bonus > 0 ? `+${formatCurrency(period.bonus)}` : formatCurrency(period.bonus))}
                                         </p>
                                     </div>

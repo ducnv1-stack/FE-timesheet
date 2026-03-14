@@ -174,7 +174,7 @@ export default function PerformancePage() {
             return;
         }
         const parsedUser = JSON.parse(user);
-        const allowedRoles = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER', 'ADMIN'];
+        const allowedRoles = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER', 'ADMIN', 'TELESALE'];
         if (!allowedRoles.includes(parsedUser.role?.code)) {
             router.push('/dashboard');
             return;

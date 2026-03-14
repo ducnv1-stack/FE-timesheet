@@ -127,8 +127,6 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
             oldOrderId: oldOrder.id,
             oldOrderCode: oldOrder.id?.split('-')[0] || '',
             // One-way sync to new order fields
-            branchId: oldOrder.branchId,
-            staffCode: oldOrder.staffCode || oldOrder.createdBy,
             customerName: oldOrder.customerName,
             customerPhone: oldOrder.customerPhone,
             customerAddress: oldOrder.customerAddress,
@@ -631,7 +629,11 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
                             <select
                                 value={order.branchId}
                                 onChange={(e) => setOrder({ ...order, branchId: e.target.value })}
-                                className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 appearance-none print:appearance-none cursor-pointer"
+                                disabled={order.isUpgrade}
+                                className={cn(
+                                    "bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 appearance-none print:appearance-none cursor-pointer",
+                                    order.isUpgrade && "cursor-not-allowed opacity-100" // Opacity-100 to keep text dark for viewing
+                                )}
                             >
                                 {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                             </select>
@@ -641,7 +643,11 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
                             <select
                                 value={order.staffCode || ''}
                                 onChange={(e) => setOrder({ ...order, staffCode: e.target.value })}
-                                className="bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 appearance-none print:appearance-none cursor-pointer"
+                                disabled={order.isUpgrade}
+                                className={cn(
+                                    "bg-transparent border-none font-medium focus:ring-0 p-0 text-slate-900 appearance-none print:appearance-none cursor-pointer",
+                                    order.isUpgrade && "cursor-not-allowed opacity-100"
+                                )}
                             >
                                 <option value="">Chọn NV...</option>
                                 {headerEmployees.map(emp => <option key={emp.id} value={emp.id}>{emp.fullName}</option>)}

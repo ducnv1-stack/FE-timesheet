@@ -200,7 +200,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             icon: Trophy,
             href: '/leaderboard',
             active: pathname === '/leaderboard',
-            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER', 'ADMIN']
+            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER', 'ADMIN', 'TELESALE']
         },
         {
             label: 'Log hệ thống',

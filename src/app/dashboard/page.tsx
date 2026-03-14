@@ -152,10 +152,10 @@ export default function DashboardPage() {
                         <Calendar size={20} />
                     </div>
                     <div>
-                        <h2 className="text-lg font-black text-slate-800 uppercase tracking-tight">Thống kê hoạt động</h2>
+                        <h2 className="text-lg font-bold text-slate-800 tracking-tight">Thống kê hoạt động</h2>
                         <div className="flex items-center gap-2 mt-0.5">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                            <p className="text-[10px] text-slate-500 font-bold tracking-wider">
                                 {formatDate(startDate)} - {formatDate(endDate)}
                             </p>
                         </div>
@@ -174,7 +174,7 @@ export default function DashboardPage() {
                             <button
                                 key={btn.val}
                                 onClick={() => setQuickRange(btn.val as any)}
-                                className="px-2 md:px-3 py-1.5 text-[10px] font-black uppercase tracking-tight rounded-xl transition-all hover:bg-white hover:shadow-sm text-slate-500 hover:text-rose-600 cursor-pointer"
+                                className="px-2 md:px-3 py-1.5 text-[10px] font-bold tracking-tight rounded-xl transition-all hover:bg-white hover:shadow-sm text-slate-500 hover:text-rose-600 cursor-pointer"
                             >
                                 {btn.label}
                             </button>
@@ -2113,9 +2113,9 @@ function TelesaleDashboard({ data, startDate, endDate }: { data: any, startDate:
                             <div>
                                 <div className="flex items-center gap-2 mb-1 opacity-80">
                                     <TrendingUp size={12} className="text-blue-300" />
-                                    <h3 className="text-[9px] font-black uppercase tracking-widest text-blue-100">Doanh số bán hệ thống</h3>
+                                    <h3 className="text-[9px] font-bold tracking-widest text-blue-100">Doanh số bán hệ thống</h3>
                                 </div>
-                                <p className="text-2xl md:text-3xl font-black truncate tracking-tight text-blue-50">
+                                <p className="text-2xl md:text-3xl font-bold truncate tracking-tight text-blue-50">
                                     {formatCurrency(data.systemSalesRevenue || 0)}
                                 </p>
                                 <span className="text-[9px] font-bold bg-blue-500/20 px-2 py-0.5 rounded-full border border-blue-400/20 text-blue-200 mt-2 inline-block">
@@ -2125,9 +2125,9 @@ function TelesaleDashboard({ data, startDate, endDate }: { data: any, startDate:
                             <div>
                                 <div className="flex items-center gap-2 mb-1 opacity-80">
                                     <TrendingUp size={12} className="text-emerald-300" />
-                                    <h3 className="text-[9px] font-black uppercase tracking-widest text-emerald-100">Tiền về hệ thống</h3>
+                                    <h3 className="text-[9px] font-bold tracking-widest text-emerald-100">Tiền về hệ thống</h3>
                                 </div>
-                                <p className="text-2xl md:text-3xl font-black truncate tracking-tight">
+                                <p className="text-2xl md:text-3xl font-bold truncate tracking-tight">
                                     {formatCurrency(systemRevenue)}
                                 </p>
                                 <div className="mt-2 flex flex-wrap gap-2">
@@ -2148,18 +2148,18 @@ function TelesaleDashboard({ data, startDate, endDate }: { data: any, startDate:
                             <div>
                                 <div className="flex items-center gap-2 mb-1">
                                     <CreditCard size={14} className="text-emerald-400" />
-                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-rose-100">Hoa hồng (0.2%)</h4>
+                                    <h4 className="text-[10px] font-bold tracking-widest text-rose-100">Hoa hồng (0.2%)</h4>
                                 </div>
-                                <p className="text-2xl font-black text-emerald-400">
+                                <p className="text-2xl font-bold text-emerald-400">
                                     {formatCurrency(commission)}
                                 </p>
                             </div>
                             <div className="text-right">
                                 <div className="flex items-center gap-2 mb-1 justify-end">
                                     <DollarSign size={14} className="text-white" />
-                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-rose-100">Tổng thực nhận</h4>
+                                    <h4 className="text-[10px] font-black tracking-widest text-rose-100">Tổng thực nhận</h4>
                                 </div>
-                                <p className="text-2xl font-black text-white">
+                                <p className="text-2xl font-bold text-white">
                                     {formatCurrency(netIncome)}
                                 </p>
                             </div>
@@ -2171,6 +2171,70 @@ function TelesaleDashboard({ data, startDate, endDate }: { data: any, startDate:
                 </div>
             </div>
 
+            {/* Branch Stats Section - Card Layout Refined */}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 text-left">
+                {(data.branchStats || []).map((branch: any, i: number) => (
+                    <div key={i} className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-all group relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110" />
+                        
+                        <div className="relative">
+                            <div className="flex items-center justify-between mb-8">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center text-white shadow-lg shadow-slate-200 transition-all group-hover:bg-rose-600 group-hover:shadow-rose-200">
+                                        <MapPin size={22} />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-slate-800 tracking-tighter text-sm leading-tight">{branch.name}</h3>
+                                        <p className="text-[10px] text-slate-400 font-bold tracking-widest mt-0.5">Chi nhánh</p>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <span className="inline-flex items-center justify-center min-w-[32px] h-8 px-2 rounded-xl bg-slate-50 text-slate-900 text-xs font-bold border border-slate-100">
+                                        {branch.orderCount}
+                                    </span>
+                                    <p className="text-[7px] font-bold text-slate-300 tracking-widest mt-1">Đơn hàng</p>
+                                </div>
+                            </div>
+                            
+                            <div className="space-y-4">
+                                <div>
+                                    <div className="flex justify-between items-end mb-1.5 px-1">
+                                        <p className="text-[9px] font-black text-slate-400 tracking-wider flex items-center gap-1">
+                                            <TrendingUp size={10} className="text-blue-500" />
+                                            Doanh số bán
+                                        </p>
+                                        <span className="text-[8px] font-bold text-blue-500/50">Phát sinh</span>
+                                    </div>
+                                    <div className="p-4 rounded-2xl bg-slate-50/50 border border-slate-100 group-hover:border-blue-100 group-hover:bg-blue-50/30 transition-colors">
+                                        <p className="text-lg font-bold text-slate-900 tracking-tighter tabular-nums">{formatCurrency(branch.salesRevenue)}</p>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div className="flex justify-between items-end mb-1.5 px-1">
+                                        <p className="text-[9px] font-black text-slate-400 tracking-wider flex items-center gap-1">
+                                            <CreditCard size={10} className="text-rose-500" />
+                                            Tiền về thực tế
+                                        </p>
+                                        <span className="text-[8px] font-bold text-rose-500/50">Hoàn thành</span>
+                                    </div>
+                                    <div className="p-4 rounded-2xl bg-slate-50/50 border border-slate-100 group-hover:border-rose-100 group-hover:bg-rose-50/30 transition-colors">
+                                        <p className="text-lg font-bold text-rose-600 tracking-tighter tabular-nums">{formatCurrency(branch.revenue)}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+                {(!data.branchStats || data.branchStats.length === 0) && (
+                    <div className="col-span-full py-24 bg-white rounded-[40px] border border-dashed border-slate-200 flex flex-col items-center justify-center">
+                        <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-200 mb-4 animate-pulse">
+                            <MapPin size={40} />
+                        </div>
+                        <p className="text-xs font-bold text-slate-300 tracking-[0.3em]">Chưa có dữ liệu chi nhánh</p>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
@@ -2195,28 +2259,28 @@ function MarketingDashboard({ data, startDate, endDate }: { data: any, startDate
                     <div key={branch.branchId} className={`p-6 rounded-2xl border transition-all ${branch.isAchieved ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-slate-100'
                         }`}>
                         <div className="flex justify-between items-start mb-4">
-                            <h3 className="font-black text-slate-800 uppercase tracking-wider text-sm">{branch.branchName}</h3>
+                            <h3 className="font-bold text-slate-800 tracking-wider text-sm">{branch.branchName}</h3>
                             {branch.isAchieved && (
-                                <span className="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold">VƯỢT MỐC</span>
+                                <span className="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold">Vượt mốc</span>
                             )}
                         </div>
 
                         <div className="space-y-4">
                             <div>
-                                <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">Doanh thu tháng</p>
-                                <p className={`text-xl font-black ${branch.isAchieved ? 'text-emerald-700' : 'text-slate-700'}`}>
+                                <p className="text-[10px] text-slate-400 font-bold mb-1">Doanh thu tháng</p>
+                                <p className={`text-xl font-bold ${branch.isAchieved ? 'text-emerald-700' : 'text-slate-700'}`}>
                                     {formatCurrency(branch.revenue)}
                                 </p>
                             </div>
 
                             <div className="bg-slate-50/50 p-3 rounded-xl border border-slate-100 space-y-2">
                                 <div className="flex justify-between text-[10px]">
-                                    <span className="text-slate-400 font-bold uppercase">Mốc KPI:</span>
+                                    <span className="text-slate-400 font-bold">Mốc KPI:</span>
                                     <span className="text-slate-700 font-black">{formatCurrency(branch.threshold)}</span>
                                 </div>
                                 <div className="flex justify-between text-[10px]">
-                                    <span className="text-slate-400 font-bold uppercase">Tỉ lệ thưởng:</span>
-                                    <span className="text-rose-600 font-black">{branch.percent}%</span>
+                                    <span className="text-slate-400 font-bold">Tỉ lệ thưởng:</span>
+                                    <span className="text-rose-600 font-bold">{branch.percent}%</span>
                                 </div>
                             </div>
 
