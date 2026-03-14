@@ -75,7 +75,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             {/* Overlay for mobile when sidebar is open */}
             {!isCollapsed && (
                 <div
-                    className="fixed inset-0 bg-slate-900/20 backdrop-blur-[2px] z-30 lg:hidden transition-opacity"
+                    className="fixed inset-0 bg-slate-900/20 backdrop-blur-[2px] z-[140] lg:hidden transition-opacity"
                     onClick={() => setIsCollapsed(true)}
                 />
             )}

@@ -30,7 +30,7 @@ export default function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
     if (isLoginPage) return null;
 
     return (
-        <nav className="sticky top-0 z-30 w-full backdrop-blur-md bg-white/70 border-b border-slate-200/50 no-print">
+        <nav className="sticky top-0 z-[100] w-full backdrop-blur-md bg-white/70 border-b border-slate-200/50 no-print">
             <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                 {/* Left side: Menu Toggle (Mobile) and Module Title */}
                 <div className="flex items-center gap-2">

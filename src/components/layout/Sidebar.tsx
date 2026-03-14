@@ -241,7 +241,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
     return (
         <aside
             className={cn(
-                "fixed top-0 left-0 h-full z-40 bg-white border-r border-border-system transition-all duration-300 no-print",
+                "fixed top-0 left-0 h-full z-[150] bg-white border-r border-border-system transition-all duration-300 no-print",
                 "lg:translate-x-0", // Always show on desktop
                 isCollapsed ? "-translate-x-full lg:w-20 lg:translate-x-0" : "translate-x-0 w-64 shadow-2xl lg:shadow-none"
             )}
