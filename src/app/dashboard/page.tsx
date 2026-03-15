@@ -1494,6 +1494,9 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
                         <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
                             <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Lương cơ bản</p>
                             <p className="text-xl font-black text-slate-700">{formatCurrency(data.baseSalary || 0)}</p>
+                            <p className="text-[9px] text-slate-400 font-bold -mt-0.5">
+                                Lương cấu hình: {formatCurrency(data.effectiveBaseSalary || 0)}
+                            </p>
                         </div>
                         <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
                             <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Tổng hoa hồng</p>
@@ -2005,6 +2008,9 @@ function SaleDashboard({ data, startDate, endDate, branchId }: { data: any, star
                         <div className="p-3 bg-slate-50/50 rounded-2xl border border-slate-100">
                             <p className="text-[9px] font-black text-slate-400 uppercase mb-0.5">Lương cơ bản</p>
                             <p className="text-lg font-black text-slate-700">{formatCurrency(data.baseSalary || 0)}</p>
+                            <p className="text-[8px] text-slate-400 font-bold -mt-0.5 whitespace-nowrap">
+                                Lương cấu hình: {formatCurrency(data.effectiveBaseSalary || 0)}
+                            </p>
                         </div>
                         <div className="p-3 bg-slate-50/50 rounded-2xl border border-slate-100">
                             <p className="text-[9px] font-black text-slate-400 uppercase mb-0.5">Tổng hoa hồng</p>
