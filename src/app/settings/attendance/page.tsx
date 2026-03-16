@@ -22,8 +22,8 @@ export default function AttendanceSettingsPage() {
             label: 'Phòng ban',
             icon: Building2,
             description: 'Quản lý cơ cấu tổ chức',
-            color: 'text-rose-500',
-            bgColor: 'bg-rose-50'
+            color: 'text-primary-light',
+            bgColor: 'bg-primary-subtle'
         },
         {
             id: 'positions',
@@ -38,7 +38,7 @@ export default function AttendanceSettingsPage() {
             label: 'Chính sách',
             icon: Settings,
             description: 'Cấu hình giờ làm & GPS',
-            color: 'text-emerald-500',
+            color: 'text-accent-light',
             bgColor: 'bg-emerald-50'
         }
     ];
@@ -56,7 +56,7 @@ export default function AttendanceSettingsPage() {
                                 <Fingerprint size={20} />
                             </div>
                             <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-                                Thiết lập <span className="text-rose-600">Chấm công</span>
+                                Thiết lập <span className="text-primary">Chấm công</span>
                             </h1>
                         </div>
                         <p className="text-xs text-slate-500 font-medium max-w-xl pl-1">
@@ -108,7 +108,7 @@ export default function AttendanceSettingsPage() {
 
                             {/* Active Indicator */}
                             {activeTab === tab.id && (
-                                <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+                                <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-primary-light animate-ping" />
                             )}
                         </button>
                     ))}

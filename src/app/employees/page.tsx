@@ -335,7 +335,7 @@ export default function EmployeesPage() {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-3">
                     <div className="flex items-center gap-1.5 mb-2 md:mb-0">
-                        <div className="p-1.5 bg-gradient-to-br from-pink-500 to-rose-600 rounded-lg shadow-lg">
+                        <div className="p-1.5 bg-gradient-to-br from-primary-light to-primary rounded-lg shadow-lg">
                             <Users className="w-4 h-4 text-white" />
                         </div>
                         <div>
@@ -346,7 +346,7 @@ export default function EmployeesPage() {
                     <div className="flex items-center gap-2">
                         <button
                             onClick={handleExportExcel}
-                            className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white font-bold text-xs rounded-lg shadow-lg hover:bg-emerald-700 hover:scale-105 transition-all cursor-pointer"
+                            className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-accent text-white font-bold text-xs rounded-lg shadow-lg hover:bg-emerald-700 hover:scale-105 transition-all cursor-pointer"
                         >
                             <FileSpreadsheet className="w-3.5 h-3.5" />
                             Xuất Excel
@@ -354,7 +354,7 @@ export default function EmployeesPage() {
                         {canManage && canCreate && (
                             <button
                                 onClick={() => router.push('/employees/new')}
-                                className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-pink-600 to-rose-600 text-white font-bold text-xs rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all cursor-pointer"
+                                className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-primary to-primary text-white font-bold text-xs rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all cursor-pointer"
                             >
                                 <Plus className="w-3.5 h-3.5" />
                                 Thêm Nhân Viên
@@ -373,7 +373,7 @@ export default function EmployeesPage() {
                         </div>
                         <button
                             onClick={resetFilters}
-                            className="text-[10px] font-bold text-rose-500 hover:text-rose-600 px-2 py-1 bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                            className="text-[10px] font-bold text-primary-light hover:text-primary px-2 py-1 bg-primary-subtle rounded-lg transition-colors cursor-pointer"
                         >
                             ✕ Reset
                         </button>
@@ -382,13 +382,13 @@ export default function EmployeesPage() {
                     {/* Mobile Header & Search Toggles */}
                     <div className="flex lg:hidden items-center gap-2 mb-2">
                         <div className="relative flex-1">
-                            <Search className={`absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 transition-colors ${searchTerm ? 'text-rose-500' : 'text-slate-400'}`} />
+                            <Search className={`absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 transition-colors ${searchTerm ? 'text-primary-light' : 'text-slate-400'}`} />
                             <input
                                 type="text"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 placeholder="Tên, SĐT..."
-                                className={`w-full pl-8 pr-3 py-1.5 text-[11px] font-bold border rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all ${searchTerm ? 'border-rose-300 bg-rose-50' : 'border-slate-300 bg-slate-50'}`}
+                                className={`w-full pl-8 pr-3 py-1.5 text-[11px] font-bold border rounded-lg focus:ring-2 focus:ring-primary-light focus:border-transparent transition-all ${searchTerm ? 'border-rose-300 bg-primary-subtle' : 'border-slate-300 bg-slate-50'}`}
                             />
                         </div>
                         <button
@@ -396,7 +396,7 @@ export default function EmployeesPage() {
                             className={cn(
                                 "flex items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all border shrink-0 cursor-pointer",
                                 showMobileFilters || selectedBranch || selectedPosition || selectedDepartment || selectedRole || selectedStatus || hasAccountFilter
-                                    ? "bg-rose-600 text-white border-rose-600 shadow-md"
+                                    ? "bg-primary text-white border-primary shadow-md"
                                     : "bg-white text-slate-600 border-slate-200"
                             )}
                         >
@@ -421,7 +421,7 @@ export default function EmployeesPage() {
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                         placeholder="Họ tên, SĐT..."
-                                        className="w-full pl-8 pr-3 h-8 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-slate-50 font-medium"
+                                        className="w-full pl-8 pr-3 h-8 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-light focus:border-transparent bg-slate-50 font-medium"
                                     />
                                 </div>
                             </div>
@@ -437,7 +437,7 @@ export default function EmployeesPage() {
                                         value={selectedBranch}
                                         onChange={(e) => setSelectedBranch(e.target.value)}
                                         disabled={currentUser?.role?.code === 'MANAGER'}
-                                        className="w-full pl-8 pr-3 h-8 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed cursor-pointer bg-slate-50 font-medium appearance-none"
+                                        className="w-full pl-8 pr-3 h-8 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-light focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed cursor-pointer bg-slate-50 font-medium appearance-none"
                                     >
                                         <option value="">Tất cả</option>
                                         {branches.map(b => (
@@ -491,7 +491,7 @@ export default function EmployeesPage() {
                                     <select
                                         value={selectedStatus}
                                         onChange={(e) => setSelectedStatus(e.target.value)}
-                                        className="w-full pl-8 pr-3 h-8 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent cursor-pointer bg-slate-50 font-medium appearance-none"
+                                        className="w-full pl-8 pr-3 h-8 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-light focus:border-transparent cursor-pointer bg-slate-50 font-medium appearance-none"
                                     >
                                         <option value="">Tất cả</option>
                                         <option value="Đang làm việc">Đang làm việc</option>
@@ -528,7 +528,7 @@ export default function EmployeesPage() {
                                     <select
                                         value={hasAccountFilter}
                                         onChange={(e) => setHasAccountFilter(e.target.value)}
-                                        className="w-full pl-8 pr-3 h-8 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent cursor-pointer bg-slate-50 font-medium appearance-none"
+                                        className="w-full pl-8 pr-3 h-8 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-light focus:border-transparent cursor-pointer bg-slate-50 font-medium appearance-none"
                                     >
                                         <option value="">Tất cả</option>
                                         <option value="true">Có tài khoản</option>
@@ -542,7 +542,7 @@ export default function EmployeesPage() {
                             <div className="lg:hidden pt-2 border-t border-slate-100 mt-1">
                                 <button
                                     onClick={resetFilters}
-                                    className="w-full py-2 bg-rose-50 text-rose-600 font-black text-[10px] uppercase tracking-wider rounded-lg border border-rose-100 cursor-pointer"
+                                    className="w-full py-2 bg-primary-subtle text-primary font-black text-[10px] uppercase tracking-wider rounded-lg border border-primary-subtle cursor-pointer"
                                 >
                                     ✕ Xóa Tất Cả Bộ Lọc
                                 </button>
@@ -555,7 +555,7 @@ export default function EmployeesPage() {
                 <div className="bg-white rounded-lg shadow-md overflow-hidden border border-slate-200">
                     {loading ? (
                         <div className="p-12 text-center">
-                            <div className="animate-spin w-12 h-12 border-4 border-pink-500 border-t-transparent rounded-full mx-auto"></div>
+                            <div className="animate-spin w-12 h-12 border-4 border-primary-light border-t-transparent rounded-full mx-auto"></div>
                             <p className="mt-4 text-slate-600">Đang tải...</p>
                         </div>
                     ) : (
@@ -644,7 +644,7 @@ export default function EmployeesPage() {
                                                                     e.stopPropagation();
                                                                     handleDeleteEmployee(emp.id, emp.fullName);
                                                                 }}
-                                                                className="p-1.5 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-600 hover:text-white transition-all cursor-pointer"
+                                                                className="p-1.5 bg-primary-subtle text-primary rounded-lg hover:bg-primary hover:text-white transition-all cursor-pointer"
                                                                 title="Xóa nhân viên"
                                                             >
                                                                 <Trash2 className="w-3.5 h-3.5" />
@@ -670,7 +670,7 @@ export default function EmployeesPage() {
                     {currentUser?.role?.code === 'ADMIN' && (
                         <div className="flex-1 w-full bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm overflow-hidden">
                             <div className="flex items-center gap-1.5 mb-2 border-b border-slate-100 pb-1.5">
-                                <ShieldCheck className="w-3.5 h-3.5 text-rose-500" />
+                                <ShieldCheck className="w-3.5 h-3.5 text-primary-light" />
                                 <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-wider">Thống kê tài khoản (Vai trò)</h3>
                             </div>
                             <div className="flex flex-wrap gap-2">
@@ -680,7 +680,7 @@ export default function EmployeesPage() {
                                         className={cn(
                                             "flex items-center gap-1.5 px-2 py-1 rounded-md border transition-all cursor-pointer",
                                             selectedRole === role.id
-                                                ? "bg-rose-50 border-rose-200 scale-105 shadow-sm"
+                                                ? "bg-primary-subtle border-primary-subtle scale-105 shadow-sm"
                                                 : "bg-slate-50 border-slate-100 hover:bg-slate-100 hover:border-slate-200"
                                         )}
                                         onClick={() => setSelectedRole(selectedRole === role.id ? '' : role.id)}
@@ -688,7 +688,7 @@ export default function EmployeesPage() {
                                         <span className="text-[10px] font-bold text-slate-700">{role.name}:</span>
                                         <span className={cn(
                                             "text-[10px] font-black px-1.5 py-0.5 rounded-full",
-                                            role.count > 0 ? "bg-rose-600 text-white" : "bg-slate-200 text-slate-500"
+                                            role.count > 0 ? "bg-primary text-white" : "bg-slate-200 text-slate-500"
                                         )}>
                                             {role.count}
                                         </span>

@@ -137,8 +137,8 @@ export default function DashboardPage() {
     };
 
     if (loading && !data) return (
-        <div className="min-h-screen flex items-center justify-center bg-rose-50/50">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-rose-600"></div>
+        <div className="min-h-screen flex items-center justify-center bg-primary-subtle/50">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
         </div>
     );
 
@@ -148,13 +148,13 @@ export default function DashboardPage() {
         <div className="bg-transparent space-y-6">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-2 md:gap-4 bg-white p-3 md:p-4 rounded-3xl border border-slate-100 shadow-sm transition-all duration-300">
                 <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-rose-50 rounded-2xl text-rose-600">
+                    <div className="p-2.5 bg-primary-subtle rounded-2xl text-primary">
                         <Calendar size={20} />
                     </div>
                     <div>
                         <h2 className="text-lg font-bold text-slate-800 tracking-tight">Thống kê hoạt động</h2>
                         <div className="flex items-center gap-2 mt-0.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-accent-light animate-pulse"></span>
                             <p className="text-[10px] text-slate-500 font-bold tracking-wider">
                                 {formatDate(startDate)} - {formatDate(endDate)}
                             </p>
@@ -174,7 +174,7 @@ export default function DashboardPage() {
                             <button
                                 key={btn.val}
                                 onClick={() => setQuickRange(btn.val as any)}
-                                className="px-2 md:px-3 py-1.5 text-[10px] font-bold tracking-tight rounded-xl transition-all hover:bg-white hover:shadow-sm text-slate-500 hover:text-rose-600 cursor-pointer"
+                                className="px-2 md:px-3 py-1.5 text-[10px] font-bold tracking-tight rounded-xl transition-all hover:bg-white hover:shadow-sm text-slate-500 hover:text-primary cursor-pointer"
                             >
                                 {btn.label}
                             </button>
@@ -183,7 +183,7 @@ export default function DashboardPage() {
 
                     <div className="h-8 w-[1px] bg-slate-200 hidden lg:block"></div>
 
-                    <div className="flex items-center gap-1.5 bg-slate-50 p-1 rounded-2xl border border-slate-100 group focus-within:border-rose-200 transition-colors h-10">
+                    <div className="flex items-center gap-1.5 bg-slate-50 p-1 rounded-2xl border border-slate-100 group focus-within:border-primary-subtle transition-colors h-10">
                         <FixedDatePicker
                             value={startDate}
                             onChange={setStartDate}
@@ -199,8 +199,8 @@ export default function DashboardPage() {
 
                     {/* Branch Filter - Only visible for Global/Accounting roles */}
                     {['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'ADMIN'].includes(user?.role?.code) && (
-                        <div className="flex items-center gap-2 bg-slate-50 p-1 pl-3 rounded-2xl border border-slate-100 group focus-within:border-rose-200 transition-colors h-10 w-full sm:w-auto">
-                            <MapPin size={14} className="text-slate-400 group-focus-within:text-rose-500" />
+                        <div className="flex items-center gap-2 bg-slate-50 p-1 pl-3 rounded-2xl border border-slate-100 group focus-within:border-primary-subtle transition-colors h-10 w-full sm:w-auto">
+                            <MapPin size={14} className="text-slate-400 group-focus-within:text-primary-light" />
                             <select
                                 value={branchId}
                                 onChange={(e) => setBranchId(e.target.value)}
@@ -216,7 +216,7 @@ export default function DashboardPage() {
 
                     <button
                         onClick={() => setQuickRange('month')}
-                        className="p-2.5 bg-rose-600 text-white rounded-2xl hover:bg-rose-700 transition-all shadow-lg shadow-rose-200 hover:scale-105 active:scale-95 group cursor-pointer"
+                        className="p-2.5 bg-primary text-white rounded-2xl hover:bg-primary-light transition-all shadow-lg shadow-primary-subtle hover:scale-105 active:scale-95 group cursor-pointer"
                         title="Reset về tháng này"
                     >
                         <Clock size={18} className="group-hover:rotate-12 transition-transform" />
@@ -301,7 +301,7 @@ function BranchRevenueChart({ chartData }: { chartData: any[] }) {
         <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
             <div className="flex items-center justify-between mb-4 gap-2">
                 <h3 className="font-black text-slate-800 flex items-center gap-2 uppercase tracking-wider text-sm whitespace-nowrap">
-                    <TrendingUp size={18} className="text-rose-600 flex-shrink-0" />
+                    <TrendingUp size={18} className="text-primary flex-shrink-0" />
                     <span className="hidden sm:inline">Doanh thu theo Chi nhánh</span>
                     <span className="sm:hidden">DT Chi nhánh</span>
                 </h3>
@@ -360,7 +360,7 @@ function BranchRevenueChart({ chartData }: { chartData: any[] }) {
                         onClick={handleZoomOut}
                         disabled={!canZoomOut}
                         className={`p-1.5 rounded-lg transition-all ${canZoomOut
-                            ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 cursor-pointer'
+                            ? 'bg-emerald-50 hover:bg-emerald-100 text-accent cursor-pointer'
                             : 'bg-slate-50 text-slate-300 cursor-not-allowed'}`}
                         title="Thu nhỏ (xem nhiều chi nhánh hơn)"
                     >
@@ -371,7 +371,7 @@ function BranchRevenueChart({ chartData }: { chartData: any[] }) {
                     {isZoomed && (
                         <button
                             onClick={handleReset}
-                            className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition-all cursor-pointer"
+                            className="p-1.5 rounded-lg bg-primary-subtle hover:bg-primary-subtle text-primary transition-all cursor-pointer"
                             title="Hiển thị tất cả chi nhánh"
                         >
                             <Maximize2 size={14} />
@@ -450,7 +450,7 @@ function DirectorDashboard({ data, userId, startDate, endDate, branchId }: { dat
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="p-3 bg-white rounded-2xl border border-slate-100 shadow-sm">
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                            <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-accent">
                                 <DollarSign size={18} />
                             </div>
                             <p className="text-[10px] font-black text-slate-400 uppercase">Doanh số hoàn thành</p>
@@ -474,7 +474,7 @@ function DirectorDashboard({ data, userId, startDate, endDate, branchId }: { dat
                     >
                         <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
-                                <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${(data.debtStats?.remainingAmount || data.pendingRevenueTotal || 0) > 0 ? 'bg-amber-100 text-amber-600 group-hover:bg-amber-200' : 'bg-slate-50 text-slate-400'}`}>
+                                <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${(data.debtStats?.remainingAmount || data.pendingRevenueTotal || 0) > 0 ? 'bg-amber-100 text-warning group-hover:bg-amber-200' : 'bg-slate-50 text-slate-400'}`}>
                                     <Clock size={18} />
                                 </div>
                                 <p className={`text-[10px] font-black uppercase ${(data.debtStats?.remainingAmount || data.pendingRevenueTotal || 0) > 0 ? 'text-amber-700' : 'text-slate-400'}`}>Khách còn nợ</p>
@@ -491,18 +491,18 @@ function DirectorDashboard({ data, userId, startDate, endDate, branchId }: { dat
                             </div>
                             <div className="flex justify-between items-center text-[9px] font-bold">
                                 <span className="text-slate-400 uppercase">Đã trả:</span>
-                                <span className="text-emerald-600 font-black">{formatCurrency(data.debtStats?.paidAmount || 0)}</span>
+                                <span className="text-accent font-black">{formatCurrency(data.debtStats?.paidAmount || 0)}</span>
                             </div>
                             <div className="flex justify-between items-center text-[9px] font-bold">
                                 <span className="text-slate-400 uppercase">Còn thiếu:</span>
-                                <span className="text-rose-600 font-black">{formatCurrency(data.debtStats?.remainingAmount || data.pendingRevenueTotal || 0)}</span>
+                                <span className="text-primary font-black">{formatCurrency(data.debtStats?.remainingAmount || data.pendingRevenueTotal || 0)}</span>
                             </div>
                         </div>
                     </div>
                     <StatCard
                         title="Tổng đơn hàng"
                         value={String(data.totalOrders || 0)}
-                        icon={<ShoppingBag size={20} className="text-rose-600" />}
+                        icon={<ShoppingBag size={20} className="text-primary" />}
                     />
                 </div>
 
@@ -512,7 +512,7 @@ function DirectorDashboard({ data, userId, startDate, endDate, branchId }: { dat
                         onClick={() => router.push(`/orders?paymentStatus=pending&excludeInstallment=true&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
                         className="p-3 bg-amber-50 rounded-2xl border border-amber-100 flex items-center gap-3 cursor-pointer hover:bg-amber-100 transition-colors group"
                     >
-                        <div className="w-10 h-10 bg-amber-100 group-hover:bg-amber-200 rounded-xl flex items-center justify-center text-amber-600">
+                        <div className="w-10 h-10 bg-amber-100 group-hover:bg-amber-200 rounded-xl flex items-center justify-center text-warning">
                             <AlertCircle size={20} />
                         </div>
                         <div>
@@ -551,7 +551,7 @@ function DirectorDashboard({ data, userId, startDate, endDate, branchId }: { dat
                     </div>
 
                     <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-100 flex items-center gap-3">
-                        <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
+                        <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-accent">
                             <Users size={20} />
                         </div>
                         <div>
@@ -634,7 +634,7 @@ function DirectorDashboard({ data, userId, startDate, endDate, branchId }: { dat
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
                     <div className="lg:col-span-6 bg-white p-4 rounded-3xl border border-slate-100 shadow-sm">
                         <div className="flex items-center gap-2 mb-3">
-                            <div className="w-8 h-8 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600">
+                            <div className="w-8 h-8 bg-primary-subtle rounded-xl flex items-center justify-center text-primary">
                                 <TrendingUp size={16} />
                             </div>
                             <div>
@@ -666,7 +666,7 @@ function DirectorDashboard({ data, userId, startDate, endDate, branchId }: { dat
                     </div>
                     <div className="lg:col-span-3 bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col">
                         <div className="flex items-center gap-2 mb-3">
-                            <div className="w-8 h-8 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600">
+                            <div className="w-8 h-8 bg-amber-50 rounded-xl flex items-center justify-center text-warning">
                                 <ShoppingBag size={16} />
                             </div>
                             <div>
@@ -684,7 +684,7 @@ function DirectorDashboard({ data, userId, startDate, endDate, branchId }: { dat
                                             <p className="text-[8px] text-slate-400 font-bold uppercase">SL: {item.quantity}</p>
                                         </div>
                                     </div>
-                                    <p className="text-[11px] font-black text-rose-600 shrink-0 mt-0.5">{formatCurrency(item.revenue)}</p>
+                                    <p className="text-[11px] font-black text-primary shrink-0 mt-0.5">{formatCurrency(item.revenue)}</p>
                                 </div>
                             ))}
                             {(!data.bestSellers || data.bestSellers.length === 0) && (
@@ -695,7 +695,7 @@ function DirectorDashboard({ data, userId, startDate, endDate, branchId }: { dat
 
                     <div className="lg:col-span-3 bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col">
                         <div className="flex items-center gap-2 mb-3">
-                            <div className="w-8 h-8 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
+                            <div className="w-8 h-8 bg-emerald-50 rounded-xl flex items-center justify-center text-accent">
                                 <Users size={16} />
                             </div>
                             <div>
@@ -712,10 +712,10 @@ function DirectorDashboard({ data, userId, startDate, endDate, branchId }: { dat
                                 >
                                     <div className="flex items-start justify-between mb-1">
                                         <div className="flex items-start gap-2 min-w-0 flex-1 mr-2">
-                                            <span className={`shrink-0 w-5 h-5 mt-0.5 rounded-md flex items-center justify-center text-[9px] font-black ${idx === 0 ? 'bg-amber-100 text-amber-600 border border-amber-200' : idx === 1 ? 'bg-slate-200 text-slate-600 border border-slate-300' : idx === 2 ? 'bg-orange-100 text-orange-600 border border-orange-200' : 'bg-white border border-slate-200 text-slate-500'}`}>{idx + 1}</span>
+                                            <span className={`shrink-0 w-5 h-5 mt-0.5 rounded-md flex items-center justify-center text-[9px] font-black ${idx === 0 ? 'bg-amber-100 text-warning border border-amber-200' : idx === 1 ? 'bg-slate-200 text-slate-600 border border-slate-300' : idx === 2 ? 'bg-orange-100 text-orange-600 border border-orange-200' : 'bg-white border border-slate-200 text-slate-500'}`}>{idx + 1}</span>
                                             <p className="text-[11px] font-black text-slate-700 leading-tight" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>{emp.name}</p>
                                         </div>
-                                        <p className="shrink-0 text-[11px] font-black text-emerald-600 mt-0.5">{formatCurrency(emp.revenue)}</p>
+                                        <p className="shrink-0 text-[11px] font-black text-accent mt-0.5">{formatCurrency(emp.revenue)}</p>
                                     </div>
                                     <div className="flex items-center justify-between pl-7 gap-2">
                                         <p className="text-[8px] text-slate-400 font-bold uppercase truncate shrink-0 max-w-[50%]">{emp.position}</p>
@@ -735,7 +735,7 @@ function DirectorDashboard({ data, userId, startDate, endDate, branchId }: { dat
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 {/* Alerts List */}
                 <div className="lg:col-span-1 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-                    <h3 className="font-black text-slate-800 mb-4 flex items-center gap-2 uppercase tracking-wider text-sm text-amber-500">
+                    <h3 className="font-black text-slate-800 mb-4 flex items-center gap-2 uppercase tracking-wider text-sm text-warning-light">
                         <AlertCircle size={18} />
                         Cảnh báo (Min cao)
                     </h3>
@@ -783,11 +783,11 @@ function DirectorDashboard({ data, userId, startDate, endDate, branchId }: { dat
                                     <tr key={i} className="hover:bg-slate-50/50 transition-colors whitespace-nowrap">
                                         <td className="py-3 pr-6 text-xs font-black text-slate-700 text-left">{branch.name}</td>
                                         <td className="py-3 pr-6 text-xs font-bold text-blue-600 text-right">{formatCurrency(branch.salesRevenue)}</td>
-                                        <td className="py-3 pr-6 text-xs font-black text-emerald-600 text-right">{formatCurrency(branch.revenue)}</td>
+                                        <td className="py-3 pr-6 text-xs font-black text-accent text-right">{formatCurrency(branch.revenue)}</td>
                                         <td className="py-3 pr-6 text-xs font-bold text-slate-500 text-center">{branch.salesOrderCount}</td>
-                                        <td className="py-3 pr-6 text-xs font-black text-emerald-600 text-center">{branch.completedOrderCount}</td>
+                                        <td className="py-3 pr-6 text-xs font-black text-accent text-center">{branch.completedOrderCount}</td>
                                         <td className="py-3 pr-6 text-center">
-                                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${branch.lowPriceRatio > 15 ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'}`}>
+                                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${branch.lowPriceRatio > 15 ? 'bg-primary-subtle text-primary' : 'bg-emerald-100 text-accent'}`}>
                                                 {branch.lowPriceRatio}%
                                             </span>
                                         </td>
@@ -796,7 +796,7 @@ function DirectorDashboard({ data, userId, startDate, endDate, branchId }: { dat
                                                 {branch.unconfirmedOrders > 0 && (
                                                     <span
                                                         onClick={() => router.push(`/orders?paymentStatus=pending&excludeInstallment=true&branchId=${branch.id}&startDate=${startDate}&endDate=${endDate}`)}
-                                                        className="text-[9px] font-black text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full border border-amber-100 cursor-pointer hover:bg-amber-600 hover:text-white transition-colors"
+                                                        className="text-[9px] font-black text-warning bg-amber-50 px-1.5 py-0.5 rounded-full border border-amber-100 cursor-pointer hover:bg-warning hover:text-white transition-colors"
                                                         title="Chờ khớp tiền thường"
                                                     >
                                                         {branch.unconfirmedOrders} CK
@@ -812,7 +812,7 @@ function DirectorDashboard({ data, userId, startDate, endDate, branchId }: { dat
                                                     </span>
                                                 )}
                                                 {branch.unconfirmedOrders === 0 && branch.pendingInstallmentOrders === 0 && (
-                                                    <CheckCircle size={14} className="text-emerald-500" />
+                                                    <CheckCircle size={14} className="text-accent-light" />
                                                 )}
                                             </div>
                                         </td>
@@ -951,14 +951,14 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
                             {/* Top Completed Server Employee */}
                             <div className="flex items-center gap-3 lg:pt-0 lg:border-t-0 pt-1 border-t border-slate-50">
                                 <div className="relative shrink-0">
-                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-md overflow-hidden border-2 border-white">
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-light to-teal-600 flex items-center justify-center text-white shadow-md overflow-hidden border-2 border-white">
                                         <UserAvatar
                                             src={getFullAvatarUrl(serverTopStaff?.completed?.avatarUrl)}
                                             fallbackIcon={<Users size={16} />}
                                             className="w-full h-full object-cover"
                                         />
                                     </div>
-                                    <div className="absolute -bottom-1 -right-1 px-1 py-0.5 rounded-md bg-emerald-600 shadow-sm flex items-center justify-center border border-white text-white">
+                                    <div className="absolute -bottom-1 -right-1 px-1 py-0.5 rounded-md bg-accent shadow-sm flex items-center justify-center border border-white text-white">
                                         <span className="text-[7px] font-black">Hạng {serverTopStaff?.completed?.rank || '—'}</span>
                                     </div>
                                 </div>
@@ -981,11 +981,11 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
                 {/* Top Performer - Branch Rankings */}
                 <div className="relative group overflow-hidden bg-white p-4 rounded-3xl border border-slate-100 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 flex flex-col justify-center">
                     <div className="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-10 transition-opacity">
-                        <MapPin size={40} className="text-rose-600" />
+                        <MapPin size={40} className="text-primary" />
                     </div>
                     <div className="relative z-10 h-full flex flex-col">
                         <div className="flex items-center gap-2 mb-3">
-                            <div className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center text-rose-600 transition-colors group-hover:bg-rose-100">
+                            <div className="w-8 h-8 rounded-lg bg-primary-subtle flex items-center justify-center text-primary transition-colors group-hover:bg-primary-subtle">
                                 <Users size={16} />
                             </div>
                             <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">Top Sales Chi nhánh</p>
@@ -995,14 +995,14 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
                             {/* Top Sales Branch Employee */}
                             <div className="flex items-center gap-3">
                                 <div className="relative shrink-0">
-                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-white shadow-md overflow-hidden border-2 border-white">
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-light to-primary flex items-center justify-center text-white shadow-md overflow-hidden border-2 border-white">
                                         <UserAvatar
                                             src={getFullAvatarUrl(branchTopStaff?.sales?.avatarUrl)}
                                             fallbackIcon={<Users size={16} />}
                                             className="w-full h-full object-cover"
                                         />
                                     </div>
-                                    <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-lg bg-rose-600 shadow-lg flex items-center justify-center border-2 border-white">
+                                    <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-lg bg-primary shadow-lg flex items-center justify-center border-2 border-white">
                                         <Trophy size={8} className="text-white" />
                                     </div>
                                 </div>
@@ -1011,7 +1011,7 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
                                         {branchTopStaff?.sales?.name || (branchTopStaff?.sales?.id ? `NV #${branchTopStaff.sales.id.slice(-4)}` : 'Đang cập nhật')}
                                     </h4>
                                     <div className="flex flex-col">
-                                        <p className="text-[10px] font-black text-rose-700 leading-none">
+                                        <p className="text-[10px] font-black text-primary-light leading-none">
                                             {formatCurrency(branchTopStaff?.sales?.amount || 0)}
                                         </p>
                                         <span className="text-[7px] text-slate-400 font-bold uppercase tracking-tighter">Top Doanh số bán</span>
@@ -1022,14 +1022,14 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
                             {/* Top Completed Branch Employee */}
                             <div className="flex items-center gap-3 lg:pt-0 lg:border-t-0 pt-1 border-t border-slate-50">
                                 <div className="relative shrink-0">
-                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-md overflow-hidden border-2 border-white">
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-warning-light to-orange-600 flex items-center justify-center text-white shadow-md overflow-hidden border-2 border-white">
                                         <UserAvatar
                                             src={getFullAvatarUrl(branchTopStaff?.completed?.avatarUrl)}
                                             fallbackIcon={<Users size={16} />}
                                             className="w-full h-full object-cover"
                                         />
                                     </div>
-                                    <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-lg bg-amber-600 shadow-lg flex items-center justify-center border-2 border-white text-white">
+                                    <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-lg bg-warning shadow-lg flex items-center justify-center border-2 border-white text-white">
                                         <CheckCircle size={8} className="text-white" />
                                     </div>
                                 </div>
@@ -1051,9 +1051,9 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
             </div>
             {/* Main Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="p-3 bg-white rounded-2xl border border-slate-100 shadow-sm hover:border-rose-100 transition-colors">
+                <div className="p-3 bg-white rounded-2xl border border-slate-100 shadow-sm hover:border-primary-subtle transition-colors">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="w-9 h-9 rounded-xl bg-rose-50 flex items-center justify-center text-rose-600">
+                        <div className="w-9 h-9 rounded-xl bg-primary-subtle flex items-center justify-center text-primary">
                             <DollarSign size={18} />
                         </div>
                         <p className="text-[10px] font-black text-slate-400 uppercase">Doanh số thực</p>
@@ -1079,7 +1079,7 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
                 >
                     <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
-                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${(data.debtStats?.remainingAmount || branchPendingRevenue || 0) > 0 ? 'bg-amber-100 text-amber-600 group-hover:bg-amber-200' : 'bg-slate-50 text-slate-400'}`}>
+                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${(data.debtStats?.remainingAmount || branchPendingRevenue || 0) > 0 ? 'bg-amber-100 text-warning group-hover:bg-amber-200' : 'bg-slate-50 text-slate-400'}`}>
                                 <Clock size={18} />
                             </div>
                             <p className={`text-[10px] font-black uppercase ${(data.debtStats?.remainingAmount || branchPendingRevenue || 0) > 0 ? 'text-amber-700' : 'text-slate-400'}`}>Khách còn nợ</p>
@@ -1096,11 +1096,11 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
                         </div>
                         <div className="flex justify-between items-center text-[9px] font-bold">
                             <span className="text-slate-400 uppercase">Đã trả:</span>
-                            <span className="text-emerald-600 font-black">{formatCurrency(data.debtStats?.paidAmount || 0)}</span>
+                            <span className="text-accent font-black">{formatCurrency(data.debtStats?.paidAmount || 0)}</span>
                         </div>
                         <div className="flex justify-between items-center text-[9px] font-bold">
                             <span className="text-slate-400 uppercase">Còn thiếu:</span>
-                            <span className="text-rose-600 font-black">{formatCurrency(data.debtStats?.remainingAmount || branchPendingRevenue)}</span>
+                            <span className="text-primary font-black">{formatCurrency(data.debtStats?.remainingAmount || branchPendingRevenue)}</span>
                         </div>
                     </div>
                 </div>
@@ -1118,25 +1118,25 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
             </div>
 
             {/* Dark Red KPI Card */}
-            <div className="bg-gradient-to-br from-rose-700 to-rose-900 rounded-3xl p-4 md:p-5 text-white shadow-xl relative overflow-hidden">
+            <div className="bg-gradient-to-br from-primary-light to-rose-900 rounded-3xl p-4 md:p-5 text-white shadow-xl relative overflow-hidden">
                 {/* Decoration */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
 
                 <div className="relative z-10">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-4 gap-3">
                         <div>
-                            <p className="text-rose-100 text-[10px] font-bold uppercase tracking-wider mb-0.5">Doanh thu hiện tại</p>
+                            <p className="text-primary-subtle text-[10px] font-bold uppercase tracking-wider mb-0.5">Doanh thu hiện tại</p>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight drop-shadow-lg leading-tight">
                                 {formatCurrency(branchRevenue)}
                             </h2>
                             <div className="flex flex-wrap items-center gap-3 mt-2">
-                                <div className="text-rose-200 text-xs bg-black/20 px-2.5 py-1 rounded-full backdrop-blur-sm border border-white/10">
+                                <div className="text-primary-subtle text-xs bg-black/20 px-2.5 py-1 rounded-full backdrop-blur-sm border border-white/10">
                                     Mốc hiện tại: {formatCurrency(branchRevenue)}
                                 </div>
                                 {isPenalty && (
                                     <div className={`text-xs px-2.5 py-1 rounded-full backdrop-blur-sm border flex items-center gap-1 ${isClemency
-                                        ? 'text-emerald-300 bg-emerald-900/30 border-emerald-500/30'
-                                        : 'text-amber-300 bg-amber-900/30 border-amber-500/30 animate-pulse'
+                                        ? 'text-emerald-300 bg-emerald-900/30 border-accent-light/30'
+                                        : 'text-amber-300 bg-amber-900/30 border-warning-light/30 animate-pulse'
                                         }`}>
                                         <div className="w-1.5 h-1.5 rounded-full bg-current"></div>
                                         {isClemency ? 'Đã được khoan hồng' : `Tỷ lệ giá thấp: ${lowPriceRatio.toFixed(1)}%`}
@@ -1146,10 +1146,10 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
                             {/* Doanh số bán CN & chờ thanh toán */}
                             <div className="flex flex-wrap gap-2 mt-2">
                                 <div className="text-[10px] bg-white/10 px-2 py-0.5 rounded-full border border-white/10">
-                                    <span className="text-rose-200">DS Bán CN:</span> <span className="text-white font-bold">{formatCurrency(branchSalesRevenue)}</span>
+                                    <span className="text-primary-subtle">DS Bán CN:</span> <span className="text-white font-bold">{formatCurrency(branchSalesRevenue)}</span>
                                 </div>
                                 {branchPendingRevenue > 0 && (
-                                    <div className="text-[10px] bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-400/30">
+                                    <div className="text-[10px] bg-warning-light/20 px-2 py-0.5 rounded-full border border-amber-400/30">
                                         <span className="text-amber-200">⚠️ Chờ TT:</span> <span className="text-amber-300 font-bold">{formatCurrency(branchPendingRevenue)}</span>
                                     </div>
                                 )}
@@ -1158,12 +1158,12 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
                         <div className="text-right">
                             {nextMilestone && nextMilestone.bonusAmount > 0 ? (
                                 <div className="bg-white/10 p-3 rounded-2xl backdrop-blur-md border border-white/10 min-w-[160px]">
-                                    <p className="text-[10px] text-rose-200 uppercase font-bold tracking-wider mb-0.5">Thưởng mốc kế tiếp</p>
+                                    <p className="text-[10px] text-primary-subtle uppercase font-bold tracking-wider mb-0.5">Thưởng mốc kế tiếp</p>
                                     <p className="text-xl font-black text-emerald-300 leading-none">{formatCurrency(nextMilestone.bonusAmount)}</p>
                                 </div>
                             ) : (
                                 <div className="bg-white/10 p-3 rounded-2xl backdrop-blur-md border border-white/10">
-                                    <p className="text-[10px] text-rose-200 uppercase font-bold tracking-wider mb-0.5">Mục tiêu tiếp theo</p>
+                                    <p className="text-[10px] text-primary-subtle uppercase font-bold tracking-wider mb-0.5">Mục tiêu tiếp theo</p>
                                     <p className="text-lg font-bold text-white leading-none">{formatCurrency(nextMilestone?.targetRevenue || 0)}</p>
                                 </div>
                             )}
@@ -1193,9 +1193,9 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
                                         <div className={`
                                             w-3.5 h-3.5 rounded-full border-2 transition-all duration-300 z-10
                                             ${reached ? 'bg-emerald-400 border-emerald-200 scale-110' :
-                                                isNext ? 'bg-white border-rose-500 animate-ping' : 'bg-slate-800 border-slate-600'}
+                                                isNext ? 'bg-white border-primary-light animate-ping' : 'bg-slate-800 border-slate-600'}
                                         `}></div>
-                                        {isNext && <div className="absolute top-0 w-3.5 h-3.5 rounded-full bg-white border-[3px] border-rose-600 z-10"></div>}
+                                        {isNext && <div className="absolute top-0 w-3.5 h-3.5 rounded-full bg-white border-[3px] border-primary z-10"></div>}
 
                                         {/* Removed % label under dot to avoid clutter */}
 
@@ -1211,7 +1211,7 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
                         <div className="bg-black/20 rounded-xl p-3 mt-2 backdrop-blur-sm border border-white/5">
                             <div className="flex flex-col gap-1.5">
                                 <div className="flex justify-between items-center text-xs">
-                                    <span className="text-rose-100 flex items-center gap-1.5">
+                                    <span className="text-primary-subtle flex items-center gap-1.5">
                                         <ArrowRight size={12} className="text-emerald-400" />
                                         Mục tiêu: <strong className="text-white">{formatCurrency(nextMilestone?.targetRevenue || 0)}</strong>
                                     </span>
@@ -1247,7 +1247,7 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
                     onClick={() => window.location.href = '/performance'}
                     className="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group text-left cursor-pointer"
                 >
-                    <div className="w-10 h-10 bg-rose-50 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform text-rose-600">
+                    <div className="w-10 h-10 bg-primary-subtle rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform text-primary">
                         <TrendingUp size={20} />
                     </div>
                     <h3 className="font-bold text-sm text-slate-800">Báo cáo chi nhánh</h3>
@@ -1264,7 +1264,7 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
                 </div>
                 <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
                     <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Tiền mặt đã thu</p>
-                    <p className="text-lg font-black text-emerald-600">{formatCurrency(data.cashAmount || 0)}</p>
+                    <p className="text-lg font-black text-accent">{formatCurrency(data.cashAmount || 0)}</p>
                     <p className="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1"><DollarSign size={10} /> Cash</p>
                 </div>
                 <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
@@ -1287,14 +1287,14 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
                     className={`p-4 rounded-2xl border cursor-pointer hover:shadow-md transition-all ${(data.unconfirmedCount || 0) > 0 ? 'bg-amber-50 border-amber-200' : 'bg-white border-slate-100'} shadow-sm`}
                 >
                     <div className="flex items-center gap-2 mb-2">
-                        <Clock size={16} className={(data.unconfirmedCount || 0) > 0 ? 'text-amber-500' : 'text-slate-400'} />
+                        <Clock size={16} className={(data.unconfirmedCount || 0) > 0 ? 'text-warning-light' : 'text-slate-400'} />
                         <p className="text-[10px] font-black text-slate-500 uppercase">Chờ khớp tiền</p>
                     </div>
-                    <p className={`text-2xl font-black ${(data.unconfirmedCount || 0) > 0 ? 'text-amber-600' : 'text-slate-700'}`}>
+                    <p className={`text-2xl font-black ${(data.unconfirmedCount || 0) > 0 ? 'text-warning' : 'text-slate-700'}`}>
                         {data.unconfirmedCount || 0} <span className="text-sm font-normal">đơn hàng</span>
                     </p>
                     {(data.unconfirmedCount || 0) > 0 && (
-                        <p className="text-[10px] text-amber-500 font-bold mt-1">⚠️ Cần xác nhận thanh toán</p>
+                        <p className="text-[10px] text-warning-light font-bold mt-1">⚠️ Cần xác nhận thanh toán</p>
                     )}
                 </div>
 
@@ -1335,10 +1335,10 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
                 {/* Nhân sự đang làm */}
                 <div className="p-4 rounded-2xl border bg-white border-slate-100 shadow-sm">
                     <div className="flex items-center gap-2 mb-2">
-                        <Users size={16} className="text-emerald-500" />
+                        <Users size={16} className="text-accent-light" />
                         <p className="text-[10px] font-black text-slate-500 uppercase">Nhân sự đang làm</p>
                     </div>
-                    <p className="text-2xl font-black text-emerald-600">
+                    <p className="text-2xl font-black text-accent">
                         {data.activeEmployees || 0} <span className="text-sm font-normal text-slate-500">nhân sự</span>
                     </p>
                     <p className="text-[10px] text-slate-400 font-bold mt-1">Chi nhánh</p>
@@ -1349,7 +1349,7 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
                 <div className="lg:col-span-8 bg-white p-4 rounded-3xl border border-slate-100 shadow-sm">
                     <div className="flex items-center gap-2 mb-3">
-                        <div className="w-8 h-8 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600">
+                        <div className="w-8 h-8 bg-primary-subtle rounded-xl flex items-center justify-center text-primary">
                             <TrendingUp size={16} />
                         </div>
                         <div>
@@ -1381,7 +1381,7 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
                 </div>
                 <div className="lg:col-span-4 bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col">
                     <div className="flex items-center gap-2 mb-3">
-                        <div className="w-8 h-8 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600">
+                        <div className="w-8 h-8 bg-amber-50 rounded-xl flex items-center justify-center text-warning">
                             <ShoppingBag size={16} />
                         </div>
                         <div>
@@ -1399,7 +1399,7 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
                                         <p className="text-[8px] text-slate-400 font-bold uppercase">SL: {item.quantity}</p>
                                     </div>
                                 </div>
-                                <p className="text-[11px] font-black text-rose-600">{formatCurrency(item.revenue)}</p>
+                                <p className="text-[11px] font-black text-primary">{formatCurrency(item.revenue)}</p>
                             </div>
                         ))}
                         {(!data.bestSellers || data.bestSellers.length === 0) && (
@@ -1480,7 +1480,7 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
             {/* Unified Income Overview Section */}
             <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
                 <div className="p-5 border-b border-slate-50 flex items-center gap-3">
-                    <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600">
+                    <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center text-accent">
                         <DollarSign size={18} />
                     </div>
                     <div>
@@ -1500,24 +1500,24 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
                         </div>
                         <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
                             <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Tổng hoa hồng</p>
-                            <p className="text-xl font-black text-emerald-600">{formatCurrency(data.commission || 0)}</p>
+                            <p className="text-xl font-black text-accent">{formatCurrency(data.commission || 0)}</p>
                         </div>
                         <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
                             <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Thưởng nóng (30%)</p>
-                            <p className="text-xl font-black text-rose-600">{formatCurrency(data.hotBonus || 0)}</p>
+                            <p className="text-xl font-black text-primary">{formatCurrency(data.hotBonus || 0)}</p>
                         </div>
                         <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
                             <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Tiền Ship</p>
                             <p className="text-xl font-black text-indigo-600">{formatCurrency(data.shippingFees || 0)}</p>
                         </div>
-                        <div className={`p-4 rounded-2xl border ${isPenalty && !isClemency ? 'bg-rose-50/50 border-rose-100' : 'bg-emerald-50/30 border-emerald-100/50'}`}>
+                        <div className={`p-4 rounded-2xl border ${isPenalty && !isClemency ? 'bg-primary-subtle/50 border-primary-subtle' : 'bg-emerald-50/30 border-emerald-100/50'}`}>
                             <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Thưởng mốc</p>
                             <div className="flex items-baseline gap-2">
                                 <p className={`text-xl font-black ${isPenalty && !isClemency ? 'line-through text-slate-400' : 'text-emerald-700'}`}>
                                     {formatCurrency(data.baseBonus || 0)}
                                 </p>
                                 {isPenalty && !isClemency && (
-                                    <p className="text-sm font-black text-rose-600">{formatCurrency(data.actualBonus || 0)}</p>
+                                    <p className="text-sm font-black text-primary">{formatCurrency(data.actualBonus || 0)}</p>
                                 )}
                             </div>
                         </div>
@@ -1525,12 +1525,12 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                         {/* Low Price Indicators */}
-                        <div className={`p-5 rounded-2xl border ${isPenalty ? 'bg-rose-50/50 border-rose-100' : 'bg-emerald-50/30 border-emerald-100/50'}`}>
+                        <div className={`p-5 rounded-2xl border ${isPenalty ? 'bg-primary-subtle/50 border-primary-subtle' : 'bg-emerald-50/30 border-emerald-100/50'}`}>
                             <div className="flex justify-between items-start mb-4">
-                                <h4 className={`text-xs font-black uppercase tracking-wider ${isPenalty ? 'text-rose-600' : 'text-emerald-600'}`}>
+                                <h4 className={`text-xs font-black uppercase tracking-wider ${isPenalty ? 'text-primary' : 'text-accent'}`}>
                                     Chỉ số giá thấp (Dưới Min)
                                 </h4>
-                                {isClemency && <span className="text-[10px] font-black bg-emerald-600 text-white px-2 py-0.5 rounded-full uppercase">Được khoan hồng</span>}
+                                {isClemency && <span className="text-[10px] font-black bg-accent text-white px-2 py-0.5 rounded-full uppercase">Được khoan hồng</span>}
                             </div>
                             <div className="grid grid-cols-3 gap-2">
                                 <div>
@@ -1543,7 +1543,7 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
                                 </div>
                                 <div>
                                     <p className="text-[10px] text-slate-400 mb-0.5">Tỷ lệ</p>
-                                    <p className={`text-sm font-bold ${isPenalty ? 'text-rose-600' : 'text-emerald-600'}`}>
+                                    <p className={`text-sm font-bold ${isPenalty ? 'text-primary' : 'text-accent'}`}>
                                         {lowPriceRatio.toFixed(1)}%
                                     </p>
                                 </div>
@@ -1597,13 +1597,13 @@ function ActionButton({ icon, title, href }: { icon: React.ReactNode, title: str
     return (
         <a
             href={href}
-            className="flex items-center gap-3 p-4 bg-white border border-slate-200 rounded-xl hover:border-rose-300 hover:bg-rose-50/50 transition-all group"
+            className="flex items-center gap-3 p-4 bg-white border border-slate-200 rounded-xl hover:border-rose-300 hover:bg-primary-subtle/50 transition-all group"
         >
-            <div className="p-2 bg-rose-50 rounded-lg text-rose-600 group-hover:bg-rose-100">
+            <div className="p-2 bg-primary-subtle rounded-lg text-primary group-hover:bg-primary-subtle">
                 {icon}
             </div>
-            <span className="font-bold text-slate-700 group-hover:text-rose-700">{title}</span>
-            <ArrowRight size={16} className="ml-auto text-slate-400 group-hover:text-rose-600" />
+            <span className="font-bold text-slate-700 group-hover:text-primary-light">{title}</span>
+            <ArrowRight size={16} className="ml-auto text-slate-400 group-hover:text-primary" />
         </a>
     );
 }
@@ -1618,14 +1618,14 @@ function RankingCard({ type, rank, total, branchRank, icon, color }: { type: str
 
     const colorClasses = {
         blue: 'bg-blue-50 border-blue-100 text-blue-600',
-        rose: 'bg-rose-50 border-rose-100 text-rose-600',
-        amber: 'bg-amber-50 border-amber-100 text-amber-600',
+        rose: 'bg-primary-subtle border-primary-subtle text-primary',
+        amber: 'bg-amber-50 border-amber-100 text-warning',
     };
 
     const iconClasses = {
         blue: 'bg-blue-100 text-blue-600',
-        rose: 'bg-rose-100 text-rose-600',
-        amber: 'bg-amber-100 text-amber-600',
+        rose: 'bg-primary-subtle text-primary',
+        amber: 'bg-amber-100 text-warning',
     };
 
     return (
@@ -1760,17 +1760,17 @@ function SaleDashboard({ data, startDate, endDate, branchId }: { data: any, star
                     </div>
 
                     {/* Branch status */}
-                    <div className="group relative overflow-hidden bg-gradient-to-br from-rose-50 via-white to-pink-50/50 p-4 rounded-3xl border border-rose-100 shadow-sm transition-all duration-500 hover:shadow-xl hover:shadow-rose-200/40 hover:-translate-y-1 flex flex-col justify-between">
-                        <div className="absolute -top-8 -right-8 w-24 h-24 bg-rose-500/5 rounded-full blur-2xl group-hover:bg-rose-500/10 transition-all duration-700"></div>
+                    <div className="group relative overflow-hidden bg-gradient-to-br from-primary-subtle via-white to-primary-subtle/50 p-4 rounded-3xl border border-primary-subtle shadow-sm transition-all duration-500 hover:shadow-xl hover:shadow-primary-subtle/40 hover:-translate-y-1 flex flex-col justify-between">
+                        <div className="absolute -top-8 -right-8 w-24 h-24 bg-primary-light/5 rounded-full blur-2xl group-hover:bg-primary-light/10 transition-all duration-700"></div>
                         <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-all duration-500 rotate-12 group-hover:rotate-0">
-                            <MapPin size={40} className="text-rose-600" />
+                            <MapPin size={40} className="text-primary" />
                         </div>
                         <div className="flex items-center gap-2.5 mb-3.5 relative z-10">
-                            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose-500 to-rose-600 flex items-center justify-center text-white shadow-md shadow-rose-200">
+                            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary-light to-primary flex items-center justify-center text-white shadow-md shadow-primary-subtle">
                                 <MapPin size={16} />
                             </div>
                             <div>
-                                <p className="text-[9px] font-black uppercase tracking-[0.15em] text-rose-600/60 leading-none mb-0.5">Địa phương</p>
+                                <p className="text-[9px] font-black uppercase tracking-[0.15em] text-primary/60 leading-none mb-0.5">Địa phương</p>
                                 <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-tight">Top Chi nhánh</h3>
                             </div>
                         </div>
@@ -1782,7 +1782,7 @@ function SaleDashboard({ data, startDate, endDate, branchId }: { data: any, star
                                     <p className="text-xl font-black text-slate-800 tracking-tighter">
                                         #{ranking.branchSales.rank || '—'}
                                     </p>
-                                    <span className="text-[10px] text-slate-400 font-bold uppercase transition-colors group-hover:text-rose-500">/ {ranking.branchSales.totalCount}</span>
+                                    <span className="text-[10px] text-slate-400 font-bold uppercase transition-colors group-hover:text-primary-light">/ {ranking.branchSales.totalCount}</span>
                                 </div>
                             </div>
                             <div className="flex flex-col">
@@ -1791,13 +1791,13 @@ function SaleDashboard({ data, startDate, endDate, branchId }: { data: any, star
                                     <p className="text-xl font-black text-slate-800 tracking-tighter">
                                         #{ranking.branchCompleted.rank || '—'}
                                     </p>
-                                    <span className="text-[10px] text-slate-400 font-bold uppercase transition-colors group-hover:text-rose-500">/ {ranking.branchCompleted.totalCount}</span>
+                                    <span className="text-[10px] text-slate-400 font-bold uppercase transition-colors group-hover:text-primary-light">/ {ranking.branchCompleted.totalCount}</span>
                                 </div>
                             </div>
                         </div>
 
                         <div className="mt-auto relative z-10">
-                            <div className="bg-gradient-to-r from-rose-600/5 to-transparent border-l-3 border-rose-500 p-2.5 rounded-r-xl">
+                            <div className="bg-gradient-to-r from-primary/5 to-transparent border-l-3 border-primary-light p-2.5 rounded-r-xl">
                                 <p className="text-[11px] font-bold leading-relaxed italic text-rose-900 drop-shadow-sm">
                                     "{(() => {
                                         const bestBranchRank = Math.min(...[ranking.branchSales.rank, ranking.branchCompleted.rank].filter(r => r !== null) as number[]);
@@ -1812,25 +1812,25 @@ function SaleDashboard({ data, startDate, endDate, branchId }: { data: any, star
                 </div>
             )}
             {/* KPI Card */}
-            <div className="bg-gradient-to-br from-rose-700 to-rose-900 rounded-3xl p-4 md:p-5 text-white shadow-xl relative overflow-hidden">
+            <div className="bg-gradient-to-br from-primary-light to-rose-900 rounded-3xl p-4 md:p-5 text-white shadow-xl relative overflow-hidden">
                 {/* Decoration */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
 
                 <div className="relative z-10">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
                         <div>
-                            <p className="text-rose-100 text-sm font-medium mb-0.5 flex items-center gap-2">
+                            <p className="text-primary-subtle text-sm font-medium mb-0.5 flex items-center gap-2">
                                 <TrendingUp size={14} /> Doanh số hoàn thành
                             </p>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight drop-shadow-lg leading-tight">
                                 {formatCurrency(completedRevenue)}
                             </h2>
                             <div className="flex flex-wrap items-center gap-3 mt-2">
-                                <div className="text-rose-200 text-xs bg-black/20 px-2.5 py-1 rounded-full backdrop-blur-sm border border-white/10">
+                                <div className="text-primary-subtle text-xs bg-black/20 px-2.5 py-1 rounded-full backdrop-blur-sm border border-white/10">
                                     KPI: {currentPercent.toFixed(1)}%
                                 </div>
                                 {isPenalty && (
-                                    <div className="text-amber-300 text-xs bg-amber-900/30 px-2.5 py-1 rounded-full backdrop-blur-sm border border-amber-500/30 flex items-center gap-1 animate-pulse">
+                                    <div className="text-amber-300 text-xs bg-amber-900/30 px-2.5 py-1 rounded-full backdrop-blur-sm border border-warning-light/30 flex items-center gap-1 animate-pulse">
                                         <Info size={12} /> Tỷ lệ giá thấp: {((lowPriceRevenue / currentRevenue) * 100).toFixed(1)}% (&gt;20%)
                                     </div>
                                 )}
@@ -1838,13 +1838,13 @@ function SaleDashboard({ data, startDate, endDate, branchId }: { data: any, star
                             {/* Doanh số bán & chờ thanh toán */}
                             <div className="flex flex-wrap gap-2 mt-2">
                                 <div className="text-[10px] bg-white/10 px-2 py-0.5 rounded-full border border-white/10">
-                                    <span className="text-rose-200">DS Bán:</span> <span className="text-white font-bold">{formatCurrency(salesRevenue)}</span>
+                                    <span className="text-primary-subtle">DS Bán:</span> <span className="text-white font-bold">{formatCurrency(salesRevenue)}</span>
                                 </div>
                                 <div
                                     onClick={() => router.push(`/orders?debtOnly=true&paymentStatus=pending&endDate=${endDate}${branchId ? `&branchId=${branchId}` : ''}`)}
                                     className={`text-[10px] px-2 py-0.5 rounded-full border transition-colors flex items-center gap-1 cursor-pointer ${
                                         (data.debtStats?.remainingAmount || pendingRevenue) > 0 
-                                        ? "bg-amber-500/20 border-amber-400/30 hover:bg-amber-500/40" 
+                                        ? "bg-warning-light/20 border-amber-400/30 hover:bg-warning-light/40" 
                                         : "bg-white/5 border-white/10 opacity-50"
                                     }`}
                                 >
@@ -1860,12 +1860,12 @@ function SaleDashboard({ data, startDate, endDate, branchId }: { data: any, star
                         <div className="text-right">
                             {nextTier.bonus > 0 ? (
                                 <div className="bg-white/10 p-3 rounded-2xl backdrop-blur-md border border-white/10 min-w-[160px]">
-                                    <p className="text-[10px] text-rose-200 uppercase font-bold tracking-wider mb-0.5">Thưởng mốc kế tiếp</p>
+                                    <p className="text-[10px] text-primary-subtle uppercase font-bold tracking-wider mb-0.5">Thưởng mốc kế tiếp</p>
                                     <p className="text-xl font-black text-emerald-300 leading-none">{formatCurrency(nextTier.bonus)}</p>
                                 </div>
                             ) : (
                                 <div className="bg-white/10 p-3 rounded-2xl backdrop-blur-md border border-white/10">
-                                    <p className="text-[10px] text-rose-200 uppercase font-bold tracking-wider mb-0.5">Mục tiêu tiếp theo</p>
+                                    <p className="text-[10px] text-primary-subtle uppercase font-bold tracking-wider mb-0.5">Mục tiêu tiếp theo</p>
                                     <p className="text-lg font-bold text-white leading-none">{nextTier.label}</p>
                                 </div>
                             )}
@@ -1900,13 +1900,13 @@ function SaleDashboard({ data, startDate, endDate, branchId }: { data: any, star
                                         <div className={`
                                             w-3.5 h-3.5 rounded-full border-2 transition-all duration-300 z-10
                                             ${reached ? 'bg-emerald-400 border-emerald-200 scale-110' :
-                                                isNext ? 'bg-white border-rose-500 animate-ping' : 'bg-slate-800 border-slate-600'}
+                                                isNext ? 'bg-white border-primary-light animate-ping' : 'bg-slate-800 border-slate-600'}
                                         `}></div>
                                         {/* Static Marker (to fix ping effect) */}
-                                        {isNext && <div className="absolute top-0 w-3.5 h-3.5 rounded-full bg-white border-[3px] border-rose-600 z-10"></div>}
+                                        {isNext && <div className="absolute top-0 w-3.5 h-3.5 rounded-full bg-white border-[3px] border-primary z-10"></div>}
 
                                         {/* Label */}
-                                        <div className={`absolute top-5 text-[9px] font-bold whitespace-nowrap transition-colors ${reached ? 'text-emerald-300' : 'text-rose-200/50'}`}>
+                                        <div className={`absolute top-5 text-[9px] font-bold whitespace-nowrap transition-colors ${reached ? 'text-emerald-300' : 'text-primary-subtle/50'}`}>
                                             {tier.label}
                                         </div>
 
@@ -1924,12 +1924,12 @@ function SaleDashboard({ data, startDate, endDate, branchId }: { data: any, star
                         <div className="bg-black/20 rounded-xl p-3 mt-2 backdrop-blur-sm border border-white/5">
                             {isPenalty ? (
                                 <div className="flex items-start gap-3">
-                                    <div className="p-1.5 bg-amber-500/20 rounded text-amber-300 mt-0.5">
+                                    <div className="p-1.5 bg-warning-light/20 rounded text-amber-300 mt-0.5">
                                         <Info size={16} />
                                     </div>
                                     <div className="flex-1">
                                         <p className="text-sm font-bold text-amber-300">Cảnh báo: Doanh số giá thấp vượt mức 20%</p>
-                                        <p className="text-xs text-rose-50 leading-relaxed opacity-90 mt-0.5">
+                                        <p className="text-xs text-primary-subtle leading-relaxed opacity-90 mt-0.5">
                                             Vượt mốc <strong>{nextTier.label}</strong> tại <strong>110%</strong> chỉ tiêu
                                             (<strong>{formatCurrency(effectiveTargetRevenue)}</strong>).
                                         </p>
@@ -1941,7 +1941,7 @@ function SaleDashboard({ data, startDate, endDate, branchId }: { data: any, star
                             ) : (
                                 <div className="flex flex-col gap-1.5">
                                     <div className="flex justify-between items-center text-xs">
-                                        <span className="text-rose-100 flex items-center gap-1.5">
+                                        <span className="text-primary-subtle flex items-center gap-1.5">
                                             <ArrowRight size={12} className="text-emerald-400" />
                                             Mục tiêu: <strong className="text-white">{nextTier.label}</strong> ({formatCurrency(nextTierRevenue)})
                                         </span>
@@ -1950,7 +1950,7 @@ function SaleDashboard({ data, startDate, endDate, branchId }: { data: any, star
                                         </span>
                                     </div>
                                     {nextBonusTier && (
-                                        <p className="text-[10px] text-rose-200/80 italic pl-4">
+                                        <p className="text-[10px] text-primary-subtle/80 italic pl-4">
                                             Chạm mốc {nextBonusTier.label} ({formatCurrency(nextBonusRevenue!)}) để nhận <strong>+{formatCurrency(nextBonusTier.bonus)}</strong> thưởng!
                                         </p>
                                     )}
@@ -1969,7 +1969,7 @@ function SaleDashboard({ data, startDate, endDate, branchId }: { data: any, star
                     onClick={() => window.location.href = '/orders/new'}
                     className="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group text-left cursor-pointer"
                 >
-                    <div className="w-10 h-10 bg-rose-50 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform text-rose-600">
+                    <div className="w-10 h-10 bg-primary-subtle rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform text-primary">
                         <ShoppingBag size={20} />
                     </div>
                     <h3 className="font-bold text-sm text-slate-800">Tạo đơn hàng mới</h3>
@@ -1988,7 +1988,7 @@ function SaleDashboard({ data, startDate, endDate, branchId }: { data: any, star
             {/* Income & Performance Overview */}
             <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
                 <div className="p-5 border-b border-slate-50 flex items-center gap-3">
-                    <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600">
+                    <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center text-accent">
                         <DollarSign size={18} />
                     </div>
                     <div>
@@ -2014,15 +2014,15 @@ function SaleDashboard({ data, startDate, endDate, branchId }: { data: any, star
                         </div>
                         <div className="p-3 bg-slate-50/50 rounded-2xl border border-slate-100">
                             <p className="text-[9px] font-black text-slate-400 uppercase mb-0.5">Tổng hoa hồng</p>
-                            <p className="text-lg font-black text-emerald-600">{formatCurrency(data.totalCommission || 0)}</p>
+                            <p className="text-lg font-black text-accent">{formatCurrency(data.totalCommission || 0)}</p>
                         </div>
                         <div className="p-3 bg-slate-50/50 rounded-2xl border border-slate-100">
                             <p className="text-[9px] font-black text-slate-400 uppercase mb-0.5">Thưởng nóng</p>
-                            <p className="text-lg font-black text-rose-600">{formatCurrency(data.hotBonus || 0)}</p>
+                            <p className="text-lg font-black text-primary">{formatCurrency(data.hotBonus || 0)}</p>
                         </div>
                         <div className="p-3 bg-slate-50/50 rounded-2xl border border-slate-100">
                             <p className="text-[9px] font-black text-slate-400 uppercase mb-0.5">Thưởng KPI kỳ</p>
-                            <p className={`text-lg font-black ${(data.periodBonus || 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                            <p className={`text-lg font-black ${(data.periodBonus || 0) >= 0 ? 'text-accent' : 'text-primary'}`}>
                                 {formatCurrency(data.periodBonus || 0)}
                             </p>
                         </div>
@@ -2034,16 +2034,16 @@ function SaleDashboard({ data, startDate, endDate, branchId }: { data: any, star
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                         {/* Penalty Section */}
-                        <div className={`p-5 rounded-2xl border ${data.performance?.isPenalty ? 'bg-rose-50/50 border-rose-100' : 'bg-emerald-50/30 border-emerald-100/50'}`}>
+                        <div className={`p-5 rounded-2xl border ${data.performance?.isPenalty ? 'bg-primary-subtle/50 border-primary-subtle' : 'bg-emerald-50/30 border-emerald-100/50'}`}>
                             <div className="flex justify-between items-start mb-4">
-                                <h4 className={`text-xs font-black uppercase tracking-wider ${data.performance?.isPenalty ? 'text-rose-600' : 'text-emerald-600'}`}>
+                                <h4 className={`text-xs font-black uppercase tracking-wider ${data.performance?.isPenalty ? 'text-primary' : 'text-accent'}`}>
                                     Chỉ số giá thấp (Dưới Min)
                                 </h4>
                                 {data.performance?.isPenalty && !data.performance?.isClemency && (
-                                    <span className="text-[9px] bg-rose-600 text-white px-2 py-0.5 rounded-full font-black animate-pulse">BỊ PHẠT 30%</span>
+                                    <span className="text-[9px] bg-primary text-white px-2 py-0.5 rounded-full font-black animate-pulse">BỊ PHẠT 30%</span>
                                 )}
                                 {data.performance?.isClemency && (
-                                    <span className="text-[9px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-black">ĐƯỢC KHOAN HỒNG</span>
+                                    <span className="text-[9px] bg-accent text-white px-2 py-0.5 rounded-full font-black">ĐƯỢC KHOAN HỒNG</span>
                                 )}
                             </div>
 
@@ -2058,7 +2058,7 @@ function SaleDashboard({ data, startDate, endDate, branchId }: { data: any, star
                                 </div>
                                 <div>
                                     <p className="text-[10px] text-slate-400 font-bold mb-0.5">Tỷ lệ</p>
-                                    <p className={`text-sm font-black ${data.performance?.isPenalty ? 'text-rose-600' : 'text-emerald-600'}`}>
+                                    <p className={`text-sm font-black ${data.performance?.isPenalty ? 'text-primary' : 'text-accent'}`}>
                                         {data.lowPriceStats?.ratio?.toFixed(1) || 0}%
                                     </p>
                                 </div>
@@ -2089,7 +2089,7 @@ function SaleDashboard({ data, startDate, endDate, branchId }: { data: any, star
                                 </div>
                             </div>
                             {/* Decorative glow */}
-                            <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl"></div>
+                            <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-accent-light/10 rounded-full blur-2xl"></div>
                         </div>
                     </div>
                 </div>
@@ -2109,7 +2109,7 @@ function TelesaleDashboard({ data, startDate, endDate }: { data: any, startDate:
     return (
         <div className="space-y-6 text-left">
             {/* Top Stat Card - Integrated Version */}
-            <div className="bg-gradient-to-br from-rose-700 to-rose-900 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden group border border-white/10">
+            <div className="bg-gradient-to-br from-primary-light to-rose-900 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden group border border-white/10">
                 <div className="absolute -right-10 -top-10 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
 
                 <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
@@ -2137,7 +2137,7 @@ function TelesaleDashboard({ data, startDate, endDate }: { data: any, startDate:
                                     {formatCurrency(systemRevenue)}
                                 </p>
                                 <div className="mt-2 flex flex-wrap gap-2">
-                                    <span className="text-[9px] font-bold bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-400/20 text-emerald-300">
+                                    <span className="text-[9px] font-bold bg-accent-light/20 px-2 py-0.5 rounded-full border border-emerald-400/20 text-emerald-300">
                                         Đơn hoàn thành: {data.completedOrderCount || 0}
                                     </span>
                                     <span className="text-[9px] font-bold bg-black/20 px-2 py-0.5 rounded-full border border-white/5">
@@ -2154,7 +2154,7 @@ function TelesaleDashboard({ data, startDate, endDate }: { data: any, startDate:
                             <div>
                                 <div className="flex items-center gap-2 mb-1">
                                     <CreditCard size={14} className="text-emerald-400" />
-                                    <h4 className="text-[10px] font-bold tracking-widest text-rose-100">Hoa hồng (0.2%)</h4>
+                                    <h4 className="text-[10px] font-bold tracking-widest text-primary-subtle">Hoa hồng (0.2%)</h4>
                                 </div>
                                 <p className="text-2xl font-bold text-emerald-400">
                                     {formatCurrency(commission)}
@@ -2163,14 +2163,14 @@ function TelesaleDashboard({ data, startDate, endDate }: { data: any, startDate:
                             <div className="text-right">
                                 <div className="flex items-center gap-2 mb-1 justify-end">
                                     <DollarSign size={14} className="text-white" />
-                                    <h4 className="text-[10px] font-black tracking-widest text-rose-100">Tổng thực nhận</h4>
+                                    <h4 className="text-[10px] font-black tracking-widest text-primary-subtle">Tổng thực nhận</h4>
                                 </div>
                                 <p className="text-2xl font-bold text-white">
                                     {formatCurrency(netIncome)}
                                 </p>
                             </div>
                         </div>
-                        <p className="text-[9px] text-rose-200/50 italic leading-tight border-t border-white/5 pt-2">
+                        <p className="text-[9px] text-primary-subtle/50 italic leading-tight border-t border-white/5 pt-2">
                             * Cách tính: 6.000.000đ lương cứng + 0.2% tổng doanh số hệ thống tháng này.
                         </p>
                     </div>
@@ -2186,7 +2186,7 @@ function TelesaleDashboard({ data, startDate, endDate }: { data: any, startDate:
                         <div className="relative">
                             <div className="flex items-center justify-between mb-8">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center text-white shadow-lg shadow-slate-200 transition-all group-hover:bg-rose-600 group-hover:shadow-rose-200">
+                                    <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center text-white shadow-lg shadow-slate-200 transition-all group-hover:bg-primary group-hover:shadow-primary-subtle">
                                         <MapPin size={22} />
                                     </div>
                                     <div>
@@ -2219,13 +2219,13 @@ function TelesaleDashboard({ data, startDate, endDate }: { data: any, startDate:
                                 <div>
                                     <div className="flex justify-between items-end mb-1.5 px-1">
                                         <p className="text-[9px] font-black text-slate-400 tracking-wider flex items-center gap-1">
-                                            <CreditCard size={10} className="text-rose-500" />
+                                            <CreditCard size={10} className="text-primary-light" />
                                             Tiền về thực tế
                                         </p>
-                                        <span className="text-[8px] font-bold text-rose-500/50">Hoàn thành</span>
+                                        <span className="text-[8px] font-bold text-primary-light/50">Hoàn thành</span>
                                     </div>
-                                    <div className="p-4 rounded-2xl bg-slate-50/50 border border-slate-100 group-hover:border-rose-100 group-hover:bg-rose-50/30 transition-colors">
-                                        <p className="text-lg font-bold text-rose-600 tracking-tighter tabular-nums">{formatCurrency(branch.revenue)}</p>
+                                    <div className="p-4 rounded-2xl bg-slate-50/50 border border-slate-100 group-hover:border-primary-subtle group-hover:bg-primary-subtle/30 transition-colors">
+                                        <p className="text-lg font-bold text-primary tracking-tighter tabular-nums">{formatCurrency(branch.revenue)}</p>
                                     </div>
                                 </div>
                             </div>
@@ -2248,9 +2248,9 @@ function TelesaleDashboard({ data, startDate, endDate }: { data: any, startDate:
 function MarketingDashboard({ data, startDate, endDate }: { data: any, startDate: string, endDate: string }) {
     return (
         <div className="space-y-6">
-            <div className="bg-gradient-to-br from-rose-700 to-rose-900 rounded-3xl p-6 text-white shadow-xl flex justify-between items-center text-left">
+            <div className="bg-gradient-to-br from-primary-light to-rose-900 rounded-3xl p-6 text-white shadow-xl flex justify-between items-center text-left">
                 <div>
-                    <p className="text-rose-100 text-sm font-medium mb-1">💰 Tổng thưởng Marketing (Dự kiến)</p>
+                    <p className="text-primary-subtle text-sm font-medium mb-1">💰 Tổng thưởng Marketing (Dự kiến)</p>
                     <h2 className="text-3xl md:text-4xl font-black tracking-tight drop-shadow-lg">
                         {formatCurrency(data.totalReward)}
                     </h2>
@@ -2267,7 +2267,7 @@ function MarketingDashboard({ data, startDate, endDate }: { data: any, startDate
                         <div className="flex justify-between items-start mb-4">
                             <h3 className="font-bold text-slate-800 tracking-wider text-sm">{branch.branchName}</h3>
                             {branch.isAchieved && (
-                                <span className="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold">Vượt mốc</span>
+                                <span className="text-[10px] bg-accent text-white px-2 py-0.5 rounded-full font-bold">Vượt mốc</span>
                             )}
                         </div>
 
@@ -2286,19 +2286,19 @@ function MarketingDashboard({ data, startDate, endDate }: { data: any, startDate
                                 </div>
                                 <div className="flex justify-between text-[10px]">
                                     <span className="text-slate-400 font-bold">Tỉ lệ thưởng:</span>
-                                    <span className="text-rose-600 font-bold">{branch.percent}%</span>
+                                    <span className="text-primary font-bold">{branch.percent}%</span>
                                 </div>
                             </div>
 
                             <div className="pt-2 border-t border-slate-100 flex justify-between items-end">
                                 <div>
                                     <p className="text-[10px] text-slate-400 font-bold uppercase">Thưởng nhận được</p>
-                                    <p className={`text-lg font-black ${branch.isAchieved ? 'text-emerald-600' : 'text-slate-300'}`}>
+                                    <p className={`text-lg font-black ${branch.isAchieved ? 'text-accent' : 'text-slate-300'}`}>
                                         {formatCurrency(branch.reward)}
                                     </p>
                                 </div>
                                 {!branch.isAchieved && (
-                                    <p className="text-[10px] text-rose-500 font-bold">
+                                    <p className="text-[10px] text-primary-light font-bold">
                                         -{formatCurrency(branch.threshold - branch.revenue)}
                                     </p>
                                 )}
@@ -2322,19 +2322,19 @@ function DriverDashboard({ data, startDate, endDate }: { data: any, startDate: s
     return (
         <div className="space-y-4">
             {/* Main Stats Card */}
-            <div className="bg-gradient-to-br from-rose-600 to-rose-800 rounded-3xl p-4 md:p-5 text-white shadow-xl relative overflow-hidden group border border-white/10">
+            <div className="bg-gradient-to-br from-primary to-primary rounded-3xl p-4 md:p-5 text-white shadow-xl relative overflow-hidden group border border-white/10">
                 <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/5 rounded-full blur-3xl"></div>
 
                 <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-4">
                     <div className="flex-1 text-left">
                         <div className="flex items-center gap-2 mb-1.5 opacity-80">
                             <Truck size={14} />
-                            <h3 className="text-[9px] font-black uppercase tracking-widest text-rose-100">Thu nhập vận chuyển tháng này</h3>
+                            <h3 className="text-[9px] font-black uppercase tracking-widest text-primary-subtle">Thu nhập vận chuyển tháng này</h3>
                         </div>
                         <p className="text-3xl font-black tracking-tight">
                             {formatCurrency(data.monthlyStats?.completedShippingFees || 0)}
                         </p>
-                        <p className="text-[10px] text-rose-200 mt-0.5 opacity-80">
+                        <p className="text-[10px] text-primary-subtle mt-0.5 opacity-80">
                             Ước tính: {formatCurrency(data.monthlyStats?.estimatedShippingFees || 0)}
                         </p>
                         <div className="mt-2 flex gap-2">
@@ -2347,12 +2347,12 @@ function DriverDashboard({ data, startDate, endDate }: { data: any, startDate: s
                     <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 min-w-[210px] text-left">
                         <div className="flex items-center gap-2 mb-1">
                             <TrendingUp size={14} className="text-emerald-400" />
-                            <h4 className="text-[9px] font-black uppercase tracking-widest text-rose-100">Tổng thu nhập tích lũy</h4>
+                            <h4 className="text-[9px] font-black uppercase tracking-widest text-primary-subtle">Tổng thu nhập tích lũy</h4>
                         </div>
                         <p className="text-xl font-black text-emerald-300">
                             {formatCurrency(data.allTimeStats?.totalShippingFees || 0)}
                         </p>
-                        <p className="text-[8px] text-rose-200 mt-1 opacity-80">
+                        <p className="text-[8px] text-primary-subtle mt-1 opacity-80">
                             Tổng cộng {data.allTimeStats?.totalTrips || 0} chuyến hàng
                         </p>
                     </div>
@@ -2362,7 +2362,7 @@ function DriverDashboard({ data, startDate, endDate }: { data: any, startDate: s
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 <div className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm text-left">
-                    <div className="w-8 h-8 bg-amber-50 rounded-xl flex items-center justify-center mb-2 text-amber-600">
+                    <div className="w-8 h-8 bg-amber-50 rounded-xl flex items-center justify-center mb-2 text-warning">
                         <Clock size={16} />
                     </div>
                     <p className="text-[9px] font-black text-slate-400 uppercase mb-0.5">Đang chờ xử lý</p>
@@ -2370,7 +2370,7 @@ function DriverDashboard({ data, startDate, endDate }: { data: any, startDate: s
                 </div>
 
                 <div className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm text-left">
-                    <div className="w-8 h-8 bg-emerald-50 rounded-xl flex items-center justify-center mb-2 text-emerald-600">
+                    <div className="w-8 h-8 bg-emerald-50 rounded-xl flex items-center justify-center mb-2 text-accent">
                         <CheckCircle size={16} />
                     </div>
                     <p className="text-[9px] font-black text-slate-400 uppercase mb-0.5">Tỷ lệ hoàn thành</p>
@@ -2382,7 +2382,7 @@ function DriverDashboard({ data, startDate, endDate }: { data: any, startDate: s
                 </div>
 
                 <div className="hidden md:block bg-white p-4 rounded-3xl border border-slate-100 shadow-sm text-left">
-                    <div className="w-8 h-8 bg-rose-50 rounded-xl flex items-center justify-center mb-2 text-rose-600">
+                    <div className="w-8 h-8 bg-primary-subtle rounded-xl flex items-center justify-center mb-2 text-primary">
                         <ShoppingBag size={16} />
                     </div>
                     <p className="text-[9px] font-black text-slate-400 uppercase mb-0.5">Tổng chuyến tháng</p>
@@ -2394,7 +2394,7 @@ function DriverDashboard({ data, startDate, endDate }: { data: any, startDate: s
             <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden text-left">
                 <div className="p-4 border-b border-slate-50 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-7 h-7 bg-rose-50 rounded-lg flex items-center justify-center text-rose-600">
+                        <div className="w-7 h-7 bg-primary-subtle rounded-lg flex items-center justify-center text-primary">
                             <Truck size={16} />
                         </div>
                         <h3 className="font-black text-slate-800 text-xs uppercase tracking-wider">Chuyến hàng gần đây</h3>
@@ -2406,8 +2406,8 @@ function DriverDashboard({ data, startDate, endDate }: { data: any, startDate: s
                         <div key={delivery.id} className="p-4 hover:bg-slate-50 transition-colors flex items-center justify-between group">
                             <div className="flex items-center gap-4">
                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${delivery.status === 'delivered'
-                                    ? 'bg-emerald-50 border-emerald-100 text-emerald-600'
-                                    : 'bg-amber-50 border-amber-100 text-amber-600'
+                                    ? 'bg-emerald-50 border-emerald-100 text-accent'
+                                    : 'bg-amber-50 border-amber-100 text-warning'
                                     }`}>
                                     <ShoppingBag size={18} />
                                 </div>
@@ -2444,7 +2444,7 @@ function DriverDashboard({ data, startDate, endDate }: { data: any, startDate: s
                 <div className="p-3 bg-slate-50/50 border-t border-slate-50 text-center">
                     <button
                         onClick={() => window.location.href = '/orders'}
-                        className="text-[9px] font-black text-rose-600 uppercase tracking-widest hover:text-rose-700 transition-colors"
+                        className="text-[9px] font-black text-primary uppercase tracking-widest hover:text-primary-light transition-colors"
                     >
                         Xem tất cả đơn hàng
                     </button>
@@ -2456,7 +2456,7 @@ function DriverDashboard({ data, startDate, endDate }: { data: any, startDate: s
 
 function StatCard({ title, value, icon, trend }: any) {
     return (
-        <div className="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm hover:border-rose-100 transition-colors">
+        <div className="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm hover:border-primary-subtle transition-colors">
             <div className="flex justify-between items-start mb-2">
                 <div className="text-left">
                     <p className="text-[10px] text-slate-500 font-medium mb-0.5 uppercase tracking-tight">{title}</p>
@@ -2467,7 +2467,7 @@ function StatCard({ title, value, icon, trend }: any) {
                 </div>
             </div>
             {trend && (
-                <div className="text-[10px] font-semibold text-emerald-600 flex items-center gap-1">
+                <div className="text-[10px] font-semibold text-accent flex items-center gap-1">
                     <TrendingUp size={12} />
                     {trend}
                 </div>
@@ -2518,7 +2518,7 @@ function ViolatedOrdersDialog({ branch, onClose, userId, startDate, endDate }: a
                 <div className="flex-1 overflow-y-auto p-6 space-y-4">
                     {loading ? (
                         <div className="flex justify-center py-20">
-                            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-rose-600"></div>
+                            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
                         </div>
                     ) : (
                         <>
@@ -2526,7 +2526,7 @@ function ViolatedOrdersDialog({ branch, onClose, userId, startDate, endDate }: a
                                 <div key={order.id} className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                                     <div className="flex justify-between items-start mb-3">
                                         <div>
-                                            <p className="text-[10px] font-black text-rose-600">#{order.id.slice(0, 8)}</p>
+                                            <p className="text-[10px] font-black text-primary">#{order.id.slice(0, 8)}</p>
                                             <p className="text-sm font-bold text-slate-800">{order.customerName}</p>
                                         </div>
                                         <div className="text-right">
@@ -2541,7 +2541,7 @@ function ViolatedOrdersDialog({ branch, onClose, userId, startDate, endDate }: a
                                                     <span className="font-bold text-slate-600">{item.productName} (x{item.quantity})</span>
                                                     <div className="flex gap-3 items-center">
                                                         <span className="text-slate-400 line-through">{formatCurrency(item.minPrice)}</span>
-                                                        <span className="font-black text-rose-600">{formatCurrency(item.unitPrice)}</span>
+                                                        <span className="font-black text-primary">{formatCurrency(item.unitPrice)}</span>
                                                     </div>
                                                 </div>
                                                 {order.isSplit && (
@@ -2549,7 +2549,7 @@ function ViolatedOrdersDialog({ branch, onClose, userId, startDate, endDate }: a
                                                         <span>Giá chia ({order.branchSharePercent}%):</span>
                                                         <div className="flex gap-3 items-center">
                                                             <span>Min: {formatCurrency(item.splitMinPrice)}</span>
-                                                            <span className="font-bold text-rose-500">Bán: {formatCurrency(item.splitUnitPrice)}</span>
+                                                            <span className="font-bold text-primary-light">Bán: {formatCurrency(item.splitUnitPrice)}</span>
                                                         </div>
                                                     </div>
                                                 )}

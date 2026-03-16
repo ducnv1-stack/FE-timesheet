@@ -528,7 +528,7 @@ export default function TimesheetPage() {
                     )}
                     <div className="flex items-center gap-3">
                         {(activeTab === 'MY' || (activeTab === 'EMPLOYEES' && viewMode === 'DETAIL')) && (
-                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl overflow-hidden bg-rose-50 border border-slate-100 shrink-0 flex items-center justify-center">
+                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl overflow-hidden bg-primary-subtle border border-slate-100 shrink-0 flex items-center justify-center">
                                 {activeTab === 'MY' ? (
                                     (currentUser?.employee?.avatarUrl && !imageErrors['my-avatar']) ? (
                                         <img
@@ -1021,7 +1021,7 @@ export default function TimesheetPage() {
                                         </div>
                                         <div className="text-center flex-1">
                                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">Về sớm</p>
-                                            <p className={cn("text-sm font-black", preview.early > 0 ? "text-amber-600" : "text-slate-300")}>{preview.early || '-'}</p>
+                                            <p className={cn("text-sm font-black", preview.early > 0 ? "text-warning" : "text-slate-300")}>{preview.early || '-'}</p>
                                         </div>
                                         <div className="text-center flex-1">
                                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">Tăng ca</p>
@@ -1086,43 +1086,43 @@ export default function TimesheetPage() {
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Tên ca *</label>
                                     <input value={shiftForm.name} onChange={e => setShiftForm({...shiftForm, name: e.target.value})}
-                                        placeholder="VD: Ca hành chính" className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100" />
+                                        placeholder="VD: Ca hành chính" className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-primary-subtle" />
                                 </div>
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Giờ vào</label>
                                     <input type="time" value={shiftForm.startTime} onChange={e => setShiftForm({...shiftForm, startTime: e.target.value})}
-                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100" />
+                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-primary-subtle" />
                                 </div>
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Giờ ra</label>
                                     <input type="time" value={shiftForm.endTime} onChange={e => setShiftForm({...shiftForm, endTime: e.target.value})}
-                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100" />
+                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-primary-subtle" />
                                 </div>
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Nghỉ giữa ca (phút)</label>
                                     <input type="number" value={shiftForm.breakMinutes} onChange={e => setShiftForm({...shiftForm, breakMinutes: parseInt(e.target.value) || 0})}
-                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100" />
+                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-primary-subtle" />
                                 </div>
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Muộn (phút)</label>
                                     <input type="number" value={shiftForm.lateThreshold} onChange={e => setShiftForm({...shiftForm, lateThreshold: parseInt(e.target.value) || 0})}
-                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100" />
+                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-primary-subtle" />
                                 </div>
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Muộn nghiêm trọng (phút)</label>
                                     <input type="number" value={shiftForm.lateSeriousThreshold} onChange={e => setShiftForm({...shiftForm, lateSeriousThreshold: parseInt(e.target.value) || 0})}
-                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100" />
+                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-primary-subtle" />
                                 </div>
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Về sớm (phút)</label>
                                     <input type="number" value={shiftForm.earlyLeaveThreshold} onChange={e => setShiftForm({...shiftForm, earlyLeaveThreshold: parseInt(e.target.value) || 0})}
-                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100" />
+                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-primary-subtle" />
                                 </div>
                             </div>
                             <div className="flex justify-end gap-2 pt-2">
                                 <button onClick={resetShiftForm} className="px-4 py-2 text-[11px] font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition-all cursor-pointer">Hủy</button>
                                 <button onClick={handleSaveShift} disabled={savingShift || !shiftForm.branchId || !shiftForm.name}
-                                    className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 text-white rounded-lg text-[11px] font-black uppercase tracking-wider hover:bg-emerald-700 transition-all disabled:opacity-50 cursor-pointer">
+                                    className="flex items-center gap-1.5 px-4 py-2 bg-accent text-white rounded-lg text-[11px] font-black uppercase tracking-wider hover:bg-emerald-700 transition-all disabled:opacity-50 cursor-pointer">
                                     <Save size={13} /> {savingShift ? 'Đang lưu...' : (editingShift ? 'Cập nhật' : 'Tạo mới')}
                                 </button>
                             </div>
@@ -1160,16 +1160,16 @@ export default function TimesheetPage() {
                                             <td className="px-4 py-3 text-center"><span className="text-[11px] font-bold text-slate-400">{i + 1}</span></td>
                                             <td className="px-4 py-3"><span className="text-[12px] font-bold text-slate-700">{shift.branch?.name}</span></td>
                                             <td className="px-4 py-3"><span className="text-[12px] font-black text-slate-800">{shift.name}</span></td>
-                                            <td className="px-4 py-3 text-center"><span className="text-[13px] font-black text-emerald-600">{shift.startTime}</span></td>
-                                            <td className="px-4 py-3 text-center"><span className="text-[13px] font-black text-rose-600">{shift.endTime}</span></td>
+                                            <td className="px-4 py-3 text-center"><span className="text-[13px] font-black text-accent">{shift.startTime}</span></td>
+                                            <td className="px-4 py-3 text-center"><span className="text-[13px] font-black text-primary">{shift.endTime}</span></td>
                                             <td className="px-4 py-3 text-center"><span className="text-[11px] font-bold text-slate-500">{shift.breakMinutes}p</span></td>
-                                            <td className="px-4 py-3 text-center"><span className="text-[11px] font-bold text-amber-600">{shift.lateThreshold}p</span></td>
-                                            <td className="px-4 py-3 text-center"><span className="text-[11px] font-bold text-rose-600">{shift.lateSeriousThreshold}p</span></td>
+                                            <td className="px-4 py-3 text-center"><span className="text-[11px] font-bold text-warning">{shift.lateThreshold}p</span></td>
+                                            <td className="px-4 py-3 text-center"><span className="text-[11px] font-bold text-primary">{shift.lateSeriousThreshold}p</span></td>
                                             <td className="px-4 py-3 text-center"><span className="text-[11px] font-bold text-blue-600">{shift.earlyLeaveThreshold}p</span></td>
                                             <td className="px-4 py-3 text-center">
                                                 <button onClick={() => handleToggleShift(shift)}
                                                     className={cn("px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-tighter border cursor-pointer transition-all",
-                                                        shift.isActive ? "bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100" : "bg-slate-50 text-slate-400 border-slate-100 hover:bg-slate-100")}>
+                                                        shift.isActive ? "bg-emerald-50 text-accent border-emerald-100 hover:bg-emerald-100" : "bg-slate-50 text-slate-400 border-slate-100 hover:bg-slate-100")}>
                                                     {shift.isActive ? 'Hoạt động' : 'Tắt'}
                                                 </button>
                                             </td>
@@ -1180,7 +1180,7 @@ export default function TimesheetPage() {
                                                         <Pencil size={13} />
                                                     </button>
                                                     <button onClick={() => handleDeleteShift(shift.id)}
-                                                        className="p-1.5 hover:bg-rose-50 text-rose-500 rounded-lg transition-all cursor-pointer" title="Xóa">
+                                                        className="p-1.5 hover:bg-primary-subtle text-primary-light rounded-lg transition-all cursor-pointer" title="Xóa">
                                                         <Trash2 size={13} />
                                                     </button>
                                                 </div>
@@ -1277,9 +1277,9 @@ export default function TimesheetPage() {
                                                 <td className="px-4 py-3 text-center">
                                                     <span className={cn(
                                                         "px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-tighter border",
-                                                        req.status === 'PENDING' ? "bg-amber-50 text-amber-600 border-amber-100" :
-                                                        req.status === 'APPROVED' ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
-                                                        "bg-rose-50 text-rose-600 border-rose-100"
+                                                        req.status === 'PENDING' ? "bg-amber-50 text-warning border-amber-100" :
+                                                        req.status === 'APPROVED' ? "bg-emerald-50 text-accent border-emerald-100" :
+                                                        "bg-primary-subtle text-primary border-primary-subtle"
                                                     )}>
                                                         {req.status === 'PENDING' ? 'Chờ duyệt' : 
                                                          req.status === 'APPROVED' ? 'Đã duyệt' : 'Từ chối'}
@@ -1297,11 +1297,11 @@ export default function TimesheetPage() {
                                                             <>
                                                                 <button 
                                                                     onClick={() => handleUpdateStatus(req.id, 'APPROVED')}
-                                                                    className="px-2 py-1 bg-emerald-600 text-white rounded text-[9px] font-bold hover:bg-emerald-700 transition-all cursor-pointer"
+                                                                    className="px-2 py-1 bg-accent text-white rounded text-[9px] font-bold hover:bg-emerald-700 transition-all cursor-pointer"
                                                                 >Duyệt</button>
                                                                 <button 
                                                                     onClick={() => handleUpdateStatus(req.id, 'REJECTED')}
-                                                                    className="px-2 py-1 bg-rose-600 text-white rounded text-[9px] font-bold hover:bg-rose-700 transition-all cursor-pointer"
+                                                                    className="px-2 py-1 bg-primary text-white rounded text-[9px] font-bold hover:bg-primary-light transition-all cursor-pointer"
                                                                 >Từ chối</button>
                                                             </>
                                                         )}
@@ -1370,7 +1370,7 @@ export default function TimesheetPage() {
                                                         log.action === 'MANUAL_ADJUST' ? "bg-blue-50 text-blue-700" :
                                                         log.action === 'EXCEPTION_APPROVED_GO_LATE' ? "bg-amber-50 text-amber-700" :
                                                         log.action === 'EXCEPTION_APPROVED_LEAVE_EARLY' ? "bg-orange-50 text-orange-700" :
-                                                        log.action === 'EXCEPTION_APPROVED_GPS_ERROR' ? "bg-rose-50 text-rose-700" :
+                                                        log.action === 'EXCEPTION_APPROVED_GPS_ERROR' ? "bg-primary-subtle text-primary-light" :
                                                         log.action === 'EXCEPTION_APPROVED_FORGOT_CHECKIN' ? "bg-indigo-50 text-indigo-700" :
                                                         log.action === 'EXCEPTION_APPROVED_FORGOT_CHECKOUT' ? "bg-violet-50 text-violet-700" :
                                                         "bg-slate-50 text-slate-700"
@@ -1392,7 +1392,7 @@ export default function TimesheetPage() {
                                                 </td>
                                                 <td className="px-4 py-3 px-6 max-w-sm">
                                                     <p className="text-[10px] text-slate-600 truncate italic" title={log.reason}>{log.reason || '-'}</p>
-                                                    <p className="text-[9px] text-emerald-600 font-medium truncate mt-0.5">
+                                                    <p className="text-[9px] text-accent font-medium truncate mt-0.5">
                                                         {log.newData?.checkInTime && `Vào: ${new Date(log.newData.checkInTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})} `}
                                                         {log.newData?.checkOutTime && `Ra: ${new Date(log.newData.checkOutTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}`}
                                                     </p>
@@ -1417,7 +1417,7 @@ export default function TimesheetPage() {
                     <div className="flex items-center justify-between">
                         <div>
                             <h2 className="text-lg font-bold text-slate-800 tracking-tight flex items-center gap-2">
-                                <Banknote size={18} className="text-rose-600" />
+                                <Banknote size={18} className="text-primary" />
                                 Quản lý Lương Cơ Bản
                             </h2>
                             <p className="text-[10px] text-slate-500 font-medium mt-0.5">Cấu hình mức lương chuẩn cho Chức vụ và Ngoại lệ riêng cho Cá nhân</p>
@@ -1467,12 +1467,12 @@ function StatCard({ label, value, icon: Icon, color, bg }: any) {
 
 function StatusBadge({ status }: { status: string }) {
     const config: any = {
-        'FULL_DAY': { label: 'Đủ công', class: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
+        'FULL_DAY': { label: 'Đủ công', class: 'bg-emerald-50 text-accent border-emerald-100' },
         'HALF_DAY': { label: 'Nửa công', class: 'bg-blue-50 text-blue-600 border-blue-100' },
-        'INCOMPLETE': { label: 'Thiếu công', class: 'bg-rose-50 text-rose-600 border-rose-100' },
-        'LATE_DAY': { label: 'Đi muộn', class: 'bg-rose-50 text-rose-600 border-rose-100' },
+        'INCOMPLETE': { label: 'Thiếu công', class: 'bg-primary-subtle text-primary border-primary-subtle' },
+        'LATE_DAY': { label: 'Đi muộn', class: 'bg-primary-subtle text-primary border-primary-subtle' },
         'ABSENT_UNAPPROVED': { label: 'Vắng (KP)', class: 'bg-slate-50 text-slate-500 border-slate-100' },
-        'ABSENT_APPROVED': { label: 'Vắng (CP)', class: 'bg-amber-50 text-amber-600 border-amber-100' },
+        'ABSENT_APPROVED': { label: 'Vắng (CP)', class: 'bg-amber-50 text-warning border-amber-100' },
         'DEFAULT': { label: status, class: 'bg-slate-50 text-slate-400 border-slate-100' }
     };
 

@@ -61,10 +61,10 @@ export default function TransactionsPage() {
 
     const getTransactionStyle = (type: string) => {
         switch (type) {
-            case 'NEW_STOCK': return { icon: ArrowUpCircle, color: 'text-emerald-600', bg: 'bg-emerald-50', label: 'Nhập kho' };
-            case 'SALE': return { icon: ArrowDownCircle, color: 'text-rose-600', bg: 'bg-rose-50', label: 'Bán hàng' };
+            case 'NEW_STOCK': return { icon: ArrowUpCircle, color: 'text-accent', bg: 'bg-emerald-50', label: 'Nhập kho' };
+            case 'SALE': return { icon: ArrowDownCircle, color: 'text-primary', bg: 'bg-primary-subtle', label: 'Bán hàng' };
             case 'TRANSFER': return { icon: ArrowRightLeft, color: 'text-blue-600', bg: 'bg-blue-50', label: 'Chuyển kho' };
-            case 'RETURN': return { icon: RefreshCw, color: 'text-amber-600', bg: 'bg-amber-50', label: 'Thu hồi' };
+            case 'RETURN': return { icon: RefreshCw, color: 'text-warning', bg: 'bg-amber-50', label: 'Thu hồi' };
             default: return { icon: History, color: 'text-slate-600', bg: 'bg-slate-50', label: type };
         }
     };
@@ -190,7 +190,7 @@ export default function TransactionsPage() {
                                             <td className="px-8 py-6 text-center">
                                                 <span className={cn(
                                                     "font-black text-lg",
-                                                    t.quantity > 0 ? "text-emerald-600" : "text-rose-600"
+                                                    t.quantity > 0 ? "text-accent" : "text-primary"
                                                 )}>
                                                     {t.quantity > 0 ? `+${t.quantity}` : t.quantity}
                                                 </span>

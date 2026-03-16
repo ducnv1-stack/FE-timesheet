@@ -240,7 +240,7 @@ export default function PositionsTab() {
                                     </button>
                                     <button 
                                         onClick={() => setDeleteConfirm({ isOpen: true, id: pos.id })}
-                                        className="p-2 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors cursor-pointer"
+                                        className="p-2 hover:bg-primary-subtle text-primary rounded-lg transition-colors cursor-pointer"
                                         title="Xóa"
                                     >
                                         <Trash2 className="w-4 h-4" />
@@ -258,7 +258,7 @@ export default function PositionsTab() {
                                 <span className={cn(
                                     "text-[11px] font-bold px-2 py-0.5 rounded-md",
                                     pos.attendancePolicy 
-                                        ? "bg-emerald-50 text-emerald-600 border border-emerald-100" 
+                                        ? "bg-emerald-50 text-accent border border-emerald-100" 
                                         : "bg-slate-100 text-slate-400 border border-slate-200"
                                 )}>
                                     {pos.attendancePolicy?.name || 'Chưa gán chính sách'}
@@ -428,7 +428,7 @@ export default function PositionsTab() {
                                                 )}
                                                 <div className={cn(
                                                     "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white",
-                                                    emp.status === 'Đang làm việc' ? "bg-emerald-500" : "bg-slate-300"
+                                                    emp.status === 'Đang làm việc' ? "bg-accent-light" : "bg-slate-300"
                                                 )} />
                                             </div>
                                             <div className="flex-1 min-w-0">

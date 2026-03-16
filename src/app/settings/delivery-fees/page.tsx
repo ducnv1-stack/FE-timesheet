@@ -178,26 +178,26 @@ export default function DeliveryFeesPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center h-screen">
-                <div className="animate-spin w-8 h-8 border-4 border-rose-500 border-t-transparent rounded-full" />
+                <div className="animate-spin w-8 h-8 border-4 border-primary-light border-t-transparent rounded-full" />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-rose-50/30 p-4 md:p-8">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-primary-subtle/30 p-4 md:p-8">
             <div className="max-w-5xl mx-auto space-y-6">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                            <Truck className="text-rose-600" size={28} />
+                            <Truck className="text-primary" size={28} />
                             Cấu hình phí ship
                         </h1>
                         <p className="text-sm text-slate-500 mt-1">Quản lý phí giao hàng theo loại hình và chi nhánh.</p>
                     </div>
                     <button
                         onClick={openCreate}
-                        className="flex items-center gap-2 px-4 py-2 bg-rose-600 text-white font-semibold text-sm rounded-xl shadow-sm hover:bg-rose-700 transition-all cursor-pointer"
+                        className="flex items-center gap-2 px-4 py-2 bg-primary text-white font-semibold text-sm rounded-xl shadow-sm hover:bg-primary-light transition-all cursor-pointer"
                     >
                         <Plus size={16} /> Thêm quy tắc
                     </button>
@@ -226,7 +226,7 @@ export default function DeliveryFeesPage() {
                                         <td className="px-6 py-3 font-medium text-slate-700">
                                             {CATEGORY_LABELS[rule.deliveryCategory] || rule.deliveryCategory}
                                         </td>
-                                        <td className="px-6 py-3 text-right font-bold text-emerald-600">
+                                        <td className="px-6 py-3 text-right font-bold text-accent">
                                             {formatCurrency(Number(rule.feeAmount))}
                                         </td>
                                         <td className="px-6 py-3 text-center">
@@ -292,7 +292,7 @@ export default function DeliveryFeesPage() {
                                         <td className="px-6 py-3 text-slate-600">
                                             {CATEGORY_LABELS[rule.deliveryCategory] || rule.deliveryCategory}
                                         </td>
-                                        <td className="px-6 py-3 text-right font-bold text-rose-600">
+                                        <td className="px-6 py-3 text-right font-bold text-primary">
                                             {formatCurrency(Number(rule.feeAmount))}
                                         </td>
                                         <td className="px-6 py-3 text-center">
@@ -346,7 +346,7 @@ export default function DeliveryFeesPage() {
                                         <select
                                             value={formBranchId}
                                             onChange={e => setFormBranchId(e.target.value)}
-                                            className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none"
+                                            className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none"
                                         >
                                             <option value="">Mặc định (Tất cả chi nhánh)</option>
                                             {branches.map(b => (
@@ -359,7 +359,7 @@ export default function DeliveryFeesPage() {
                                         <select
                                             value={formCategory}
                                             onChange={e => setFormCategory(e.target.value)}
-                                            className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none"
+                                            className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none"
                                         >
                                             {CATEGORIES.map(c => (
                                                 <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>
@@ -376,7 +376,7 @@ export default function DeliveryFeesPage() {
                                     step="1000"
                                     value={formFeeAmount}
                                     onChange={e => setFormFeeAmount(e.target.value)}
-                                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none"
+                                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none"
                                     required
                                 />
                             </div>
@@ -390,7 +390,7 @@ export default function DeliveryFeesPage() {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 px-4 py-2.5 bg-rose-600 text-white rounded-xl text-sm font-bold hover:bg-rose-700 transition-all cursor-pointer flex items-center justify-center gap-2"
+                                    className="flex-1 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary-light transition-all cursor-pointer flex items-center justify-center gap-2"
                                 >
                                     <Save size={16} />
                                     {editingRule ? 'Cập nhật' : 'Thêm mới'}

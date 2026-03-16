@@ -247,7 +247,7 @@ export default function ProfilePage() {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
                 <div className="flex flex-col items-center gap-4">
-                    <div className="w-12 h-12 border-4 border-rose-200 border-t-rose-600 rounded-full animate-spin" />
+                    <div className="w-12 h-12 border-4 border-primary-subtle border-t-primary rounded-full animate-spin" />
                     <p className="text-slate-500 font-medium text-sm">Đang tải thông tin...</p>
                 </div>
             </div>
@@ -274,7 +274,7 @@ export default function ProfilePage() {
                 <div className="relative px-8 py-10 flex flex-col sm:flex-row items-center gap-6">
                     <div className="w-28 h-28 rounded-[2rem] bg-white p-1.5 shadow-2xl shrink-0 relative">
                         <div
-                            className="w-full h-full rounded-[1.7rem] bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-white text-3xl font-black tracking-tighter cursor-pointer overflow-hidden group relative"
+                            className="w-full h-full rounded-[1.7rem] bg-gradient-to-br from-primary-light to-primary flex items-center justify-center text-white text-3xl font-black tracking-tighter cursor-pointer overflow-hidden group relative"
                             onClick={() => emp && document.getElementById('profile-avatar-upload')?.click()}
                         >
                             {emp?.avatarUrl ? (
@@ -298,7 +298,7 @@ export default function ProfilePage() {
                                     e.stopPropagation();
                                     setShowDeleteConfirm(true);
                                 }}
-                                className="absolute -top-2 -right-2 p-2 bg-rose-100 text-rose-600 hover:bg-rose-600 hover:text-white rounded-full transition-all shadow-md z-10 cursor-pointer"
+                                className="absolute -top-2 -right-2 p-2 bg-primary-subtle text-primary hover:bg-primary hover:text-white rounded-full transition-all shadow-md z-10 cursor-pointer"
                                 title="Xóa ảnh đại diện"
                             >
                                 <Trash2 size={16} />
@@ -310,7 +310,7 @@ export default function ProfilePage() {
                                     e.stopPropagation();
                                     document.getElementById('profile-avatar-upload')?.click();
                                 }}
-                                className="absolute -bottom-2 -right-2 p-2 bg-white text-slate-700 hover:text-rose-600 rounded-full transition-all shadow-[0_4px_10px_rgba(0,0,0,0.1)] z-10 cursor-pointer border border-slate-100"
+                                className="absolute -bottom-2 -right-2 p-2 bg-white text-slate-700 hover:text-primary rounded-full transition-all shadow-[0_4px_10px_rgba(0,0,0,0.1)] z-10 cursor-pointer border border-slate-100"
                                 title="Đổi ảnh đại diện"
                             >
                                 <Camera size={16} />
@@ -352,8 +352,8 @@ export default function ProfilePage() {
                     {/* Username Card */}
                     <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
                         <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-xl bg-rose-50 flex items-center justify-center">
-                                <Key size={14} className="text-rose-600" />
+                            <div className="w-8 h-8 rounded-xl bg-primary-subtle flex items-center justify-center">
+                                <Key size={14} className="text-primary" />
                             </div>
                             <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider">Tài khoản</h3>
                         </div>
@@ -370,7 +370,7 @@ export default function ProfilePage() {
                                                 setNewUsername(profile.username);
                                                 setIsEditingUsername(true);
                                             }}
-                                            className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
+                                            className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-primary transition-colors cursor-pointer"
                                         >
                                             <Pencil size={14} />
                                         </button>
@@ -381,14 +381,14 @@ export default function ProfilePage() {
                                             type="text"
                                             value={newUsername}
                                             onChange={(e) => setNewUsername(e.target.value)}
-                                            className="w-full px-3 py-2 bg-slate-50 border-2 border-slate-200 rounded-xl focus:bg-white focus:border-rose-500 outline-none transition-all font-bold text-slate-900 text-xs"
+                                            className="w-full px-3 py-2 bg-slate-50 border-2 border-slate-200 rounded-xl focus:bg-white focus:border-primary-light outline-none transition-all font-bold text-slate-900 text-xs"
                                             placeholder="Nhập tên đăng nhập mới"
                                         />
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={handleSaveUsername}
                                                 disabled={savingUsername}
-                                                className="flex-1 px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-black uppercase tracking-wider rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
+                                                className="flex-1 px-3 py-2 bg-primary hover:bg-primary-light text-white text-[10px] font-black uppercase tracking-wider rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
                                             >
                                                 {savingUsername ? 'Đang lưu...' : 'Lưu'}
                                             </button>
@@ -407,7 +407,7 @@ export default function ProfilePage() {
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">
                                     Vai trò
                                 </label>
-                                <p className="text-sm font-bold text-rose-600">{profile.role.name}</p>
+                                <p className="text-sm font-bold text-primary">{profile.role.name}</p>
                             </div>
 
                             <div className="pt-2 border-t border-slate-100">
@@ -420,7 +420,7 @@ export default function ProfilePage() {
                                             <Key size={14} className="text-slate-400" />
                                             Đổi mật khẩu
                                         </span>
-                                        <ChevronRight size={14} className="text-slate-400 group-hover:text-rose-500 transition-colors" />
+                                        <ChevronRight size={14} className="text-slate-400 group-hover:text-primary-light transition-colors" />
                                     </button>
                                 ) : (
                                     <div className="space-y-3">
@@ -431,7 +431,7 @@ export default function ProfilePage() {
                                                 type={showCurrentPassword ? 'text' : 'password'}
                                                 value={currentPassword}
                                                 onChange={(e) => setCurrentPassword(e.target.value)}
-                                                className="w-full px-3 py-2 pr-10 bg-slate-50 border-2 border-slate-200 rounded-xl focus:bg-white focus:border-rose-500 outline-none transition-all font-medium text-slate-900 text-xs"
+                                                className="w-full px-3 py-2 pr-10 bg-slate-50 border-2 border-slate-200 rounded-xl focus:bg-white focus:border-primary-light outline-none transition-all font-medium text-slate-900 text-xs"
                                                 placeholder="Mật khẩu hiện tại"
                                             />
                                             <button
@@ -448,7 +448,7 @@ export default function ProfilePage() {
                                                 type={showNewPassword ? 'text' : 'password'}
                                                 value={newPassword}
                                                 onChange={(e) => setNewPassword(e.target.value)}
-                                                className="w-full px-3 py-2 pr-10 bg-slate-50 border-2 border-slate-200 rounded-xl focus:bg-white focus:border-rose-500 outline-none transition-all font-medium text-slate-900 text-xs"
+                                                className="w-full px-3 py-2 pr-10 bg-slate-50 border-2 border-slate-200 rounded-xl focus:bg-white focus:border-primary-light outline-none transition-all font-medium text-slate-900 text-xs"
                                                 placeholder="Mật khẩu mới (tối thiểu 4 ký tự)"
                                             />
                                             <button
@@ -464,7 +464,7 @@ export default function ProfilePage() {
                                             type="password"
                                             value={confirmPassword}
                                             onChange={(e) => setConfirmPassword(e.target.value)}
-                                            className="w-full px-3 py-2 bg-slate-50 border-2 border-slate-200 rounded-xl focus:bg-white focus:border-rose-500 outline-none transition-all font-medium text-slate-900 text-xs"
+                                            className="w-full px-3 py-2 bg-slate-50 border-2 border-slate-200 rounded-xl focus:bg-white focus:border-primary-light outline-none transition-all font-medium text-slate-900 text-xs"
                                             placeholder="Xác nhận mật khẩu mới"
                                         />
 
@@ -472,7 +472,7 @@ export default function ProfilePage() {
                                             <button
                                                 onClick={handleChangePassword}
                                                 disabled={savingPassword}
-                                                className="flex-1 px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-black uppercase tracking-wider rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
+                                                className="flex-1 px-3 py-2 bg-primary hover:bg-primary-light text-white text-[10px] font-black uppercase tracking-wider rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
                                             >
                                                 {savingPassword ? 'Đang lưu...' : 'Xác nhận'}
                                             </button>
@@ -518,7 +518,7 @@ export default function ProfilePage() {
                                     <InfoItem label="Ngày ký hợp đồng" value={emp.contractSigningDate ? formatDate(emp.contractSigningDate) : null} icon={<Calendar size={13} />} />
                                     {emp.isInternalDriver && (
                                         <div className="sm:col-span-2">
-                                            <span className="px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-wider border border-emerald-100 inline-flex items-center gap-1.5">
+                                            <span className="px-3 py-1.5 bg-emerald-50 text-accent rounded-full text-[10px] font-black uppercase tracking-wider border border-emerald-100 inline-flex items-center gap-1.5">
                                                 ✓ Là tài xế nội bộ
                                             </span>
                                         </div>
@@ -579,7 +579,7 @@ function InfoItem({ label, value, icon, highlight }: {
             </div>
             <p className={cn(
                 "text-[13px] font-bold pl-0 min-h-[20px]",
-                highlight === 'green' && "text-emerald-600",
+                highlight === 'green' && "text-accent",
                 highlight === 'red' && "text-red-500",
                 !highlight && "text-slate-900"
             )}>

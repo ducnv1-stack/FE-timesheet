@@ -182,7 +182,7 @@ export default function ProductsPage() {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
                     <div className="flex items-center gap-2 md:gap-3">
-                        <div className="p-1.5 md:p-2 bg-rose-600 rounded-lg md:rounded-xl shadow-lg shadow-rose-200">
+                        <div className="p-1.5 md:p-2 bg-primary rounded-lg md:rounded-xl shadow-lg shadow-primary-subtle">
                             <Package className="w-5 h-5 md:w-6 md:h-6 text-white" />
                         </div>
                         <div>
@@ -201,7 +201,7 @@ export default function ProductsPage() {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
                                 className={`flex items-center justify-center gap-1.5 px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-[10px] md:text-xs font-bold transition-all whitespace-nowrap flex-1 md:flex-none cursor-pointer ${activeTab === tab.id
-                                    ? 'bg-rose-600 text-white shadow-md scale-105'
+                                    ? 'bg-primary text-white shadow-md scale-105'
                                     : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
                                     }`}
                             >
@@ -223,13 +223,13 @@ export default function ProductsPage() {
                                 placeholder="Tìm kiếm tên..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-9 md:pl-10 pr-4 py-1.5 md:py-2 bg-slate-50 border-none rounded-xl text-[11px] md:text-xs focus:ring-2 focus:ring-rose-500 transition-all font-medium"
+                                className="w-full pl-9 md:pl-10 pr-4 py-1.5 md:py-2 bg-slate-50 border-none rounded-xl text-[11px] md:text-xs focus:ring-2 focus:ring-primary-light transition-all font-medium"
                             />
                         </div>
                         {activeTab !== 'premium' && (
                             <button
                                 onClick={() => activeTab === 'products' ? setIsProductModalOpen(true) : setIsGiftModalOpen(true)}
-                                className="flex items-center gap-1.5 md:gap-2 px-4 md:px-5 py-2 md:py-2.5 bg-rose-600 text-white rounded-xl text-[11px] md:text-xs font-bold hover:bg-rose-700 transition-all shadow-lg shadow-rose-200 w-full md:w-auto justify-center active:scale-95 cursor-pointer"
+                                className="flex items-center gap-1.5 md:gap-2 px-4 md:px-5 py-2 md:py-2.5 bg-primary text-white rounded-xl text-[11px] md:text-xs font-bold hover:bg-primary-light transition-all shadow-lg shadow-primary-subtle w-full md:w-auto justify-center active:scale-95 cursor-pointer"
                             >
                                 <Plus className="w-3.5 md:w-4 h-3.5 md:h-4" />
                                 Thêm {activeTab === 'products' ? 'sản phẩm' : 'quà tặng'}
@@ -241,7 +241,7 @@ export default function ProductsPage() {
                     <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden min-h-[500px]">
                         {loading ? (
                             <div className="flex flex-col items-center justify-center h-96 gap-3">
-                                <div className="w-10 h-10 border-4 border-rose-600 border-t-transparent rounded-full animate-spin"></div>
+                                <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
                                 <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Đang đồng bộ dữ liệu</p>
                             </div>
                         ) : activeTab === 'products' ? (
@@ -352,13 +352,13 @@ function ProductTable({ products, onEdit, onPrice, onDelete }: { products: Produ
                             <td className="px-3 md:px-6 py-3 md:py-4 pr-8">
                                 <span className="text-xs md:text-sm font-bold text-slate-800">{product.name}</span>
                             </td>
-                            <td className="px-3 md:px-6 py-3 md:py-4 font-mono text-[10px] md:text-xs font-bold text-rose-600 pr-8">
+                            <td className="px-3 md:px-6 py-3 md:py-4 font-mono text-[10px] md:text-xs font-bold text-primary pr-8">
                                 {new Intl.NumberFormat('vi-VN').format(product.minPrice)}đ
                             </td>
                             <td className="px-3 md:px-6 py-3 md:py-4 pr-8">
                                 <button
                                     onClick={() => (onPrice as any)(product)}
-                                    className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 rounded-lg text-[10px] font-black transition-all border border-slate-200 hover:border-rose-200 cursor-pointer uppercase tracking-tight"
+                                    className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 hover:bg-primary-subtle text-slate-500 hover:text-primary rounded-lg text-[10px] font-black transition-all border border-slate-200 hover:border-primary-subtle cursor-pointer uppercase tracking-tight"
                                 >
                                     <Calendar className="w-3 h-3" />
                                     {product.minPricePolicies?.length || 0} kế hoạch
@@ -366,7 +366,7 @@ function ProductTable({ products, onEdit, onPrice, onDelete }: { products: Produ
                             </td>
                             <td className="px-3 md:px-6 py-3 md:py-4 pr-8">
                                 {product.isHighEnd ? (
-                                    <span className="inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-0.5 md:py-1 bg-amber-50 text-amber-600 rounded-full text-[8px] md:text-[10px] font-black border border-amber-100 uppercase tracking-wider">
+                                    <span className="inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-0.5 md:py-1 bg-amber-50 text-warning rounded-full text-[8px] md:text-[10px] font-black border border-amber-100 uppercase tracking-wider">
                                         <Star className="w-2.5 h-2.5 md:w-3 md:h-3 fill-current" /> Cao cấp
                                     </span>
                                 ) : (
@@ -375,10 +375,10 @@ function ProductTable({ products, onEdit, onPrice, onDelete }: { products: Produ
                             </td>
                             <td className="px-3 md:px-6 py-3 md:py-4">
                                 <div className="flex items-center justify-end gap-1 md:gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all md:transform md:translate-x-2 md:group-hover:translate-x-0">
-                                    <button onClick={() => onEdit(product)} className="p-1.5 md:p-2 text-slate-400 hover:text-rose-600 hover:bg-white rounded-lg md:rounded-xl transition-all shadow-sm hover:shadow-md border border-slate-100 md:border-transparent hover:border-slate-100 cursor-pointer">
+                                    <button onClick={() => onEdit(product)} className="p-1.5 md:p-2 text-slate-400 hover:text-primary hover:bg-white rounded-lg md:rounded-xl transition-all shadow-sm hover:shadow-md border border-slate-100 md:border-transparent hover:border-slate-100 cursor-pointer">
                                         <Edit2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                     </button>
-                                    <button onClick={() => onDelete(product)} className="p-1.5 md:p-2 text-slate-400 hover:text-rose-600 hover:bg-white rounded-lg md:rounded-xl transition-all shadow-sm hover:shadow-md border border-slate-100 md:border-transparent hover:border-slate-100 cursor-pointer">
+                                    <button onClick={() => onDelete(product)} className="p-1.5 md:p-2 text-slate-400 hover:text-primary hover:bg-white rounded-lg md:rounded-xl transition-all shadow-sm hover:shadow-md border border-slate-100 md:border-transparent hover:border-slate-100 cursor-pointer">
                                         <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                     </button>
                                 </div>
@@ -409,15 +409,15 @@ function GiftTable({ gifts, onEdit, onDelete }: { gifts: Gift[], onEdit: (g: Gif
                             <td className="px-3 md:px-6 py-3 md:py-4 pr-8">
                                 <span className="text-xs md:text-sm font-bold text-slate-800">{gift.name}</span>
                             </td>
-                            <td className="px-3 md:px-6 py-3 md:py-4 font-mono text-[10px] md:text-xs font-bold text-emerald-600 pr-8">
+                            <td className="px-3 md:px-6 py-3 md:py-4 font-mono text-[10px] md:text-xs font-bold text-accent pr-8">
                                 {new Intl.NumberFormat('vi-VN').format(gift.price)}đ
                             </td>
                             <td className="px-3 md:px-6 py-3 md:py-4">
                                 <div className="flex items-center justify-end gap-1 md:gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all md:translate-x-2 md:group-hover:translate-x-0">
-                                    <button onClick={() => onEdit(gift)} className="p-1.5 md:p-2 text-slate-400 hover:text-rose-600 hover:bg-white rounded-lg md:rounded-xl transition-all shadow-sm border border-slate-100 md:border-transparent hover:border-slate-100 cursor-pointer">
+                                    <button onClick={() => onEdit(gift)} className="p-1.5 md:p-2 text-slate-400 hover:text-primary hover:bg-white rounded-lg md:rounded-xl transition-all shadow-sm border border-slate-100 md:border-transparent hover:border-slate-100 cursor-pointer">
                                         <Edit2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                     </button>
-                                    <button onClick={() => onDelete(gift)} className="p-1.5 md:p-2 text-slate-400 hover:text-rose-600 hover:bg-white rounded-lg md:rounded-xl transition-all shadow-sm border border-slate-100 md:border-transparent hover:border-slate-100 cursor-pointer">
+                                    <button onClick={() => onDelete(gift)} className="p-1.5 md:p-2 text-slate-400 hover:text-primary hover:bg-white rounded-lg md:rounded-xl transition-all shadow-sm border border-slate-100 md:border-transparent hover:border-slate-100 cursor-pointer">
                                         <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                     </button>
                                 </div>
@@ -445,19 +445,19 @@ function PremiumBonusView({ products, onUpdateBonus }: { products: Product[], on
         <div className="p-3 md:p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {products.map(product => (
-                    <div key={product.id} className="bg-white rounded-2xl md:rounded-3xl border border-slate-100 p-4 md:p-5 hover:border-rose-100 transition-all hover:shadow-xl group relative overflow-hidden bg-gradient-to-br from-white to-slate-50/50">
-                        <div className="absolute -right-4 -top-4 w-24 h-24 bg-rose-50/50 rounded-full blur-2xl group-hover:bg-rose-100/50 transition-colors" />
+                    <div key={product.id} className="bg-white rounded-2xl md:rounded-3xl border border-slate-100 p-4 md:p-5 hover:border-primary-subtle transition-all hover:shadow-xl group relative overflow-hidden bg-gradient-to-br from-white to-slate-50/50">
+                        <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary-subtle/50 rounded-full blur-2xl group-hover:bg-primary-subtle/50 transition-colors" />
 
                         <div className="flex items-center justify-between mb-4 md:mb-5 relative z-10">
                             <div className="flex items-center gap-2 md:gap-3">
-                                <div className="p-2 md:p-2.5 bg-white rounded-xl md:rounded-2xl border border-slate-200 group-hover:border-rose-200 group-hover:scale-110 transition-all shadow-sm">
-                                    <TrendingUp className="w-3.5 md:w-4 h-3.5 md:h-4 text-rose-600" />
+                                <div className="p-2 md:p-2.5 bg-white rounded-xl md:rounded-2xl border border-slate-200 group-hover:border-primary-subtle group-hover:scale-110 transition-all shadow-sm">
+                                    <TrendingUp className="w-3.5 md:w-4 h-3.5 md:h-4 text-primary" />
                                 </div>
                                 <h3 className="text-[10px] md:text-[11px] font-bold text-slate-800 uppercase tracking-wider">{product.name}</h3>
                             </div>
                             <button
                                 onClick={() => onUpdateBonus(product)}
-                                className="shrink-0 text-[9px] md:text-[10px] font-black text-rose-600 hover:text-white hover:bg-rose-600 bg-rose-50 px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl uppercase tracking-widest transition-all active:scale-90 cursor-pointer"
+                                className="shrink-0 text-[9px] md:text-[10px] font-black text-primary hover:text-white hover:bg-primary bg-primary-subtle px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl uppercase tracking-widest transition-all active:scale-90 cursor-pointer"
                             >
                                 + Thiết lập
                             </button>
@@ -485,7 +485,7 @@ function PremiumBonusView({ products, onUpdateBonus }: { products: Product[], on
                                                 <ChevronRight className="w-2.5 md:w-3 h-2.5 md:h-3 text-slate-300" />
                                                 <div className="flex flex-col">
                                                     <span className="text-[7px] md:text-[8px] font-black text-rose-400 uppercase tracking-tight">Thưởng</span>
-                                                    <span className="text-[10px] md:text-xs font-black text-rose-600">
+                                                    <span className="text-[10px] md:text-xs font-black text-primary">
                                                         {new Intl.NumberFormat('vi-VN').format(rule.bonusAmount)}
                                                     </span>
                                                 </div>
@@ -560,25 +560,25 @@ function ProductModal({ isOpen, onClose, onSuccess, product }: { isOpen: boolean
                 <form onSubmit={handleSubmit} className="p-6 space-y-5">
                     <div>
                         <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Tên sản phẩm</label>
-                        <input required value={name} onChange={e => setName(e.target.value)} className="w-full px-4 py-3 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-rose-500 font-bold text-sm" placeholder="VD: Khóa vân tay Ohari S1" />
+                        <input required value={name} onChange={e => setName(e.target.value)} className="w-full px-4 py-3 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-primary-light font-bold text-sm" placeholder="VD: Khóa vân tay Ohari S1" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Giá tối thiểu</label>
-                            <input type="text" required value={formatNumber(minPrice)} onChange={e => setMinPrice(parseNumber(e.target.value).toString())} className="w-full px-4 py-3 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-rose-500 font-mono text-sm font-bold" placeholder="Nhập giá..." />
+                            <input type="text" required value={formatNumber(minPrice)} onChange={e => setMinPrice(parseNumber(e.target.value).toString())} className="w-full px-4 py-3 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-primary-light font-mono text-sm font-bold" placeholder="Nhập giá..." />
                         </div>
                         <div>
                             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Thưởng nóng (nếu có)</label>
-                            <input type="text" value={formatNumber(hotBonus)} onChange={e => setHotBonus(parseNumber(e.target.value).toString())} className="w-full px-4 py-3 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-rose-500 font-mono text-sm font-bold" placeholder="Nhập mức thưởng..." />
+                            <input type="text" value={formatNumber(hotBonus)} onChange={e => setHotBonus(parseNumber(e.target.value).toString())} className="w-full px-4 py-3 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-primary-light font-mono text-sm font-bold" placeholder="Nhập mức thưởng..." />
                         </div>
                     </div>
-                    <div className="flex items-center gap-3 p-4 bg-rose-50/50 rounded-2xl border border-rose-100/50">
-                        <input type="checkbox" id="highend" checked={isHighEnd} onChange={e => setIsHighEnd(e.target.checked)} className="w-5 h-5 rounded-lg border-rose-200 text-rose-600 focus:ring-rose-500 transition-all cursor-pointer" />
-                        <label htmlFor="highend" className="text-xs font-black text-rose-700 cursor-pointer select-none uppercase tracking-widest">Sản phẩm cao cấp</label>
-                        <Star className={`w-4 h-4 ml-auto ${isHighEnd ? 'text-amber-500 fill-current' : 'text-slate-300'}`} />
+                    <div className="flex items-center gap-3 p-4 bg-primary-subtle/50 rounded-2xl border border-primary-subtle/50">
+                        <input type="checkbox" id="highend" checked={isHighEnd} onChange={e => setIsHighEnd(e.target.checked)} className="w-5 h-5 rounded-lg border-primary-subtle text-primary focus:ring-primary-light transition-all cursor-pointer" />
+                        <label htmlFor="highend" className="text-xs font-black text-primary-light cursor-pointer select-none uppercase tracking-widest">Sản phẩm cao cấp</label>
+                        <Star className={`w-4 h-4 ml-auto ${isHighEnd ? 'text-warning-light fill-current' : 'text-slate-300'}`} />
                     </div>
                     <div className="pt-2">
-                        <button disabled={submitting} className="w-full py-4 bg-rose-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-rose-100 hover:bg-rose-700 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer">
+                        <button disabled={submitting} className="w-full py-4 bg-primary text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-primary-subtle hover:bg-primary-light hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer">
                             {submitting ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
                             {product ? 'Lưu thay đổi' : 'Tạo sản phẩm'}
                         </button>
@@ -636,14 +636,14 @@ function GiftModal({ isOpen, onClose, onSuccess, gift }: { isOpen: boolean, onCl
                 <form onSubmit={handleSubmit} className="p-6 space-y-5">
                     <div>
                         <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Tên quà tặng</label>
-                        <input required value={name} onChange={e => setName(e.target.value)} className="w-full px-4 py-3 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-rose-500 font-bold text-sm" placeholder="VD: Mũ bảo hiểm Ohari" />
+                        <input required value={name} onChange={e => setName(e.target.value)} className="w-full px-4 py-3 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-primary-light font-bold text-sm" placeholder="VD: Mũ bảo hiểm Ohari" />
                     </div>
                     <div>
                         <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Giá trị quy đổi</label>
-                        <input type="text" required value={formatNumber(price)} onChange={e => setPrice(parseNumber(e.target.value).toString())} className="w-full px-4 py-3 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-rose-500 font-mono text-sm font-bold" placeholder="Nhập giá trị..." />
+                        <input type="text" required value={formatNumber(price)} onChange={e => setPrice(parseNumber(e.target.value).toString())} className="w-full px-4 py-3 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-primary-light font-mono text-sm font-bold" placeholder="Nhập giá trị..." />
                     </div>
                     <div className="pt-2">
-                        <button disabled={submitting} className="w-full py-4 bg-rose-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-rose-100 hover:bg-rose-700 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                        <button disabled={submitting} className="w-full py-4 bg-primary text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-primary-subtle hover:bg-primary-light transition-all flex items-center justify-center gap-2 cursor-pointer">
                             {submitting ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
                             {gift ? 'Lưu thay đổi' : 'Thêm quà tặng'}
                         </button>
@@ -752,7 +752,7 @@ function BonusModal({ product, onClose, onSuccess }: { product: Product, onClose
                 <div className="p-6 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
                     <div>
                         <h2 className="text-base font-black text-slate-800 uppercase tracking-widest leading-none">Thiết lập thưởng nóng</h2>
-                        <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest mt-1">Sản phẩm: {product.name}</p>
+                        <p className="text-[10px] font-black text-primary-light uppercase tracking-widest mt-1">Sản phẩm: {product.name}</p>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-white rounded-xl transition-all shadow-sm cursor-pointer"><X className="w-5 h-5 text-slate-400" /></button>
                 </div>
@@ -773,7 +773,7 @@ function BonusModal({ product, onClose, onSuccess }: { product: Product, onClose
                                             <Calendar className="w-3.5 h-3.5 text-rose-400 shrink-0" />
                                             <span className="text-[9px] font-black text-slate-500 uppercase tracking-wider">Chính sách #{policies.length - pIdx}</span>
                                         </div>
-                                        <button type="button" onClick={() => removePolicy(pIdx)} className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-white rounded-lg transition-all cursor-pointer">
+                                        <button type="button" onClick={() => removePolicy(pIdx)} className="p-1.5 text-slate-300 hover:text-primary-light hover:bg-white rounded-lg transition-all cursor-pointer">
                                             <Trash2 className="w-3.5 h-3.5" />
                                         </button>
                                     </div>
@@ -781,11 +781,11 @@ function BonusModal({ product, onClose, onSuccess }: { product: Product, onClose
                                     <div className="grid grid-cols-2 gap-3">
                                         <div>
                                             <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Ngày bắt đầu *</label>
-                                            <input type="date" required value={policy.startDate} onChange={e => updatePolicy(pIdx, 'startDate', e.target.value)} className="w-full px-3 py-2 bg-white rounded-xl border-none focus:ring-1 focus:ring-rose-500 text-xs font-bold shadow-sm" />
+                                            <input type="date" required value={policy.startDate} onChange={e => updatePolicy(pIdx, 'startDate', e.target.value)} className="w-full px-3 py-2 bg-white rounded-xl border-none focus:ring-1 focus:ring-primary-light text-xs font-bold shadow-sm" />
                                         </div>
                                         <div>
                                             <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Ngày kết thúc</label>
-                                            <input type="date" value={policy.endDate} onChange={e => updatePolicy(pIdx, 'endDate', e.target.value)} className="w-full px-3 py-2 bg-white rounded-xl border-none focus:ring-1 focus:ring-rose-500 text-xs font-bold shadow-sm" placeholder="Bỏ trống = vĩnh viễn" />
+                                            <input type="date" value={policy.endDate} onChange={e => updatePolicy(pIdx, 'endDate', e.target.value)} className="w-full px-3 py-2 bg-white rounded-xl border-none focus:ring-1 focus:ring-primary-light text-xs font-bold shadow-sm" placeholder="Bỏ trống = vĩnh viễn" />
                                         </div>
                                     </div>
                                     {/* Rules */}
@@ -794,18 +794,18 @@ function BonusModal({ product, onClose, onSuccess }: { product: Product, onClose
                                             <div key={rIdx} className="flex items-center gap-2 bg-white p-3 rounded-xl border border-slate-100 group">
                                                 <div className="flex-1">
                                                     <label className="block text-[7px] font-black text-slate-400 uppercase tracking-widest mb-0.5 ml-1">Giá bán từ (đ)</label>
-                                                    <input type="text" value={formatNumber(rule.minSellPrice)} onChange={e => updateRule(pIdx, rIdx, 'minSellPrice', parseNumber(e.target.value).toString())} className="w-full px-2 py-1.5 bg-slate-50 rounded-lg border-none focus:ring-1 focus:ring-rose-500 font-mono text-[11px] font-bold" />
+                                                    <input type="text" value={formatNumber(rule.minSellPrice)} onChange={e => updateRule(pIdx, rIdx, 'minSellPrice', parseNumber(e.target.value).toString())} className="w-full px-2 py-1.5 bg-slate-50 rounded-lg border-none focus:ring-1 focus:ring-primary-light font-mono text-[11px] font-bold" />
                                                 </div>
                                                 <div className="flex-1">
                                                     <label className="block text-[7px] font-black text-rose-400 uppercase tracking-widest mb-0.5 ml-1">Mức thưởng (đ)</label>
-                                                    <input type="text" value={formatNumber(rule.bonusAmount)} onChange={e => updateRule(pIdx, rIdx, 'bonusAmount', parseNumber(e.target.value).toString())} className="w-full px-2 py-1.5 bg-rose-50/30 rounded-lg border-none focus:ring-1 focus:ring-rose-500 font-mono text-[11px] font-black text-rose-600" />
+                                                    <input type="text" value={formatNumber(rule.bonusAmount)} onChange={e => updateRule(pIdx, rIdx, 'bonusAmount', parseNumber(e.target.value).toString())} className="w-full px-2 py-1.5 bg-primary-subtle/30 rounded-lg border-none focus:ring-1 focus:ring-primary-light font-mono text-[11px] font-black text-primary" />
                                                 </div>
-                                                <button type="button" onClick={() => removeRule(pIdx, rIdx)} className="mt-3 p-1 text-slate-300 hover:text-rose-500 hover:bg-slate-50 rounded-lg transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 cursor-pointer">
+                                                <button type="button" onClick={() => removeRule(pIdx, rIdx)} className="mt-3 p-1 text-slate-300 hover:text-primary-light hover:bg-slate-50 rounded-lg transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 cursor-pointer">
                                                     <X className="w-3 h-3" />
                                                 </button>
                                             </div>
                                         ))}
-                                        <button type="button" onClick={() => addRuleToPolicy(pIdx)} className="w-full py-2 border border-dashed border-slate-200 text-slate-400 rounded-xl text-[9px] font-black uppercase tracking-widest hover:border-rose-200 hover:text-rose-500 transition-all cursor-pointer">
+                                        <button type="button" onClick={() => addRuleToPolicy(pIdx)} className="w-full py-2 border border-dashed border-slate-200 text-slate-400 rounded-xl text-[9px] font-black uppercase tracking-widest hover:border-primary-subtle hover:text-primary-light transition-all cursor-pointer">
                                             + Thêm mức thưởng
                                         </button>
                                     </div>
@@ -815,10 +815,10 @@ function BonusModal({ product, onClose, onSuccess }: { product: Product, onClose
                     </div>
 
                     <div className="flex gap-4">
-                        <button type="button" onClick={addPolicy} className="flex-1 py-3 border-2 border-dashed border-slate-200 text-slate-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:border-rose-200 hover:text-rose-500 hover:bg-rose-50/30 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                        <button type="button" onClick={addPolicy} className="flex-1 py-3 border-2 border-dashed border-slate-200 text-slate-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:border-primary-subtle hover:text-primary-light hover:bg-primary-subtle/30 transition-all flex items-center justify-center gap-2 cursor-pointer">
                             <Plus className="w-4 h-4" /> Thêm chính sách mới
                         </button>
-                        <button disabled={submitting} className="flex-1 py-3 bg-rose-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-rose-100 hover:bg-rose-700 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 cursor-pointer">
+                        <button disabled={submitting} className="flex-1 py-3 bg-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary-subtle hover:bg-primary-light transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 cursor-pointer">
                             {submitting ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Check className="w-4 h-4" />}
                             Lưu tất cả
                         </button>
@@ -939,16 +939,16 @@ function PricePolicyModal({ product, onClose, onSuccess }: { product: Product, o
                                 {policies.map((p, idx) => (
                                     <div key={idx} className="grid grid-cols-12 gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-100 group items-center">
                                         <div className="col-span-4">
-                                            <input type="text" value={formatNumber(p.minPrice)} onChange={e => updatePolicy(idx, 'minPrice', parseNumber(e.target.value).toString())} className="w-full px-3 py-2 bg-white rounded-xl border-none focus:ring-1 focus:ring-rose-500 font-mono text-xs font-bold shadow-sm" placeholder="Nhập giá..." />
+                                            <input type="text" value={formatNumber(p.minPrice)} onChange={e => updatePolicy(idx, 'minPrice', parseNumber(e.target.value).toString())} className="w-full px-3 py-2 bg-white rounded-xl border-none focus:ring-1 focus:ring-primary-light font-mono text-xs font-bold shadow-sm" placeholder="Nhập giá..." />
                                         </div>
                                         <div className="col-span-3">
-                                            <input type="date" value={p.startDate} onChange={e => updatePolicy(idx, 'startDate', e.target.value)} className="w-full px-2 py-2 bg-white rounded-xl border-none focus:ring-1 focus:ring-rose-500 text-[10px] font-bold shadow-sm" />
+                                            <input type="date" value={p.startDate} onChange={e => updatePolicy(idx, 'startDate', e.target.value)} className="w-full px-2 py-2 bg-white rounded-xl border-none focus:ring-1 focus:ring-primary-light text-[10px] font-bold shadow-sm" />
                                         </div>
                                         <div className="col-span-3">
-                                            <input type="date" value={p.endDate || ''} onChange={e => updatePolicy(idx, 'endDate', e.target.value)} className="w-full px-2 py-2 bg-white rounded-xl border-none focus:ring-1 focus:ring-rose-500 text-[10px] font-bold shadow-sm" />
+                                            <input type="date" value={p.endDate || ''} onChange={e => updatePolicy(idx, 'endDate', e.target.value)} className="w-full px-2 py-2 bg-white rounded-xl border-none focus:ring-1 focus:ring-primary-light text-[10px] font-bold shadow-sm" />
                                         </div>
                                         <div className="col-span-2 text-right">
-                                            <button type="button" onClick={() => setDeletingIdx(idx)} className="p-2 text-slate-300 hover:text-rose-500 hover:bg-white rounded-lg transition-all shadow-sm cursor-pointer">
+                                            <button type="button" onClick={() => setDeletingIdx(idx)} className="p-2 text-slate-300 hover:text-primary-light hover:bg-white rounded-lg transition-all shadow-sm cursor-pointer">
                                                 <Trash2 className="w-3.5 h-3.5" />
                                             </button>
                                         </div>
@@ -962,7 +962,7 @@ function PricePolicyModal({ product, onClose, onSuccess }: { product: Product, o
                         <button type="button" onClick={addPolicy} className="flex-2 py-3 border-2 border-dashed border-slate-200 text-slate-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:border-blue-200 hover:text-blue-500 hover:bg-blue-50/30 transition-all flex items-center justify-center gap-2 cursor-pointer px-6">
                             <Plus className="w-4 h-4" /> Thêm mốc giá
                         </button>
-                        <button disabled={submitting} className="flex-1 py-3 bg-rose-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-rose-100 hover:bg-rose-700 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 cursor-pointer">
+                        <button disabled={submitting} className="flex-1 py-3 bg-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary-subtle hover:bg-primary-light transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 cursor-pointer">
                             {submitting ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
                             Lưu cấu hình
                         </button>

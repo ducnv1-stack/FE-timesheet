@@ -799,7 +799,7 @@ function OrdersPageContent() {
 
     if (loading) return (
         <div className="flex items-center justify-center min-h-[400px]">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-rose-600"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
         </div>
     );
 
@@ -818,14 +818,14 @@ function OrdersPageContent() {
                             <button
                                 onClick={handleExportExcel}
                                 disabled={isExporting}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white font-bold text-[10px] rounded-lg shadow-sm hover:bg-emerald-700 transition-all cursor-pointer disabled:opacity-50"
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-accent text-white font-bold text-[10px] rounded-lg shadow-sm hover:bg-emerald-700 transition-all cursor-pointer disabled:opacity-50"
                             >
                                 <FileSpreadsheet size={14} className={isExporting ? "animate-bounce" : ""} />
                                 {isExporting ? "ĐANG XUẤT..." : "Xuất Excel"}
                             </button>
                         )}
                         <div className="bg-white px-3 py-1.5 rounded-xl shadow-sm border border-slate-100 flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+                            <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-accent">
                                 <ShoppingBag size={14} />
                             </div>
                             <div>
@@ -841,13 +841,13 @@ function OrdersPageContent() {
                     {/* Mobile Toggle & Search */}
                     <div className="flex lg:hidden items-center gap-2">
                         <div className="relative flex-1">
-                            <Search className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${searchTerm ? 'text-rose-500' : 'text-slate-400'}`} size={14} />
+                            <Search className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${searchTerm ? 'text-primary-light' : 'text-slate-400'}`} size={14} />
                             <input
                                 type="text"
                                 placeholder="Tìm khách, SĐT, mã đơn..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className={`w-full pl-8 pr-2 py-1.5 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none transition-all text-[11px] font-bold cursor-text ${searchTerm ? 'border-rose-300' : 'border-slate-200'}`}
+                                className={`w-full pl-8 pr-2 py-1.5 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none transition-all text-[11px] font-bold cursor-text ${searchTerm ? 'border-rose-300' : 'border-slate-200'}`}
                             />
                         </div>
                         <button
@@ -855,7 +855,7 @@ function OrdersPageContent() {
                             className={cn(
                                 "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all border shrink-0 cursor-pointer",
                                 showMobileFilters || statusFilter !== 'all' || timeFilter !== 'all' || paymentMethodFilter !== 'all' || paymentStatusFilter !== 'all' || invoiceStatusFilter !== 'all' || deliveryTypeFilter !== 'all' || selectedBranchId !== 'all' || selectedEmployeeId !== 'all' || editTimeFilter !== 'all' || confirmedTimeFilter !== 'all'
-                                    ? "bg-rose-600 text-white border-rose-600 shadow-md scale-105"
+                                    ? "bg-primary text-white border-primary shadow-md scale-105"
                                     : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
                             )}
                         >
@@ -870,23 +870,23 @@ function OrdersPageContent() {
                     )}>
                         {/* Search Search (Desktop Only) */}
                         <div className="relative hidden lg:block">
-                            <Search className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${searchTerm ? 'text-rose-500' : 'text-slate-400'}`} size={14} />
+                            <Search className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${searchTerm ? 'text-primary-light' : 'text-slate-400'}`} size={14} />
                             <input
                                 type="text"
                                 placeholder="Tìm khách, SĐT, mã đơn..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className={`w-full pl-8 pr-2 py-1 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none transition-all text-[10.5px] font-medium cursor-text ${searchTerm ? 'border-rose-300' : 'border-slate-200'}`}
+                                className={`w-full pl-8 pr-2 py-1 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none transition-all text-[10.5px] font-medium cursor-text ${searchTerm ? 'border-rose-300' : 'border-slate-200'}`}
                             />
                         </div>
 
                         {/* Status Filter */}
                         <div className="relative">
-                            <Filter className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${statusFilter !== 'all' ? 'text-rose-500' : 'text-slate-400'}`} size={14} />
+                            <Filter className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${statusFilter !== 'all' ? 'text-primary-light' : 'text-slate-400'}`} size={14} />
                             <select
                                 value={statusFilter}
                                 onChange={(e: any) => setStatusFilter(e.target.value)}
-                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${statusFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${statusFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
                             >
                                 <option value="all">Tất cả trạng thái</option>
                                 <option value="pending">⏳ Chờ giao</option>
@@ -898,7 +898,7 @@ function OrdersPageContent() {
                         {/* Time Filter & Range */}
                         <div className={`flex items-center gap-1.5 ${timeFilter === 'custom' ? 'lg:col-span-2 xl:col-span-2' : ''}`}>
                             <div className="relative flex-shrink-0 flex-1">
-                                <Calendar className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${timeFilter !== 'all' ? 'text-rose-500' : 'text-slate-400'}`} size={14} />
+                                <Calendar className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${timeFilter !== 'all' ? 'text-primary-light' : 'text-slate-400'}`} size={14} />
                                 <select
                                     value={timeFilter}
                                     onChange={(e: any) => {
@@ -909,7 +909,7 @@ function OrdersPageContent() {
                                             setEndDate('');
                                         }
                                     }}
-                                    className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${timeFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                                    className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${timeFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
                                 >
                                     <option value="all">Thời gian: Tất cả</option>
                                     <option value="today">Hôm nay</option>
@@ -938,14 +938,14 @@ function OrdersPageContent() {
 
                         {/* Payment Method Filter */}
                         <div className="relative">
-                            <CreditCard className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${paymentMethodFilter !== 'all' ? 'text-rose-500' : 'text-slate-400'}`} size={14} />
+                            <CreditCard className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${paymentMethodFilter !== 'all' ? 'text-primary-light' : 'text-slate-400'}`} size={14} />
                             <select
                                 value={paymentMethodFilter}
                                 onChange={(e: any) => {
                                     setPaymentMethodFilter(e.target.value);
                                     setExcludeInstallment(false);
                                 }}
-                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${paymentMethodFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${paymentMethodFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
                             >
                                 <option value="all">PTTT: Tất cả</option>
                                 <option value="CASH">💵 Tiền mặt</option>
@@ -958,14 +958,14 @@ function OrdersPageContent() {
 
                         {/* Accountant Status Filter */}
                         <div className="relative">
-                            <ShieldCheck className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${paymentStatusFilter !== 'all' ? 'text-rose-500' : 'text-slate-400'}`} size={14} />
+                            <ShieldCheck className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${paymentStatusFilter !== 'all' ? 'text-primary-light' : 'text-slate-400'}`} size={14} />
                             <select
                                 value={paymentStatusFilter}
                                 onChange={(e: any) => {
                                     setPaymentStatusFilter(e.target.value);
                                     setExcludeInstallment(false);
                                 }}
-                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${paymentStatusFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${paymentStatusFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
                             >
                                 <option value="all">Thanh toán: Tất cả</option>
                                 <option value="confirmed">✅ Đã thanh toán đủ</option>
@@ -975,11 +975,11 @@ function OrdersPageContent() {
 
                         {/* Invoice Status Filter */}
                         <div className="relative">
-                            <ReceiptText className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${invoiceStatusFilter !== 'all' ? 'text-rose-500' : 'text-slate-400'}`} size={14} />
+                            <ReceiptText className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${invoiceStatusFilter !== 'all' ? 'text-primary-light' : 'text-slate-400'}`} size={14} />
                             <select
                                 value={invoiceStatusFilter}
                                 onChange={(e: any) => setInvoiceStatusFilter(e.target.value)}
-                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${invoiceStatusFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${invoiceStatusFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
                             >
                                 <option value="all">Hóa đơn: Tất cả</option>
                                 <option value="pending">⏳ Chưa xuất HĐ</option>
@@ -990,7 +990,7 @@ function OrdersPageContent() {
                         {/* Order Edit Date Filter */}
                         <div className={`flex items-center gap-1.5 ${editTimeFilter === 'custom' ? 'lg:col-span-2 xl:col-span-2' : ''}`}>
                             <div className="relative flex-shrink-0 flex-1">
-                                <History className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${editTimeFilter !== 'all' ? 'text-rose-500' : 'text-slate-400'}`} size={14} />
+                                <History className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${editTimeFilter !== 'all' ? 'text-primary-light' : 'text-slate-400'}`} size={14} />
                                 <select
                                     value={editTimeFilter}
                                     onChange={(e: any) => {
@@ -1001,7 +1001,7 @@ function OrdersPageContent() {
                                             setEditEndDate('');
                                         }
                                     }}
-                                    className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${editTimeFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                                    className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${editTimeFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
                                 >
                                     <option value="all">Sửa gần nhất: Tất cả</option>
                                     <option value="today">Sửa: Hôm nay</option>
@@ -1030,7 +1030,7 @@ function OrdersPageContent() {
                         {/* Order Confirmation Date Filter */}
                         <div className={`flex items-center gap-1.5 ${confirmedTimeFilter === 'custom' ? 'lg:col-span-2 xl:col-span-2' : ''}`}>
                             <div className="relative flex-shrink-0 flex-1">
-                                <CheckCircle className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${confirmedTimeFilter !== 'all' ? 'text-rose-500' : 'text-slate-400'}`} size={14} />
+                                <CheckCircle className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${confirmedTimeFilter !== 'all' ? 'text-primary-light' : 'text-slate-400'}`} size={14} />
                                 <select
                                     value={confirmedTimeFilter}
                                     onChange={(e: any) => {
@@ -1041,7 +1041,7 @@ function OrdersPageContent() {
                                             setConfirmedEndDate('');
                                         }
                                     }}
-                                    className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${confirmedTimeFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                                    className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${confirmedTimeFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
                                 >
                                     <option value="all">Xác nhận: Tất cả</option>
                                     <option value="today">XN: Hôm nay</option>
@@ -1070,11 +1070,11 @@ function OrdersPageContent() {
 
                         {/* Delivery Type Filter */}
                         <div className="relative">
-                            <Truck className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${deliveryTypeFilter !== 'all' ? 'text-rose-500' : 'text-slate-400'}`} size={14} />
+                            <Truck className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${deliveryTypeFilter !== 'all' ? 'text-primary-light' : 'text-slate-400'}`} size={14} />
                             <select
                                 value={deliveryTypeFilter}
                                 onChange={(e: any) => setDeliveryTypeFilter(e.target.value)}
-                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${deliveryTypeFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${deliveryTypeFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
                             >
                                 <option value="all">Lái xe: Tất cả</option>
                                 <option value="company">🏢 Xe công ty</option>
@@ -1085,7 +1085,7 @@ function OrdersPageContent() {
                         {/* Branch Filter (Director & Manager) */}
                         {(isGlobalRole || isManager) ? (
                             <div className="relative">
-                                <MapPin className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${selectedBranchId !== 'all' ? 'text-rose-500' : 'text-slate-400'}`} size={14} />
+                                <MapPin className={`absolute left-2.5 top-1/2 -translate-y-1/2 transition-colors ${selectedBranchId !== 'all' ? 'text-primary-light' : 'text-slate-400'}`} size={14} />
                                 <select
                                     value={selectedBranchId}
                                     onChange={(e) => {
@@ -1093,7 +1093,7 @@ function OrdersPageContent() {
                                         setSelectedEmployeeId('all');
                                     }}
                                     disabled={isManager}
-                                    className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${selectedBranchId !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'} ${isManager ? 'opacity-70 cursor-not-allowed bg-slate-100' : ''}`}
+                                    className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${selectedBranchId !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'} ${isManager ? 'opacity-70 cursor-not-allowed bg-slate-100' : ''}`}
                                 >
                                     {isGlobalRole && <option value="all">Tất cả chi nhánh</option>}
                                     {branches.map(b => (
@@ -1154,7 +1154,7 @@ function OrdersPageContent() {
                         <div className="relative lg:hidden">
                             <button
                                 onClick={resetFilters}
-                                className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all border bg-rose-50 text-rose-500 border-rose-200 hover:bg-rose-500 hover:text-white cursor-pointer"
+                                className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all border bg-primary-subtle text-primary-light border-primary-subtle hover:bg-primary-light hover:text-white cursor-pointer"
                                 title="Xoá toàn bộ bộ lọc"
                             >
                                 ✕ Reset
@@ -1165,7 +1165,7 @@ function OrdersPageContent() {
                         <div className="relative hidden lg:block">
                             <button
                                 onClick={resetFilters}
-                                className="w-full flex items-center justify-center gap-1.5 px-3 h-[28px] py-0 rounded-lg text-[10.5px] font-bold transition-all border bg-rose-50 text-rose-500 border-rose-200 hover:bg-rose-500 hover:text-white cursor-pointer"
+                                className="w-full flex items-center justify-center gap-1.5 px-3 h-[28px] py-0 rounded-lg text-[10.5px] font-bold transition-all border bg-primary-subtle text-primary-light border-primary-subtle hover:bg-primary-light hover:text-white cursor-pointer"
                                 title="Xoá toàn bộ bộ lọc"
                             >
                                 ✕ Reset
@@ -1182,19 +1182,19 @@ function OrdersPageContent() {
                             className={cn(
                                 "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5",
                                 activeTab === 'all'
-                                    ? "text-rose-600 bg-rose-50 cursor-pointer"
+                                    ? "text-primary bg-primary-subtle cursor-pointer"
                                     : "text-slate-600 hover:bg-slate-50 cursor-pointer"
                             )}
                         >
                             <span className="truncate min-w-0">Tất cả</span>
                             <span className={cn(
                                 "px-1.5 py-0.5 rounded-full text-[10px] font-black flex-none",
-                                activeTab === 'all' ? "bg-rose-600 text-white" : "bg-slate-200 text-slate-600"
+                                activeTab === 'all' ? "bg-primary text-white" : "bg-slate-200 text-slate-600"
                             )}>
                                 {allOrdersCount > 999 ? '999+' : allOrdersCount}
                             </span>
                             {activeTab === 'all' && (
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-600"></div>
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
                             )}
                         </button>
                         <button
@@ -1202,19 +1202,19 @@ function OrdersPageContent() {
                             className={cn(
                                 "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5",
                                 activeTab === 'created'
-                                    ? "text-emerald-600 bg-emerald-50 cursor-pointer"
+                                    ? "text-accent bg-emerald-50 cursor-pointer"
                                     : "text-slate-600 hover:bg-slate-50 cursor-pointer"
                             )}
                         >
                             <span className="truncate min-w-0">Của tôi</span>
                             <span className={cn(
                                 "px-1.5 py-0.5 rounded-full text-[10px] font-black flex-none",
-                                activeTab === 'created' ? "bg-emerald-600 text-white" : "bg-slate-200 text-slate-600"
+                                activeTab === 'created' ? "bg-accent text-white" : "bg-slate-200 text-slate-600"
                             )}>
                                 {createdCount > 999 ? '999+' : createdCount}
                             </span>
                             {activeTab === 'created' && (
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-600"></div>
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"></div>
                             )}
                         </button>
                         <button
@@ -1292,7 +1292,7 @@ function OrdersPageContent() {
                     {
                         refreshing && (
                             <div className="absolute top-0 left-0 right-0 h-[2px] bg-slate-100 overflow-hidden z-20">
-                                <div className="h-full bg-rose-500 animate-[loading-bar_1.5s_infinite_linear]"></div>
+                                <div className="h-full bg-primary-light animate-[loading-bar_1.5s_infinite_linear]"></div>
                             </div>
                         )
                     }
@@ -1375,13 +1375,13 @@ function OrdersPageContent() {
                                                             {/* Badges */}
                                                             <div className="flex flex-wrap gap-1">
                                                                 {order.items?.some((item: any) => item.isBelowMin) && (
-                                                                    <span className="px-1 py-[0.5px] rounded text-[8px] font-black bg-amber-50 text-amber-600 border border-amber-100 whitespace-nowrap" title="Bán dưới giá Min">
+                                                                    <span className="px-1 py-[0.5px] rounded text-[8px] font-black bg-amber-50 text-warning border border-amber-100 whitespace-nowrap" title="Bán dưới giá Min">
                                                                         Min
                                                                     </span>
                                                                 )}
                                                                 {order.isUpgrade && (
-                                                                    <span className="px-1.5 py-[1px] rounded text-[9px] font-semibold bg-rose-50/80 text-rose-600 border border-rose-200 whitespace-nowrap flex items-center gap-1 shadow-sm" title={`Nâng cấp từ đơn: ${order.oldOrderCode || order.oldOrderId?.split('-')[0] || '...'}`}>
-                                                                        <RefreshCw size={10} className="text-rose-500" />
+                                                                    <span className="px-1.5 py-[1px] rounded text-[9px] font-semibold bg-primary-subtle/80 text-primary border border-primary-subtle whitespace-nowrap flex items-center gap-1 shadow-sm" title={`Nâng cấp từ đơn: ${order.oldOrderCode || order.oldOrderId?.split('-')[0] || '...'}`}>
+                                                                        <RefreshCw size={10} className="text-primary-light" />
                                                                         Nâng cấp từ { (order.oldOrderCode || order.oldOrderId?.split('-')[0]) ? `#${order.oldOrderCode || order.oldOrderId?.split('-')[0]}` : ''}
                                                                     </span>
                                                                 )}
@@ -1392,7 +1392,7 @@ function OrdersPageContent() {
                                                                     </span>
                                                                 )}
                                                                 {isOrderCreatedByUser(order) && (
-                                                                    <span className="px-1 py-[0.5px] rounded text-[8px] font-black bg-emerald-50 text-emerald-600 border border-emerald-100 whitespace-nowrap">
+                                                                    <span className="px-1 py-[0.5px] rounded text-[8px] font-black bg-emerald-50 text-accent border border-emerald-100 whitespace-nowrap">
                                                                         Tôi
                                                                     </span>
                                                                 )}
@@ -1416,7 +1416,7 @@ function OrdersPageContent() {
                                                                 order.branch?.name || 'HQ',
                                                                 ...(order.splits?.map((s: any) => s.branch?.name).filter((name: any) => name) || [])
                                                             ])).map((bName: any, i: number) => (
-                                                                <span key={i} className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-rose-50 text-rose-600 border border-rose-100 leading-tight whitespace-nowrap">
+                                                                <span key={i} className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-primary-subtle text-primary border border-primary-subtle leading-tight whitespace-nowrap">
                                                                     {bName}
                                                                 </span>
                                                             ))}
@@ -1440,7 +1440,7 @@ function OrdersPageContent() {
                                                 <td className="px-2 py-1.5">
                                                     <div className="flex flex-wrap gap-1">
                                                         {order.isUpgrade && (
-                                                            <span className="text-[10px] font-bold text-rose-600 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded whitespace-nowrap italic italic-faint">
+                                                            <span className="text-[10px] font-bold text-primary bg-primary-subtle border border-primary-subtle px-1.5 py-0.5 rounded whitespace-nowrap italic italic-faint">
                                                                 Từ: {order.oldOrderProductName || 'SP cũ'}
                                                             </span>
                                                         )}
@@ -1450,14 +1450,14 @@ function OrdersPageContent() {
                                                             </span>
                                                         ))}
                                                         {order.gifts?.map((og: any, idx: number) => (
-                                                            <span key={`gift-${idx}`} className="text-[10px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded whitespace-nowrap border border-rose-100">
+                                                            <span key={`gift-${idx}`} className="text-[10px] font-bold text-primary bg-primary-subtle px-1.5 py-0.5 rounded whitespace-nowrap border border-primary-subtle">
                                                                 🎁 {og.gift?.name || og.name || 'Quà'} x{og.quantity}
                                                             </span>
                                                         ))}
                                                     </div>
                                                 </td>
                                                 <td className="px-2 py-1.5 text-right">
-                                                    <span className="text-[11px] font-black text-rose-600">
+                                                    <span className="text-[11px] font-black text-primary">
                                                         {formatCurrency(Number(order.totalAmount))}
                                                     </span>
                                                 </td>
@@ -1498,7 +1498,7 @@ function OrdersPageContent() {
                                                                 <>
                                                                     {/* Chỉ các đơn TRANSFER_COMPANY, CARD, INSTALLMENT, CREDIT mới cần xuất hóa đơn */}
                                                                     {order.payments?.some((p: any) => ['TRANSFER_COMPANY', 'CARD', 'CREDIT', 'INSTALLMENT'].includes(p.paymentMethod)) ? (
-                                                                        <span className="px-1 py-0.5 rounded text-[8px] font-black bg-rose-50 text-rose-600 border border-rose-100 whitespace-nowrap animate-pulse uppercase">
+                                                                        <span className="px-1 py-0.5 rounded text-[8px] font-black bg-primary-subtle text-primary border border-primary-subtle whitespace-nowrap animate-pulse uppercase">
                                                                             GẤP
                                                                         </span>
                                                                     ) : (
@@ -1546,13 +1546,13 @@ function OrdersPageContent() {
                                                                 </td>
                                                                 <td className="px-2 py-1.5 text-right">
                                                                     <div className="flex flex-col">
-                                                                        <span className="text-[11px] font-black text-emerald-600 leading-tight">
+                                                                        <span className="text-[11px] font-black text-accent leading-tight">
                                                                             {formatCurrency(inc.total)}
                                                                         </span>
                                                                         {isSale && (
                                                                             <span className={cn(
                                                                                 "text-[8px] font-black uppercase tracking-tighter leading-none",
-                                                                                inc.isRecognized ? "text-slate-400" : "text-amber-500"
+                                                                                inc.isRecognized ? "text-slate-400" : "text-warning-light"
                                                                             )}>
                                                                                 DS: {formatCurrency(inc.revenue)} {inc.isRecognized ? '✓' : ''}
                                                                             </span>
@@ -1568,10 +1568,10 @@ function OrdersPageContent() {
                                                         {order.status === 'delivered' ? (
                                                             <div className="flex flex-col items-center animate-in zoom-in duration-300 gap-1">
                                                                 <div className="flex flex-col items-center">
-                                                                    <div className="w-5 h-5 rounded bg-emerald-500 text-white flex items-center justify-center shadow-sm">
+                                                                    <div className="w-5 h-5 rounded bg-accent-light text-white flex items-center justify-center shadow-sm">
                                                                         <Check size={12} strokeWidth={4} />
                                                                     </div>
-                                                                    <span className="text-[8px] font-black text-emerald-600 uppercase tracking-tighter">Đã giao</span>
+                                                                    <span className="text-[8px] font-black text-accent uppercase tracking-tighter">Đã giao</span>
                                                                 </div>
                                                                 <div className="flex items-center gap-1">
                                                                     <span className="text-xs leading-none">🚗</span>
@@ -1594,7 +1594,7 @@ function OrdersPageContent() {
                                                                 {((isGlobalRole && !isDirector) || isManager) ? (
                                                                     <button
                                                                         onClick={() => handleConfirmDelivery(order.id)}
-                                                                        className="px-1 py-0.5 bg-emerald-600 text-white rounded text-[8px] font-black uppercase hover:bg-emerald-700 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
+                                                                        className="px-1 py-0.5 bg-accent text-white rounded text-[8px] font-black uppercase hover:bg-emerald-700 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
                                                                     >
                                                                         XÁC NHẬN XONG
                                                                     </button>
@@ -1638,10 +1638,10 @@ function OrdersPageContent() {
                                                             if (order.isPaymentConfirmed) {
                                                                 return (
                                                                     <div className="flex flex-col items-center animate-in zoom-in duration-300">
-                                                                        <div className="w-5 h-5 rounded bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                                                                        <div className="w-5 h-5 rounded bg-emerald-100 text-accent flex items-center justify-center">
                                                                             <Check size={12} strokeWidth={4} />
                                                                         </div>
-                                                                        <span className="text-[8px] font-black text-emerald-600 uppercase tracking-tighter">Đã xác nhận</span>
+                                                                        <span className="text-[8px] font-black text-accent uppercase tracking-tighter">Đã xác nhận</span>
                                                                         {order.confirmedAt && (
                                                                             <span className="text-[7px] text-slate-400 font-bold whitespace-nowrap leading-none mt-0.5">
                                                                                 {formatDateTime(new Date(order.confirmedAt))}
@@ -1654,11 +1654,11 @@ function OrdersPageContent() {
                                                             return (
                                                                 <div className="flex flex-col items-center gap-1">
                                                                     <div className="flex flex-col items-center">
-                                                                        <span className="text-[7px] font-black text-amber-600 bg-amber-50 px-1 py-[0.5px] rounded border border-amber-200 uppercase">
+                                                                        <span className="text-[7px] font-black text-warning bg-amber-50 px-1 py-[0.5px] rounded border border-amber-200 uppercase">
                                                                             {totalPaid > 0 ? `Đã trả: ${formatCurrency(totalPaid)}` : 'Chưa thu tiền'}
                                                                         </span>
                                                                         {remaining > 0 && (
-                                                                            <span className="text-[8px] font-black text-rose-500 bg-rose-50 px-1 rounded mt-0.5 border border-rose-100">
+                                                                            <span className="text-[8px] font-black text-primary-light bg-primary-subtle px-1 rounded mt-0.5 border border-primary-subtle">
                                                                                 Còn nợ: {formatCurrency(remaining)}
                                                                             </span>
                                                                         )}
@@ -1667,7 +1667,7 @@ function OrdersPageContent() {
                                                                     {(isGlobalRole && !isDirector) ? (
                                                                         <button
                                                                             onClick={() => handleConfirmPayment(order.id)}
-                                                                            className="px-1.5 py-0.5 bg-rose-600 text-white rounded text-[8px] font-black hover:bg-rose-700 transition-all active:scale-95 shadow-sm whitespace-nowrap uppercase cursor-pointer"
+                                                                            className="px-1.5 py-0.5 bg-primary text-white rounded text-[8px] font-black hover:bg-primary-light transition-all active:scale-95 shadow-sm whitespace-nowrap uppercase cursor-pointer"
                                                                         >
                                                                             Xác nhận đủ
                                                                         </button>
@@ -1714,7 +1714,7 @@ function OrdersPageContent() {
                                                                     setDeleteOrderId(order.id);
                                                                     setShowDeleteConfirm(true);
                                                                 }}
-                                                                className="p-1 text-rose-500 hover:bg-rose-50 rounded transition-colors whitespace-nowrap cursor-pointer"
+                                                                className="p-1 text-primary-light hover:bg-primary-subtle rounded transition-colors whitespace-nowrap cursor-pointer"
                                                             >
                                                                 <Trash2 size={13} />
                                                             </button>
@@ -1735,7 +1735,7 @@ function OrdersPageContent() {
                     !loading && totalPages > 1 && (
                         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 px-2 pb-10">
                             <div className="text-[11px] text-slate-500 font-medium bg-white px-3 py-1.5 rounded-lg border border-slate-100 shadow-sm">
-                                Hiển thị <span className="font-bold text-slate-800">{(page - 1) * limit + 1}</span> - <span className="font-bold text-slate-800">{Math.min(page * limit, total)}</span> trong tổng số <span className="font-bold text-rose-600 font-mono">{total}</span> đơn hàng
+                                Hiển thị <span className="font-bold text-slate-800">{(page - 1) * limit + 1}</span> - <span className="font-bold text-slate-800">{Math.min(page * limit, total)}</span> trong tổng số <span className="font-bold text-primary font-mono">{total}</span> đơn hàng
                             </div>
 
                             <div className="flex items-center gap-1.5">
@@ -1767,7 +1767,7 @@ function OrdersPageContent() {
                                                 className={cn(
                                                     "min-w-[32px] h-8 flex items-center justify-center rounded-lg border transition-all shadow-sm font-bold",
                                                     page === pageNum
-                                                        ? "bg-rose-600 border-rose-600 text-white cursor-pointer"
+                                                        ? "bg-primary border-primary text-white cursor-pointer"
                                                         : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 cursor-pointer"
                                                 )}
                                             >
@@ -1858,7 +1858,7 @@ export default function OrdersPage() {
     return (
         <Suspense fallback={
             <div className="flex items-center justify-center min-h-[400px]">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-rose-600"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
             </div>
         }>
             <OrdersPageContent />

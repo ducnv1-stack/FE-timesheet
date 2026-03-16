@@ -489,7 +489,7 @@ export default function EmployeeDetailPage() {
         return (
             <div className="flex items-center justify-center min-h-screen bg-slate-50">
                 <div className="flex flex-col items-center gap-4">
-                    <div className="animate-spin w-12 h-12 border-4 border-rose-500 border-t-transparent rounded-full shadow-lg"></div>
+                    <div className="animate-spin w-12 h-12 border-4 border-primary-light border-t-transparent rounded-full shadow-lg"></div>
                     <p className="text-slate-500 font-bold animate-pulse">Đang tải dữ liệu...</p>
                 </div>
             </div>
@@ -531,7 +531,7 @@ export default function EmployeeDetailPage() {
                     <div className="px-6 pb-8 -mt-12 relative flex flex-col md:flex-row md:items-end md:justify-between gap-6">
                         <div className="flex flex-col md:flex-row items-center md:items-end gap-5 text-center md:text-left">
                             <div className="w-32 h-32 rounded-[2.5rem] bg-white p-1.5 shadow-2xl relative">
-                                <div className="w-full h-full rounded-[2.2rem] bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-white text-4xl font-black tracking-tighter cursor-pointer overflow-hidden group relative" onClick={() => document.getElementById('avatar-upload')?.click()}>
+                                <div className="w-full h-full rounded-[2.2rem] bg-gradient-to-br from-primary-light to-primary flex items-center justify-center text-white text-4xl font-black tracking-tighter cursor-pointer overflow-hidden group relative" onClick={() => document.getElementById('avatar-upload')?.click()}>
                                     {employee.avatarUrl ? (
                                         <img src={employee.avatarUrl.startsWith('http') ? employee.avatarUrl : `${API_URL}${employee.avatarUrl}`} alt="Avatar" className="w-full h-full object-cover" />
                                     ) : (
@@ -548,7 +548,7 @@ export default function EmployeeDetailPage() {
                                 <input id="avatar-upload" type="file" className="hidden" accept="image/*" onChange={handleAvatarUpload} />
                                 <div className={cn(
                                     "absolute bottom-2 right-2 w-8 h-8 rounded-full border-4 border-white flex items-center justify-center shadow-lg",
-                                    employee.status === 'Đang làm việc' ? "bg-emerald-500" : "bg-slate-400"
+                                    employee.status === 'Đang làm việc' ? "bg-accent-light" : "bg-slate-400"
                                 )}>
                                     {employee.status === 'Đang làm việc' ? <BadgeCheck size={16} className="text-white" /> : <Clock size={16} className="text-white" />}
                                 </div>
@@ -562,12 +562,12 @@ export default function EmployeeDetailPage() {
                                         type="text"
                                         value={editForm.fullName || ''}
                                         onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
-                                        className="text-3xl font-black text-slate-900 tracking-tight mb-1 bg-slate-50 border-b-2 border-rose-500 outline-none w-full max-w-md px-2 py-1 rounded-lg"
+                                        className="text-3xl font-black text-slate-900 tracking-tight mb-1 bg-slate-50 border-b-2 border-primary-light outline-none w-full max-w-md px-2 py-1 rounded-lg"
                                         placeholder="Nhập họ tên đầy đủ"
                                     />
                                 )}
                                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                                    <span className="px-3 py-1 bg-rose-50 text-rose-600 rounded-full text-[10px] font-black uppercase tracking-wider border border-rose-100 flex items-center gap-1.5">
+                                    <span className="px-3 py-1 bg-primary-subtle text-primary rounded-full text-[10px] font-black uppercase tracking-wider border border-primary-subtle flex items-center gap-1.5">
                                         <Briefcase size={12} />
                                         {employee.pos?.name || employee.position || 'Chưa rõ'}
                                     </span>
@@ -584,7 +584,7 @@ export default function EmployeeDetailPage() {
                                 <>
                                     <button
                                         onClick={handleStartEdit}
-                                        className="flex items-center gap-2 px-5 py-3 bg-white border-2 border-slate-100 text-slate-700 font-black text-xs rounded-2xl hover:border-rose-500 hover:text-rose-600 transition-all shadow-sm active:scale-95 cursor-pointer"
+                                        className="flex items-center gap-2 px-5 py-3 bg-white border-2 border-slate-100 text-slate-700 font-black text-xs rounded-2xl hover:border-primary-light hover:text-primary transition-all shadow-sm active:scale-95 cursor-pointer"
                                     >
                                         <Edit size={16} />
                                         CHỈNH SỬA
@@ -592,7 +592,7 @@ export default function EmployeeDetailPage() {
                                     {currentUser?.role?.code === 'ADMIN' && (
                                         <button
                                             onClick={handleDeleteEmployee}
-                                            className="flex items-center gap-2 px-5 py-3 bg-rose-50 border-2 border-rose-100 text-rose-600 font-black text-xs rounded-2xl hover:bg-rose-600 hover:text-white transition-all shadow-sm active:scale-95 cursor-pointer"
+                                            className="flex items-center gap-2 px-5 py-3 bg-primary-subtle border-2 border-primary-subtle text-primary font-black text-xs rounded-2xl hover:bg-primary hover:text-white transition-all shadow-sm active:scale-95 cursor-pointer"
                                         >
                                             <Trash2 size={16} />
                                             XÓA NHÂN VIÊN
@@ -604,7 +604,7 @@ export default function EmployeeDetailPage() {
                                     <button
                                         onClick={handleSaveEmployee}
                                         disabled={saving}
-                                        className="flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white font-black text-xs rounded-2xl hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50 active:scale-95 cursor-pointer"
+                                        className="flex items-center gap-2 px-6 py-3 bg-accent text-white font-black text-xs rounded-2xl hover:bg-emerald-700 shadow-lg shadow-accent-light/20 transition-all disabled:opacity-50 active:scale-95 cursor-pointer"
                                     >
                                         <Save size={16} />
                                         {saving ? 'ĐANG LƯU...' : 'LƯU THAY ĐỔI'}
@@ -627,7 +627,7 @@ export default function EmployeeDetailPage() {
                         {/* Work Information Card */}
                         <div className="bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden">
                             <div className="px-6 py-4 bg-slate-50/50 border-b border-slate-100 flex items-center gap-3">
-                                <div className="p-2 bg-rose-100 text-rose-600 rounded-xl">
+                                <div className="p-2 bg-primary-subtle text-primary rounded-xl">
                                     <Briefcase size={20} />
                                 </div>
                                 <h2 className="text-sm font-black text-slate-900 uppercase tracking-wider">Thông Tin Công Việc</h2>
@@ -739,7 +739,7 @@ export default function EmployeeDetailPage() {
                                             />
                                             <div className={cn(
                                                 "w-12 h-6 bg-slate-200 rounded-full transition-all duration-300",
-                                                editForm.isInternalDriver && "bg-emerald-500",
+                                                editForm.isInternalDriver && "bg-accent-light",
                                                 !isEditing && "opacity-50 cursor-not-allowed"
                                             )} />
                                             <div className={cn(
@@ -749,7 +749,7 @@ export default function EmployeeDetailPage() {
                                         </div>
                                         <span className={cn(
                                             "text-xs font-black uppercase tracking-wider transition-colors",
-                                            editForm.isInternalDriver ? "text-emerald-600" : "text-slate-400"
+                                            editForm.isInternalDriver ? "text-accent" : "text-slate-400"
                                         )}>Là tài xế nội bộ</span>
                                     </label>
                                 </div>
@@ -848,7 +848,7 @@ export default function EmployeeDetailPage() {
                         <div className="bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden overflow-hidden sticky top-6">
                             <div className="px-6 py-4 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-slate-800 text-rose-500 rounded-xl">
+                                    <div className="p-2 bg-slate-800 text-primary-light rounded-xl">
                                         <ShieldAlert size={20} />
                                     </div>
                                     <h2 className="text-sm font-black text-white uppercase tracking-wider">Tài Khoản</h2>
@@ -856,7 +856,7 @@ export default function EmployeeDetailPage() {
                                 {employee.user && (
                                     <span className={cn(
                                         "w-2 h-2 rounded-full animate-pulse",
-                                        employee.user.isActive ? "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" : "bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]"
+                                        employee.user.isActive ? "bg-accent-light shadow-[0_0_10px_rgba(16,185,129,0.5)]" : "bg-primary-light shadow-[0_0_10px_rgba(244,63,94,0.5)]"
                                     )} />
                                 )}
                             </div>
@@ -888,8 +888,8 @@ export default function EmployeeDetailPage() {
                                                 className={cn(
                                                     "flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold text-xs transition-all active:scale-95 cursor-pointer",
                                                     employee.user.isActive
-                                                        ? "bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white"
-                                                        : "bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white"
+                                                        ? "bg-primary-subtle text-primary hover:bg-primary hover:text-white"
+                                                        : "bg-emerald-50 text-accent hover:bg-accent hover:text-white"
                                                 )}
                                             >
                                                 {employee.user.isActive ? <Lock size={14} /> : <Unlock size={14} />}
@@ -914,7 +914,7 @@ export default function EmployeeDetailPage() {
                                         </div>
                                         <button
                                             onClick={() => setShowCreateAccount(true)}
-                                            className="flex items-center justify-center gap-2 w-full py-4 bg-gradient-to-r from-pink-600 to-rose-600 text-white font-black rounded-2xl hover:shadow-xl hover:shadow-rose-500/20 transition-all active:scale-95 text-xs tracking-wider cursor-pointer"
+                                            className="flex items-center justify-center gap-2 w-full py-4 bg-gradient-to-r from-primary to-primary text-white font-black rounded-2xl hover:shadow-xl hover:shadow-primary-light/20 transition-all active:scale-95 text-xs tracking-wider cursor-pointer"
                                         >
                                             <UserPlus size={18} />
                                             TẠO TÀI KHOẢN
@@ -932,7 +932,7 @@ export default function EmployeeDetailPage() {
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
                     <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in zoom-in-95 duration-200 border border-slate-100">
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="w-12 h-12 rounded-xl bg-pink-100 flex items-center justify-center text-pink-600">
+                            <div className="w-12 h-12 rounded-xl bg-pink-100 flex items-center justify-center text-primary">
                                 <UserPlus size={24} />
                             </div>
                             <div>
@@ -948,7 +948,7 @@ export default function EmployeeDetailPage() {
                                     type="text"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-all font-bold text-slate-900"
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-primary-light/10 focus:border-primary-light outline-none transition-all font-bold text-slate-900"
                                     placeholder="Tên đăng nhập"
                                     autoComplete="off"
                                 />
@@ -959,7 +959,7 @@ export default function EmployeeDetailPage() {
                                     type="text"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-all font-bold text-slate-900"
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-primary-light/10 focus:border-primary-light outline-none transition-all font-bold text-slate-900"
                                     placeholder="Ít nhất 6 ký tự"
                                 />
                             </div>
@@ -968,7 +968,7 @@ export default function EmployeeDetailPage() {
                                 <select
                                     value={roleId}
                                     onChange={(e) => setRoleId(e.target.value)}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-all font-bold text-slate-900 appearance-none bg-no-repeat bg-[right_1rem_center] cursor-pointer"
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-primary-light/10 focus:border-primary-light outline-none transition-all font-bold text-slate-900 appearance-none bg-no-repeat bg-[right_1rem_center] cursor-pointer"
                                     style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7' /%3E%3C/svg%3E")`, backgroundSize: '1.5em' }}
                                 >
                                     <option value="">Chọn vai trò</option>
@@ -982,7 +982,7 @@ export default function EmployeeDetailPage() {
                             <button
                                 onClick={handleCreateAccount}
                                 disabled={saving}
-                                className="w-full py-4 bg-gradient-to-r from-pink-600 to-rose-600 text-white font-black rounded-xl hover:shadow-xl hover:shadow-rose-500/20 shadow-lg shadow-rose-500/10 transition-all disabled:opacity-50 active:scale-[0.98] cursor-pointer text-xs tracking-widest uppercase"
+                                className="w-full py-4 bg-gradient-to-r from-primary to-primary text-white font-black rounded-xl hover:shadow-xl hover:shadow-primary-light/20 shadow-lg shadow-primary-light/10 transition-all disabled:opacity-50 active:scale-[0.98] cursor-pointer text-xs tracking-widest uppercase"
                             >
                                 {saving ? 'ĐANG TẠO...' : 'TẠO TÀI KHOẢN MỚI'}
                             </button>
@@ -1016,7 +1016,7 @@ export default function EmployeeDetailPage() {
                                     type="text"
                                     value={newPassword}
                                     onChange={(e) => setNewPassword(e.target.value)}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all font-bold text-center text-slate-900 placeholder:text-slate-300"
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-primary-light/10 focus:border-primary-light outline-none transition-all font-bold text-center text-slate-900 placeholder:text-slate-300"
                                     placeholder="Ít nhất 6 ký tự"
                                     autoFocus
                                 />
@@ -1027,7 +1027,7 @@ export default function EmployeeDetailPage() {
                             <button
                                 onClick={handleResetPassword}
                                 disabled={saving}
-                                className="w-full py-4 bg-gradient-to-r from-rose-600 to-pink-600 text-white font-black rounded-xl hover:shadow-xl hover:shadow-rose-500/20 shadow-lg shadow-rose-500/10 transition-all disabled:opacity-50 active:scale-[0.98] cursor-pointer text-xs tracking-widest uppercase"
+                                className="w-full py-4 bg-gradient-to-r from-primary to-primary text-white font-black rounded-xl hover:shadow-xl hover:shadow-primary-light/20 shadow-lg shadow-primary-light/10 transition-all disabled:opacity-50 active:scale-[0.98] cursor-pointer text-xs tracking-widest uppercase"
                             >
                                 {saving ? 'ĐANG RESET...' : 'XÁC NHẬN RESET'}
                             </button>
@@ -1047,7 +1047,7 @@ export default function EmployeeDetailPage() {
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 font-inter">
                     <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in zoom-in-95 duration-200">
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="w-12 h-12 rounded-xl bg-pink-100 flex items-center justify-center text-pink-600">
+                            <div className="w-12 h-12 rounded-xl bg-pink-100 flex items-center justify-center text-primary">
                                 <Save size={24} />
                             </div>
                             <div>
@@ -1063,7 +1063,7 @@ export default function EmployeeDetailPage() {
                                     type="text"
                                     value={editUsername}
                                     onChange={(e) => setEditUsername(e.target.value)}
-                                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-all font-medium"
+                                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-4 focus:ring-primary-light/10 focus:border-primary-light outline-none transition-all font-medium"
                                     placeholder="Tên đăng nhập"
                                     autoComplete="off"
                                 />
@@ -1073,7 +1073,7 @@ export default function EmployeeDetailPage() {
                                 <select
                                     value={editRoleId}
                                     onChange={(e) => setEditRoleId(e.target.value)}
-                                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-all font-medium appearance-none bg-no-repeat bg-[right_1rem_center] cursor-pointer"
+                                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-4 focus:ring-primary-light/10 focus:border-primary-light outline-none transition-all font-medium appearance-none bg-no-repeat bg-[right_1rem_center] cursor-pointer"
                                     style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7' /%3E%3C/svg%3E")`, backgroundSize: '1.5em' }}
                                 >
                                     {roles.map(r => (
@@ -1087,7 +1087,7 @@ export default function EmployeeDetailPage() {
                             <button
                                 onClick={handleUpdateAccount}
                                 disabled={saving}
-                                className="flex-1 px-4 py-3 bg-gradient-to-r from-pink-600 to-rose-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-pink-500/20 disabled:opacity-50 transition-all active:scale-95 cursor-pointer"
+                                className="flex-1 px-4 py-3 bg-gradient-to-r from-primary to-primary text-white font-bold rounded-xl hover:shadow-lg hover:shadow-primary-light/20 disabled:opacity-50 transition-all active:scale-95 cursor-pointer"
                             >
                                 {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
                             </button>
@@ -1139,7 +1139,7 @@ function InfoField({
     return (
         <div className="flex flex-col gap-1.5 group/field">
             <div className="flex items-center gap-1.5">
-                {icon && <span className="text-slate-400 group-hover/field:text-rose-500 transition-colors">{icon}</span>}
+                {icon && <span className="text-slate-400 group-hover/field:text-primary-light transition-colors">{icon}</span>}
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</label>
             </div>
             {!isEditing ? (
@@ -1152,7 +1152,7 @@ function InfoField({
                             value={editValue || ''}
                             onChange={(e) => onChange?.(e.target.value)}
                             placeholder={placeholder}
-                            className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-100 rounded-xl focus:bg-white focus:border-rose-500 outline-none transition-all font-bold text-slate-900 text-xs"
+                            className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-100 rounded-xl focus:bg-white focus:border-primary-light outline-none transition-all font-bold text-slate-900 text-xs"
                         />
                     )}
                     {type === 'select' && (
@@ -1160,7 +1160,7 @@ function InfoField({
                             <select
                                 value={editValue || ''}
                                 onChange={(e) => onChange?.(e.target.value)}
-                                className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-100 rounded-xl focus:bg-white focus:border-rose-500 outline-none transition-all font-bold text-slate-900 text-xs appearance-none bg-no-repeat bg-[right_1rem_center] cursor-pointer"
+                                className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-100 rounded-xl focus:bg-white focus:border-primary-light outline-none transition-all font-bold text-slate-900 text-xs appearance-none bg-no-repeat bg-[right_1rem_center] cursor-pointer"
                                 style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7' /%3E%3C/svg%3E")`, backgroundSize: '1.2em' }}
                             >
                                 <option value="">- Chọn -</option>

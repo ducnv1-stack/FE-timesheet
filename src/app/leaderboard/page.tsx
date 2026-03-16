@@ -83,9 +83,9 @@ export default function LeaderboardPage() {
     const isManager = user?.role?.code === 'MANAGER';
 
     const getRankColor = (rank: number) => {
-        if (rank === 1) return 'bg-amber-500 text-white border-amber-400 shadow-lg shadow-amber-200/50';
+        if (rank === 1) return 'bg-warning-light text-white border-amber-400 shadow-lg shadow-amber-200/50';
         if (rank === 2) return 'bg-slate-400 text-white border-slate-300 shadow-lg shadow-slate-200/50';
-        if (rank === 3) return 'bg-amber-600 text-white border-amber-500 shadow-lg shadow-amber-200/50';
+        if (rank === 3) return 'bg-warning text-white border-warning-light shadow-lg shadow-amber-200/50';
         return 'bg-white text-slate-400 border-slate-100';
     };
 
@@ -121,7 +121,7 @@ export default function LeaderboardPage() {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div className="space-y-2">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-rose-100 rounded-xl text-rose-600 shadow-sm">
+                        <div className="p-2 bg-primary-subtle rounded-xl text-primary shadow-sm">
                             <Trophy size={24} />
                         </div>
                         <h1 className="text-3xl font-black tracking-tight text-slate-800">Bảng Xếp Hạng</h1>
@@ -171,10 +171,10 @@ export default function LeaderboardPage() {
             {/* Personalized Performance & Motivational Card */}
             {user && (data?.employee?.[metric]?.rank || data?.employee?.[`branch${metric.charAt(0).toUpperCase() + metric.slice(1)}`]?.rank) && (
                 <div className="bg-white rounded-[32px] p-6 border border-slate-200 shadow-xl shadow-slate-200/40 relative overflow-hidden group">
-                    <div className="absolute right-0 top-0 w-32 h-32 bg-rose-50 rounded-full blur-3xl -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700" />
+                    <div className="absolute right-0 top-0 w-32 h-32 bg-primary-subtle rounded-full blur-3xl -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700" />
 
                     <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
-                        <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-rose-500 to-rose-600 flex items-center justify-center text-white shadow-lg shadow-rose-200 group-hover:rotate-6 transition-transform">
+                        <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary-light to-primary flex items-center justify-center text-white shadow-lg shadow-primary-subtle group-hover:rotate-6 transition-transform">
                             <Trophy size={40} />
                         </div>
 
@@ -184,7 +184,7 @@ export default function LeaderboardPage() {
                             </h3>
                             <div className="flex flex-wrap justify-center md:justify-start gap-3">
                                 {data.employee[metric]?.rank && (
-                                    <span className="px-4 py-2 bg-amber-50 text-amber-600 border border-amber-100 rounded-2xl text-xs font-black flex items-center gap-2">
+                                    <span className="px-4 py-2 bg-amber-50 text-warning border border-amber-100 rounded-2xl text-xs font-black flex items-center gap-2">
                                         <Trophy size={14} />
                                         Top {data.employee[metric].rank} Server
                                     </span>
@@ -196,7 +196,7 @@ export default function LeaderboardPage() {
                                     </span>
                                 )}
                             </div>
-                            <p className="text-sm font-bold text-rose-600 italic">
+                            <p className="text-sm font-bold text-primary italic">
                                 {data.employee[metric]?.rank === 1
                                     ? "Xin chúc mừng bạn đang Top 1 Server, hãy giữ vững phong độ tuyệt vời này nhé!"
                                     : data.employee[metric]?.rank <= 3
@@ -232,7 +232,7 @@ export default function LeaderboardPage() {
                             className={cn(
                                 "flex items-center gap-1.5 px-3 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-black transition-all whitespace-nowrap cursor-pointer",
                                 activeTab === 'employees'
-                                    ? "bg-white text-rose-600 shadow-sm"
+                                    ? "bg-white text-primary shadow-sm"
                                     : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
                             )}
                         >
@@ -244,7 +244,7 @@ export default function LeaderboardPage() {
                             className={cn(
                                 "flex items-center gap-1.5 px-3 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-black transition-all whitespace-nowrap cursor-pointer",
                                 activeTab === 'branches'
-                                    ? "bg-white text-rose-600 shadow-sm"
+                                    ? "bg-white text-primary shadow-sm"
                                     : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
                             )}
                         >
@@ -269,7 +269,7 @@ export default function LeaderboardPage() {
                             onClick={() => setMetric('completed')}
                             className={cn(
                                 "flex-1 sm:flex-initial px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-all whitespace-nowrap cursor-pointer",
-                                metric === 'completed' ? "bg-rose-600 text-white shadow-lg" : "text-slate-500 hover:bg-slate-50"
+                                metric === 'completed' ? "bg-primary text-white shadow-lg" : "text-slate-500 hover:bg-slate-50"
                             )}
                         >
                             <DollarSign size={14} />
@@ -283,7 +283,7 @@ export default function LeaderboardPage() {
                     {loading && (
                         <div className="absolute inset-0 bg-white/80 backdrop-blur-[1px] flex items-center justify-center z-10 transition-all duration-300">
                             <div className="flex flex-col items-center gap-4">
-                                <div className="w-12 h-12 border-4 border-rose-100 border-t-rose-600 rounded-full animate-spin" />
+                                <div className="w-12 h-12 border-4 border-primary-subtle border-t-primary rounded-full animate-spin" />
                                 <p className="text-sm font-black text-slate-800 animate-pulse">Đang thu thập dữ liệu...</p>
                             </div>
                         </div>
@@ -385,12 +385,12 @@ export default function LeaderboardPage() {
                                                 <div className="flex flex-col items-end">
                                                     <p className={cn(
                                                         "text-xs font-black",
-                                                        metric === 'sales' ? "text-blue-600" : "text-rose-600"
+                                                        metric === 'sales' ? "text-blue-600" : "text-primary"
                                                     )}>
                                                         {formatCurrency(item.amount)}
                                                     </p>
                                                     <div className="flex items-center gap-1 mt-0.5">
-                                                        <ArrowUpRight size={8} className="text-emerald-500" />
+                                                        <ArrowUpRight size={8} className="text-accent-light" />
                                                         <p className="text-[9px] text-slate-400 font-bold">Tháng này</p>
                                                     </div>
                                                 </div>
@@ -398,8 +398,8 @@ export default function LeaderboardPage() {
                                             <td className="px-3 py-2 whitespace-nowrap text-center">
                                                 <div className="flex justify-center">
                                                     {item.rank <= 3 ? (
-                                                        <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full text-[9px] font-black flex items-center gap-1">
-                                                            <div className="w-1 h-1 bg-emerald-600 rounded-full animate-pulse" />
+                                                        <span className="px-2 py-0.5 bg-emerald-50 text-accent border border-emerald-100 rounded-full text-[9px] font-black flex items-center gap-1">
+                                                            <div className="w-1 h-1 bg-accent rounded-full animate-pulse" />
                                                             Vượt trội
                                                         </span>
                                                     ) : (
@@ -430,18 +430,18 @@ export default function LeaderboardPage() {
             </div>
 
             {/* Footer Motivational Quote */}
-            <div className="bg-gradient-to-r from-rose-700 to-rose-500 p-6 md:p-8 rounded-[32px] text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl shadow-rose-200/50 overflow-hidden relative group">
+            <div className="bg-gradient-to-r from-primary-light to-primary-light p-6 md:p-8 rounded-[32px] text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl shadow-primary-subtle/50 overflow-hidden relative group">
                 <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-700" />
 
                 <div className="space-y-2 text-center md:text-left relative z-10 w-full overflow-hidden">
                     <h3 className="text-lg md:text-xl font-black tracking-tight truncate">Đừng bao giờ dừng nỗ lực!</h3>
-                    <p className="text-rose-50 opacity-90 text-[11px] md:text-xs max-w-lg italic font-medium leading-relaxed">
+                    <p className="text-primary-subtle opacity-90 text-[11px] md:text-xs max-w-lg italic font-medium leading-relaxed">
                         "Mỗi bước tiến hôm nay là viên gạch cho thành công ngày mai."
                     </p>
                 </div>
                 <button
                     onClick={() => router.push('/dashboard')}
-                    className="flex items-center justify-center gap-1.5 bg-white text-rose-600 px-5 py-3 rounded-xl font-black text-[11px] hover:scale-105 active:scale-95 transition-all shadow-xl shadow-black/10 relative z-10 shrink-0 w-full md:w-auto cursor-pointer"
+                    className="flex items-center justify-center gap-1.5 bg-white text-primary px-5 py-3 rounded-xl font-black text-[11px] hover:scale-105 active:scale-95 transition-all shadow-xl shadow-black/10 relative z-10 shrink-0 w-full md:w-auto cursor-pointer"
                 >
                     Về Dashboard
                     <ChevronRight size={14} />

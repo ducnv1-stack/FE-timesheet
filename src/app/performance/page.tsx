@@ -86,7 +86,7 @@ function MultiSelect({
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 flex items-center justify-between hover:border-rose-500 transition-all shadow-sm outline-none"
+                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 flex items-center justify-between hover:border-primary-light transition-all shadow-sm outline-none"
             >
                 <span className="truncate">
                     {isAllSelected ? placeholder : `${label} (${selected.length})`}
@@ -108,7 +108,7 @@ function MultiSelect({
                             }}
                             className={cn(
                                 "flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer text-xs font-bold transition-colors",
-                                isAllSelected ? "bg-rose-50 text-rose-600" : "hover:bg-slate-50 text-slate-600"
+                                isAllSelected ? "bg-primary-subtle text-primary" : "hover:bg-slate-50 text-slate-600"
                             )}
                         >
                             <span>Tất cả {label}</span>
@@ -121,7 +121,7 @@ function MultiSelect({
                                 onClick={() => toggleOption(opt.value)}
                                 className={cn(
                                     "flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer text-xs font-medium transition-colors mb-0.5",
-                                    selected.includes(opt.value) ? "bg-rose-50 text-rose-600 font-bold" : "hover:bg-slate-50 text-slate-600"
+                                    selected.includes(opt.value) ? "bg-primary-subtle text-primary font-bold" : "hover:bg-slate-50 text-slate-600"
                                 )}
                             >
                                 <span>{opt.label}</span>
@@ -341,7 +341,7 @@ export default function PerformancePage() {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
                     <div>
                         <h1 className="text-xl font-black text-slate-900 flex items-center gap-2">
-                            <TrendingUp className="text-rose-500" size={20} />
+                            <TrendingUp className="text-primary-light" size={20} />
                             {isManager ? 'Báo Cáo Doanh Số Chi Nhánh' : 'Báo Cáo Doanh Số & Thưởng'}
                         </h1>
                         <p className="text-slate-400 font-medium text-xs">
@@ -373,7 +373,7 @@ export default function PerformancePage() {
 
                         <button
                             onClick={handleExportExcel}
-                            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-bold transition-all shadow-lg shadow-emerald-100 active:scale-95 whitespace-nowrap cursor-pointer"
+                            className="flex items-center gap-2 bg-accent hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-bold transition-all shadow-lg shadow-emerald-100 active:scale-95 whitespace-nowrap cursor-pointer"
                         >
                             <FileSpreadsheet size={16} />
                             Xuất Excel
@@ -383,13 +383,13 @@ export default function PerformancePage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-3 relative z-50">
                     <div className="relative group col-span-1 md:col-span-1">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-rose-500 transition-colors" size={18} />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary-light transition-colors" size={18} />
                         <input
                             type="text"
                             placeholder="Tìm tên nhân viên..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full h-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl shadow-sm outline-none focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 transition-all text-sm font-medium"
+                            className="w-full h-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl shadow-sm outline-none focus:ring-4 focus:ring-primary-light/10 focus:border-primary-light transition-all text-sm font-medium"
                         />
                     </div>
 
@@ -467,8 +467,8 @@ export default function PerformancePage() {
                                             <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase border-r border-slate-200">Chi nhánh</th>
                                             <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase border-r border-slate-200">Chức vụ</th>
                                             <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-center border-r border-slate-200">Tổng đơn</th>
-                                            <th className="px-2 py-2 text-[10px] font-black text-rose-600 uppercase text-right border-r border-slate-200 bg-rose-50/50">Doanh số bán</th>
-                                            <th className="px-2 py-2 text-[10px] font-black text-emerald-600 uppercase text-right border-r border-slate-200 bg-emerald-50/50">DS hoàn thành</th>
+                                            <th className="px-2 py-2 text-[10px] font-black text-primary uppercase text-right border-r border-slate-200 bg-primary-subtle/50">Doanh số bán</th>
+                                            <th className="px-2 py-2 text-[10px] font-black text-accent uppercase text-right border-r border-slate-200 bg-emerald-50/50">DS hoàn thành</th>
                                             {!isManager && <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Hoa hồng</th>}
                                             {!isManager && <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Thưởng nóng</th>}
                                             {!isManager && <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Tiền ship</th>}
@@ -476,8 +476,8 @@ export default function PerformancePage() {
                                             <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-center border-r border-slate-200">Tỷ lệ</th>
                                             {!isManager && <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Mốc thưởng</th>}
                                             {!isManager && <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-center border-r border-slate-200">Số công</th>}
-                                            {!isManager && <th className="px-2 py-2 text-[10px] font-black text-amber-600 uppercase text-right border-r border-slate-200">Chuyên cần</th>}
-                                            {!isManager && <th className="px-2 py-2 text-[10px] font-black text-emerald-600 uppercase text-right border-r border-slate-200">Phụ cấp</th>}
+                                            {!isManager && <th className="px-2 py-2 text-[10px] font-black text-warning uppercase text-right border-r border-slate-200">Chuyên cần</th>}
+                                            {!isManager && <th className="px-2 py-2 text-[10px] font-black text-accent uppercase text-right border-r border-slate-200">Phụ cấp</th>}
                                             {!isManager && <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Lương CB</th>}
                                             {!isManager && <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-right border-r border-slate-200">Thực nhận</th>}
                                             {!isManager && <th className="px-2 py-2 text-[10px] font-black text-slate-600 uppercase text-center">Trạng thái</th>}
@@ -496,7 +496,7 @@ export default function PerformancePage() {
                                                     <td className="px-2 py-2 text-center border-r border-slate-100 font-bold text-slate-400">{idx + 1}</td>
                                                     <td className="px-2 py-2 border-r border-slate-100">
                                                         <div className="flex justify-center">
-                                                            <div className="w-8 h-8 rounded-full overflow-hidden bg-rose-50 border border-slate-100 shrink-0 flex items-center justify-center">
+                                                            <div className="w-8 h-8 rounded-full overflow-hidden bg-primary-subtle border border-slate-100 shrink-0 flex items-center justify-center">
                                                                 {(r.avatarUrl && !imageErrors[`perf-${r.employeeId}`]) ? (
                                                                     <img
                                                                         src={getFullImageUrl(r.avatarUrl)!}
@@ -505,17 +505,17 @@ export default function PerformancePage() {
                                                                         onError={() => handleImageError(`perf-${r.employeeId}`)}
                                                                     />
                                                                 ) : (
-                                                                    <div className="w-full h-full flex items-center justify-center text-rose-500 font-black text-[10px] uppercase">
+                                                                    <div className="w-full h-full flex items-center justify-center text-primary-light font-black text-[10px] uppercase">
                                                                         {r.fullName.split(' ').pop()?.charAt(0)}
                                                                     </div>
                                                                 )}
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td className="px-2 py-2 whitespace-nowrap font-bold border-r border-slate-100 group-hover:bg-rose-50/50 transition-colors">
+                                                    <td className="px-2 py-2 whitespace-nowrap font-bold border-r border-slate-100 group-hover:bg-primary-subtle/50 transition-colors">
                                                         <button
                                                             onClick={() => setSelectedEmployeeForOrders(r)}
-                                                            className="text-slate-900 group-hover:text-rose-700 hover:underline cursor-pointer text-left"
+                                                            className="text-slate-900 group-hover:text-primary-light hover:underline cursor-pointer text-left"
                                                         >
                                                             {r.fullName}
                                                         </button>
@@ -526,24 +526,24 @@ export default function PerformancePage() {
                                                         <div className="font-bold text-slate-700">{r.totalOrders}</div>
                                                         {!isManager && r.position?.toLowerCase().includes('telesale') && <div className="text-[9px] text-slate-400 font-bold uppercase">(System)</div>}
                                                     </td>
-                                                    <td className="px-2 py-2 text-right border-r border-slate-100 bg-rose-50/10">
-                                                        <div className="font-bold text-rose-600 whitespace-nowrap">{formatCurrency(r.grossRevenue)}</div>
+                                                    <td className="px-2 py-2 text-right border-r border-slate-100 bg-primary-subtle/10">
+                                                        <div className="font-bold text-primary whitespace-nowrap">{formatCurrency(r.grossRevenue)}</div>
                                                     </td>
                                                     <td className="px-2 py-2 text-right border-r border-slate-100 bg-emerald-50/10">
-                                                        <div className="font-bold text-emerald-600 whitespace-nowrap">{formatCurrency(r.totalRevenue)}</div>
+                                                        <div className="font-bold text-accent whitespace-nowrap">{formatCurrency(r.totalRevenue)}</div>
                                                         {!isManager && r.position?.toLowerCase().includes('telesale') && <div className="text-[9px] text-slate-400 font-bold uppercase">(Hệ thống)</div>}
-                                                        {!isManager && (r.position?.toLowerCase().includes('manager') || r.position?.toLowerCase().includes('quản lý')) && <div className="text-[9px] text-amber-500 font-bold uppercase">(Chi nhánh)</div>}
+                                                        {!isManager && (r.position?.toLowerCase().includes('manager') || r.position?.toLowerCase().includes('quản lý')) && <div className="text-[9px] text-warning-light font-bold uppercase">(Chi nhánh)</div>}
                                                         {!isManager && r.position?.toLowerCase().includes('marketing') && <div className="text-[9px] text-slate-400 font-bold uppercase">(Hệ thống)</div>}
                                                         {!isManager && ['lái xe', 'nvgh', 'driver'].some(p => r.position?.toLowerCase().includes(p)) && <div className="text-[9px] text-blue-500 font-bold uppercase">(Phí ship)</div>}
                                                     </td>
                                                     {!isManager && <td className="px-2 py-2 text-right font-medium text-slate-600 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.commission)}</td>}
-                                                    {!isManager && <td className="px-2 py-2 text-right font-medium text-amber-600 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.hotBonus)}</td>}
+                                                    {!isManager && <td className="px-2 py-2 text-right font-medium text-warning whitespace-nowrap border-r border-slate-100">{formatCurrency(r.hotBonus)}</td>}
                                                     {!isManager && <td className="px-2 py-2 text-right font-medium text-blue-600 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.shippingFee)}</td>}
                                                     <td className="px-2 py-2 text-right text-slate-500 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.lowPriceValue)}</td>
                                                     <td className="px-2 py-2 text-center border-r border-slate-100">
                                                         <span className={cn(
                                                             "px-1 py-0.5 rounded text-[9px] font-black",
-                                                            r.lowPriceRatio >= 20 ? "bg-red-50 text-red-600" : "bg-emerald-50 text-emerald-600"
+                                                            r.lowPriceRatio >= 20 ? "bg-red-50 text-red-600" : "bg-emerald-50 text-accent"
                                                         )}>
                                                             {r.lowPriceRatio.toFixed(1)}%
                                                         </span>
@@ -570,7 +570,7 @@ export default function PerformancePage() {
                                                                 {r.actualWorkingDays || 0} <span className="text-slate-400 text-[10px]">/ {r.effectiveStandardDays || 27}</span>
                                                             </div>
                                                             {r.effectiveBaseSalary > 0 && r.effectiveBaseSalary !== r.baseSalary && (
-                                                                <div className="text-[9px] text-rose-500 font-bold mt-0.5 line-through decoration-rose-300">
+                                                                <div className="text-[9px] text-primary-light font-bold mt-0.5 line-through decoration-rose-300">
                                                                     {formatCurrency(r.effectiveBaseSalary)}
                                                                 </div>
                                                             )}
@@ -581,14 +581,14 @@ export default function PerformancePage() {
                                                             )}
                                                         </td>
                                                     )}
-                                                    {!isManager && <td className="px-2 py-2 text-right font-medium text-amber-600 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.diligentSalary)}</td>}
-                                                    {!isManager && <td className="px-2 py-2 text-right font-medium text-emerald-600 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.allowance)}</td>}
+                                                    {!isManager && <td className="px-2 py-2 text-right font-medium text-warning whitespace-nowrap border-r border-slate-100">{formatCurrency(r.diligentSalary)}</td>}
+                                                    {!isManager && <td className="px-2 py-2 text-right font-medium text-accent whitespace-nowrap border-r border-slate-100">{formatCurrency(r.allowance)}</td>}
                                                     {!isManager && <td className="px-2 py-2 text-right font-bold text-slate-700 whitespace-nowrap border-r border-slate-100">{formatCurrency(r.baseSalary)}</td>}
                                                     {!isManager && (
                                                         <td className="px-2 py-2 text-right border-r border-slate-100">
                                                             <div className={cn(
                                                                 "font-black whitespace-nowrap text-[12px]",
-                                                                r.isPenalty && !r.isClemency ? "text-red-600" : "text-emerald-600"
+                                                                r.isPenalty && !r.isClemency ? "text-red-600" : "text-accent"
                                                             )}>
                                                                 {formatCurrency(r.netIncome)}
                                                             </div>
@@ -598,7 +598,7 @@ export default function PerformancePage() {
                                                         <td className="px-2 py-2 text-center">
                                                             <div className="flex justify-center">
                                                                 {r.isClemency ? (
-                                                                    <div className="flex items-center gap-1 bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded-full text-[9px] font-black whitespace-nowrap border border-amber-200">
+                                                                    <div className="flex items-center gap-1 bg-amber-50 text-warning px-1.5 py-0.5 rounded-full text-[9px] font-black whitespace-nowrap border border-amber-200">
                                                                         <CheckCircle2 size={10} /> Khoan hồng
                                                                     </div>
                                                                 ) : r.isPenalty ? (
@@ -606,7 +606,7 @@ export default function PerformancePage() {
                                                                         <AlertTriangle size={10} /> Bị phạt
                                                                     </div>
                                                                 ) : r.totalRevenue > 0 ? (
-                                                                    <div className="flex items-center gap-1 bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded-full text-[9px] font-black whitespace-nowrap border border-emerald-200">
+                                                                    <div className="flex items-center gap-1 bg-emerald-50 text-accent px-1.5 py-0.5 rounded-full text-[9px] font-black whitespace-nowrap border border-emerald-200">
                                                                         <CheckCircle2 size={10} /> Hợp lệ
                                                                     </div>
                                                                 ) : (
@@ -632,18 +632,18 @@ export default function PerformancePage() {
                                         <tfoot className="sticky bottom-0 z-30 shadow-[0_-2px_4px_rgba(0,0,0,0.05)]">
                                             <tr className="bg-slate-50 border-t-2 border-slate-300 text-[11px] font-black text-slate-700">
                                                 <td colSpan={5} className="px-4 py-3 text-left bg-slate-100 border-r border-slate-200 uppercase tracking-wider">TỔNG CỘNG</td>
-                                                <td className="px-2 py-3 text-center border-r border-slate-200 text-rose-600">{totals.totalOrders}</td>
-                                                <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 font-black text-rose-600 bg-rose-50/50">{formatCurrency(totals.grossRevenue)}</td>
-                                                <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 font-black text-emerald-600 bg-emerald-50/50">{formatCurrency(totals.totalRevenue)}</td>
+                                                <td className="px-2 py-3 text-center border-r border-slate-200 text-primary">{totals.totalOrders}</td>
+                                                <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 font-black text-primary bg-primary-subtle/50">{formatCurrency(totals.grossRevenue)}</td>
+                                                <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 font-black text-accent bg-emerald-50/50">{formatCurrency(totals.totalRevenue)}</td>
                                                 {!isManager && <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 text-indigo-600">{formatCurrency(totals.commission)}</td>}
-                                                {!isManager && <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 text-amber-600">{formatCurrency(totals.hotBonus)}</td>}
+                                                {!isManager && <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 text-warning">{formatCurrency(totals.hotBonus)}</td>}
                                                 {!isManager && <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 text-blue-600">{formatCurrency(totals.shippingFee)}</td>}
                                                 <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 text-slate-500">{formatCurrency(totals.lowPriceValue)}</td>
                                                 <td className="px-2 py-3 border-r border-slate-200 bg-slate-100/30"></td>
                                                 {!isManager && <td className="px-2 py-3 border-r border-slate-200 bg-slate-100/30"></td>}
                                                 {!isManager && <td className="px-2 py-3 border-r border-slate-200 bg-slate-100/30"></td>}
-                                                {!isManager && <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 text-amber-600">{formatCurrency(totals.diligentSalary)}</td>}
-                                                {!isManager && <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 text-emerald-600">{formatCurrency(totals.allowance)}</td>}
+                                                {!isManager && <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 text-warning">{formatCurrency(totals.diligentSalary)}</td>}
+                                                {!isManager && <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 text-accent">{formatCurrency(totals.allowance)}</td>}
                                                 {!isManager && <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 text-slate-700">{formatCurrency(totals.baseSalary)}</td>}
                                                 {!isManager && <td className="px-2 py-3 text-right whitespace-nowrap border-r border-slate-200 text-emerald-700 bg-emerald-50/30">{formatCurrency(totals.netIncome)}</td>}
                                                 {!isManager && <td className="px-2 py-3 bg-slate-100/30"></td>}
@@ -670,11 +670,11 @@ export default function PerformancePage() {
                         </div>
                         <div className="bg-white p-6 rounded-2xl border border-slate-200">
                             <h4 className="font-black text-slate-800 text-sm mb-3 flex items-center gap-2">
-                                <TrendingUp size={16} className="text-emerald-500" />
+                                <TrendingUp size={16} className="text-accent-light" />
                                 CHẾ ĐỘ KHOAN HỒNG (110%)
                             </h4>
                             <p className="text-sm text-slate-500 leading-relaxed font-medium">
-                                Nếu doanh số thực tế đạt trên <span className="bg-emerald-50 text-emerald-600 px-1 rounded font-bold">110%</span> so với mốc thưởng đang xét, nhân viên sẽ được xóa phạt và hưởng <span className="font-bold">100%</span> thưởng mốc.
+                                Nếu doanh số thực tế đạt trên <span className="bg-emerald-50 text-accent px-1 rounded font-bold">110%</span> so với mốc thưởng đang xét, nhân viên sẽ được xóa phạt và hưởng <span className="font-bold">100%</span> thưởng mốc.
                             </p>
                         </div>
                     </div>

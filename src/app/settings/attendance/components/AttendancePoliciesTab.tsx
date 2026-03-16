@@ -350,12 +350,12 @@ export default function AttendancePoliciesTab() {
                         placeholder="Tìm kiếm chính sách..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-sm"
+                        className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-accent-light transition-all text-sm"
                     />
                 </div>
                 <button
                     onClick={() => handleOpenForm()}
-                    className="flex items-center justify-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold text-sm rounded-xl shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer"
+                    className="flex items-center justify-center gap-2 px-6 py-2.5 bg-gradient-to-r from-accent to-teal-600 text-white font-semibold text-sm rounded-xl shadow-lg shadow-accent-light/20 hover:shadow-accent-light/40 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer"
                 >
                     <Plus className="w-4 h-4" />
                     Tạo chính sách mới
@@ -365,7 +365,7 @@ export default function AttendancePoliciesTab() {
             {/* List View */}
             {loading ? (
                 <div className="py-20 flex flex-col items-center gap-4">
-                    <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
+                    <Loader2 className="w-10 h-10 text-accent-light animate-spin" />
                     <p className="text-slate-400 font-semibold animate-pulse">Đang tải chính sách...</p>
                 </div>
             ) : filteredPolicies.length === 0 ? (
@@ -382,13 +382,13 @@ export default function AttendancePoliciesTab() {
                             <div className="flex items-start justify-between mb-4">
                                 <div className="space-y-1 min-w-0 flex-1">
                                     <div className="flex items-center gap-2">
-                                        <h3 className="text-lg md:text-xl font-bold text-slate-900 group-hover:text-emerald-600 transition-colors tracking-tight truncate">{policy.name}</h3>
+                                        <h3 className="text-lg md:text-xl font-bold text-slate-900 group-hover:text-accent transition-colors tracking-tight truncate">{policy.name}</h3>
                                         {policy.configData?.theme && (
                                             <span className={cn(
                                                 "px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest",
                                                 policy.configData.theme === 'FIXED_TIME' ? "bg-blue-50 text-blue-600 border border-blue-100" :
-                                                policy.configData.theme === 'FLEXIBLE' ? "bg-amber-50 text-amber-600 border border-amber-100" :
-                                                "bg-rose-50 text-rose-600 border border-rose-100"
+                                                policy.configData.theme === 'FLEXIBLE' ? "bg-amber-50 text-warning border border-amber-100" :
+                                                "bg-primary-subtle text-primary border border-primary-subtle"
                                             )}>
                                                 {policy.configData.theme === 'FIXED_TIME' ? 'Hành chính' :
                                                  policy.configData.theme === 'FLEXIBLE' ? 'Linh hoạt' : 'Theo dõi thô'}
@@ -398,15 +398,15 @@ export default function AttendancePoliciesTab() {
                                     <p className="text-xs md:text-sm text-slate-400 font-medium line-clamp-2 md:line-clamp-1">{policy.note || 'Không có mô tả'}</p>
                                 </div>
                                 <div className="flex gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                                    <button onClick={() => handleOpenForm(policy)} className="p-2 hover:bg-emerald-50 text-emerald-600 rounded-xl transition-all cursor-pointer" title="Sửa"><Edit2 className="w-4 h-4 md:w-[18px] md:h-[18px]" /></button>
-                                    <button onClick={() => setDeleteConfirm({ isOpen: true, id: policy.id })} className="p-2 hover:bg-rose-50 text-rose-600 rounded-xl transition-all cursor-pointer" title="Xóa"><Trash2 className="w-4 h-4 md:w-[18px] md:h-[18px]" /></button>
+                                    <button onClick={() => handleOpenForm(policy)} className="p-2 hover:bg-emerald-50 text-accent rounded-xl transition-all cursor-pointer" title="Sửa"><Edit2 className="w-4 h-4 md:w-[18px] md:h-[18px]" /></button>
+                                    <button onClick={() => setDeleteConfirm({ isOpen: true, id: policy.id })} className="p-2 hover:bg-primary-subtle text-primary rounded-xl transition-all cursor-pointer" title="Xóa"><Trash2 className="w-4 h-4 md:w-[18px] md:h-[18px]" /></button>
                                 </div>
                             </div>
 
                             {/* Summary Info */}
                             <div className="grid grid-cols-2 gap-3 md:gap-4 mb-6">
                                 <div className="p-3 md:p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-2 md:gap-3">
-                                    <div className="p-2 bg-emerald-100 text-emerald-600 rounded-lg shrink-0">
+                                    <div className="p-2 bg-emerald-100 text-accent rounded-lg shrink-0">
                                         <MapPin className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                     </div>
                                     <div className="min-w-0">
@@ -439,7 +439,7 @@ export default function AttendancePoliciesTab() {
                                             <span className="text-[8px] md:text-[10px] font-bold text-slate-400">{label}</span>
                                             <div className={cn(
                                                 "w-full h-1 md:h-1.5 rounded-full",
-                                                dayData?.isOff ? "bg-slate-200" : "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]"
+                                                dayData?.isOff ? "bg-slate-200" : "bg-accent-light shadow-[0_0_8px_rgba(16,185,129,0.3)]"
                                             )} />
                                         </div>
                                     )
@@ -448,7 +448,7 @@ export default function AttendancePoliciesTab() {
 
                             <button
                                 onClick={() => handleOpenForm(policy)}
-                                className="w-full mt-6 py-3 bg-slate-50 text-slate-400 group-hover:bg-emerald-600 group-hover:text-white rounded-xl font-bold text-[10px] tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer"
+                                className="w-full mt-6 py-3 bg-slate-50 text-slate-400 group-hover:bg-accent group-hover:text-white rounded-xl font-bold text-[10px] tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer"
                             >
                                 Xem chi tiết & thiết lập
                                 <ChevronRight size={14} />
@@ -471,7 +471,7 @@ export default function AttendancePoliciesTab() {
                         {/* Drawer Header */}
                         <div className="shrink-0 z-20 bg-white border-b border-slate-100 px-4 md:px-8 py-4 md:py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                             <div className="flex items-center gap-3 md:gap-4">
-                                <div className="p-2 md:p-3 bg-emerald-50 text-emerald-600 rounded-xl md:rounded-2xl shrink-0">
+                                <div className="p-2 md:p-3 bg-emerald-50 text-accent rounded-xl md:rounded-2xl shrink-0">
                                     <Settings className="w-5 h-5 md:w-6 md:h-6" />
                                 </div>
                                 <div className="min-w-0">
@@ -503,7 +503,7 @@ export default function AttendancePoliciesTab() {
                             {/* General Section */}
                             <section className="bg-white rounded-[1.5rem] md:rounded-[2.5rem] p-5 md:p-8 border border-slate-200 shadow-sm space-y-6">
                                 <h3 className="text-sm font-bold text-slate-800 tracking-tight flex items-center gap-2">
-                                    <Info size={16} className="text-emerald-500" />
+                                    <Info size={16} className="text-accent-light" />
                                     Thông tin chung
                                 </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -513,7 +513,7 @@ export default function AttendancePoliciesTab() {
                                             type="text" 
                                             value={formData.name}
                                             onChange={e => setFormData({...formData, name: e.target.value})}
-                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all font-bold text-sm"
+                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-accent-light outline-none transition-all font-bold text-sm"
                                             placeholder="VD: Nhóm Sale Hà Nội, VP Miền Trung..."
                                         />
                                     </div>
@@ -523,7 +523,7 @@ export default function AttendancePoliciesTab() {
                                             type="text" 
                                             value={formData.note || ''}
                                             onChange={e => setFormData({...formData, note: e.target.value})}
-                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-sm"
+                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-accent-light outline-none transition-all text-sm"
                                             placeholder="Ghi chú về nhóm áp dụng..."
                                         />
                                     </div>
@@ -567,7 +567,7 @@ export default function AttendancePoliciesTab() {
                                                     className={cn(
                                                         "p-4 rounded-2xl border-2 text-left transition-all",
                                                         formData.configData?.theme === mode.id 
-                                                            ? "border-emerald-500 bg-emerald-50 shadow-md" 
+                                                            ? "border-accent-light bg-emerald-50 shadow-md" 
                                                             : "border-slate-100 bg-slate-50 hover:border-slate-200"
                                                     )}
                                                 >
@@ -587,7 +587,7 @@ export default function AttendancePoliciesTab() {
                             <section className="bg-white rounded-[1.5rem] md:rounded-[2.5rem] p-5 md:p-8 border border-slate-200 shadow-sm space-y-6">
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-sm font-bold text-slate-800 tracking-tight flex items-center gap-2">
-                                        <MapPin size={16} className="text-rose-500" />
+                                        <MapPin size={16} className="text-primary-light" />
                                         Cấu hình GPS (Ghi đè chi nhánh)
                                     </h3>
                                     <div className="flex items-center gap-4">
@@ -603,13 +603,13 @@ export default function AttendancePoliciesTab() {
                                                         days: (formData.days || []).map(d => ({ ...d, requireGPS: e.target.checked }))
                                                     })}
                                                 />
-                                                <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+                                                <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-accent-light"></div>
                                             </div>
-                                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider group-hover:text-emerald-600">Bắt buộc GPS</span>
+                                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider group-hover:text-accent">Bắt buộc GPS</span>
                                         </label>
                                         <button 
                                             onClick={getCurrentLocation}
-                                            className="text-[10px] font-bold text-emerald-600 border border-emerald-200 px-3 py-1 rounded-full hover:bg-emerald-50 transition-all cursor-pointer"
+                                            className="text-[10px] font-bold text-accent border border-emerald-200 px-3 py-1 rounded-full hover:bg-emerald-50 transition-all cursor-pointer"
                                         >
                                             Lấy tọa độ hiện tại
                                         </button>
@@ -622,7 +622,7 @@ export default function AttendancePoliciesTab() {
                                             type="number" step="any"
                                             value={formData.latitude || ''}
                                             onChange={e => setFormData({...formData, latitude: e.target.value ? parseFloat(e.target.value) : null})}
-                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-rose-500 transition-all font-mono text-xs"
+                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-primary-light transition-all font-mono text-xs"
                                             placeholder="21.0285..."
                                         />
                                     </div>
@@ -632,7 +632,7 @@ export default function AttendancePoliciesTab() {
                                             type="number" step="any"
                                             value={formData.longitude || ''}
                                             onChange={e => setFormData({...formData, longitude: e.target.value ? parseFloat(e.target.value) : null})}
-                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-rose-500 transition-all font-mono text-xs"
+                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-primary-light transition-all font-mono text-xs"
                                             placeholder="105.8542..."
                                         />
                                     </div>
@@ -642,13 +642,13 @@ export default function AttendancePoliciesTab() {
                                             type="number"
                                             value={formData.radius || ''}
                                             onChange={e => setFormData({...formData, radius: e.target.value ? parseInt(e.target.value) : null})}
-                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-rose-500 transition-all font-bold text-sm"
+                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-primary-light transition-all font-bold text-sm"
                                             placeholder="200"
                                         />
                                     </div>
                                 </div>
                                 <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 flex items-start gap-4">
-                                    <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                                    <AlertCircle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
                                     <p className="text-xs text-amber-700 leading-relaxed font-medium">
                                         <strong>Lưu ý:</strong> Nếu để trống các giá trị GPS ở đây, hệ thống sẽ sử dụng tọa độ mặc định của chi nhánh mà nhân viên đang công tác. Nếu bạn muốn cấu hình điểm chấm công riêng cho nhóm này (ví dụ: công trình, kho riêng), hãy điền tọa độ vào đây.
                             </p>
@@ -658,7 +658,7 @@ export default function AttendancePoliciesTab() {
                             {/* Advanced Calculation Rules */}
                             <section className="bg-white rounded-[1.5rem] md:rounded-[2.5rem] p-5 md:p-8 border border-slate-200 shadow-sm space-y-6">
                                 <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
-                                    <Zap size={16} className="text-amber-500" />
+                                    <Zap size={16} className="text-warning-light" />
                                     Quy tắc tính toán (Engine Rules)
                                 </h3>
                                 
@@ -667,7 +667,7 @@ export default function AttendancePoliciesTab() {
                                         {/* Late / Early Rules */}
                                         <div className="space-y-4">
                                             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-                                                <div className="p-1 px-2 bg-rose-50 text-rose-600 rounded-lg text-[10px] font-bold italic">Vào trễ - Về sớm</div>
+                                                <div className="p-1 px-2 bg-primary-subtle text-primary rounded-lg text-[10px] font-bold italic">Vào trễ - Về sớm</div>
                                             </div>
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div className="space-y-2">
@@ -685,7 +685,7 @@ export default function AttendancePoliciesTab() {
                                                                 }
                                                             }
                                                         })}
-                                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-sm shadow-sm"
+                                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-accent-light transition-all font-bold text-sm shadow-sm"
                                                     />
                                                 </div>
                                                 <div className="space-y-2">
@@ -703,7 +703,7 @@ export default function AttendancePoliciesTab() {
                                                                 }
                                                             }
                                                         })}
-                                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-sm shadow-sm"
+                                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-accent-light transition-all font-bold text-sm shadow-sm"
                                                     />
                                                 </div>
                                             </div>
@@ -758,18 +758,18 @@ export default function AttendancePoliciesTab() {
                                         {/* Lunch Break Config */}
                                         <div className="space-y-4 pt-4 border-t border-slate-100">
                                             <div className="flex items-center justify-between pb-2">
-                                                <div className="p-1 px-2 bg-amber-50 text-amber-600 rounded-lg text-[10px] font-bold italic">Nghỉ trưa mặc định</div>
+                                                <div className="p-1 px-2 bg-amber-50 text-warning rounded-lg text-[10px] font-bold italic">Nghỉ trưa mặc định</div>
                                                 <label className="flex items-center gap-2 cursor-pointer group">
                                                     <input 
                                                         type="checkbox"
-                                                        className="w-4 h-4 rounded border-slate-300 text-amber-600 focus:ring-amber-500 cursor-pointer"
+                                                        className="w-4 h-4 rounded border-slate-300 text-warning focus:ring-warning-light cursor-pointer"
                                                         checked={(formData.days || []).every(d => (d as any).hasBreak ?? true)}
                                                         onChange={e => {
                                                             const newDays = (formData.days || []).map(d => ({ ...d, hasBreak: e.target.checked }));
                                                             setFormData({ ...formData, days: newDays });
                                                         }}
                                                     />
-                                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider group-hover:text-amber-600">Bật tất cả</span>
+                                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider group-hover:text-warning">Bật tất cả</span>
                                                 </label>
                                             </div>
                                             <div className="flex items-center gap-3">
@@ -785,7 +785,7 @@ export default function AttendancePoliciesTab() {
                                                                 schedule: { ...formData.configData?.schedule, break_start: e.target.value, is_working_day: true, start_time: '08:00', end_time: '17:30', total_standard_hours: 8 }
                                                             }
                                                         })}
-                                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-xs shadow-sm"
+                                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-accent-light transition-all font-bold text-xs shadow-sm"
                                                     />
                                                 </div>
                                                 <div className="flex-1 space-y-2">
@@ -800,7 +800,7 @@ export default function AttendancePoliciesTab() {
                                                                 schedule: { ...formData.configData?.schedule, break_end: e.target.value, is_working_day: true, start_time: '08:00', end_time: '17:30', total_standard_hours: 8 }
                                                             }
                                                         })}
-                                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-xs shadow-sm"
+                                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-accent-light transition-all font-bold text-xs shadow-sm"
                                                     />
                                                 </div>
                                             </div>
@@ -810,7 +810,7 @@ export default function AttendancePoliciesTab() {
                                     {/* Engine Advanced Rules - Compact */}
                                     <div className="space-y-4 md:pl-8 md:border-l border-slate-100">
                                         <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-                                            <div className="p-1 px-2 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-bold italic">Thông số Engine</div>
+                                            <div className="p-1 px-2 bg-emerald-50 text-accent rounded-lg text-[10px] font-bold italic">Thông số Engine</div>
                                         </div>
                                         <div className="grid grid-cols-1 gap-3">
                                             {[
@@ -833,7 +833,7 @@ export default function AttendancePoliciesTab() {
                                                                 }
                                                             }
                                                         })}
-                                                        className="w-5 h-5 rounded-lg border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                                                        className="w-5 h-5 rounded-lg border-slate-300 text-accent focus:ring-accent-light"
                                                     />
                                                 </label>
                                             ))}
@@ -855,7 +855,7 @@ export default function AttendancePoliciesTab() {
                                         </div>
                                         <input 
                                             type="checkbox"
-                                            className="w-6 h-6 rounded-xl border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                                            className="w-6 h-6 rounded-xl border-slate-300 text-accent focus:ring-accent-light cursor-pointer"
                                             checked={formData.configData?.overtime_rules?.is_allowed ?? true}
                                             onChange={e => setFormData({
                                                 ...formData,
@@ -887,7 +887,7 @@ export default function AttendancePoliciesTab() {
                                                         }
                                                     }
                                                 })}
-                                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-sm shadow-sm"
+                                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-accent-light transition-all font-bold text-sm shadow-sm"
                                             />
                                         </div>
                                         <div className="space-y-2">
@@ -909,7 +909,7 @@ export default function AttendancePoliciesTab() {
                                                         days: (formData.days || []).map(d => ({ ...d, otMultiplier: val }))
                                                     });
                                                 }}
-                                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-sm shadow-sm"
+                                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-accent-light transition-all font-bold text-sm shadow-sm"
                                             />
                                         </div>
                                     </div>
@@ -930,18 +930,18 @@ export default function AttendancePoliciesTab() {
                                                     }
                                                 }
                                             })}
-                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-sm shadow-sm"
+                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-accent-light transition-all font-bold text-sm shadow-sm"
                                         />
                                     </div>
 
                                     <div className="flex items-center justify-between p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100">
                                         <div className="space-y-0.5">
                                             <span className="block text-xs font-semibold text-emerald-700">Thứ 7 & CN chỉ tính OT</span>
-                                            <span className="block text-[10px] text-emerald-600/70">Mọi giờ làm cuối tuần đều là tăng ca</span>
+                                            <span className="block text-[10px] text-accent/70">Mọi giờ làm cuối tuần đều là tăng ca</span>
                                         </div>
                                         <input 
                                             type="checkbox"
-                                            className="w-4 h-4 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                                            className="w-4 h-4 rounded border-emerald-300 text-accent focus:ring-accent-light cursor-pointer"
                                             checked={formData.configData?.overtime_rules?.all_weekend_is_ot ?? false}
                                             onChange={e => setFormData({
                                                 ...formData,
@@ -975,7 +975,7 @@ export default function AttendancePoliciesTab() {
                                                 <div className="flex items-center gap-3 w-full lg:w-44 shrink-0">
                                                     <div className={cn(
                                                         "w-10 h-10 rounded-xl flex items-center justify-center font-bold text-base shadow-inner",
-                                                        day.isOff ? "bg-slate-100 text-slate-300" : "bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-emerald-200"
+                                                        day.isOff ? "bg-slate-100 text-slate-300" : "bg-gradient-to-br from-emerald-400 to-accent text-white shadow-emerald-200"
                                                     )}>
                                                         {DAYS_OF_WEEK.find(d => d.value === day.dayOfWeek)?.label.split(' ')[1]}
                                                     </div>
@@ -988,7 +988,7 @@ export default function AttendancePoliciesTab() {
                                                             onClick={() => handleDayChange(idx, 'isOff', !day.isOff)}
                                                             className={cn(
                                                                 "mt-0.5 px-2 py-0.5 rounded-full text-[8px] font-semibold tracking-tight transition-all",
-                                                                day.isOff ? "bg-slate-200 text-slate-500" : "bg-emerald-100 text-emerald-600"
+                                                                day.isOff ? "bg-slate-200 text-slate-500" : "bg-emerald-100 text-accent"
                                                             )}
                                                         >
                                                             {day.isOff ? "Nghỉ" : "Làm"}
@@ -1000,30 +1000,30 @@ export default function AttendancePoliciesTab() {
                                                     <div className="flex-1 grid grid-cols-2 lg:grid-cols-6 gap-3 w-full">
                                                         <div className="space-y-1">
                                                             <label className="text-[9px] font-semibold text-slate-400 tracking-tight flex items-center gap-1">
-                                                                <Clock size={10} className="text-emerald-500" /> Vào
+                                                                <Clock size={10} className="text-accent-light" /> Vào
                                                             </label>
                                                             <input 
                                                                 type="time" 
                                                                 value={day.startTime}
                                                                 onChange={e => handleDayChange(idx, 'startTime', e.target.value)}
-                                                                className="w-full px-2 py-1.5 bg-slate-50 border border-slate-100 rounded-xl focus:ring-1 focus:ring-emerald-500 outline-none font-bold text-xs"
+                                                                className="w-full px-2 py-1.5 bg-slate-50 border border-slate-100 rounded-xl focus:ring-1 focus:ring-accent-light outline-none font-bold text-xs"
                                                             />
                                                         </div>
                                                         <div className="space-y-1">
                                                             <label className="text-[9px] font-semibold text-slate-400 tracking-tight flex items-center gap-1">
-                                                                <Clock size={10} className="text-rose-500" /> Ra
+                                                                <Clock size={10} className="text-primary-light" /> Ra
                                                             </label>
                                                             <input 
                                                                 type="time" 
                                                                 value={day.endTime}
                                                                 onChange={e => handleDayChange(idx, 'endTime', e.target.value)}
-                                                                className="w-full px-2 py-1.5 bg-slate-50 border border-slate-100 rounded-xl focus:ring-1 focus:ring-emerald-500 outline-none font-bold text-xs"
+                                                                className="w-full px-2 py-1.5 bg-slate-50 border border-slate-100 rounded-xl focus:ring-1 focus:ring-accent-light outline-none font-bold text-xs"
                                                             />
                                                         </div>
                                                         <div className="md:col-span-2 space-y-1">
                                                             <div className="flex items-center justify-start gap-2">
                                                                     <label className="text-[9px] font-semibold text-slate-400 tracking-tight flex items-center gap-1 cursor-pointer">
-                                                                        <Zap size={10} className="text-amber-500" /> Nghỉ trưa
+                                                                        <Zap size={10} className="text-warning-light" /> Nghỉ trưa
                                                                     <input 
                                                                         type="checkbox" 
                                                                         checked={(day as any).hasBreak ?? true}
@@ -1061,7 +1061,7 @@ export default function AttendancePoliciesTab() {
                                                                 type="number" step="0.1"
                                                                 value={day.otMultiplier}
                                                                 onChange={e => handleDayChange(idx, 'otMultiplier', e.target.value)}
-                                                                className="w-full px-2 py-1.5 bg-slate-50 border border-slate-100 rounded-xl focus:ring-1 focus:ring-emerald-500 outline-none font-bold text-xs"
+                                                                className="w-full px-2 py-1.5 bg-slate-50 border border-slate-100 rounded-xl focus:ring-1 focus:ring-accent-light outline-none font-bold text-xs"
                                                             />
                                                         </div>
                                                         <div className="flex items-center lg:items-end justify-start gap-3 flex-wrap h-full lg:col-span-1">
@@ -1070,9 +1070,9 @@ export default function AttendancePoliciesTab() {
                                                                     type="checkbox" 
                                                                     checked={day.requireGPS}
                                                                     onChange={e => handleDayChange(idx, 'requireGPS', e.target.checked)}
-                                                                    className="w-3.5 h-3.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                                                                    className="w-3.5 h-3.5 rounded border-slate-300 text-accent focus:ring-accent-light cursor-pointer"
                                                                 />
-                                                                <span className="text-[9px] font-semibold text-slate-500 tracking-tight group-hover:text-emerald-600">GPS</span>
+                                                                <span className="text-[9px] font-semibold text-slate-500 tracking-tight group-hover:text-accent">GPS</span>
                                                             </label>
                                                             <label className="flex items-center gap-1.5 cursor-pointer group">
                                                                 <input 

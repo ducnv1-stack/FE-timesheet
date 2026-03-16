@@ -454,7 +454,7 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
                     <button
                         onClick={handleSave}
                         disabled={loading}
-                        className="flex items-center gap-2 px-6 py-2 bg-rose-700 hover:bg-rose-800 disabled:bg-slate-300 text-white rounded font-bold shadow-md shadow-rose-200 transition-all active:scale-95 cursor-pointer text-sm"
+                        className="flex items-center gap-2 px-6 py-2 bg-primary hover:bg-primary-light disabled:bg-slate-300 text-white rounded font-bold shadow-md shadow-primary-subtle transition-all active:scale-95 cursor-pointer text-sm"
                     >
                         {loading ? 'Đang lưu...' : <><Save size={16} /> Lưu Đơn</>}
                     </button>
@@ -463,8 +463,8 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
 
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-3 xl:gap-4 print:block">
                 <div id="invoice-paper" className="w-full max-w-[210mm] bg-white border-2 p-4 md:p-6 shadow-xl shadow-slate-200/50 relative overflow-hidden print:shadow-none print:p-[10mm] print:border-none print:m-auto transition-all text-slate-900">
-                    <div className="absolute top-0 left-0 w-full h-1.5 bg-rose-700 print:hidden"></div>
-                    <div className="hidden print:block w-full h-3 bg-rose-700 mb-8"></div>
+                    <div className="absolute top-0 left-0 w-full h-1.5 bg-primary print:hidden"></div>
+                    <div className="hidden print:block w-full h-3 bg-primary mb-8"></div>
 
                     <div className="flex justify-between items-start mb-8">
                         <div className="space-y-4">
@@ -493,21 +493,21 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
 
                     {/* Old Order Info Section */}
                     {(order.isUpgrade) && (
-                        <div className="mb-6 p-4 border-2 border-dashed border-rose-200 rounded-xl bg-rose-50/30 no-print print:hidden">
+                        <div className="mb-6 p-4 border-2 border-dashed border-primary-subtle rounded-xl bg-primary-subtle/30 no-print print:hidden">
                             <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4">
-                                <h3 className="text-xs font-black uppercase text-rose-800 flex items-center gap-2">
+                                <h3 className="text-xs font-black uppercase text-primary flex items-center gap-2">
                                     <Info size={14} className="shrink-0" /> Thông tin đơn cũ (Pre-system)
                                 </h3>
                                 <div className="flex flex-wrap items-center gap-2">
                                     {order.oldOrderCode && (
-                                        <span className="px-2 py-0.5 bg-rose-200 text-rose-900 text-[10px] font-black rounded-full border border-rose-300 whitespace-nowrap">
+                                        <span className="px-2 py-0.5 bg-primary-subtle text-primary text-[10px] font-black rounded-full border border-primary-light whitespace-nowrap">
                                             #{order.oldOrderCode}
                                         </span>
                                     )}
                                     <button
                                         type="button"
                                         onClick={() => setSearchModalOpen(true)}
-                                        className="px-3 py-1 bg-rose-600 text-white text-[10px] font-bold rounded hover:bg-rose-700 transition-all flex items-center gap-1 shrink-0 whitespace-nowrap"
+                                        className="px-3 py-1 bg-primary text-white text-[10px] font-bold rounded hover:bg-primary-light transition-all flex items-center gap-1 shrink-0 whitespace-nowrap"
                                     >
                                         <ShoppingCart size={12} className="shrink-0" /> Tìm đơn cũ
                                     </button>
@@ -519,7 +519,7 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
                                     <select
                                         value={order.oldOrderProductName || ''}
                                         onChange={(e) => setOrder({ ...order, oldOrderProductName: e.target.value })}
-                                        className="w-full bg-white border border-slate-200 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-rose-200 text-sm"
+                                        className="w-full bg-white border border-slate-200 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-primary-subtle text-sm"
                                     >
                                         <option value="">-- Chọn sản phẩm cũ --</option>
                                         {products.map(p => <option key={p.id} value={p.name}>{p.name}</option>)}
@@ -535,7 +535,7 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
                                             setOldOrderAmountDisplay(formatted);
                                             setOrder({ ...order, oldOrderAmount: parseNumber(formatted) });
                                         }}
-                                        className="w-full bg-white border border-slate-200 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-rose-200"
+                                        className="w-full bg-white border border-slate-200 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-primary-subtle"
                                         placeholder="Ví dụ: 12.000.000"
                                     />
                                 </div>
@@ -546,8 +546,8 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
                                         onChange={(val) => setOrder({ ...order, oldOrderDate: val })}
                                     />
                                 </div>
-                                <div className="md:col-span-2 mt-2 pt-2 border-t border-rose-100">
-                                    <p className="text-[10px] text-rose-600 font-bold italic mb-3">* Nhập thông tin khách hàng từ đơn cũ để tự động điền sang đơn mới</p>
+                                <div className="md:col-span-2 mt-2 pt-2 border-t border-primary-subtle">
+                                    <p className="text-[10px] text-primary-light font-bold italic mb-3">* Nhập thông tin khách hàng từ đơn cũ để tự động điền sang đơn mới</p>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-black text-slate-500 uppercase">Họ tên khách</label>
@@ -562,7 +562,7 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
                                                         customerName: val // One-way sync
                                                     });
                                                 }}
-                                                className="w-full bg-white border border-slate-200 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-rose-200"
+                                                className="w-full bg-white border border-slate-200 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-primary-subtle"
                                                 placeholder="Nguyễn Văn A"
                                             />
                                         </div>
@@ -579,7 +579,7 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
                                                         customerPhone: val // One-way sync
                                                     });
                                                 }}
-                                                className="w-full bg-white border border-slate-200 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-rose-200"
+                                                className="w-full bg-white border border-slate-200 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-primary-subtle"
                                                 placeholder="098..."
                                             />
                                         </div>
@@ -618,7 +618,7 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
                                                         customerCardNumber: val // One-way sync
                                                     });
                                                 }}
-                                                className="w-full bg-white border border-slate-200 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-rose-200"
+                                                className="w-full bg-white border border-slate-200 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-primary-subtle"
                                             />
                                         </div>
                                         <div className="space-y-1">

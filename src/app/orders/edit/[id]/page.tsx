@@ -427,7 +427,7 @@ export default function EditOrderPage() {
     if (fetching) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-700"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-light"></div>
             </div>
         );
     }
@@ -445,7 +445,7 @@ export default function EditOrderPage() {
                     <button
                         onClick={handleSave}
                         disabled={loading}
-                        className="flex items-center gap-2 px-6 py-2 bg-rose-700 hover:bg-rose-800 disabled:bg-slate-300 text-white rounded-lg font-bold shadow-md shadow-rose-200 transition-all active:scale-95 cursor-pointer text-sm"
+                        className="flex items-center gap-2 px-6 py-2 bg-primary-light hover:bg-primary disabled:bg-slate-300 text-white rounded-lg font-bold shadow-md shadow-primary-subtle transition-all active:scale-95 cursor-pointer text-sm"
                     >
                         {loading ? 'Đang cập nhật...' : <><Save size={16} /> Lưu Thay Đổi</>}
                     </button>
@@ -454,8 +454,8 @@ export default function EditOrderPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-3 xl:gap-4 print:block">
                 <div id="invoice-paper" className="bg-white border-2 border-slate-800 p-4 md:p-6 shadow-2xl relative print:p-[10mm] print:shadow-none transition-all">
-                    <div className="absolute top-0 left-0 w-full h-1.5 bg-rose-700 print:hidden"></div>
-                    <div className="hidden print:block w-full h-3 bg-rose-700 mb-8"></div>
+                    <div className="absolute top-0 left-0 w-full h-1.5 bg-primary-light print:hidden"></div>
+                    <div className="hidden print:block w-full h-3 bg-primary-light mb-8"></div>
 
                     {/* Brand Header */}
                     <div className="flex justify-between items-start mb-8">
@@ -473,7 +473,7 @@ export default function EditOrderPage() {
                         </div>
                         <div className="text-right">
                             <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-1">Ohari</h1>
-                            <p className="text-emerald-600 font-black text-sm uppercase tracking-widest">Hệ thống ERP</p>
+                            <p className="text-accent font-black text-sm uppercase tracking-widest">Hệ thống ERP</p>
                         </div>
                     </div>
 
@@ -485,30 +485,30 @@ export default function EditOrderPage() {
 
                     {/* Upgrade Info Banner (Optional) */}
                     {order.isUpgrade && (
-                        <div className="mb-6 bg-rose-50 border-2 border-rose-200 rounded-xl p-4 md:p-5 animate-in slide-in-from-top-2 duration-500 shadow-sm">
+                        <div className="mb-6 bg-primary-subtle border-2 border-primary-subtle rounded-xl p-4 md:p-5 animate-in slide-in-from-top-2 duration-500 shadow-sm">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
                                 <div className="flex items-center gap-2">
-                                    <span className="px-2.5 py-1 bg-rose-600 text-white text-[10px] font-black rounded uppercase tracking-wider">Đơn hàng nâng cấp</span>
+                                    <span className="px-2.5 py-1 bg-primary text-white text-[10px] font-black rounded uppercase tracking-wider">Đơn hàng nâng cấp</span>
                                     {order.oldOrderCode && (
-                                        <span className="text-xs font-bold text-rose-900 bg-rose-100 px-2 py-0.5 rounded">Mã gốc: #{order.oldOrderCode}</span>
+                                        <span className="text-xs font-bold text-rose-900 bg-primary-subtle px-2 py-0.5 rounded">Mã gốc: #{order.oldOrderCode}</span>
                                     )}
                                 </div>
                                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Thông tin sản phẩm cũ đã thu hồi</div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-xs">
-                                <div className="flex justify-between items-center border-b border-rose-100/50 py-1.5">
+                                <div className="flex justify-between items-center border-b border-primary-subtle/50 py-1.5">
                                     <span className="text-slate-500 font-medium">Sản phẩm cũ:</span>
                                     <span className="font-bold text-slate-800">{order.oldOrderProductName || '---'}</span>
                                 </div>
-                                <div className="flex justify-between items-center border-b border-rose-100/50 py-1.5">
+                                <div className="flex justify-between items-center border-b border-primary-subtle/50 py-1.5">
                                     <span className="text-slate-500 font-medium">Giá trị thu hồi:</span>
-                                    <span className="font-bold text-rose-600">{formatCurrency(Number(order.oldOrderAmount || 0))}</span>
+                                    <span className="font-bold text-primary">{formatCurrency(Number(order.oldOrderAmount || 0))}</span>
                                 </div>
-                                <div className="flex justify-between items-center border-b border-rose-100/50 py-1.5">
+                                <div className="flex justify-between items-center border-b border-primary-subtle/50 py-1.5">
                                     <span className="text-slate-500 font-medium">Ngày mua cũ:</span>
                                     <span className="font-bold text-slate-800">{order.oldOrderDate ? formatDate(order.oldOrderDate) : '---'}</span>
                                 </div>
-                                <div className="flex justify-between items-center border-b border-rose-100/50 py-1.5">
+                                <div className="flex justify-between items-center border-b border-primary-subtle/50 py-1.5">
                                     <span className="text-slate-500 font-medium">Khách hàng cũ:</span>
                                     <span className="font-bold text-slate-800">{order.oldOrderCustomerName || '---'}</span>
                                 </div>
@@ -619,7 +619,7 @@ export default function EditOrderPage() {
                                             });
                                         }
                                     }}
-                                    className="bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[10px] font-bold text-slate-700 w-full outline-none focus:ring-1 focus:ring-rose-200 cursor-pointer"
+                                    className="bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[10px] font-bold text-slate-700 w-full outline-none focus:ring-1 focus:ring-primary-subtle cursor-pointer"
                                 >
                                     <option value="none">-- Không --</option>
                                     <option value="external">🚚 Lái xe ngoài (+{(() => {
@@ -721,12 +721,12 @@ export default function EditOrderPage() {
                             <span className="text-right font-black text-sm text-slate-900">{formatCurrency(totalAmount)}</span>
                         </div>
                         {totalGiftAmount > 0 && (
-                            <div className="grid grid-cols-[120px_160px] border-b border-slate-200 py-1 text-rose-600 font-bold italic">
+                            <div className="grid grid-cols-[120px_160px] border-b border-slate-200 py-1 text-primary font-bold italic">
                                 <span className="text-slate-600">Quà tặng:</span>
                                 <span className="text-right">{formatCurrency(totalGiftAmount)}</span>
                             </div>
                         )}
-                        <div className="grid grid-cols-[120px_160px] border-b border-slate-200 py-1 text-emerald-600">
+                        <div className="grid grid-cols-[120px_160px] border-b border-slate-200 py-1 text-accent">
                             <span className="font-bold">Đã thanh toán:</span>
                             <span className="text-right font-bold">{formatCurrency(paidAmount)}</span>
                         </div>
@@ -771,7 +771,7 @@ export default function EditOrderPage() {
                                 </div>
                                 {isInstallment && order.isPaymentConfirmed && (
                                     <div className="mt-2 p-2 bg-emerald-50 border border-emerald-100 rounded flex justify-between items-center">
-                                        <span className="text-[10px] font-black text-emerald-600 uppercase">✓ Kế toán xác nhận:</span>
+                                        <span className="text-[10px] font-black text-accent uppercase">✓ Kế toán xác nhận:</span>
                                         <span className="text-[10px] font-bold text-emerald-800 italic">
                                             {order.confirmer?.fullName || 'Hệ thống'} - {order.confirmedAt ? formatDate(order.confirmedAt) : '---'}
                                         </span>
@@ -842,8 +842,8 @@ export default function EditOrderPage() {
                             </div>
                             {totalGiftAmount > 0 && (
                                 <div className="flex justify-between items-center pb-3 border-b border-slate-100 italic">
-                                    <span className="text-rose-500 font-bold text-[10px] uppercase tracking-tight">Chi phí quà tặng</span>
-                                    <span className="font-bold text-sm text-rose-600">
+                                    <span className="text-primary-light font-bold text-[10px] uppercase tracking-tight">Chi phí quà tặng</span>
+                                    <span className="font-bold text-sm text-primary">
                                         -{formatCurrency(totalGiftAmount)}
                                     </span>
                                 </div>
@@ -851,7 +851,7 @@ export default function EditOrderPage() {
                             {/* Commission Row */}
                             <div className="flex justify-between items-center pb-3 border-b border-slate-100">
                                 <span className="text-slate-500 font-bold text-[11px] uppercase tracking-tight">{commissionLabel}</span>
-                                <span className="font-black text-lg text-emerald-600">
+                                <span className="font-black text-lg text-accent">
                                     {(() => {
                                         const totalComm = order.items.reduce((sum, item) => {
                                             const p = products.find(prod => prod.id === item.productId);
@@ -925,9 +925,9 @@ export default function EditOrderPage() {
 
                                 return (
                                     <div className="space-y-3">
-                                        <div className="flex justify-between items-center bg-rose-50 p-1.5 rounded border border-rose-100">
-                                            <span className="text-rose-700 font-black uppercase text-[9px] tracking-tight">Thưởng nóng</span>
-                                            <span className="font-black text-base text-rose-800">
+                                        <div className="flex justify-between items-center bg-primary-subtle p-1.5 rounded border border-primary-subtle">
+                                            <span className="text-primary-light font-black uppercase text-[9px] tracking-tight">Thưởng nóng</span>
+                                            <span className="font-black text-base text-primary">
                                                 {(() => {
                                                     const othersTotal = order.splits.reduce((sum, s) => sum + s.splitAmount, 0);
                                                     const myPercent = totalAmount > 0 ? (totalAmount - othersTotal) / totalAmount : 1;
@@ -985,11 +985,11 @@ export default function EditOrderPage() {
                     />
 
                     {/* Instructions Section */}
-                    <div className="bg-rose-50 border border-rose-100 rounded-xl p-4">
+                    <div className="bg-primary-subtle border border-primary-subtle rounded-xl p-4">
                         <h4 className="font-bold text-rose-900 text-sm mb-2 flex items-center gap-2">
                             <Info size={16} /> Hướng dẫn
                         </h4>
-                        <p className="text-xs text-rose-800 leading-relaxed">
+                        <p className="text-xs text-primary leading-relaxed">
                             Nhập thông tin khách hàng và sản phẩm vào hóa đơn.
                             Sử dụng các mục Chia doanh số và Thanh toán để hoàn tất nghiệp vụ.
                         </p>

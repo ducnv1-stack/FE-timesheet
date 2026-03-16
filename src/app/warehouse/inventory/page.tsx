@@ -119,7 +119,7 @@ export default function InventoryPage() {
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div className="space-y-1">
                     <h1 className="text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-4">
-                        <div className="p-3 bg-rose-50 rounded-2xl text-rose-600">
+                        <div className="p-3 bg-primary-subtle rounded-2xl text-primary">
                             <Warehouse size={28} />
                         </div>
                         Tồn kho chi tiết
@@ -129,11 +129,11 @@ export default function InventoryPage() {
 
                 <div className="flex flex-col sm:flex-row gap-3">
                     <div className="relative group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-rose-500 transition-colors" size={18} />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary-light transition-colors" size={18} />
                         <input
                             type="text"
                             placeholder="Tìm tên sản phẩm..."
-                            className="pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl w-full sm:w-64 shadow-sm focus:ring-4 focus:ring-rose-500/10 focus:border-rose-400 outline-none transition-all font-bold text-sm"
+                            className="pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl w-full sm:w-64 shadow-sm focus:ring-4 focus:ring-primary-light/10 focus:border-rose-400 outline-none transition-all font-bold text-sm"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -142,7 +142,7 @@ export default function InventoryPage() {
                     <select
                         value={selectedBranch}
                         onChange={(e) => setSelectedBranch(e.target.value)}
-                        className="px-6 py-3 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-4 focus:ring-rose-500/10 focus:border-rose-400 outline-none font-bold text-sm transition-all"
+                        className="px-6 py-3 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-4 focus:ring-primary-light/10 focus:border-rose-400 outline-none font-bold text-sm transition-all"
                     >
                         <option value="ALL">Tất cả kho bãi</option>
                         {branches.map(b => (
@@ -154,7 +154,7 @@ export default function InventoryPage() {
 
                     <button
                         onClick={() => setIsImportModalOpen(true)}
-                        className="px-6 py-3 bg-rose-600 text-white rounded-2xl font-bold tracking-tight hover:bg-rose-700 transition-all shadow-xl shadow-rose-200 active:scale-95 flex items-center gap-2 cursor-pointer"
+                        className="px-6 py-3 bg-primary text-white rounded-2xl font-bold tracking-tight hover:bg-primary-light transition-all shadow-xl shadow-primary-subtle active:scale-95 flex items-center gap-2 cursor-pointer"
                     >
                         <Plus size={20} />
                         Nhập kho
@@ -164,14 +164,14 @@ export default function InventoryPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4">
-                    <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl"><Package size={24} /></div>
+                    <div className="p-3 bg-primary-subtle text-primary rounded-2xl"><Package size={24} /></div>
                     <div>
                         <p className="text-[10px] font-bold text-slate-400 tracking-widest leading-none mb-1">Tổng sản phẩm</p>
                         <p className="text-2xl font-bold text-slate-900">{Object.keys(totalByProduct).length}</p>
                     </div>
                 </div>
                 <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4">
-                    <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><TrendingUp size={24} /></div>
+                    <div className="p-3 bg-emerald-50 text-accent rounded-2xl"><TrendingUp size={24} /></div>
                     <div>
                         <p className="text-[10px] font-bold text-slate-400 tracking-widest leading-none mb-1">Tổng tồn kho</p>
                         <p className="text-2xl font-bold text-slate-900">
@@ -180,7 +180,7 @@ export default function InventoryPage() {
                     </div>
                 </div>
                 <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4">
-                    <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl"><AlertTriangle size={24} /></div>
+                    <div className="p-3 bg-primary-subtle text-primary rounded-2xl"><AlertTriangle size={24} /></div>
                     <div>
                         <p className="text-[10px] font-bold text-slate-400 tracking-widest leading-none mb-1">Sắp hết hàng</p>
                         <p className="text-2xl font-bold text-slate-900">
@@ -228,7 +228,7 @@ export default function InventoryPage() {
                                     <tr key={item.id} className="hover:bg-blue-50/30 transition-colors group">
                                         <td className="px-8 py-6">
                                             <div className="flex items-center gap-4 focus:outline-none">
-                                                <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-rose-50 group-hover:text-rose-600 transition-all font-bold">
+                                                <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-primary-subtle group-hover:text-primary transition-all font-bold">
                                                     {item.product.name.charAt(0)}
                                                 </div>
                                                 <div>
@@ -241,7 +241,7 @@ export default function InventoryPage() {
                                             <div className="flex items-center gap-2">
                                                 <div className={cn(
                                                     "w-8 h-8 rounded-lg flex items-center justify-center",
-                                                    item.branch.branchType === 'KHO_TONG' ? "bg-slate-100 text-slate-600" : "bg-rose-50 text-rose-600"
+                                                    item.branch.branchType === 'KHO_TONG' ? "bg-slate-100 text-slate-600" : "bg-primary-subtle text-primary"
                                                 )}>
                                                     {item.branch.branchType === 'KHO_TONG' ? <Warehouse size={16} /> : <Building2 size={16} />}
                                                 </div>
@@ -251,26 +251,26 @@ export default function InventoryPage() {
                                         <td className="px-8 py-6 text-center">
                                             <span className={cn(
                                                 "inline-flex items-center justify-center min-w-[3rem] px-3 py-1 rounded-full font-bold text-sm transition-all",
-                                                item.quantity <= 2 ? "bg-rose-100 text-rose-600" : 
-                                                item.quantity <= 10 ? "bg-amber-100 text-amber-600" : 
-                                                "bg-emerald-100 text-emerald-600"
+                                                item.quantity <= 2 ? "bg-primary-subtle text-primary" : 
+                                                item.quantity <= 10 ? "bg-amber-100 text-warning" : 
+                                                "bg-emerald-100 text-accent"
                                             )}>
                                                 {item.quantity}
                                             </span>
                                         </td>
                                         <td className="px-8 py-6">
                                             {item.quantity <= 2 ? (
-                                                <span className="flex items-center gap-1.5 text-rose-600 text-xs font-bold tracking-tight">
+                                                <span className="flex items-center gap-1.5 text-primary text-xs font-bold tracking-tight">
                                                     <AlertTriangle size={14} /> Sắp hết hàng
                                                 </span>
                                             ) : (
-                                                <span className="flex items-center gap-1.5 text-emerald-600 text-xs font-bold tracking-tight">
+                                                <span className="flex items-center gap-1.5 text-accent text-xs font-bold tracking-tight">
                                                     <CheckCircle2 size={14} /> Sẵn sàng
                                                 </span>
                                             )}
                                         </td>
                                         <td className="px-8 py-6 text-right font-outfit">
-                                            <button className="p-2 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer">
+                                            <button className="p-2 text-slate-400 hover:text-primary transition-colors cursor-pointer">
                                                 <ArrowRightLeft size={20} />
                                             </button>
                                         </td>
@@ -288,7 +288,7 @@ export default function InventoryPage() {
                     <div className="bg-white rounded-[2.5rem] shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-10 space-y-8 animate-in zoom-in-95" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between">
                             <h2 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
-                                <Plus className="text-rose-600" />
+                                <Plus className="text-primary" />
                                 Nhập kho sản phẩm
                             </h2>
                             <button onClick={() => setIsImportModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-2xl transition-all cursor-pointer"><X /></button>
@@ -298,7 +298,7 @@ export default function InventoryPage() {
                             <div className="space-y-2">
                                 <label className="text-xs font-bold text-slate-400 tracking-widest px-1">Sản phẩm</label>
                                 <select 
-                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:bg-white focus:ring-4 focus:ring-rose-500/10 focus:border-rose-400 outline-none transition-all"
+                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:bg-white focus:ring-4 focus:ring-primary-light/10 focus:border-rose-400 outline-none transition-all"
                                     value={importData.productId}
                                     onChange={e => setImportData({ ...importData, productId: e.target.value })}
                                 >
@@ -311,7 +311,7 @@ export default function InventoryPage() {
                             <div className="space-y-2">
                                 <label className="text-xs font-bold text-slate-400 tracking-widest px-1">Kho nhận</label>
                                 <select 
-                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:bg-white focus:ring-4 focus:ring-rose-500/10 focus:border-rose-400 outline-none transition-all"
+                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:bg-white focus:ring-4 focus:ring-primary-light/10 focus:border-rose-400 outline-none transition-all"
                                     value={importData.branchId}
                                     onChange={e => setImportData({ ...importData, branchId: e.target.value })}
                                 >
@@ -325,7 +325,7 @@ export default function InventoryPage() {
                                 <label className="text-xs font-bold text-slate-400 tracking-widest px-1">Số lượng</label>
                                 <input 
                                     type="number"
-                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:bg-white focus:ring-4 focus:ring-rose-500/10 focus:border-rose-400 outline-none transition-all"
+                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:bg-white focus:ring-4 focus:ring-primary-light/10 focus:border-rose-400 outline-none transition-all"
                                     value={importData.quantity}
                                     onChange={e => setImportData({ ...importData, quantity: parseInt(e.target.value) })}
                                 />
@@ -333,7 +333,7 @@ export default function InventoryPage() {
                             <div className="space-y-2">
                                 <label className="text-xs font-bold text-slate-400 tracking-widest px-1">Số Serial (Cố định bằng "," nếu có)</label>
                                 <input 
-                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:bg-white focus:ring-4 focus:ring-rose-500/10 focus:border-rose-400 outline-none transition-all"
+                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:bg-white focus:ring-4 focus:ring-primary-light/10 focus:border-rose-400 outline-none transition-all"
                                     placeholder="SN123, SN456..."
                                     value={importData.serials}
                                     onChange={e => setImportData({ ...importData, serials: e.target.value })}
@@ -344,7 +344,7 @@ export default function InventoryPage() {
                         <div className="space-y-2 pt-2">
                             <label className="text-xs font-bold text-slate-400 tracking-widest px-1">Ghi chú</label>
                             <textarea 
-                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:bg-white focus:ring-4 focus:ring-rose-500/10 focus:border-rose-400 outline-none transition-all h-24 resize-none"
+                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:bg-white focus:ring-4 focus:ring-primary-light/10 focus:border-rose-400 outline-none transition-all h-24 resize-none"
                                 value={importData.note}
                                 onChange={e => setImportData({ ...importData, note: e.target.value })}
                             />
@@ -355,7 +355,7 @@ export default function InventoryPage() {
                             <button 
                                 onClick={handleImport}
                                 disabled={saving === 'IMPORT' || !importData.productId || !importData.branchId || !importData.quantity}
-                                className="flex-[2] px-8 py-3 bg-rose-600 text-white font-bold tracking-tight rounded-2xl shadow-xl shadow-rose-200 hover:bg-rose-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                                className="flex-[2] px-8 py-3 bg-primary text-white font-bold tracking-tight rounded-2xl shadow-xl shadow-primary-subtle hover:bg-primary-light transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                             >
                                 {saving === 'IMPORT' ? <Loader2 className="animate-spin" /> : <Save size={20} />}
                                 Xác nhận nhập kho

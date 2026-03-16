@@ -169,12 +169,12 @@ export default function DepartmentsTab() {
                         placeholder="Tìm kiếm phòng ban..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent outline-none transition-all shadow-sm text-sm"
+                        className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-light focus:border-transparent outline-none transition-all shadow-sm text-sm"
                     />
                 </div>
                 <button
                     onClick={() => handleOpenModal()}
-                    className="flex items-center justify-center gap-2 px-6 py-2.5 bg-gradient-to-r from-rose-500 to-pink-600 text-white font-semibold text-sm rounded-xl shadow-lg shadow-rose-500/20 hover:shadow-rose-500/40 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer"
+                    className="flex items-center justify-center gap-2 px-6 py-2.5 bg-gradient-to-r from-primary-light to-primary text-white font-semibold text-sm rounded-xl shadow-lg shadow-primary-light/20 hover:shadow-primary-light/40 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer"
                 >
                     <Plus className="w-4 h-4" />
                     Thêm phòng ban
@@ -184,7 +184,7 @@ export default function DepartmentsTab() {
             {/* Content Area */}
             {loading ? (
                 <div className="flex flex-col items-center justify-center py-20 gap-4">
-                    <Loader2 className="w-10 h-10 text-rose-500 animate-spin" />
+                    <Loader2 className="w-10 h-10 text-primary-light animate-spin" />
                     <p className="text-slate-500 font-medium animate-pulse">Đang tải dữ liệu...</p>
                 </div>
             ) : filteredDepts.length === 0 ? (
@@ -199,13 +199,13 @@ export default function DepartmentsTab() {
                     {filteredDepts.map((dept) => (
                         <div 
                             key={dept.id} 
-                            className="group bg-white rounded-3xl p-5 border border-slate-100 shadow-sm hover:shadow-xl hover:border-rose-100 transition-all duration-300 relative overflow-hidden"
+                            className="group bg-white rounded-3xl p-5 border border-slate-100 shadow-sm hover:shadow-xl hover:border-primary-subtle transition-all duration-300 relative overflow-hidden"
                         >
                             {/* Decorative background element */}
-                            <div className="absolute -right-4 -top-4 w-24 h-24 bg-rose-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
+                            <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary-subtle rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
                             
                             <div className="flex items-start justify-between mb-4">
-                                <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl group-hover:bg-rose-500 group-hover:text-white transition-colors duration-300">
+                                <div className="p-3 bg-primary-subtle text-primary rounded-2xl group-hover:bg-primary-light group-hover:text-white transition-colors duration-300">
                                     <Building2 className="w-6 h-6" />
                                 </div>
                                 <div className="flex gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity">
@@ -218,7 +218,7 @@ export default function DepartmentsTab() {
                                     </button>
                                     <button 
                                         onClick={() => setDeleteConfirm({ isOpen: true, id: dept.id })}
-                                        className="p-2 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors cursor-pointer"
+                                        className="p-2 hover:bg-primary-subtle text-primary rounded-lg transition-colors cursor-pointer"
                                         title="Xóa"
                                     >
                                         <Trash2 className="w-4 h-4" />
@@ -226,7 +226,7 @@ export default function DepartmentsTab() {
                                 </div>
                             </div>
 
-                            <h3 className="text-lg font-bold text-slate-900 mb-1 group-hover:text-rose-600 transition-colors tracking-tight">
+                            <h3 className="text-lg font-bold text-slate-900 mb-1 group-hover:text-primary transition-colors tracking-tight">
                                 {dept.name}
                             </h3>
                             <p className="text-slate-500 text-sm line-clamp-2 min-h-[2.5rem] mb-4">
@@ -237,7 +237,7 @@ export default function DepartmentsTab() {
                                 <span className="text-[10px] font-bold text-slate-400 tracking-wider">Nhân sự</span>
                                 <button 
                                     onClick={() => handleViewEmployees(dept.id, dept.name)}
-                                    className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-[11px] font-bold hover:bg-rose-50 hover:text-rose-600 transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
+                                    className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-[11px] font-bold hover:bg-primary-subtle hover:text-primary transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
                                 >
                                     <Users className="w-3 h-3" />
                                     {dept._count?.employees || 0} thành viên
@@ -268,7 +268,7 @@ export default function DepartmentsTab() {
                                     type="text"
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-rose-500 focus:border-transparent outline-none transition-all text-sm font-bold"
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-primary-light focus:border-transparent outline-none transition-all text-sm font-bold"
                                     placeholder="VD: Phòng Kinh Doanh, Kỹ Thuật..."
                                     required
                                 />
@@ -279,7 +279,7 @@ export default function DepartmentsTab() {
                                 <textarea
                                     value={formData.note}
                                     onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-rose-500 focus:border-transparent outline-none transition-all text-sm min-h-[100px] resize-none"
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-primary-light focus:border-transparent outline-none transition-all text-sm min-h-[100px] resize-none"
                                     placeholder="Nhập mô tả chi tiết nếu có..."
                                 />
                             </div>
@@ -342,7 +342,7 @@ export default function DepartmentsTab() {
                         <div className="p-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
                             {employeeModal.loading ? (
                                 <div className="py-12 flex flex-col items-center gap-3">
-                                    <Loader2 className="w-8 h-8 text-rose-500 animate-spin" />
+                                    <Loader2 className="w-8 h-8 text-primary-light animate-spin" />
                                     <p className="text-xs font-bold text-slate-400 animate-pulse uppercase tracking-widest">Đang tải...</p>
                                 </div>
                             ) : employeeModal.employees.length === 0 ? (
@@ -352,7 +352,7 @@ export default function DepartmentsTab() {
                             ) : (
                                 <div className="space-y-2">
                                     {employeeModal.employees.map((emp) => (
-                                        <div key={emp.id} className="flex items-center gap-4 p-3 rounded-2xl border border-slate-50 hover:bg-rose-50/50 hover:border-rose-100 transition-all group">
+                                        <div key={emp.id} className="flex items-center gap-4 p-3 rounded-2xl border border-slate-50 hover:bg-primary-subtle/50 hover:border-primary-subtle transition-all group">
                                             <div className="relative">
                                                 {emp.avatarUrl ? (
                                                     <>
@@ -367,22 +367,22 @@ export default function DepartmentsTab() {
                                                                 if (fallback) fallback.classList.remove('hidden');
                                                             }}
                                                         />
-                                                        <div className="hidden w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center ring-2 ring-white shadow-sm group-hover:bg-rose-100 transition-colors">
-                                                            <User className="w-5 h-5 text-slate-400 group-hover:text-rose-600" />
+                                                        <div className="hidden w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center ring-2 ring-white shadow-sm group-hover:bg-primary-subtle transition-colors">
+                                                            <User className="w-5 h-5 text-slate-400 group-hover:text-primary" />
                                                         </div>
                                                     </>
                                                 ) : (
-                                                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center ring-2 ring-white shadow-sm group-hover:bg-rose-100 transition-colors">
-                                                        <User className="w-5 h-5 text-slate-400 group-hover:text-rose-600" />
+                                                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center ring-2 ring-white shadow-sm group-hover:bg-primary-subtle transition-colors">
+                                                        <User className="w-5 h-5 text-slate-400 group-hover:text-primary" />
                                                     </div>
                                                 )}
                                                 <div className={cn(
                                                     "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white",
-                                                    emp.status === 'Đang làm việc' ? "bg-emerald-500" : "bg-slate-300"
+                                                    emp.status === 'Đang làm việc' ? "bg-accent-light" : "bg-slate-300"
                                                 )} />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <h4 className="text-sm font-bold text-slate-900 truncate leading-tight mb-0.5 group-hover:text-rose-600 transition-colors">{emp.fullName}</h4>
+                                                <h4 className="text-sm font-bold text-slate-900 truncate leading-tight mb-0.5 group-hover:text-primary transition-colors">{emp.fullName}</h4>
                                                 <div className="flex items-center gap-2">
                                                     <p className="text-[11px] font-bold text-slate-400 truncate">{emp.pos?.name || 'Chưa gán chức vụ'}</p>
                                                     <span className="w-1 h-1 rounded-full bg-slate-300" />

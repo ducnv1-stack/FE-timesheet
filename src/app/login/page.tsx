@@ -74,7 +74,7 @@ export default function LoginPage() {
                                 type="text"
                                 value={username}
                                 onChange={e => setUsername(e.target.value)}
-                                className="w-full px-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 font-medium text-slate-800 transition-all outline-none"
+                                className="w-full px-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-primary-light focus:ring-2 focus:ring-primary-subtle font-medium text-slate-800 transition-all outline-none"
                                 placeholder="Nhập username (vd: sale01)"
                                 required
                             />
@@ -86,7 +86,7 @@ export default function LoginPage() {
                                 type="password"
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
-                                className="w-full px-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 font-medium text-slate-800 transition-all outline-none"
+                                className="w-full px-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-primary-light focus:ring-2 focus:ring-primary-subtle font-medium text-slate-800 transition-all outline-none"
                                 placeholder="••••••••"
                                 required
                             />
@@ -95,7 +95,7 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-rose-200 active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                            className="w-full bg-primary hover:bg-primary-light text-white font-bold py-3.5 rounded-xl shadow-lg shadow-primary-subtle active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                         >
                             {loading ? 'Đang đăng nhập...' : 'Đăng nhập hệ thống'}
                         </button>

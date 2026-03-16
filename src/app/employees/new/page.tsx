@@ -302,7 +302,7 @@ export default function NewEmployeePage() {
                                 id="isInternalDriver"
                                 checked={form.isInternalDriver}
                                 onChange={(e) => setForm({ ...form, isInternalDriver: e.target.checked })}
-                                className="w-4 h-4 rounded border-slate-300 text-pink-600 focus:ring-pink-500"
+                                className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary-light"
                             />
                             <label htmlFor="isInternalDriver" className="text-[11px] font-semibold text-slate-700 cursor-pointer">
                                 Là tài xế nội bộ
@@ -322,7 +322,7 @@ export default function NewEmployeePage() {
                     <button
                         onClick={handleSubmit}
                         disabled={saving}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-pink-600 to-rose-600 text-white font-bold text-xs rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100 cursor-pointer"
+                        className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-primary to-primary text-white font-bold text-xs rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100 cursor-pointer"
                     >
                         <Save className="w-3.5 h-3.5" />
                         {saving ? 'Đang lưu...' : 'Lưu Nhân Viên'}
@@ -356,7 +356,7 @@ function FormField({
                 <select
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
-                    className="w-full px-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white cursor-pointer"
+                    className="w-full px-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-light focus:border-transparent bg-white cursor-pointer"
                 >
                     <option value="">{placeholder || 'Chọn...'}</option>
                     {options?.map((opt) => (
@@ -377,7 +377,7 @@ function FormField({
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                     placeholder={placeholder}
-                    className="w-full px-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    className="w-full px-3 py-1.5 text-[11px] border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-light focus:border-transparent"
                 />
             )}
         </div>

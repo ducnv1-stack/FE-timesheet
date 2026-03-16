@@ -55,7 +55,7 @@ export default function LogsPage() {
             case 'update':
                 return <span className="px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full text-[10px] font-black uppercase whitespace-nowrap tracking-tighter">Cập nhật</span>;
             case 'delete':
-                return <span className="px-2 py-0.5 bg-rose-100 text-rose-700 rounded-full text-[10px] font-black uppercase">Xóa</span>;
+                return <span className="px-2 py-0.5 bg-primary-subtle text-primary-light rounded-full text-[10px] font-black uppercase">Xóa</span>;
             default:
                 return <span className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-full text-[10px] font-black uppercase">{action}</span>;
         }
@@ -66,7 +66,7 @@ export default function LogsPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
                     <h1 className="text-2xl font-black text-slate-900 flex items-center gap-3">
-                        <ScrollText className="text-rose-600" size={28} />
+                        <ScrollText className="text-primary" size={28} />
                         Log Hệ Thống
                     </h1>
                     <p className="text-slate-500 text-sm mt-1">Lịch sử thay đổi và tác động lên dữ liệu đơn hàng</p>
@@ -80,7 +80,7 @@ export default function LogsPage() {
                             placeholder="Tìm theo mã đơn, nhân viên..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none w-full md:w-64 transition-all"
+                            className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-light focus:border-primary-light outline-none w-full md:w-64 transition-all"
                         />
                     </div>
                 </div>
@@ -88,7 +88,7 @@ export default function LogsPage() {
 
             {loading ? (
                 <div className="flex items-center justify-center min-h-[400px]">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-700"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-light"></div>
                 </div>
             ) : filteredLogs.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-slate-100 p-12 text-center">
@@ -132,7 +132,7 @@ export default function LogsPage() {
                                         </td>
                                         <td className="px-3 py-3 md:px-6 md:py-4">
                                             <div className="flex items-center gap-2 md:gap-3">
-                                                <div className="w-7 h-7 md:w-8 md:h-8 shrink-0 rounded-full bg-rose-50 flex items-center justify-center text-rose-600 font-bold text-[10px] md:text-xs">
+                                                <div className="w-7 h-7 md:w-8 md:h-8 shrink-0 rounded-full bg-primary-subtle flex items-center justify-center text-primary font-bold text-[10px] md:text-xs">
                                                     {log.changedByUser?.employee?.fullName?.charAt(0) || <UserIcon size={12} />}
                                                 </div>
                                                 <div className="flex flex-col">
@@ -167,7 +167,7 @@ export default function LogsPage() {
                                         </td>
                                         <td className="px-3 py-3 md:px-6 md:py-4 text-right">
                                             <button
-                                                className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all cursor-pointer"
+                                                className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary-subtle rounded-lg transition-all cursor-pointer"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     setSelectedLog(log);

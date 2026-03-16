@@ -355,7 +355,7 @@ export default function BranchesPage() {
                             <button
                                 onClick={() => getCurrentLocation(null)}
                                 disabled={fetchingGpsId === 'NEW'}
-                                className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-primary-light text-primary rounded-2xl font-bold hover:bg-rose-100 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                                className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-primary-light text-primary rounded-2xl font-bold hover:bg-primary-subtle transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
                             >
                                 {fetchingGpsId === 'NEW' ? <Loader2 size={20} className="animate-spin" /> : <LocateFixed size={20} />}
                                 Lấy tọa độ GPS
@@ -397,8 +397,8 @@ export default function BranchesPage() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {filteredBranches.map((branch) => (
-                        <div key={branch.id} className="bg-white rounded-[2.5rem] p-8 shadow-2xl shadow-slate-200/40 border border-slate-50 space-y-8 group hover:border-rose-200 transition-all duration-500 relative overflow-hidden">
-                            <div className="absolute -right-12 -top-12 w-28 h-28 rotate-45 flex items-end justify-center pb-2 text-[10px] font-black uppercase tracking-widest text-white shadow-lg bg-rose-700">
+                        <div key={branch.id} className="bg-white rounded-[2.5rem] p-8 shadow-2xl shadow-slate-200/40 border border-slate-50 space-y-8 group hover:border-primary-subtle transition-all duration-500 relative overflow-hidden">
+                            <div className="absolute -right-12 -top-12 w-28 h-28 rotate-45 flex items-end justify-center pb-2 text-[10px] font-black uppercase tracking-widest text-white shadow-lg bg-primary-light">
                                 CN
                             </div>
 
@@ -465,7 +465,7 @@ export default function BranchesPage() {
                                 <button
                                     onClick={() => getCurrentLocation(branch.id)}
                                     disabled={fetchingGpsId === branch.id}
-                                    className="p-3 bg-primary-light text-primary rounded-xl hover:bg-rose-100 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                                    className="p-3 bg-primary-light text-primary rounded-xl hover:bg-primary-subtle transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
                                     title="Lấy tọa độ hiện tại"
                                 >
                                     {fetchingGpsId === branch.id ? <Loader2 size={20} className="animate-spin" /> : <LocateFixed size={20} />}
@@ -505,7 +505,7 @@ export default function BranchesPage() {
                                 {canCreateDelete && branch.id !== userBranchId && (
                                     <button
                                         onClick={() => triggerActionWithPassword((pwd: string) => executeDelete(branch.id, pwd))}
-                                        className="p-3 bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-600 rounded-xl transition-all active:scale-95 cursor-pointer"
+                                        className="p-3 bg-slate-50 text-slate-400 hover:bg-primary-subtle hover:text-primary rounded-xl transition-all active:scale-95 cursor-pointer"
                                         title="Xóa chi nhánh"
                                     >
                                         <Trash2 size={20} />
