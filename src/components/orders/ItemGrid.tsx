@@ -11,9 +11,33 @@ interface ItemGridProps {
     onChange: (items: OrderItem[]) => void;
     isUpgrade?: boolean;
     oldOrderAmount?: number;
+    orderDate?: string;
 }
 
-export default function ItemGrid({ items, products, onChange, isUpgrade, oldOrderAmount }: ItemGridProps) {
+export default function ItemGrid({ items, products, onChange, isUpgrade, oldOrderAmount, orderDate }: ItemGridProps) {
+    const getEffectiveMinPrice = (product: Product, date?: string) => {
+        if (!product) return 0;
+        if (!date || !product.minPricePolicies || product.minPricePolicies.length === 0) {
+            return product.minPrice;
+        }
+
+        const dateObj = new Date(date);
+        // Backend should have already sorted them, but we'll be safe
+        const applicablePolicies = product.minPricePolicies
+            .filter(p => {
+                const start = new Date(p.startDate);
+                const end = p.endDate ? new Date(p.endDate) : null;
+                return dateObj >= start && (!end || dateObj <= end);
+            })
+            .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+
+        if (applicablePolicies.length > 0) {
+            return applicablePolicies[0].minPrice;
+        }
+
+        return product.minPrice;
+    };
+
     const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const addItem = () => {
@@ -53,8 +77,9 @@ export default function ItemGrid({ items, products, onChange, isUpgrade, oldOrde
                     <tbody className="divide-y-2 divide-slate-800">
                         {items.map((item, index) => {
                             const selectedProduct = products.find(p => p.id === item.productId);
+                            const effectiveMinPrice = selectedProduct ? getEffectiveMinPrice(selectedProduct, orderDate) : 0;
                             const effectivePrice = Number(item.unitPrice) + (isUpgrade ? Number(oldOrderAmount || 0) : 0);
-                            const isBelowMin = selectedProduct && effectivePrice < selectedProduct.minPrice;
+                            const isBelowMin = selectedProduct && effectivePrice < effectiveMinPrice;
 
                             // Calculate Commission
                             let commissionPercent = 0;
@@ -67,20 +92,34 @@ export default function ItemGrid({ items, products, onChange, isUpgrade, oldOrde
                             // Calculate Bonus if High-end
                             let bonusAmount = 0;
                             const isHighEnd = selectedProduct?.isHighEnd || (selectedProduct as any)?.is_high_end;
-                            const bonusRules = selectedProduct?.bonusRules || (selectedProduct as any)?.bonus_rules;
 
-                            if (isHighEnd && bonusRules) {
-                                const applicableRules = (bonusRules as any[])
-                                    .filter(rule => Number(effectivePrice) >= Number(rule.minSellPrice || rule.min_sell_price))
-                                    .sort((a, b) => Number(b.minSellPrice || b.min_sell_price) - Number(a.minSellPrice || a.min_sell_price));
+                            if (isHighEnd && selectedProduct?.bonusPolicies && orderDate) {
+                                // 🆕 Find effective bonus policy based on orderDate
+                                const dateObj = new Date(orderDate);
+                                const applicablePolicy = [...selectedProduct.bonusPolicies]
+                                    .filter(pol => {
+                                        const start = new Date(pol.startDate);
+                                        const end = pol.endDate ? new Date(pol.endDate) : null;
+                                        return dateObj >= start && (!end || dateObj <= end);
+                                    })
+                                    .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
 
-                                if (applicableRules.length > 0) {
-                                    bonusAmount = Number(applicableRules[0].bonusAmount || applicableRules[0].bonus_amount) * item.quantity;
+                                if (applicablePolicy?.rules) {
+                                    const applicableRule = [...applicablePolicy.rules]
+                                        .filter(rule => Number(effectivePrice) >= Number(rule.minSellPrice))
+                                        .sort((a, b) => Number(b.minSellPrice) - Number(a.minSellPrice))[0];
+
+                                    if (applicableRule) {
+                                        bonusAmount = Number(applicableRule.bonusAmount) * item.quantity;
+                                    }
                                 }
                             }
 
                             return (
-                                <tr key={index} className="group">
+                                <tr key={index} className={cn(
+                                    "group transition-colors",
+                                    isBelowMin ? "bg-rose-50/50" : "hover:bg-slate-50/50"
+                                )}>
                                     <td className="px-2 py-2 border-r-2 border-slate-800 text-center font-medium">
                                         {index + 1}
                                     </td>
@@ -92,7 +131,7 @@ export default function ItemGrid({ items, products, onChange, isUpgrade, oldOrde
                                         >
                                             <option value="">Chọn sản phẩm...</option>
                                             {products.map(p => (
-                                                <option key={p.id} value={p.id}>{p.name}</option>
+                                                <option key={p.id} value={p.id}>{p.name} ({new Intl.NumberFormat('vi-VN').format(getEffectiveMinPrice(p, orderDate))}đ)</option>
                                             ))}
                                         </select>
                                     </td>
@@ -121,13 +160,13 @@ export default function ItemGrid({ items, products, onChange, isUpgrade, oldOrde
                                                 )}
                                                 placeholder="Giá bán..."
                                             />
-                                            {selectedProduct && selectedProduct.minPrice > 0 && (
+                                            {selectedProduct && effectiveMinPrice > 0 && (
                                                 <div className={cn(
                                                     "absolute -top-7 right-0 scale-90 px-1.5 py-0.5 rounded shadow-lg transition-all whitespace-nowrap z-10 font-bold text-[10px]",
                                                     isBelowMin ? "bg-amber-600 text-white" : "bg-slate-800 text-white",
                                                     (focusedIndex === index || hoveredIndex === index) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1 pointer-events-none"
                                                 )}>
-                                                    {isBelowMin ? `Dưới giá Min: ${formatCurrency(selectedProduct.minPrice)}` : `Giá tối thiểu: ${formatCurrency(selectedProduct.minPrice)}`}
+                                                    {isBelowMin ? `Dưới giá Min: ${formatCurrency(effectiveMinPrice)}` : `Giá tối thiểu: ${formatCurrency(effectiveMinPrice)}`}
                                                 </div>
                                             )}
                                         </div>

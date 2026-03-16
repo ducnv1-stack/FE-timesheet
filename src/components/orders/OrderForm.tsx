@@ -234,9 +234,26 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
         const rates = new Set(validRateItems.map(item => {
             const p = products.find(prod => prod.id === item.productId);
             if (!p) return 1.8;
-            const minPrice = Number(p.minPrice || (p as any).min_price || 0);
+            
+            // 🆕 Use dynamic min price helper logic (matching ItemGrid)
+            let effectiveMinPrice = p.minPrice;
+            if (order.orderDate && p.minPricePolicies && p.minPricePolicies.length > 0) {
+                const dateObj = new Date(order.orderDate);
+                const applicablePolicies = [...p.minPricePolicies]
+                    .filter(pol => {
+                        const start = new Date(pol.startDate);
+                        const end = pol.endDate ? new Date(pol.endDate) : null;
+                        return dateObj >= start && (!end || dateObj <= end);
+                    })
+                    .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+                
+                if (applicablePolicies.length > 0) {
+                    effectiveMinPrice = applicablePolicies[0].minPrice;
+                }
+            }
+
             const effectivePrice = Number(item.unitPrice) + (order.isUpgrade ? Number(order.oldOrderAmount || 0) : 0);
-            return effectivePrice < minPrice ? 1 : 1.8;
+            return effectivePrice < effectiveMinPrice ? 1 : 1.8;
         }));
 
         if (rates.has(1) && rates.has(1.8)) commissionLabel = "Hoa hồng (1% - 1.8%)";
@@ -819,6 +836,7 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
                             onChange={(items) => setOrder({ ...order, items })}
                             isUpgrade={order.isUpgrade}
                             oldOrderAmount={order.oldOrderAmount}
+                            orderDate={order.orderDate}
                         />
 
                         <div className="mt-4 no-print print:hidden">
@@ -927,8 +945,26 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
                                     {formatCurrency(order.items.reduce((sum, item) => {
                                         const p = products.find(prod => prod.id === item.productId);
                                         if (!p) return sum;
+
+                                        // 🆕 Use dynamic min price
+                                        let effectiveMinPrice = p.minPrice;
+                                        if (order.orderDate && p.minPricePolicies && p.minPricePolicies.length > 0) {
+                                            const dateObj = new Date(order.orderDate);
+                                            const applicablePolicies = [...p.minPricePolicies]
+                                                .filter(pol => {
+                                                    const start = new Date(pol.startDate);
+                                                    const end = pol.endDate ? new Date(pol.endDate) : null;
+                                                    return dateObj >= start && (!end || dateObj <= end);
+                                                })
+                                                .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+                                            
+                                            if (applicablePolicies.length > 0) {
+                                                effectiveMinPrice = applicablePolicies[0].minPrice;
+                                            }
+                                        }
+
                                         const effectivePrice = Number(item.unitPrice) + (order.isUpgrade ? Number(order.oldOrderAmount || 0) : 0);
-                                        const rate = effectivePrice < p.minPrice ? 0.01 : 0.018;
+                                        const rate = effectivePrice < effectiveMinPrice ? 0.01 : 0.018;
                                         const itemTotal = item.quantity * item.unitPrice;
                                         const creatorShare = totalProductAmount > 0 ? (totalProductAmount - order.splits.reduce((sSum, s) => sSum + s.splitAmount, 0)) / totalProductAmount : 1;
                                         const commissionFactor = totalProductAmount > 0 ? (netRevenue / totalProductAmount) : 1;
@@ -943,15 +979,25 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
                                     if (!p) return sum;
 
                                     const isHighEnd = p.isHighEnd || (p as any).is_high_end;
-                                    const bonusRules = p.bonusRules || (p as any).bonus_rules;
+                                    if (!isHighEnd || !p.bonusPolicies || p.bonusPolicies.length === 0) return sum;
 
-                                    if (!isHighEnd || !bonusRules) return sum;
+                                    // 🆕 Find effective bonus policy based on orderDate
+                                    const dateObj = order.orderDate ? new Date(order.orderDate) : new Date();
+                                    const applicablePolicy = [...p.bonusPolicies]
+                                        .filter(pol => {
+                                            const start = new Date(pol.startDate);
+                                            const end = pol.endDate ? new Date(pol.endDate) : null;
+                                            return dateObj >= start && (!end || dateObj <= end);
+                                        })
+                                        .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
+
+                                    if (!applicablePolicy?.rules) return sum;
 
                                     const effectivePrice = Number(item.unitPrice) + (order.isUpgrade ? Number(order.oldOrderAmount || 0) : 0);
-                                    const rule = (bonusRules as any[])
-                                        .filter(r => Number(effectivePrice) >= Number(r.minSellPrice || r.min_sell_price))
-                                        .sort((a, b) => Number(b.minSellPrice || b.min_sell_price) - Number(a.minSellPrice || a.min_sell_price))[0];
-                                    return sum + (rule ? Number(rule.bonusAmount || rule.bonus_amount) : 0) * item.quantity;
+                                    const rule = [...applicablePolicy.rules]
+                                        .filter(r => Number(effectivePrice) >= Number(r.minSellPrice))
+                                        .sort((a, b) => Number(b.minSellPrice) - Number(a.minSellPrice))[0];
+                                    return sum + (rule ? Number(rule.bonusAmount) : 0) * item.quantity;
                                 }, 0);
 
                                 if (totalBonus === 0) return (

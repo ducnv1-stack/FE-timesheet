@@ -177,7 +177,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     icon: ShoppingBag,
                     href: '/products',
                     active: pathname === '/products',
-                    roleAccess: ['ADMIN']
+                    roleAccess: ['ADMIN', 'DIRECTOR', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT']
                 },
                 {
                     label: 'Quản lý chi nhánh',

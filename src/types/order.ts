@@ -1,10 +1,26 @@
 export interface ProductBonusRule {
     id: string;
-    productId: string;
+    policyId: string;
     minSellPrice: number;
     bonusAmount: number;
     salePercent: number;
     managerPercent: number;
+}
+
+export interface BonusPolicy {
+    id: string;
+    productId: string;
+    name?: string;
+    startDate: string;
+    endDate: string | null;
+    rules: ProductBonusRule[];
+}
+
+export interface MinPricePolicy {
+    id: string;
+    minPrice: number;
+    startDate: string;
+    endDate: string | null;
 }
 
 export interface Product {
@@ -12,7 +28,8 @@ export interface Product {
     name: string;
     minPrice: number;
     isHighEnd: boolean;
-    bonusRules?: ProductBonusRule[];
+    bonusPolicies?: BonusPolicy[];
+    minPricePolicies?: MinPricePolicy[];
 }
 
 export interface Gift {

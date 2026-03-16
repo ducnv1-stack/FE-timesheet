@@ -13,6 +13,7 @@ import {
     ChevronRight,
     Star,
     AlertCircle,
+    Calendar,
     X,
     Save,
     Check
@@ -27,7 +28,23 @@ interface Product {
     minPrice: number;
     isHighEnd: boolean;
     hotBonus: number;
-    bonusRules: BonusRule[];
+    bonusPolicies: BonusPolicy[];
+    minPricePolicies: MinPricePolicy[];
+}
+
+interface MinPricePolicy {
+    id?: string;
+    minPrice: number;
+    startDate: string;
+    endDate?: string | null;
+}
+
+interface BonusPolicy {
+    id?: string;
+    name?: string;
+    startDate: string;
+    endDate?: string | null;
+    rules: BonusRule[];
 }
 
 interface BonusRule {
@@ -58,6 +75,8 @@ export default function ProductsPage() {
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [editingGift, setEditingGift] = useState<Gift | null>(null);
     const [selectedProductForBonus, setSelectedProductForBonus] = useState<Product | null>(null);
+    const [selectedProductForPrice, setSelectedProductForPrice] = useState<Product | null>(null);
+    const [isPriceModalOpen, setIsPriceModalOpen] = useState(false);
 
     // Deletion confirm state
     const [deleteConfirm, setDeleteConfirm] = useState<{
@@ -229,6 +248,7 @@ export default function ProductsPage() {
                             <ProductTable
                                 products={filteredProducts}
                                 onEdit={(p) => { setEditingProduct(p); setIsProductModalOpen(true); }}
+                                onPrice={(p) => { setSelectedProductForPrice(p); setIsPriceModalOpen(true); }}
                                 onDelete={handleDeleteProduct}
                             />
                         ) : activeTab === 'gifts' ? (
@@ -274,6 +294,14 @@ export default function ProductsPage() {
                 />
             )}
 
+            {isPriceModalOpen && selectedProductForPrice && (
+                <PricePolicyModal
+                    product={selectedProductForPrice}
+                    onClose={() => { setIsPriceModalOpen(false); setSelectedProductForPrice(null); }}
+                    onSuccess={() => { setIsPriceModalOpen(false); setSelectedProductForPrice(null); fetchData(); }}
+                />
+            )}
+
             <ConfirmModal
                 isOpen={deleteConfirm.isOpen}
                 title="Xác nhận xóa"
@@ -304,7 +332,7 @@ const parseNumber = (val: string) => {
 
 // --- Sub-components ---
 
-function ProductTable({ products, onEdit, onDelete }: { products: Product[], onEdit: (p: Product) => void, onDelete: (p: Product) => void }) {
+function ProductTable({ products, onEdit, onPrice, onDelete }: { products: Product[], onEdit: (p: Product) => void, onPrice: (p: Product) => void, onDelete: (p: Product) => void }) {
     if (products.length === 0) return <EmptyState label="sản phẩm" />;
     return (
         <div className="overflow-x-auto">
@@ -313,6 +341,7 @@ function ProductTable({ products, onEdit, onDelete }: { products: Product[], onE
                     <tr className="bg-slate-50/50 border-b border-slate-100 whitespace-nowrap">
                         <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest pr-8">Tên sản phẩm</th>
                         <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest pr-8">Giá tối thiểu</th>
+                        <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest pr-8">Chính sách giá</th>
                         <th className="px-3 md:px-6 py-3 md:py-4 text-left text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest pr-8">Loại hàng</th>
                         <th className="px-3 md:px-6 py-3 md:py-4 text-right text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Hành động</th>
                     </tr>
@@ -325,6 +354,15 @@ function ProductTable({ products, onEdit, onDelete }: { products: Product[], onE
                             </td>
                             <td className="px-3 md:px-6 py-3 md:py-4 font-mono text-[10px] md:text-xs font-bold text-rose-600 pr-8">
                                 {new Intl.NumberFormat('vi-VN').format(product.minPrice)}đ
+                            </td>
+                            <td className="px-3 md:px-6 py-3 md:py-4 pr-8">
+                                <button
+                                    onClick={() => (onPrice as any)(product)}
+                                    className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 rounded-lg text-[10px] font-black transition-all border border-slate-200 hover:border-rose-200 cursor-pointer uppercase tracking-tight"
+                                >
+                                    <Calendar className="w-3 h-3" />
+                                    {product.minPricePolicies?.length || 0} kế hoạch
+                                </button>
                             </td>
                             <td className="px-3 md:px-6 py-3 md:py-4 pr-8">
                                 {product.isHighEnd ? (
@@ -426,23 +464,34 @@ function PremiumBonusView({ products, onUpdateBonus }: { products: Product[], on
                         </div>
 
                         <div className="space-y-2 relative z-10">
-                            {product.bonusRules.length > 0 ? (
-                                [...product.bonusRules].sort((a, b) => a.minSellPrice - b.minSellPrice).map((rule, idx) => (
-                                    <div key={rule.id || idx} className="flex items-center justify-between bg-white/60 backdrop-blur-sm p-2.5 md:p-3 rounded-xl md:rounded-2xl border border-white shadow-sm transition-all hover:scale-[1.02]">
-                                        <div className="flex flex-col">
-                                            <span className="text-[7px] md:text-[8px] font-black text-slate-400 uppercase tracking-tight">Giá ≥</span>
-                                            <span className="text-[10px] md:text-xs font-bold text-slate-700">
-                                                {new Intl.NumberFormat('vi-VN').format(rule.minSellPrice)}
+                            {product.bonusPolicies && product.bonusPolicies.length > 0 ? (
+                                product.bonusPolicies.map((policy, pIdx) => (
+                                    <div key={policy.id || pIdx} className="space-y-1.5">
+                                        <div className="flex items-center gap-1.5">
+                                            <Calendar className="w-2.5 h-2.5 text-slate-400" />
+                                            <span className="text-[7px] font-black text-slate-400 uppercase tracking-tight">
+                                                Từ {new Date(policy.startDate).toLocaleDateString('vi-VN')}
+                                                {policy.endDate ? ` → ${new Date(policy.endDate).toLocaleDateString('vi-VN')}` : ' → Vĩnh viễn'}
                                             </span>
                                         </div>
-                                        <ChevronRight className="w-2.5 md:w-3 h-2.5 md:h-3 text-slate-300" />
-                                        <div className="flex flex-col">
-                                            <span className="text-[7px] md:text-[8px] font-black text-rose-400 uppercase tracking-tight">Thưởng</span>
-                                            <span className="text-[10px] md:text-xs font-black text-rose-600">
-                                                {new Intl.NumberFormat('vi-VN').format(rule.bonusAmount)}
-                                            </span>
-                                        </div>
-                                        <div className="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
+                                        {(policy.rules || []).sort((a, b) => a.minSellPrice - b.minSellPrice).map((rule, idx) => (
+                                            <div key={rule.id || idx} className="flex items-center justify-between bg-white/60 backdrop-blur-sm p-2.5 md:p-3 rounded-xl md:rounded-2xl border border-white shadow-sm transition-all hover:scale-[1.02]">
+                                                <div className="flex flex-col">
+                                                    <span className="text-[7px] md:text-[8px] font-black text-slate-400 uppercase tracking-tight">Giá ≥</span>
+                                                    <span className="text-[10px] md:text-xs font-bold text-slate-700">
+                                                        {new Intl.NumberFormat('vi-VN').format(rule.minSellPrice)}
+                                                    </span>
+                                                </div>
+                                                <ChevronRight className="w-2.5 md:w-3 h-2.5 md:h-3 text-slate-300" />
+                                                <div className="flex flex-col">
+                                                    <span className="text-[7px] md:text-[8px] font-black text-rose-400 uppercase tracking-tight">Thưởng</span>
+                                                    <span className="text-[10px] md:text-xs font-black text-rose-600">
+                                                        {new Intl.NumberFormat('vi-VN').format(rule.bonusAmount)}
+                                                    </span>
+                                                </div>
+                                                <div className="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
+                                            </div>
+                                        ))}
                                     </div>
                                 ))
                             ) : (
@@ -606,57 +655,90 @@ function GiftModal({ isOpen, onClose, onSuccess, gift }: { isOpen: boolean, onCl
 }
 
 function BonusModal({ product, onClose, onSuccess }: { product: Product, onClose: () => void, onSuccess: () => void }) {
-    const [rules, setRules] = useState<any[]>(() =>
-        [...(product.bonusRules || [])].sort((a, b) => a.minSellPrice - b.minSellPrice).map(r => ({ ...r, minSellPrice: r.minSellPrice.toString(), bonusAmount: r.bonusAmount.toString() }))
+    const [policies, setPolicies] = useState<any[]>(() =>
+        [...(product.bonusPolicies || [])].sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()).map(p => ({
+            ...p,
+            startDate: p.startDate ? new Date(p.startDate).toISOString().split('T')[0] : '',
+            endDate: p.endDate ? new Date(p.endDate).toISOString().split('T')[0] : '',
+            rules: [...(p.rules || [])].sort((a, b) => a.minSellPrice - b.minSellPrice).map(r => ({
+                ...r,
+                minSellPrice: r.minSellPrice.toString(),
+                bonusAmount: r.bonusAmount.toString()
+            }))
+        }))
     );
     const [submitting, setSubmitting] = useState(false);
-    const [deletingIdx, setDeletingIdx] = useState<number | null>(null);
+    const [deletingPolicyIdx, setDeletingPolicyIdx] = useState<number | null>(null);
     const { success, error } = useToast();
 
-    const addRule = () => {
-        setRules([...rules, { minSellPrice: '0', bonusAmount: '0' }]);
+    const addPolicy = () => {
+        setPolicies([{ name: '', startDate: new Date().toISOString().split('T')[0], endDate: '', rules: [{ minSellPrice: '0', bonusAmount: '0' }] }, ...policies]);
     };
 
-    const removeRule = (idx: number) => {
-        setDeletingIdx(idx);
-    };
+    const removePolicy = (idx: number) => { setDeletingPolicyIdx(idx); };
 
-    const confirmDelete = () => {
-        if (deletingIdx !== null) {
-            setRules(rules.filter((_, i) => i !== deletingIdx));
-            setDeletingIdx(null);
+    const confirmDeletePolicy = () => {
+        if (deletingPolicyIdx !== null) {
+            setPolicies(policies.filter((_, i) => i !== deletingPolicyIdx));
+            setDeletingPolicyIdx(null);
         }
     };
 
-    const updateRule = (idx: number, field: string, value: string) => {
-        const newRules = [...rules];
-        newRules[idx] = { ...newRules[idx], [field]: value };
-        setRules(newRules);
+    const updatePolicy = (idx: number, field: string, value: string) => {
+        const newPolicies = [...policies];
+        newPolicies[idx] = { ...newPolicies[idx], [field]: value };
+        setPolicies(newPolicies);
+    };
+
+    const addRuleToPolicy = (pIdx: number) => {
+        const newPolicies = [...policies];
+        newPolicies[pIdx].rules = [...newPolicies[pIdx].rules, { minSellPrice: '0', bonusAmount: '0' }];
+        setPolicies(newPolicies);
+    };
+
+    const updateRule = (pIdx: number, rIdx: number, field: string, value: string) => {
+        const newPolicies = [...policies];
+        newPolicies[pIdx].rules[rIdx] = { ...newPolicies[pIdx].rules[rIdx], [field]: value };
+        setPolicies(newPolicies);
+    };
+
+    const removeRule = (pIdx: number, rIdx: number) => {
+        const newPolicies = [...policies];
+        newPolicies[pIdx].rules = newPolicies[pIdx].rules.filter((_: any, i: number) => i !== rIdx);
+        setPolicies(newPolicies);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSubmitting(true);
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${product.id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    bonusRules: rules.map(rule => ({
-                        minSellPrice: Number(rule.minSellPrice),
-                        bonusAmount: Number(rule.bonusAmount),
-                        salePercent: Number((rule as any).salePercent || 0),
-                        managerPercent: Number((rule as any).managerPercent || 0)
-                    }))
-                })
-            });
-
-            if (res.ok) {
-                success('Cập nhật quy tắc thưởng thành công');
-                onSuccess();
-            } else {
-                error('Có lỗi xảy ra');
+            // Delete ALL existing policies for this product first
+            const existingPolicies = product.bonusPolicies || [];
+            for (const existing of existingPolicies) {
+                if (existing.id) {
+                    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${product.id}/bonus-policies/${existing.id}`, { method: 'DELETE' });
+                }
             }
+            // Create all current policies
+            for (const pol of policies) {
+                await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${product.id}/bonus-policies`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: pol.name || null,
+                        startDate: pol.startDate,
+                        endDate: pol.endDate || null,
+                        rules: pol.rules.map((r: any) => ({
+                            minSellPrice: Number(r.minSellPrice),
+                            bonusAmount: Number(r.bonusAmount),
+                            salePercent: 70,
+                            managerPercent: 30,
+                        }))
+                    })
+                });
+            }
+            success('Cập nhật chính sách thưởng thành công');
+            onSuccess();
         } catch (err) {
             error('Lỗi kết nối server');
         } finally {
@@ -666,7 +748,7 @@ function BonusModal({ product, onClose, onSuccess }: { product: Product, onClose
 
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
-            <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-8 duration-300">
+            <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-8 duration-300">
                 <div className="p-6 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
                     <div>
                         <h2 className="text-base font-black text-slate-800 uppercase tracking-widest leading-none">Thiết lập thưởng nóng</h2>
@@ -676,34 +758,65 @@ function BonusModal({ product, onClose, onSuccess }: { product: Product, onClose
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6">
-                    <div className="max-h-[400px] overflow-y-auto pr-2 space-y-3 mb-6 scrollbar-thin scrollbar-thumb-slate-200">
-                        {rules.length === 0 ? (
+                    <div className="max-h-[500px] overflow-y-auto pr-2 space-y-4 mb-6 scrollbar-thin scrollbar-thumb-slate-200">
+                        {policies.length === 0 ? (
                             <div className="text-center py-12 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
                                 <AlertCircle className="w-8 h-8 text-slate-300 mx-auto mb-3" />
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Chưa có quy tắc nào</p>
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Chưa có chính sách nào</p>
                             </div>
                         ) : (
-                            rules.map((rule, idx) => (
-                                <div key={idx} className="flex items-center gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100 group">
-                                    <div className="flex-1">
-                                        <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Giá bán từ (đ)</label>
-                                        <input type="text" value={formatNumber(rule.minSellPrice)} onChange={e => updateRule(idx, 'minSellPrice', parseNumber(e.target.value).toString())} className="w-full px-3 py-2 bg-white rounded-xl border-none focus:ring-1 focus:ring-rose-500 font-mono text-xs font-bold shadow-sm" placeholder="Nhập giá..." />
+                            policies.map((policy, pIdx) => (
+                                <div key={pIdx} className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3">
+                                    {/* Policy Header */}
+                                    <div className="flex items-center gap-2 justify-between">
+                                        <div className="flex items-center gap-2 flex-1">
+                                            <Calendar className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-wider">Chính sách #{policies.length - pIdx}</span>
+                                        </div>
+                                        <button type="button" onClick={() => removePolicy(pIdx)} className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-white rounded-lg transition-all cursor-pointer">
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
                                     </div>
-                                    <div className="flex-1">
-                                        <label className="block text-[8px] font-black text-rose-400 uppercase tracking-widest mb-1 ml-1">Mức thưởng (đ)</label>
-                                        <input type="text" value={formatNumber(rule.bonusAmount)} onChange={e => updateRule(idx, 'bonusAmount', parseNumber(e.target.value).toString())} className="w-full px-3 py-2 bg-rose-50/30 rounded-xl border-none focus:ring-1 focus:ring-rose-500 font-mono text-xs font-black text-rose-600 shadow-sm" placeholder="Nhập thưởng..." />
+                                    {/* Date Range */}
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Ngày bắt đầu *</label>
+                                            <input type="date" required value={policy.startDate} onChange={e => updatePolicy(pIdx, 'startDate', e.target.value)} className="w-full px-3 py-2 bg-white rounded-xl border-none focus:ring-1 focus:ring-rose-500 text-xs font-bold shadow-sm" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Ngày kết thúc</label>
+                                            <input type="date" value={policy.endDate} onChange={e => updatePolicy(pIdx, 'endDate', e.target.value)} className="w-full px-3 py-2 bg-white rounded-xl border-none focus:ring-1 focus:ring-rose-500 text-xs font-bold shadow-sm" placeholder="Bỏ trống = vĩnh viễn" />
+                                        </div>
                                     </div>
-                                    <button type="button" onClick={() => removeRule(idx)} className="mt-4 p-2 text-slate-300 hover:text-rose-500 hover:bg-white rounded-lg transition-all shadow-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 cursor-pointer">
-                                        <Trash2 className="w-3.5 md:w-4 h-3.5 md:h-4" />
-                                    </button>
+                                    {/* Rules */}
+                                    <div className="space-y-2">
+                                        {policy.rules.map((rule: any, rIdx: number) => (
+                                            <div key={rIdx} className="flex items-center gap-2 bg-white p-3 rounded-xl border border-slate-100 group">
+                                                <div className="flex-1">
+                                                    <label className="block text-[7px] font-black text-slate-400 uppercase tracking-widest mb-0.5 ml-1">Giá bán từ (đ)</label>
+                                                    <input type="text" value={formatNumber(rule.minSellPrice)} onChange={e => updateRule(pIdx, rIdx, 'minSellPrice', parseNumber(e.target.value).toString())} className="w-full px-2 py-1.5 bg-slate-50 rounded-lg border-none focus:ring-1 focus:ring-rose-500 font-mono text-[11px] font-bold" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <label className="block text-[7px] font-black text-rose-400 uppercase tracking-widest mb-0.5 ml-1">Mức thưởng (đ)</label>
+                                                    <input type="text" value={formatNumber(rule.bonusAmount)} onChange={e => updateRule(pIdx, rIdx, 'bonusAmount', parseNumber(e.target.value).toString())} className="w-full px-2 py-1.5 bg-rose-50/30 rounded-lg border-none focus:ring-1 focus:ring-rose-500 font-mono text-[11px] font-black text-rose-600" />
+                                                </div>
+                                                <button type="button" onClick={() => removeRule(pIdx, rIdx)} className="mt-3 p-1 text-slate-300 hover:text-rose-500 hover:bg-slate-50 rounded-lg transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 cursor-pointer">
+                                                    <X className="w-3 h-3" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <button type="button" onClick={() => addRuleToPolicy(pIdx)} className="w-full py-2 border border-dashed border-slate-200 text-slate-400 rounded-xl text-[9px] font-black uppercase tracking-widest hover:border-rose-200 hover:text-rose-500 transition-all cursor-pointer">
+                                            + Thêm mức thưởng
+                                        </button>
+                                    </div>
                                 </div>
                             ))
                         )}
                     </div>
 
                     <div className="flex gap-4">
-                        <button type="button" onClick={addRule} className="flex-1 py-3 border-2 border-dashed border-slate-200 text-slate-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:border-rose-200 hover:text-rose-500 hover:bg-rose-50/30 transition-all flex items-center justify-center gap-2 cursor-pointer">
-                            <Plus className="w-4 h-4" /> Thêm mức mới
+                        <button type="button" onClick={addPolicy} className="flex-1 py-3 border-2 border-dashed border-slate-200 text-slate-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:border-rose-200 hover:text-rose-500 hover:bg-rose-50/30 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                            <Plus className="w-4 h-4" /> Thêm chính sách mới
                         </button>
                         <button disabled={submitting} className="flex-1 py-3 bg-rose-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-rose-100 hover:bg-rose-700 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 cursor-pointer">
                             {submitting ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Check className="w-4 h-4" />}
@@ -713,14 +826,14 @@ function BonusModal({ product, onClose, onSuccess }: { product: Product, onClose
                 </form>
 
                 <ConfirmModal
-                    isOpen={deletingIdx !== null}
+                    isOpen={deletingPolicyIdx !== null}
                     title="Xác nhận xóa"
-                    message="Bạn có chắc chắn muốn xoá quy tắc thưởng này? Thao tác này sẽ cập nhật danh sách ngay lập tức."
+                    message="Bạn có chắc chắn muốn xoá chính sách thưởng này? Toàn bộ mức thưởng bên trong sẽ bị xóa theo."
                     confirmLabel="Xóa ngay"
                     cancelLabel="Quay lại"
                     isDanger={true}
-                    onConfirm={confirmDelete}
-                    onCancel={() => setDeletingIdx(null)}
+                    onConfirm={confirmDeletePolicy}
+                    onCancel={() => setDeletingPolicyIdx(null)}
                 />
             </div>
         </div>
@@ -734,6 +847,138 @@ function EmptyState({ label, icon }: { label: string, icon?: React.ReactNode }) 
             <div className="text-center">
                 <p className="text-slate-400 text-xs font-black uppercase tracking-widest italic leading-none mb-1">Dễ thở nào!</p>
                 <p className="text-slate-300 text-[10px] font-bold uppercase tracking-widest">Chưa có {label} nào được thiết lập</p>
+            </div>
+        </div>
+    );
+}
+function PricePolicyModal({ product, onClose, onSuccess }: { product: Product, onClose: () => void, onSuccess: () => void }) {
+    const [policies, setPolicies] = useState<any[]>(() =>
+        [...(product.minPricePolicies || [])].map(p => ({
+            ...p,
+            minPrice: p.minPrice.toString(),
+            startDate: p.startDate ? new Date(p.startDate).toISOString().split('T')[0] : '',
+            endDate: p.endDate ? new Date(p.endDate).toISOString().split('T')[0] : ''
+        }))
+    );
+    const [submitting, setSubmitting] = useState(false);
+    const [deletingIdx, setDeletingIdx] = useState<number | null>(null);
+    const { success, error } = useToast();
+
+    const addPolicy = () => {
+        setPolicies([...policies, { minPrice: '0', startDate: new Date().toISOString().split('T')[0], endDate: '' }]);
+    };
+
+    const updatePolicy = (idx: number, field: string, value: string) => {
+        const newPolicies = [...policies];
+        newPolicies[idx] = { ...newPolicies[idx], [field]: value };
+        setPolicies(newPolicies);
+    };
+
+    const confirmDelete = () => {
+        if (deletingIdx !== null) {
+            setPolicies(policies.filter((_, i) => i !== deletingIdx));
+            setDeletingIdx(null);
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSubmitting(true);
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${product.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    minPricePolicies: policies.map(p => ({
+                        minPrice: Number(p.minPrice),
+                        startDate: p.startDate,
+                        endDate: p.endDate || null
+                    }))
+                })
+            });
+
+            if (res.ok) {
+                success('Cập nhật chính sách giá thành công');
+                onSuccess();
+            } else {
+                error('Có lỗi xảy ra');
+            }
+        } catch (err) {
+            error('Lỗi kết nối server');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
+            <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+                <div className="p-6 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
+                    <div>
+                        <h2 className="text-base font-black text-slate-800 uppercase tracking-widest leading-none">Chính sách giá theo thời gian</h2>
+                        <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest mt-1">Sản phẩm: {product.name}</p>
+                    </div>
+                    <button onClick={onClose} className="p-2 hover:bg-white rounded-xl transition-all shadow-sm cursor-pointer"><X className="w-5 h-5 text-slate-400" /></button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="p-6">
+                    <div className="max-h-[400px] overflow-y-auto pr-2 space-y-3 mb-6 scrollbar-thin scrollbar-thumb-slate-200">
+                        {policies.length === 0 ? (
+                            <div className="text-center py-12 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                                <Calendar className="w-8 h-8 text-slate-300 mx-auto mb-3" />
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Chưa có mốc giá nào</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 gap-2">
+                                <div className="grid grid-cols-12 gap-2 px-4 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">
+                                    <div className="col-span-4">Giá tối thiểu (đ)</div>
+                                    <div className="col-span-3">Từ ngày</div>
+                                    <div className="col-span-3">Đến ngày</div>
+                                    <div className="col-span-2 text-right">Xoá</div>
+                                </div>
+                                {policies.map((p, idx) => (
+                                    <div key={idx} className="grid grid-cols-12 gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-100 group items-center">
+                                        <div className="col-span-4">
+                                            <input type="text" value={formatNumber(p.minPrice)} onChange={e => updatePolicy(idx, 'minPrice', parseNumber(e.target.value).toString())} className="w-full px-3 py-2 bg-white rounded-xl border-none focus:ring-1 focus:ring-rose-500 font-mono text-xs font-bold shadow-sm" placeholder="Nhập giá..." />
+                                        </div>
+                                        <div className="col-span-3">
+                                            <input type="date" value={p.startDate} onChange={e => updatePolicy(idx, 'startDate', e.target.value)} className="w-full px-2 py-2 bg-white rounded-xl border-none focus:ring-1 focus:ring-rose-500 text-[10px] font-bold shadow-sm" />
+                                        </div>
+                                        <div className="col-span-3">
+                                            <input type="date" value={p.endDate || ''} onChange={e => updatePolicy(idx, 'endDate', e.target.value)} className="w-full px-2 py-2 bg-white rounded-xl border-none focus:ring-1 focus:ring-rose-500 text-[10px] font-bold shadow-sm" />
+                                        </div>
+                                        <div className="col-span-2 text-right">
+                                            <button type="button" onClick={() => setDeletingIdx(idx)} className="p-2 text-slate-300 hover:text-rose-500 hover:bg-white rounded-lg transition-all shadow-sm cursor-pointer">
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="flex gap-4">
+                        <button type="button" onClick={addPolicy} className="flex-2 py-3 border-2 border-dashed border-slate-200 text-slate-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:border-blue-200 hover:text-blue-500 hover:bg-blue-50/30 transition-all flex items-center justify-center gap-2 cursor-pointer px-6">
+                            <Plus className="w-4 h-4" /> Thêm mốc giá
+                        </button>
+                        <button disabled={submitting} className="flex-1 py-3 bg-rose-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-rose-100 hover:bg-rose-700 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 cursor-pointer">
+                            {submitting ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
+                            Lưu cấu hình
+                        </button>
+                    </div>
+                </form>
+
+                <ConfirmModal
+                    isOpen={deletingIdx !== null}
+                    title="Xác nhận xóa"
+                    message="Bạn có chắc chắn muốn xoá mốc giá này?"
+                    confirmLabel="Xóa ngay"
+                    cancelLabel="Quay lại"
+                    isDanger={true}
+                    onConfirm={confirmDelete}
+                    onCancel={() => setDeletingIdx(null)}
+                />
             </div>
         </div>
     );
