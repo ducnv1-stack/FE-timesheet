@@ -170,7 +170,7 @@ export default function EmployeesPage() {
                 { wch: 15 }  // TK Status
             ];
 
-            XLSX.writeFile(wb, `Danh_sach_Nhan_vien_Ohari_${formatDate(new Date()).replace(/\//g, '-')}.xlsx`);
+            XLSX.writeFile(wb, `Danh_sach_Nhan_vien_Superb AI_${formatDate(new Date()).replace(/\//g, '-')}.xlsx`);
         } catch (error: any) {
             console.error('Export error:', error);
             toastError(error.message || 'Lỗi khi xuất file');
@@ -373,7 +373,7 @@ export default function EmployeesPage() {
                         </div>
                         <button
                             onClick={resetFilters}
-                            className="text-[10px] font-bold text-primary-light hover:text-primary px-2 py-1 bg-primary-subtle rounded-lg transition-colors cursor-pointer"
+                            className="text-[10px] font-bold text-white px-2 py-1 bg-primary rounded-lg hover:bg-primary-light transition-colors cursor-pointer"
                         >
                             ✕ Reset
                         </button>
@@ -388,7 +388,7 @@ export default function EmployeesPage() {
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 placeholder="Tên, SĐT..."
-                                className={`w-full pl-8 pr-3 py-1.5 text-[11px] font-bold border rounded-lg focus:ring-2 focus:ring-primary-light focus:border-transparent transition-all ${searchTerm ? 'border-rose-300 bg-primary-subtle' : 'border-slate-300 bg-slate-50'}`}
+                                className={`w-full pl-8 pr-3 py-1.5 text-[11px] font-bold border rounded-lg focus:ring-2 focus:ring-primary-light focus:border-transparent transition-all ${searchTerm ? 'border-primary bg-primary-subtle' : 'border-slate-300 bg-slate-50'}`}
                             />
                         </div>
                         <button
@@ -542,7 +542,7 @@ export default function EmployeesPage() {
                             <div className="lg:hidden pt-2 border-t border-slate-100 mt-1">
                                 <button
                                     onClick={resetFilters}
-                                    className="w-full py-2 bg-primary-subtle text-primary font-black text-[10px] uppercase tracking-wider rounded-lg border border-primary-subtle cursor-pointer"
+                                    className="w-full py-2 bg-primary text-white font-black text-[10px] uppercase tracking-wider rounded-lg border border-primary cursor-pointer hover:bg-primary-light"
                                 >
                                     ✕ Xóa Tất Cả Bộ Lọc
                                 </button>

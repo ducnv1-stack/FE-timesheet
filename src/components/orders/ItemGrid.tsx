@@ -56,7 +56,7 @@ export default function ItemGrid({ items, products, onChange, isUpgrade, oldOrde
 
     return (
         <div className="bg-white border-2 border-slate-800 overflow-hidden shadow-lg">
-            <div className="bg-rose-50 border-b-2 border-slate-800 p-2 text-center">
+            <div className="bg-primary-subtle border-b-2 border-slate-800 p-2 text-center">
                 <h3 className="font-bold text-slate-900 uppercase tracking-wider">
                     Danh sách hàng hóa
                 </h3>
@@ -65,7 +65,7 @@ export default function ItemGrid({ items, products, onChange, isUpgrade, oldOrde
             <div className="overflow-x-auto">
                 <table className="w-full text-xs border-collapse">
                     <thead>
-                        <tr className="bg-rose-50 border-b-2 border-slate-800 text-slate-900">
+                        <tr className="bg-primary-subtle border-b-2 border-slate-800 text-slate-900">
                             <th className="px-2 py-2 border-r-2 border-slate-800 text-center w-[40px] text-slate-900">STT</th>
                             <th className="px-4 py-2 border-r-2 border-slate-800 text-left min-w-[200px] text-slate-900">Tên hàng hóa</th>
                             <th className="px-2 py-2 border-r-2 border-slate-800 text-center w-[80px] text-slate-900">Số lượng</th>
@@ -118,7 +118,7 @@ export default function ItemGrid({ items, products, onChange, isUpgrade, oldOrde
                             return (
                                 <tr key={index} className={cn(
                                     "group transition-colors",
-                                    isBelowMin ? "bg-rose-50/50" : "hover:bg-slate-50/50"
+                                    isBelowMin ? "bg-primary-subtle/50" : "hover:bg-slate-50/50"
                                 )}>
                                     <td className="px-2 py-2 border-r-2 border-slate-800 text-center font-medium">
                                         {index + 1}
@@ -200,7 +200,7 @@ export default function ItemGrid({ items, products, onChange, isUpgrade, oldOrde
                 <button
                     onClick={addItem}
                     type="button"
-                    className="flex items-center gap-1.5 px-3 py-1 bg-rose-700 hover:bg-rose-800 text-white rounded font-bold text-[10px] uppercase tracking-wider transition-all cursor-pointer"
+                    className="flex items-center gap-1.5 px-3 py-1 bg-primary-light hover:bg-primary text-white rounded font-bold text-[10px] uppercase tracking-wider transition-all cursor-pointer"
                 >
                     <Plus size={12} /> Thêm sản phẩm
                 </button>

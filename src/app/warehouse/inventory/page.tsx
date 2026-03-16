@@ -133,7 +133,7 @@ export default function InventoryPage() {
                         <input
                             type="text"
                             placeholder="Tìm tên sản phẩm..."
-                            className="pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl w-full sm:w-64 shadow-sm focus:ring-4 focus:ring-primary-light/10 focus:border-rose-400 outline-none transition-all font-bold text-sm"
+                            className="pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl w-full sm:w-64 shadow-sm focus:ring-4 focus:ring-primary-light/10 focus:border-primary outline-none transition-all font-bold text-sm"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -142,7 +142,7 @@ export default function InventoryPage() {
                     <select
                         value={selectedBranch}
                         onChange={(e) => setSelectedBranch(e.target.value)}
-                        className="px-6 py-3 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-4 focus:ring-primary-light/10 focus:border-rose-400 outline-none font-bold text-sm transition-all"
+                        className="px-6 py-3 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-4 focus:ring-primary-light/10 focus:border-primary outline-none font-bold text-sm transition-all"
                     >
                         <option value="ALL">Tất cả kho bãi</option>
                         {branches.map(b => (
@@ -298,7 +298,7 @@ export default function InventoryPage() {
                             <div className="space-y-2">
                                 <label className="text-xs font-bold text-slate-400 tracking-widest px-1">Sản phẩm</label>
                                 <select 
-                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:bg-white focus:ring-4 focus:ring-primary-light/10 focus:border-rose-400 outline-none transition-all"
+                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:bg-white focus:ring-4 focus:ring-primary-light/10 focus:border-primary outline-none transition-all"
                                     value={importData.productId}
                                     onChange={e => setImportData({ ...importData, productId: e.target.value })}
                                 >
@@ -311,7 +311,7 @@ export default function InventoryPage() {
                             <div className="space-y-2">
                                 <label className="text-xs font-bold text-slate-400 tracking-widest px-1">Kho nhận</label>
                                 <select 
-                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:bg-white focus:ring-4 focus:ring-primary-light/10 focus:border-rose-400 outline-none transition-all"
+                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:bg-white focus:ring-4 focus:ring-primary-light/10 focus:border-primary outline-none transition-all"
                                     value={importData.branchId}
                                     onChange={e => setImportData({ ...importData, branchId: e.target.value })}
                                 >
@@ -325,7 +325,7 @@ export default function InventoryPage() {
                                 <label className="text-xs font-bold text-slate-400 tracking-widest px-1">Số lượng</label>
                                 <input 
                                     type="number"
-                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:bg-white focus:ring-4 focus:ring-primary-light/10 focus:border-rose-400 outline-none transition-all"
+                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:bg-white focus:ring-4 focus:ring-primary-light/10 focus:border-primary outline-none transition-all"
                                     value={importData.quantity}
                                     onChange={e => setImportData({ ...importData, quantity: parseInt(e.target.value) })}
                                 />
@@ -333,7 +333,7 @@ export default function InventoryPage() {
                             <div className="space-y-2">
                                 <label className="text-xs font-bold text-slate-400 tracking-widest px-1">Số Serial (Cố định bằng "," nếu có)</label>
                                 <input 
-                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:bg-white focus:ring-4 focus:ring-primary-light/10 focus:border-rose-400 outline-none transition-all"
+                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:bg-white focus:ring-4 focus:ring-primary-light/10 focus:border-primary outline-none transition-all"
                                     placeholder="SN123, SN456..."
                                     value={importData.serials}
                                     onChange={e => setImportData({ ...importData, serials: e.target.value })}
@@ -344,7 +344,7 @@ export default function InventoryPage() {
                         <div className="space-y-2 pt-2">
                             <label className="text-xs font-bold text-slate-400 tracking-widest px-1">Ghi chú</label>
                             <textarea 
-                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:bg-white focus:ring-4 focus:ring-primary-light/10 focus:border-rose-400 outline-none transition-all h-24 resize-none"
+                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:bg-white focus:ring-4 focus:ring-primary-light/10 focus:border-primary outline-none transition-all h-24 resize-none"
                                 value={importData.note}
                                 onChange={e => setImportData({ ...importData, note: e.target.value })}
                             />

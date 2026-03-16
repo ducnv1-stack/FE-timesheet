@@ -62,7 +62,7 @@ export default function EmployeeOrdersModal({ employee, month, year, onClose }: 
                 <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50/50">
                     <div>
                         <h2 className="text-xl font-black text-slate-800 flex items-center gap-2">
-                            <Package className="text-rose-500" />
+                            <Package className="text-primary-light" />
                             Đơn hàng của {employee.fullName}
                         </h2>
                         <p className="text-sm text-slate-500 mt-1 flex items-center gap-4 font-medium">
@@ -72,7 +72,7 @@ export default function EmployeeOrdersModal({ employee, month, year, onClose }: 
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+                        className="p-2 text-slate-400 hover:text-primary hover:bg-primary-subtle rounded-xl transition-colors cursor-pointer"
                     >
                         <X size={24} />
                     </button>
@@ -106,7 +106,7 @@ export default function EmployeeOrdersModal({ employee, month, year, onClose }: 
                                         ))
                                     ) : orders.length > 0 ? (
                                         orders.map((order: any, idx) => (
-                                            <tr key={order.id} className="hover:bg-rose-50/30 transition-colors group">
+                                            <tr key={order.id} className="hover:bg-primary-subtle/30 transition-colors group">
                                                 {/* Thời gian */}
                                                 <td className="px-3 py-2 whitespace-nowrap border-r border-slate-100 align-top">
                                                     <div className="font-bold text-slate-700">{formatDate(order.orderDate)}</div>
@@ -162,7 +162,7 @@ export default function EmployeeOrdersModal({ employee, month, year, onClose }: 
                                                         const displayAmount = userSplit ? userSplit.splitAmount : order.totalAmount;
                                                         return (
                                                             <div className="flex flex-col items-end gap-1">
-                                                                <div className="font-black text-rose-600">{formatCurrency(displayAmount)}</div>
+                                                                <div className="font-black text-primary">{formatCurrency(displayAmount)}</div>
                                                                 {userSplit && (
                                                                     <div className="text-[10px] text-slate-500 font-bold bg-slate-100 px-1 rounded">
                                                                         (Chia DT: {formatCurrency(order.totalAmount)})

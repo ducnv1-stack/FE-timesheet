@@ -55,7 +55,7 @@ export default function LoginPage() {
             <div className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
                 <div className="pt-10 pb-6 px-8 text-center">
                     <div className="flex justify-center mb-4">
-                        <img src="/logo.png" alt="Ohari Logo" className="h-28 w-auto object-contain drop-shadow-sm" />
+                        <img src="/logo.png" alt="Superb AI Logo" className="h-28 w-auto object-contain drop-shadow-sm" />
                     </div>
                     {/* <p className="text-slate-500 text-base font-medium">HỆ THỐNG QUẢN LÝ - TÍNH LƯƠNG</p> */}
                 </div>
@@ -101,7 +101,7 @@ export default function LoginPage() {
                         </button>
 
                         <div className="text-center text-xs text-slate-400 mt-6">
-                            © 2026 OHARI GROUP. All rights reserved.
+                            © 2026 Superb AI GROUP. All rights reserved.
                         </div>
                     </form>
                 </div>

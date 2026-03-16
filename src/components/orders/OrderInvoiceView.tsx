@@ -57,7 +57,7 @@ export default function OrderInvoiceView({ order, onBack }: OrderInvoiceViewProp
             <div className="bg-slate-900 px-3 md:px-4 py-2.5 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-0 no-print rounded-t-2xl">
                 <div className="flex items-center justify-between w-full md:w-auto">
                     <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 bg-rose-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-rose-900/20 shrink-0">
+                        <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white shadow-lg shadow-primary/20 shrink-0">
                             <Printer size={16} />
                         </div>
                         <div>
@@ -69,7 +69,7 @@ export default function OrderInvoiceView({ order, onBack }: OrderInvoiceViewProp
                     {onBack && (
                         <button
                             onClick={onBack}
-                            className="w-8 h-8 flex md:hidden items-center justify-center bg-white/10 hover:bg-rose-600 text-white rounded-lg transition-all cursor-pointer shrink-0"
+                            className="w-8 h-8 flex md:hidden items-center justify-center bg-white/10 hover:bg-primary text-white rounded-lg transition-all cursor-pointer shrink-0"
                         >
                             <X size={16} />
                         </button>
@@ -90,7 +90,7 @@ export default function OrderInvoiceView({ order, onBack }: OrderInvoiceViewProp
                                 {(!order.isUpgrade) && (
                                     <button
                                         onClick={() => router.push(`/orders/upgrade?from=${order.id}`)}
-                                        className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg text-[11px] font-bold transition-all active:scale-95 cursor-pointer shadow-sm flex-1 md:flex-none whitespace-nowrap"
+                                        className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary-subtle hover:bg-primary-subtle text-primary border border-primary-subtle rounded-lg text-[11px] font-bold transition-all active:scale-95 cursor-pointer shadow-sm flex-1 md:flex-none whitespace-nowrap"
                                     >
                                         <ArrowUpCircle size={13} /> Nâng cấp đơn
                                     </button>
@@ -106,7 +106,7 @@ export default function OrderInvoiceView({ order, onBack }: OrderInvoiceViewProp
                                 ) : (
                                     <button
                                         onClick={() => router.push(`/orders/edit/${order.id}`)}
-                                        className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[11px] font-bold transition-all active:scale-95 cursor-pointer flex-1 md:flex-none whitespace-nowrap"
+                                        className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary-light text-white rounded-lg text-[11px] font-bold transition-all active:scale-95 cursor-pointer flex-1 md:flex-none whitespace-nowrap"
                                     >
                                         <Edit3 size={13} /> Sửa hóa đơn
                                     </button>
@@ -123,7 +123,7 @@ export default function OrderInvoiceView({ order, onBack }: OrderInvoiceViewProp
                     {onBack && (
                         <button
                             onClick={onBack}
-                            className="hidden md:flex w-8 h-8 items-center justify-center bg-white/10 hover:bg-rose-600 text-white rounded-lg transition-all cursor-pointer shrink-0"
+                            className="hidden md:flex w-8 h-8 items-center justify-center bg-white/10 hover:bg-primary text-white rounded-lg transition-all cursor-pointer shrink-0"
                         >
                             <X size={16} />
                         </button>

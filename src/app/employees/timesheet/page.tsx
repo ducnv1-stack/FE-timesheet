@@ -585,99 +585,81 @@ export default function TimesheetPage() {
                 </div>
             </div>
 
-            {/* Tabs - Underline style from Orders Page */}
+            {/* Tabs - Now using full navy background for active state */}
             {canViewOthers && (
                 <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                    <div className="flex border-b border-slate-200 w-full">
+                    <div className="flex border-b border-slate-200 w-full p-1 gap-1">
                         <button
                             onClick={() => setActiveTab('MY')}
                             className={cn(
-                                "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5",
+                                "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5 rounded-lg",
                                 activeTab === 'MY'
-                                    ? "text-primary bg-primary-light cursor-pointer font-black"
-                                    : "text-slate-600 hover:bg-slate-50 cursor-pointer"
+                                    ? "text-white bg-primary shadow-sm font-black"
+                                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                             )}
                         >
                             <span className="tracking-wider">Công cá nhân</span>
-                            {activeTab === 'MY' && (
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
-                            )}
                         </button>
                         <button
                             onClick={() => { setActiveTab('EMPLOYEES'); setViewMode('LIST'); }}
                             className={cn(
-                                "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5",
+                                "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5 rounded-lg",
                                 activeTab === 'EMPLOYEES'
-                                    ? "text-primary bg-primary-light cursor-pointer font-black"
-                                    : "text-slate-600 hover:bg-slate-50 cursor-pointer"
+                                    ? "text-white bg-primary shadow-sm font-black"
+                                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                             )}
                         >
                             <span className="tracking-wider">Công nhân viên</span>
-                            {activeTab === 'EMPLOYEES' && (
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
-                            )}
                         </button>
                         <button
                             onClick={() => setActiveTab('EXCEPTION_REQUESTS')}
                             className={cn(
-                                "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5",
+                                "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5 rounded-lg",
                                 activeTab === 'EXCEPTION_REQUESTS'
-                                    ? "text-primary bg-primary-light cursor-pointer font-black"
-                                    : "text-slate-600 hover:bg-slate-50 cursor-pointer"
+                                    ? "text-white bg-primary shadow-sm font-black"
+                                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                             )}
                         >
                             <FileText size={13} />
                             <span className="tracking-wider">Đơn giải trình</span>
-                            {activeTab === 'EXCEPTION_REQUESTS' && (
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
-                            )}
                         </button>
                         <button
                             onClick={() => setActiveTab('AUDIT_LOGS')}
                             className={cn(
-                                "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5",
+                                "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5 rounded-lg",
                                 activeTab === 'AUDIT_LOGS'
-                                    ? "text-primary bg-primary-light cursor-pointer font-black"
-                                    : "text-slate-600 hover:bg-slate-50 cursor-pointer"
+                                    ? "text-white bg-primary shadow-sm font-black"
+                                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                             )}
                         >
                             <History size={13} />
                             <span className="tracking-wider">Lịch sử sửa</span>
-                            {activeTab === 'AUDIT_LOGS' && (
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
-                            )}
                         </button>
                         {canManageSettings && (
                             <>
                                 <button
                                     onClick={() => setActiveTab('SETTINGS')}
                                     className={cn(
-                                        "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5",
+                                        "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5 rounded-lg",
                                         activeTab === 'SETTINGS'
-                                            ? "text-primary bg-primary-light cursor-pointer font-black"
-                                            : "text-slate-600 hover:bg-slate-50 cursor-pointer"
+                                            ? "text-white bg-primary shadow-sm font-black"
+                                            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                                     )}
                                 >
                                     <Settings size={13} />
                                     <span className="tracking-wider">Cài đặt ca</span>
-                                    {activeTab === 'SETTINGS' && (
-                                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
-                                    )}
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('SALARY_SETTINGS')}
                                     className={cn(
-                                        "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5",
+                                        "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5 rounded-lg",
                                         activeTab === 'SALARY_SETTINGS'
-                                            ? "text-primary bg-primary-light cursor-pointer font-black"
-                                            : "text-slate-600 hover:bg-slate-50 cursor-pointer"
+                                            ? "text-white bg-primary shadow-sm font-black"
+                                            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                                     )}
                                 >
                                     <Banknote size={13} />
                                     <span className="tracking-wider">Cài đặt lương</span>
-                                    {activeTab === 'SALARY_SETTINGS' && (
-                                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
-                                    )}
                                 </button>
                             </>
                         )}
@@ -746,7 +728,7 @@ export default function TimesheetPage() {
                         <div className="relative">
                             <button
                                 onClick={resetFilters}
-                                className="w-full h-[28px] flex items-center justify-center gap-1.5 px-3 py-0 rounded-lg text-[10.5px] font-bold transition-all border bg-primary-light text-primary border-primary/20 hover:bg-primary hover:text-white cursor-pointer"
+                                className="w-full h-[28px] flex items-center justify-center gap-1.5 px-3 py-0 rounded-lg text-[10.5px] font-bold transition-all border bg-primary-light text-white border-primary/20 hover:bg-primary cursor-pointer"
                                 title="Xoá toàn bộ bộ lọc"
                             >
                                 ✕ Reset
@@ -1086,37 +1068,37 @@ export default function TimesheetPage() {
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Tên ca *</label>
                                     <input value={shiftForm.name} onChange={e => setShiftForm({...shiftForm, name: e.target.value})}
-                                        placeholder="VD: Ca hành chính" className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-primary-subtle" />
+                                        placeholder="VD: Ca hành chính" className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-primary focus:ring-2 focus:ring-primary-subtle" />
                                 </div>
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Giờ vào</label>
                                     <input type="time" value={shiftForm.startTime} onChange={e => setShiftForm({...shiftForm, startTime: e.target.value})}
-                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-primary-subtle" />
+                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-primary focus:ring-2 focus:ring-primary-subtle" />
                                 </div>
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Giờ ra</label>
                                     <input type="time" value={shiftForm.endTime} onChange={e => setShiftForm({...shiftForm, endTime: e.target.value})}
-                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-primary-subtle" />
+                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-primary focus:ring-2 focus:ring-primary-subtle" />
                                 </div>
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Nghỉ giữa ca (phút)</label>
                                     <input type="number" value={shiftForm.breakMinutes} onChange={e => setShiftForm({...shiftForm, breakMinutes: parseInt(e.target.value) || 0})}
-                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-primary-subtle" />
+                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-primary focus:ring-2 focus:ring-primary-subtle" />
                                 </div>
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Muộn (phút)</label>
                                     <input type="number" value={shiftForm.lateThreshold} onChange={e => setShiftForm({...shiftForm, lateThreshold: parseInt(e.target.value) || 0})}
-                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-primary-subtle" />
+                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-primary focus:ring-2 focus:ring-primary-subtle" />
                                 </div>
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Muộn nghiêm trọng (phút)</label>
                                     <input type="number" value={shiftForm.lateSeriousThreshold} onChange={e => setShiftForm({...shiftForm, lateSeriousThreshold: parseInt(e.target.value) || 0})}
-                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-primary-subtle" />
+                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-primary focus:ring-2 focus:ring-primary-subtle" />
                                 </div>
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Về sớm (phút)</label>
                                     <input type="number" value={shiftForm.earlyLeaveThreshold} onChange={e => setShiftForm({...shiftForm, earlyLeaveThreshold: parseInt(e.target.value) || 0})}
-                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-rose-400 focus:ring-2 focus:ring-primary-subtle" />
+                                        className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-primary focus:ring-2 focus:ring-primary-subtle" />
                                 </div>
                             </div>
                             <div className="flex justify-end gap-2 pt-2">

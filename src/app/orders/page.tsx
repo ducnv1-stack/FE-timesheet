@@ -847,7 +847,7 @@ function OrdersPageContent() {
                                 placeholder="Tìm khách, SĐT, mã đơn..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className={`w-full pl-8 pr-2 py-1.5 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none transition-all text-[11px] font-bold cursor-text ${searchTerm ? 'border-rose-300' : 'border-slate-200'}`}
+                                className={`w-full pl-8 pr-2 py-1.5 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-primary outline-none transition-all text-[11px] font-bold cursor-text ${searchTerm ? 'border-primary' : 'border-slate-200'}`}
                             />
                         </div>
                         <button
@@ -876,7 +876,7 @@ function OrdersPageContent() {
                                 placeholder="Tìm khách, SĐT, mã đơn..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className={`w-full pl-8 pr-2 py-1 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none transition-all text-[10.5px] font-medium cursor-text ${searchTerm ? 'border-rose-300' : 'border-slate-200'}`}
+                                className={`w-full pl-8 pr-2 py-1 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-primary outline-none transition-all text-[10.5px] font-medium cursor-text ${searchTerm ? 'border-primary' : 'border-slate-200'}`}
                             />
                         </div>
 
@@ -886,7 +886,7 @@ function OrdersPageContent() {
                             <select
                                 value={statusFilter}
                                 onChange={(e: any) => setStatusFilter(e.target.value)}
-                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${statusFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-primary outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${statusFilter !== 'all' ? 'border-primary font-bold' : 'border-slate-200'}`}
                             >
                                 <option value="all">Tất cả trạng thái</option>
                                 <option value="pending">⏳ Chờ giao</option>
@@ -909,7 +909,7 @@ function OrdersPageContent() {
                                             setEndDate('');
                                         }
                                     }}
-                                    className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${timeFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                                    className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-primary outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${timeFilter !== 'all' ? 'border-primary font-bold' : 'border-slate-200'}`}
                                 >
                                     <option value="all">Thời gian: Tất cả</option>
                                     <option value="today">Hôm nay</option>
@@ -945,7 +945,7 @@ function OrdersPageContent() {
                                     setPaymentMethodFilter(e.target.value);
                                     setExcludeInstallment(false);
                                 }}
-                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${paymentMethodFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-primary outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${paymentMethodFilter !== 'all' ? 'border-primary font-bold' : 'border-slate-200'}`}
                             >
                                 <option value="all">PTTT: Tất cả</option>
                                 <option value="CASH">💵 Tiền mặt</option>
@@ -965,7 +965,7 @@ function OrdersPageContent() {
                                     setPaymentStatusFilter(e.target.value);
                                     setExcludeInstallment(false);
                                 }}
-                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${paymentStatusFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-primary outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${paymentStatusFilter !== 'all' ? 'border-primary font-bold' : 'border-slate-200'}`}
                             >
                                 <option value="all">Thanh toán: Tất cả</option>
                                 <option value="confirmed">✅ Đã thanh toán đủ</option>
@@ -979,7 +979,7 @@ function OrdersPageContent() {
                             <select
                                 value={invoiceStatusFilter}
                                 onChange={(e: any) => setInvoiceStatusFilter(e.target.value)}
-                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${invoiceStatusFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-primary outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${invoiceStatusFilter !== 'all' ? 'border-primary font-bold' : 'border-slate-200'}`}
                             >
                                 <option value="all">Hóa đơn: Tất cả</option>
                                 <option value="pending">⏳ Chưa xuất HĐ</option>
@@ -1001,7 +1001,7 @@ function OrdersPageContent() {
                                             setEditEndDate('');
                                         }
                                     }}
-                                    className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${editTimeFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                                    className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-primary outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${editTimeFilter !== 'all' ? 'border-primary font-bold' : 'border-slate-200'}`}
                                 >
                                     <option value="all">Sửa gần nhất: Tất cả</option>
                                     <option value="today">Sửa: Hôm nay</option>
@@ -1041,7 +1041,7 @@ function OrdersPageContent() {
                                             setConfirmedEndDate('');
                                         }
                                     }}
-                                    className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${confirmedTimeFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                                    className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-primary outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${confirmedTimeFilter !== 'all' ? 'border-primary font-bold' : 'border-slate-200'}`}
                                 >
                                     <option value="all">Xác nhận: Tất cả</option>
                                     <option value="today">XN: Hôm nay</option>
@@ -1074,7 +1074,7 @@ function OrdersPageContent() {
                             <select
                                 value={deliveryTypeFilter}
                                 onChange={(e: any) => setDeliveryTypeFilter(e.target.value)}
-                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${deliveryTypeFilter !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'}`}
+                                className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-primary outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${deliveryTypeFilter !== 'all' ? 'border-primary font-bold' : 'border-slate-200'}`}
                             >
                                 <option value="all">Lái xe: Tất cả</option>
                                 <option value="company">🏢 Xe công ty</option>
@@ -1093,7 +1093,7 @@ function OrdersPageContent() {
                                         setSelectedEmployeeId('all');
                                     }}
                                     disabled={isManager}
-                                    className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${selectedBranchId !== 'all' ? 'border-rose-300 font-bold' : 'border-slate-200'} ${isManager ? 'opacity-70 cursor-not-allowed bg-slate-100' : ''}`}
+                                    className={`w-full pl-8 pr-2 h-[28px] py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-primary outline-none appearance-none transition-all text-[10.5px] font-medium cursor-pointer ${selectedBranchId !== 'all' ? 'border-primary font-bold' : 'border-slate-200'} ${isManager ? 'opacity-70 cursor-not-allowed bg-slate-100' : ''}`}
                                 >
                                     {isGlobalRole && <option value="all">Tất cả chi nhánh</option>}
                                     {branches.map(b => (
@@ -1154,7 +1154,7 @@ function OrdersPageContent() {
                         <div className="relative lg:hidden">
                             <button
                                 onClick={resetFilters}
-                                className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all border bg-primary-subtle text-primary-light border-primary-subtle hover:bg-primary-light hover:text-white cursor-pointer"
+                                className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all border bg-primary text-white border-primary hover:bg-primary-light cursor-pointer"
                                 title="Xoá toàn bộ bộ lọc"
                             >
                                 ✕ Reset
@@ -1165,7 +1165,7 @@ function OrdersPageContent() {
                         <div className="relative hidden lg:block">
                             <button
                                 onClick={resetFilters}
-                                className="w-full flex items-center justify-center gap-1.5 px-3 h-[28px] py-0 rounded-lg text-[10.5px] font-bold transition-all border bg-primary-subtle text-primary-light border-primary-subtle hover:bg-primary-light hover:text-white cursor-pointer"
+                                className="w-full flex items-center justify-center gap-1.5 px-3 h-[28px] py-0 rounded-lg text-[10.5px] font-bold transition-all border bg-primary text-white border-primary hover:bg-primary-light cursor-pointer"
                                 title="Xoá toàn bộ bộ lọc"
                             >
                                 ✕ Reset

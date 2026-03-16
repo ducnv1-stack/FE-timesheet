@@ -118,7 +118,7 @@ export default function LogDetailModal({ log, onClose }: LogDetailModalProps) {
         checkField('customerCardIssueDate', 'Ngày cấp CCCD', <Calendar size={18} />, 'text-slate-500', 'bg-slate-50', false, true);
 
         // 3. Status & Confirmation
-        checkField('status', 'Trạng thái đơn', <Activity size={18} />, 'text-rose-500', 'bg-rose-50');
+        checkField('status', 'Trạng thái đơn', <Activity size={18} />, 'text-primary-light', 'bg-primary-subtle');
         if (oldData?.isPaymentConfirmed !== newData?.isPaymentConfirmed) {
             list.push({
                 label: 'Xác nhận tiền',
@@ -179,8 +179,8 @@ export default function LogDetailModal({ log, onClose }: LogDetailModalProps) {
                 old: (oldData?.gifts || []).map((g: any) => `${g.gift?.name || g.name} (x${g.quantity})`).join(', ') || 'Không có',
                 new: (newData?.gifts || []).map((g: any) => `${g.gift?.name || g.name} (x${g.quantity})`).join(', ') || 'Không có',
                 icon: <Gift size={18} />,
-                color: 'text-pink-500',
-                bgColor: 'bg-pink-50'
+                color: 'text-primary-light',
+                bgColor: 'bg-primary-subtle'
             });
         }
 
@@ -212,8 +212,8 @@ export default function LogDetailModal({ log, onClose }: LogDetailModalProps) {
                 old: oldDriver ? `${oldDriver.driver?.fullName || 'Lái xe'} - ${formatCurrency(Number(oldDriver.deliveryFee))}` : 'Chưa gán',
                 new: newDriver ? `${newDriver.driver?.fullName || 'Lái xe'} - ${formatCurrency(Number(newDriver.deliveryFee))}` : 'Chưa gán',
                 icon: <Truck size={18} />,
-                color: 'text-rose-600',
-                bgColor: 'bg-rose-50'
+                color: 'text-primary',
+                bgColor: 'bg-primary-subtle'
             });
         }
 
@@ -285,7 +285,7 @@ export default function LogDetailModal({ log, onClose }: LogDetailModalProps) {
 
                     <button
                         onClick={onClose}
-                        className="relative z-20 w-10 h-10 rounded-xl bg-white/5 hover:bg-rose-500/20 hover:text-rose-500 text-white/40 transition-all duration-300 flex items-center justify-center group cursor-pointer border border-white/5"
+                        className="relative z-20 w-10 h-10 rounded-xl bg-white/5 hover:bg-primary-light/20 hover:text-primary-light text-white/40 transition-all duration-300 flex items-center justify-center group cursor-pointer border border-white/5"
                     >
                         <X size={24} />
                     </button>
@@ -435,7 +435,7 @@ export default function LogDetailModal({ log, onClose }: LogDetailModalProps) {
                 <div className="py-1.5 px-6 bg-slate-900 border-t border-white/5 flex justify-between items-center relative overflow-hidden shrink-0">
                     <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
                     <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.3em] relative z-10 italic">
-                        Ohari - Quản Lý Hóa Đơn & Lịch Sử Thay Đổi Hệ Thống
+                        Superb AI - Quản Lý Hóa Đơn & Lịch Sử Thay Đổi Hệ Thống
                     </p>
                     <button
                         onClick={onClose}

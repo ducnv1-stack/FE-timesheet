@@ -234,7 +234,7 @@ export default function BranchesPage() {
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div className="space-y-1">
                     <h1 className="text-4xl font-bold text-slate-900 tracking-tight flex items-center gap-4">
-                        <div className="p-3 bg-primary-light text-primary rounded-2xl shadow-xl shadow-primary-light/50">
+                        <div className="p-3 bg-primary text-white rounded-2xl shadow-xl shadow-primary/20">
                             <Building2 size={32} />
                         </div>
                         Quản lý chi nhánh
@@ -269,14 +269,14 @@ export default function BranchesPage() {
             {/* Quick Stats / Filter */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4">
-                    <div className="p-3 bg-primary-light text-primary rounded-2xl"><LayoutGrid size={24} /></div>
+                    <div className="p-3 bg-primary text-white rounded-2xl shadow-sm"><LayoutGrid size={24} /></div>
                     <div>
                         <p className="text-xs font-bold text-slate-400 tracking-widest">Tổng số chi nhánh</p>
                         <p className="text-2xl font-bold text-slate-900">{branches.filter(b => b.branchType === 'CHI_NHANH').length}</p>
                     </div>
                 </div>
                 <div className="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4">
-                    <div className="p-3 bg-primary-light text-primary rounded-2xl"><Building2 size={24} /></div>
+                    <div className="p-3 bg-primary text-white rounded-2xl shadow-sm"><Building2 size={24} /></div>
                     <div>
                         <p className="text-xs font-bold text-slate-400 tracking-widest">Đang hoạt động</p>
                         <p className="text-2xl font-bold text-slate-900">{branches.filter(b => b.branchType === 'CHI_NHANH').length}</p>
@@ -302,7 +302,7 @@ export default function BranchesPage() {
                             <label className="text-xs font-bold text-slate-400 tracking-widest px-1">Tên chi nhánh</label>
                             <input
                                 className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
-                                placeholder="VD: Ohari Hà Nội"
+                                placeholder="VD: Superb AI Hà Nội"
                                 value={newBranch.name}
                                 onChange={e => setNewBranch({ ...newBranch, name: e.target.value })}
                             />
@@ -398,15 +398,15 @@ export default function BranchesPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {filteredBranches.map((branch) => (
                         <div key={branch.id} className="bg-white rounded-[2.5rem] p-8 shadow-2xl shadow-slate-200/40 border border-slate-50 space-y-8 group hover:border-primary-subtle transition-all duration-500 relative overflow-hidden">
-                            <div className="absolute -right-12 -top-12 w-28 h-28 rotate-45 flex items-end justify-center pb-2 text-[10px] font-black uppercase tracking-widest text-white shadow-lg bg-primary-light">
+                            <div className="absolute -right-12 -top-12 w-28 h-28 rotate-45 flex items-end justify-center pb-2 text-[10px] font-black uppercase tracking-widest text-white shadow-lg bg-primary">
                                 CN
                             </div>
 
                             <div className="flex items-start justify-between">
                                 <div className="flex items-center gap-4">
                                     <div className={cn(
-                                        "w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-lg",
-                                        branch.branchType === 'KHO_TONG' ? "bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white group-hover:shadow-blue-200" : "bg-primary-light text-primary group-hover:bg-primary group-hover:text-white group-hover:shadow-primary/20"
+                                        "w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-lg font-bold",
+                                        branch.branchType === 'KHO_TONG' ? "bg-blue-600 text-white" : "bg-primary text-white"
                                     )}>
                                         {branch.branchType === 'KHO_TONG' ? <Warehouse size={28} /> : <Building2 size={28} />}
                                     </div>
@@ -465,7 +465,7 @@ export default function BranchesPage() {
                                 <button
                                     onClick={() => getCurrentLocation(branch.id)}
                                     disabled={fetchingGpsId === branch.id}
-                                    className="p-3 bg-primary-light text-primary rounded-xl hover:bg-primary-subtle transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                                    className="p-3 bg-primary text-white rounded-xl hover:bg-primary-light transition-all active:scale-95 disabled:opacity-50 cursor-pointer shadow-sm"
                                     title="Lấy tọa độ hiện tại"
                                 >
                                     {fetchingGpsId === branch.id ? <Loader2 size={20} className="animate-spin" /> : <LocateFixed size={20} />}
@@ -494,8 +494,8 @@ export default function BranchesPage() {
                                     className={cn(
                                         "flex-1 flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl text-xs font-bold tracking-widest transition-all shadow-sm active:scale-95 disabled:opacity-50 cursor-pointer",
                                         justFetchedId === branch.id 
-                                            ? "bg-accent text-white hover:bg-emerald-700 animate-bounce shadow-accent/20" 
-                                            : "bg-primary-light text-primary hover:bg-primary hover:text-white"
+                                            ? "bg-accent text-white hover:bg-accent/90 animate-bounce shadow-accent/20" 
+                                            : "bg-primary text-white hover:bg-primary/90"
                                     )}
                                 >
                                     {saving === branch.id ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}

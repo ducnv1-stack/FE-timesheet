@@ -460,19 +460,19 @@ export default function EditOrderPage() {
                     {/* Brand Header */}
                     <div className="flex justify-between items-start mb-8">
                         <div className="space-y-4">
-                            <img src="/logo.png" alt="Ohari Logo" className="h-12 w-auto object-contain" />
+                            <img src="/logo.png" alt="Superb AI Logo" className="h-12 w-auto object-contain" />
                             <div className="space-y-1">
-                                <p className="text-xs font-black text-slate-800 uppercase tracking-tighter">Công ty TNHH Tập đoàn OHARI</p>
+                                <p className="text-xs font-black text-slate-800 uppercase tracking-tighter">Công ty TNHH Tập đoàn Superb AI</p>
                                 <p className="text-[10px] text-slate-500 max-w-[200px] leading-relaxed">
                                     {(() => {
                                         const b = branches.find(b => b.id === order.branchId);
-                                        return b?.address || b?.name || 'Chi nhánh Ohari';
+                                        return b?.address || b?.name || 'Chi nhánh Superb AI';
                                     })()}
                                 </p>
                             </div>
                         </div>
                         <div className="text-right">
-                            <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-1">Ohari</h1>
+                            <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-1">Superb AI</h1>
                             <p className="text-accent font-black text-sm uppercase tracking-widest">Hệ thống ERP</p>
                         </div>
                     </div>
@@ -490,7 +490,7 @@ export default function EditOrderPage() {
                                 <div className="flex items-center gap-2">
                                     <span className="px-2.5 py-1 bg-primary text-white text-[10px] font-black rounded uppercase tracking-wider">Đơn hàng nâng cấp</span>
                                     {order.oldOrderCode && (
-                                        <span className="text-xs font-bold text-rose-900 bg-primary-subtle px-2 py-0.5 rounded">Mã gốc: #{order.oldOrderCode}</span>
+                                        <span className="text-xs font-bold text-primary bg-primary-subtle px-2 py-0.5 rounded">Mã gốc: #{order.oldOrderCode}</span>
                                     )}
                                 </div>
                                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Thông tin sản phẩm cũ đã thu hồi</div>
@@ -816,7 +816,7 @@ export default function EditOrderPage() {
                             <div>
                                 * Ngày in: {isMounted ? formatDateTime(new Date()) : '...'}
                             </div>
-                            <div className="text-right">Hệ thống quản lý Ohari</div>
+                            <div className="text-right">Hệ thống quản lý Superb AI</div>
                         </div>
                     </div>
                 </div>
@@ -986,7 +986,7 @@ export default function EditOrderPage() {
 
                     {/* Instructions Section */}
                     <div className="bg-primary-subtle border border-primary-subtle rounded-xl p-4">
-                        <h4 className="font-bold text-rose-900 text-sm mb-2 flex items-center gap-2">
+                        <h4 className="font-bold text-primary text-sm mb-2 flex items-center gap-2">
                             <Info size={16} /> Hướng dẫn
                         </h4>
                         <p className="text-xs text-primary leading-relaxed">

@@ -9,8 +9,8 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
 export const metadata: Metadata = {
-  title: "Ohari - Revenue Aggregation System",
-  description: "Enterprise revenue and order management system",
+  title: "Superb AI - Timesheet",
+  description: "Timesheet",
 };
 
 export const viewport = {

@@ -24,7 +24,7 @@ const FixedDatePicker: React.FC<FixedDatePickerProps> = ({
     return (
         <div 
             className={cn(
-                "relative group flex items-center justify-between bg-white border border-slate-200 rounded px-2 py-0.5 font-medium text-slate-900 hover:border-rose-300 transition-all",
+                "relative group flex items-center justify-between bg-white border border-slate-200 rounded px-2 py-0.5 font-medium text-slate-900 hover:border-primary transition-all",
                 disabled && "opacity-60 cursor-not-allowed",
                 className
             )}
@@ -36,7 +36,7 @@ const FixedDatePicker: React.FC<FixedDatePickerProps> = ({
             )}>
                 {displayValue || placeholder}
             </span>
-            <Calendar size={14} className="ml-2 text-slate-400 group-hover:text-rose-500 transition-colors shrink-0" />
+            <Calendar size={14} className="ml-2 text-slate-400 group-hover:text-primary-light transition-colors shrink-0" />
 
             {/* Input gốc (Logic layer - Nằm đè lên trên để nhận click trực tiếp) */}
             <input

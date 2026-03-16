@@ -99,7 +99,7 @@ export default function AddressSelector({
                                 e.stopPropagation();
                                 onChange({ provinceId: '', wardId: '', customerAddress: '' });
                             }}
-                            className="p-1 hover:bg-rose-50 rounded-full text-rose-500 transition-colors shrink-0 print:hidden cursor-pointer"
+                            className="p-1 hover:bg-primary-subtle rounded-full text-primary-light transition-colors shrink-0 print:hidden cursor-pointer"
                             title="Xóa địa chỉ"
                         >
                             <X size={12} />
@@ -118,11 +118,11 @@ export default function AddressSelector({
                     <div className="absolute top-0 left-0 w-full md:w-[450px] bg-white border-2 border-slate-800 rounded-xl shadow-2xl z-[70] p-4 space-y-4 animate-in fade-in zoom-in duration-200">
                         <div className="flex justify-between items-center border-b border-slate-100 pb-3 mb-1">
                             <span className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-1.5 tracking-widest">
-                                <MapPin size={12} className="text-rose-600" /> Vị trí khách hàng
+                                <MapPin size={12} className="text-primary" /> Vị trí khách hàng
                             </span>
                             <button
                                 onClick={() => setIsExpanded(false)}
-                                className="p-1 hover:bg-rose-50 rounded-full text-rose-600 transition-colors cursor-pointer"
+                                className="p-1 hover:bg-primary-subtle rounded-full text-primary transition-colors cursor-pointer"
                             >
                                 <X size={16} />
                             </button>
@@ -165,7 +165,7 @@ export default function AddressSelector({
                                     if (e.key === 'Enter') setIsExpanded(false);
                                 }}
                                 placeholder="VD: 1012 Đường Láng..."
-                                className="w-full bg-slate-50 border-2 border-slate-100 rounded-lg px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:border-rose-500 transition-all placeholder:font-normal"
+                                className="w-full bg-slate-50 border-2 border-slate-100 rounded-lg px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:border-primary-light transition-all placeholder:font-normal"
                             />
                         </div>
 
@@ -237,7 +237,7 @@ function SearchableDropdown({
                 onClick={() => setIsOpen(!isOpen)}
                 className={cn(
                     "flex items-center justify-between w-full bg-slate-50 border-2 border-slate-100 rounded-lg px-3 py-2 text-sm font-bold text-slate-700 hover:border-slate-200 transition-all cursor-pointer group",
-                    isOpen && "border-rose-500 bg-white"
+                    isOpen && "border-primary-light bg-white"
                 )}
             >
                 <span className={cn("truncate", !selectedOption && "text-slate-400 font-normal")}>
@@ -273,12 +273,12 @@ function SearchableDropdown({
                                         setSearch('');
                                     }}
                                     className={cn(
-                                        "px-3 py-2 text-[11px] hover:bg-rose-50 flex items-center justify-between cursor-pointer transition-colors group",
-                                        value === opt.id ? "bg-rose-50 text-rose-700 font-bold" : "text-slate-700"
+                                        "px-3 py-2 text-[11px] hover:bg-primary-subtle flex items-center justify-between cursor-pointer transition-colors group",
+                                        value === opt.id ? "bg-primary-subtle text-primary-light font-bold" : "text-slate-700"
                                     )}
                                 >
                                     <span className="truncate">{opt.name}</span>
-                                    {value === opt.id && <Check size={12} className="text-rose-600" />}
+                                    {value === opt.id && <Check size={12} className="text-primary" />}
                                 </div>
                             ))
                         ) : (

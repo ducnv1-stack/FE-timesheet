@@ -346,7 +346,7 @@ export default function DeliveryFeesPage() {
                                         <select
                                             value={formBranchId}
                                             onChange={e => setFormBranchId(e.target.value)}
-                                            className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none"
+                                            className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary-subtle focus:border-primary outline-none"
                                         >
                                             <option value="">Mặc định (Tất cả chi nhánh)</option>
                                             {branches.map(b => (
@@ -359,7 +359,7 @@ export default function DeliveryFeesPage() {
                                         <select
                                             value={formCategory}
                                             onChange={e => setFormCategory(e.target.value)}
-                                            className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none"
+                                            className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary-subtle focus:border-primary outline-none"
                                         >
                                             {CATEGORIES.map(c => (
                                                 <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>
@@ -376,7 +376,7 @@ export default function DeliveryFeesPage() {
                                     step="1000"
                                     value={formFeeAmount}
                                     onChange={e => setFormFeeAmount(e.target.value)}
-                                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary-subtle focus:border-rose-400 outline-none"
+                                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary-subtle focus:border-primary outline-none"
                                     required
                                 />
                             </div>

@@ -129,7 +129,7 @@ export default function AttendanceSettingsPage() {
                 {/* Footer Info */}
                 <div className="flex items-center justify-center gap-4 py-4 text-[10px] font-bold text-slate-300 tracking-[0.1em]">
                     <LayoutGrid size={14} />
-                    Ohari System • Chính sách nhân sự
+                    Superb AI System • Chính sách nhân sự
                 </div>
             </div>
         </div>

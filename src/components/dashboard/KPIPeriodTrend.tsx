@@ -12,7 +12,7 @@ export default function KPIPeriodTrend({ periodStats }: { periodStats: any[] }) 
         <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
             <div className="p-5 border-b border-slate-50 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-rose-50 rounded-lg flex items-center justify-center text-rose-600">
+                    <div className="w-8 h-8 bg-primary-subtle rounded-lg flex items-center justify-center text-primary">
                         <TrendingUp size={18} />
                     </div>
                     <div>
@@ -22,7 +22,7 @@ export default function KPIPeriodTrend({ periodStats }: { periodStats: any[] }) 
                 </div>
                 <div className="text-right">
                     <p className="text-[10px] text-slate-400 font-bold mb-0.5">Thưởng kỳ (Tạm tính)</p>
-                    <p className={`text-sm font-bold ${totalBonus >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                    <p className={`text-sm font-bold ${totalBonus >= 0 ? 'text-emerald-600' : 'text-primary'}`}>
                         {totalBonus > 0 ? `+${formatCurrency(totalBonus)}` : formatCurrency(totalBonus)}
                     </p>
                 </div>
@@ -39,7 +39,7 @@ export default function KPIPeriodTrend({ periodStats }: { periodStats: any[] }) 
                         return (
                             <div key={idx} className={`p-4 rounded-2xl border transition-all ${isOngoing ? 'bg-amber-50/30 border-amber-100 shadow-sm' :
                                 isAchieved ? 'bg-emerald-50/20 border-emerald-100' :
-                                    isFailed ? 'bg-rose-50/20 border-rose-100' : 'bg-slate-50/30 border-slate-100'
+                                    isFailed ? 'bg-primary-subtle/20 border-primary-subtle' : 'bg-slate-50/30 border-slate-100'
                                 }`}>
                                 <div className="flex justify-between items-start mb-3">
                                     <div>
@@ -51,7 +51,7 @@ export default function KPIPeriodTrend({ periodStats }: { periodStats: any[] }) 
                                         </p>
                                     </div>
                                     {isAchieved && <CheckCircle size={16} className="text-emerald-500" />}
-                                    {isFailed && <AlertCircle size={16} className="text-rose-500" />}
+                                    {isFailed && <AlertCircle size={16} className="text-primary-light" />}
                                     {isOngoing && <Clock size={16} className="text-amber-500 animate-pulse" />}
                                 </div>
 
@@ -69,7 +69,7 @@ export default function KPIPeriodTrend({ periodStats }: { periodStats: any[] }) 
                                             <p className="text-[8px] text-slate-400 font-medium tracking-tight mt-1">Mục tiêu: {formatCurrency(period.target)}</p>
                                         </div>
                                         <div className="text-right">
-                                            <p className={`text-xs font-black ${isAchieved ? 'text-emerald-600' : isFailed ? 'text-rose-600' : 'text-amber-600'}`}>
+                                            <p className={`text-xs font-black ${isAchieved ? 'text-emerald-600' : isFailed ? 'text-primary' : 'text-amber-600'}`}>
                                                 {percent.toFixed(1)}%
                                             </p>
                                         </div>
@@ -77,7 +77,7 @@ export default function KPIPeriodTrend({ periodStats }: { periodStats: any[] }) 
 
                                     <div className="w-full bg-slate-200/50 h-1.5 rounded-full overflow-hidden">
                                         <div
-                                            className={`h-full transition-all duration-1000 ${isAchieved ? 'bg-emerald-500' : isOngoing ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : isFailed ? 'bg-rose-500' : 'bg-slate-300'
+                                            className={`h-full transition-all duration-1000 ${isAchieved ? 'bg-emerald-500' : isOngoing ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : isFailed ? 'bg-primary-light' : 'bg-slate-300'
                                                 }`}
                                             style={{ width: `${Math.min(percent, 100)}%` }}
                                         ></div>
@@ -87,7 +87,7 @@ export default function KPIPeriodTrend({ periodStats }: { periodStats: any[] }) 
                                         <p className="text-[9px] text-slate-400 font-bold">
                                             {period.status === 'upcoming' ? 'Trạng thái' : 'Thưởng/Phạt'}
                                         </p>
-                                        <p className={`text-[10px] font-bold ${period.bonus > 0 ? 'text-emerald-600' : (period.bonus < 0 ? 'text-rose-600' : 'text-slate-400')}`}>
+                                        <p className={`text-[10px] font-bold ${period.bonus > 0 ? 'text-emerald-600' : (period.bonus < 0 ? 'text-primary' : 'text-slate-400')}`}>
                                             {period.status === 'upcoming' ? 'Chưa đến' : (period.bonus > 0 ? `+${formatCurrency(period.bonus)}` : formatCurrency(period.bonus))}
                                         </p>
                                     </div>

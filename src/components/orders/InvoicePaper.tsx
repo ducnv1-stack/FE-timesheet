@@ -80,22 +80,22 @@ export default function InvoicePaper({ order, className, type, isCreate, scale, 
             style={scale ? { transform: `scale(${scale})`, transformOrigin: 'top center' } : {}}
         >
             {/* Top decoration line */}
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-rose-700 print:hidden"></div>
-            <div className="hidden print:block w-full h-3 bg-rose-700 mb-8"></div>
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-primary-light print:hidden"></div>
+            <div className="hidden print:block w-full h-3 bg-primary-light mb-8"></div>
 
             {/* Brand Header */}
             <div className="flex justify-between items-start mb-8">
                 <div className="space-y-4">
-                    <img src="/logo.png" alt="Ohari Logo" className="h-12 w-auto object-contain" />
+                    <img src="/logo.png" alt="Superb AI Logo" className="h-12 w-auto object-contain" />
                     <div className="space-y-1">
-                        <p className="text-xs font-black text-slate-800 uppercase tracking-tighter">Công ty TNHH Tập đoàn OHARI</p>
+                        <p className="text-xs font-black text-slate-800 uppercase tracking-tighter">Công ty TNHH Tập đoàn Superb AI</p>
                         <p className="text-[10px] text-slate-500 max-w-[200px] leading-relaxed">
-                            {order.branch?.address || order.branch?.name || 'Chi nhánh Ohari'}
+                            {order.branch?.address || order.branch?.name || 'Chi nhánh Superb AI'}
                         </p>
                     </div>
                 </div>
                 <div className="text-right">
-                    <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-1">Ohari</h1>
+                    <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-1">Superb AI</h1>
                     <p className={cn(
                         "font-black text-sm uppercase tracking-widest",
                         order.isPaymentConfirmed ? "text-emerald-600" : "text-amber-500"
@@ -164,7 +164,7 @@ export default function InvoicePaper({ order, className, type, isCreate, scale, 
                 <div className="grid grid-cols-[120px_1fr] items-center border-b border-slate-100 py-1">
                     <span className="font-bold text-slate-600">Lái xe:</span>
                     {driverDelivery ? (
-                        <span className="font-black text-rose-600 leading-tight">
+                        <span className="font-black text-primary leading-tight">
                             {driverDelivery.category === 'EXTERNAL_DRIVER'
                                 ? '🚚 Lái xe ngoài'
                                 : `🏢 ${driverDelivery.driver?.fullName || '---'}`}
@@ -205,27 +205,27 @@ export default function InvoicePaper({ order, className, type, isCreate, scale, 
 
             {/* Upgrade Info Section */}
             {order.isUpgrade && (
-                <div className="mb-6 bg-rose-50 border-2 border-rose-200 rounded-xl p-4 animate-in slide-in-from-top-2 duration-500">
+                <div className="mb-6 bg-primary-subtle border-2 border-primary-subtle rounded-xl p-4 animate-in slide-in-from-top-2 duration-500">
                     <div className="flex items-center gap-2 mb-2">
-                        <span className="px-2 py-0.5 bg-rose-600 text-white text-[10px] font-black rounded uppercase">Đơn hàng nâng cấp</span>
+                        <span className="px-2 py-0.5 bg-primary text-white text-[10px] font-black rounded uppercase">Đơn hàng nâng cấp</span>
                         {(order.oldOrderCode || order.oldOrderId) && (
-                            <span className="text-xs font-bold text-rose-900">Gốc: #{order.oldOrderCode || order.oldOrderId?.split('-')[0]}</span>
+                            <span className="text-xs font-bold text-primary">Gốc: #{order.oldOrderCode || order.oldOrderId?.split('-')[0]}</span>
                         )}
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 text-xs">
-                        <div className="flex justify-between border-b border-rose-100 py-1">
+                        <div className="flex justify-between border-b border-primary-subtle py-1">
                             <span className="text-slate-500 font-medium">Sản phẩm cũ:</span>
                             <span className="font-bold text-slate-800">{order.oldOrderProductName || '---'}</span>
                         </div>
-                        <div className="flex justify-between border-b border-rose-100 py-1">
+                        <div className="flex justify-between border-b border-primary-subtle py-1">
                             <span className="text-slate-500 font-medium">Giá trị cũ:</span>
-                            <span className="font-bold text-rose-600">{formatCurrency(Number(order.oldOrderAmount || 0))}</span>
+                            <span className="font-bold text-primary">{formatCurrency(Number(order.oldOrderAmount || 0))}</span>
                         </div>
-                        <div className="flex justify-between border-b border-rose-100 py-1">
+                        <div className="flex justify-between border-b border-primary-subtle py-1">
                             <span className="text-slate-500 font-medium">Ngày đơn cũ:</span>
                             <span className="font-bold text-slate-800">{order.oldOrderDate ? formatDate(order.oldOrderDate) : '---'}</span>
                         </div>
-                        <div className="flex justify-between border-b border-rose-100 py-1">
+                        <div className="flex justify-between border-b border-primary-subtle py-1">
                             <span className="text-slate-500 font-medium">Khách hàng cũ:</span>
                             <span className="font-bold text-slate-800">{order.oldOrderCustomerName || '---'}</span>
                         </div>
@@ -235,7 +235,7 @@ export default function InvoicePaper({ order, className, type, isCreate, scale, 
 
             {/* Items Table */}
             <div className="bg-white border-2 border-slate-800 overflow-hidden shadow-lg mb-6">
-                <div className="bg-rose-50 border-b-2 border-slate-800 p-2 text-center">
+                <div className="bg-primary-subtle border-b-2 border-slate-800 p-2 text-center">
                     <h3 className="font-bold text-slate-900 uppercase tracking-wider">
                         Danh sách hàng hóa
                     </h3>
@@ -243,7 +243,7 @@ export default function InvoicePaper({ order, className, type, isCreate, scale, 
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm border-collapse">
                         <thead>
-                            <tr className="bg-rose-50 border-b-2 border-slate-800">
+                            <tr className="bg-primary-subtle border-b-2 border-slate-800">
                                 <th className="px-2 py-3 border-r-2 border-slate-800 text-center w-[40px]">STT</th>
                                 <th className="px-4 py-3 border-r-2 border-slate-800 text-left min-w-[200px]">Tên hàng hóa</th>
                                 <th className="px-2 py-3 border-r-2 border-slate-800 text-center w-[80px]">Số lượng</th>
@@ -274,15 +274,15 @@ export default function InvoicePaper({ order, className, type, isCreate, scale, 
             {/* Gifts */}
             {order.gifts && order.gifts.length > 0 && (
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-6">
-                    <div className="p-2 border-b border-slate-100 flex items-center gap-1.5 bg-rose-50">
-                        <Gift size={14} className="text-rose-600" />
+                    <div className="p-2 border-b border-slate-100 flex items-center gap-1.5 bg-primary-subtle">
+                        <Gift size={14} className="text-primary" />
                         <h3 className="font-bold text-slate-800 text-xs uppercase tracking-tight">
                             Quà tặng kèm
                         </h3>
                     </div>
                     <div className="p-2 space-y-2">
                         {order.gifts.map((og: any, idx: number) => (
-                            <div key={idx} className="flex items-center gap-2 p-1.5 bg-rose-50/30 rounded-lg border border-rose-100 shadow-sm">
+                            <div key={idx} className="flex items-center gap-2 p-1.5 bg-primary-subtle/30 rounded-lg border border-primary-subtle shadow-sm">
                                 <div className="flex-1">
                                     <span className="text-[11px] font-bold text-slate-700">{og.gift?.name || og.name || 'Quà tặng'}</span>
                                 </div>
@@ -292,7 +292,7 @@ export default function InvoicePaper({ order, className, type, isCreate, scale, 
                                 </div>
                                 <div className="text-right min-w-[70px] shrink-0">
                                     <span className="text-[7px] text-slate-400 font-bold block uppercase tracking-wider leading-none">Trị giá</span>
-                                    <span className="text-[11px] font-black text-rose-600">
+                                    <span className="text-[11px] font-black text-primary">
                                         {formatCurrency(Number(og.gift?.price || og.price || 0) * og.quantity)}
                                     </span>
                                 </div>
@@ -313,7 +313,7 @@ export default function InvoicePaper({ order, className, type, isCreate, scale, 
                 </div>
                 {giftAmount > 0 && (
                     <div className={cn(
-                        "grid border-b border-slate-200 py-2 text-rose-600 w-full max-w-[320px]",
+                        "grid border-b border-slate-200 py-2 text-primary w-full max-w-[320px]",
                         forceGrid ? "grid-cols-[140px_1fr]" : "grid-cols-[120px_1fr] md:grid-cols-[140px_180px] print:grid-cols-[140px_180px]"
                     )}>
                         <span className="font-bold">Quà tặng:</span>
@@ -435,7 +435,7 @@ export default function InvoicePaper({ order, className, type, isCreate, scale, 
                 <div>
                     * Ngày in: {isMounted ? formatDateTime(new Date()) : '...'}
                 </div>
-                <div className="text-right">Hệ thống quản lý Ohari</div>
+                <div className="text-right">Hệ thống quản lý Superb AI</div>
             </div>
         </div>
     );

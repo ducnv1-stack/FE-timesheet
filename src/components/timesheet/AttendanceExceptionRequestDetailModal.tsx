@@ -22,7 +22,7 @@ export default function AttendanceExceptionRequestDetailModal({
     const getStatusInfo = (status: string) => {
         switch (status) {
             case 'APPROVED': return { label: 'Đã duyệt', color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' };
-            case 'REJECTED': return { label: 'Từ chối', color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-100' };
+            case 'REJECTED': return { label: 'Từ chối', color: 'text-primary', bg: 'bg-primary-subtle', border: 'border-primary-subtle' };
             default: return { label: 'Chờ duyệt', color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' };
         }
     };

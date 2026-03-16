@@ -162,7 +162,7 @@ export default function OrderAuditLogModal({ orderId, onClose }: OrderAuditLogMo
                 <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-slate-50/50">
                     {loading ? (
                         <div className="flex items-center justify-center py-12">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-600"></div>
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                         </div>
                     ) : logs.length === 0 ? (
                         <div className="text-center py-12 text-slate-400 font-medium">
@@ -207,7 +207,7 @@ export default function OrderAuditLogModal({ orderId, onClose }: OrderAuditLogMo
                                                     <span className="text-slate-400">Khách hàng:</span> <span className="font-bold text-slate-700">{log.newData?.customerName} ({log.newData?.customerPhone})</span>
                                                 </div>
                                                 <div className="font-medium">
-                                                    <span className="text-slate-400">Tổng tiền:</span> <span className="font-bold text-rose-600">{formatCurrency(log.newData?.totalAmount)}</span>
+                                                    <span className="text-slate-400">Tổng tiền:</span> <span className="font-bold text-primary">{formatCurrency(log.newData?.totalAmount)}</span>
                                                 </div>
                                                 <div className="font-medium">
                                                     <span className="text-slate-400">Trạng thái:</span> <span className="font-bold text-slate-700 uppercase">{statusMap[log.newData?.status] || log.newData?.status}</span>

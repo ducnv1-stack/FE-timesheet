@@ -38,9 +38,9 @@ export default function InsufficientPaymentModal({
                         <X size={20} />
                     </button>
 
-                    <div className="w-20 h-20 rounded-2xl bg-rose-50 flex items-center justify-center mb-6 shadow-sm border border-rose-100 relative group overflow-hidden">
-                        <div className="absolute inset-0 bg-rose-600 translate-y-full group-hover:translate-y-0 transition-transform duration-500 opacity-10"></div>
-                        <AlertTriangle size={40} className="text-rose-500 animate-bounce" />
+                    <div className="w-20 h-20 rounded-2xl bg-primary-subtle flex items-center justify-center mb-6 shadow-sm border border-primary-subtle relative group overflow-hidden">
+                        <div className="absolute inset-0 bg-primary translate-y-full group-hover:translate-y-0 transition-transform duration-500 opacity-10"></div>
+                        <AlertTriangle size={40} className="text-primary-light animate-bounce" />
                     </div>
 
                     <h3 className="text-2xl font-black text-slate-900 leading-tight">Chưa thanh toán đủ!</h3>
@@ -71,11 +71,11 @@ export default function InsufficientPaymentModal({
                         <div className="h-px bg-slate-200"></div>
 
                         <div className="flex items-center justify-between py-1">
-                            <div className="flex items-center gap-2.5 text-rose-600">
+                            <div className="flex items-center gap-2.5 text-primary">
                                 <Calculator size={16} />
                                 <span className="text-xs font-black uppercase tracking-widest">Cần thu thêm</span>
                             </div>
-                            <span className="text-lg font-black text-rose-600">
+                            <span className="text-lg font-black text-primary">
                                 {formatCurrency(remaining)}
                             </span>
                         </div>
@@ -90,7 +90,7 @@ export default function InsufficientPaymentModal({
                                 onClose();
                                 onViewDetails();
                             }}
-                            className="group w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-sm flex items-center justify-center gap-2 shadow-xl shadow-slate-900/20 hover:bg-rose-600 hover:shadow-rose-600/30 transition-all active:scale-[0.98]"
+                            className="group w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-sm flex items-center justify-center gap-2 shadow-xl shadow-slate-900/20 hover:bg-primary hover:shadow-primary/30 transition-all active:scale-[0.98]"
                         >
                             ĐIỀU CHỈNH THANH TOÁN
                             <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
@@ -106,7 +106,7 @@ export default function InsufficientPaymentModal({
                 </div>
 
                 {/* Bottom accent bar */}
-                <div className="h-1.5 w-full bg-gradient-to-r from-rose-500 via-rose-600 to-rose-700"></div>
+                <div className="h-1.5 w-full bg-gradient-to-r from-primary-light via-primary to-primary-light"></div>
             </div>
         </div>
     );

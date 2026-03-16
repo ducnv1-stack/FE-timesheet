@@ -133,7 +133,7 @@ export default function LeaderboardPage() {
 
                 {/* Filters */}
                 <div className="flex items-center gap-2 flex-wrap">
-                    <div className="flex items-center gap-1.5 bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-sm shrink min-w-0 hover:border-rose-300 transition-colors">
+                    <div className="flex items-center gap-1.5 bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-sm shrink min-w-0 hover:border-primary transition-colors">
                         <FixedDatePicker 
                             value={startDate} 
                             onChange={setStartDate} 

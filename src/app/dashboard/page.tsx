@@ -1118,7 +1118,7 @@ function ManagerDashboard({ data, startDate, endDate, branchId }: { data: any, s
             </div>
 
             {/* Dark Red KPI Card */}
-            <div className="bg-gradient-to-br from-primary-light to-rose-900 rounded-3xl p-4 md:p-5 text-white shadow-xl relative overflow-hidden">
+            <div className="bg-gradient-to-br from-primary-light to-primary rounded-3xl p-4 md:p-5 text-white shadow-xl relative overflow-hidden">
                 {/* Decoration */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
 
@@ -1597,7 +1597,7 @@ function ActionButton({ icon, title, href }: { icon: React.ReactNode, title: str
     return (
         <a
             href={href}
-            className="flex items-center gap-3 p-4 bg-white border border-slate-200 rounded-xl hover:border-rose-300 hover:bg-primary-subtle/50 transition-all group"
+            className="flex items-center gap-3 p-4 bg-white border border-slate-200 rounded-xl hover:border-primary hover:bg-primary-subtle/50 transition-all group"
         >
             <div className="p-2 bg-primary-subtle rounded-lg text-primary group-hover:bg-primary-subtle">
                 {icon}
@@ -1798,7 +1798,7 @@ function SaleDashboard({ data, startDate, endDate, branchId }: { data: any, star
 
                         <div className="mt-auto relative z-10">
                             <div className="bg-gradient-to-r from-primary/5 to-transparent border-l-3 border-primary-light p-2.5 rounded-r-xl">
-                                <p className="text-[11px] font-bold leading-relaxed italic text-rose-900 drop-shadow-sm">
+                                <p className="text-[11px] font-bold leading-relaxed italic text-primary drop-shadow-sm">
                                     "{(() => {
                                         const bestBranchRank = Math.min(...[ranking.branchSales.rank, ranking.branchCompleted.rank].filter(r => r !== null) as number[]);
                                         if (!bestBranchRank || bestBranchRank === 1) return "Bạn là chiến binh số 1 của chi nhánh! 🌟";
@@ -1812,7 +1812,7 @@ function SaleDashboard({ data, startDate, endDate, branchId }: { data: any, star
                 </div>
             )}
             {/* KPI Card */}
-            <div className="bg-gradient-to-br from-primary-light to-rose-900 rounded-3xl p-4 md:p-5 text-white shadow-xl relative overflow-hidden">
+            <div className="bg-gradient-to-br from-primary-light to-primary rounded-3xl p-4 md:p-5 text-white shadow-xl relative overflow-hidden">
                 {/* Decoration */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
 
@@ -2109,7 +2109,7 @@ function TelesaleDashboard({ data, startDate, endDate }: { data: any, startDate:
     return (
         <div className="space-y-6 text-left">
             {/* Top Stat Card - Integrated Version */}
-            <div className="bg-gradient-to-br from-primary-light to-rose-900 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden group border border-white/10">
+            <div className="bg-gradient-to-br from-primary-light to-primary rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden group border border-white/10">
                 <div className="absolute -right-10 -top-10 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
 
                 <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
@@ -2248,7 +2248,7 @@ function TelesaleDashboard({ data, startDate, endDate }: { data: any, startDate:
 function MarketingDashboard({ data, startDate, endDate }: { data: any, startDate: string, endDate: string }) {
     return (
         <div className="space-y-6">
-            <div className="bg-gradient-to-br from-primary-light to-rose-900 rounded-3xl p-6 text-white shadow-xl flex justify-between items-center text-left">
+            <div className="bg-gradient-to-br from-primary-light to-primary rounded-3xl p-6 text-white shadow-xl flex justify-between items-center text-left">
                 <div>
                     <p className="text-primary-subtle text-sm font-medium mb-1">💰 Tổng thưởng Marketing (Dự kiến)</p>
                     <h2 className="text-3xl md:text-4xl font-black tracking-tight drop-shadow-lg">

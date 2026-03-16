@@ -570,7 +570,7 @@ export default function PerformancePage() {
                                                                 {r.actualWorkingDays || 0} <span className="text-slate-400 text-[10px]">/ {r.effectiveStandardDays || 27}</span>
                                                             </div>
                                                             {r.effectiveBaseSalary > 0 && r.effectiveBaseSalary !== r.baseSalary && (
-                                                                <div className="text-[9px] text-primary-light font-bold mt-0.5 line-through decoration-rose-300">
+                                                                <div className="text-[9px] text-primary-light font-bold mt-0.5 line-through decoration-primary">
                                                                     {formatCurrency(r.effectiveBaseSalary)}
                                                                 </div>
                                                             )}

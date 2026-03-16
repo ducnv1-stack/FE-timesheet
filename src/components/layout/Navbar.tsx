@@ -49,7 +49,7 @@ export default function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
                         </button>
                     )}
                     <h2 className="text-sm font-bold text-slate-800 tracking-wider">
-                        {pathname === '/dashboard' ? 'Báo cáo tổng quan' : pathname === '/orders/new' ? 'Tạo đơn hàng mới' : 'Hệ thống Ohari'}
+                        {pathname === '/dashboard' ? 'Báo cáo tổng quan' : pathname === '/orders/new' ? 'Tạo đơn hàng mới' : 'Superb AI - Timesheet'}
                     </h2>
                 </div>
 

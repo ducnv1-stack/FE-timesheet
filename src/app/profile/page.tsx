@@ -267,7 +267,7 @@ export default function ProfilePage() {
     return (
         <div className="max-w-4xl mx-auto space-y-6">
             {/* Header Card */}
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-rose-900 shadow-2xl">
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-primary shadow-2xl">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(225,29,72,0.15),transparent_70%)]" />
                 <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.03)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.03)_50%,rgba(255,255,255,0.03)_75%,transparent_75%)] bg-[length:40px_40px]" />
 
@@ -327,7 +327,7 @@ export default function ProfilePage() {
                         <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                             {emp && (
                                 <>
-                                    <span className="px-3 py-1 bg-white/10 text-rose-300 rounded-full text-[10px] font-black uppercase tracking-wider border border-white/10 flex items-center gap-1.5 backdrop-blur-sm">
+                                    <span className="px-3 py-1 bg-white/10 text-primary rounded-full text-[10px] font-black uppercase tracking-wider border border-white/10 flex items-center gap-1.5 backdrop-blur-sm">
                                         <Briefcase size={11} />
                                         {emp.position}
                                     </span>

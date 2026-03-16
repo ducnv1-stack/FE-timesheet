@@ -75,14 +75,14 @@ export default function PaymentForm({ payments, totalOrderAmount, onChange, avai
     return (
         <>
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div className="p-2 border-b border-slate-100 flex justify-between items-center bg-rose-50">
+                <div className="p-2 border-b border-slate-100 flex justify-between items-center bg-primary-subtle">
                     <h3 className="font-bold text-slate-800 text-xs uppercase tracking-tight">
                         Thanh toán
                     </h3>
                     <button
                         onClick={addPayment}
                         type="button"
-                        className="flex items-center gap-1 px-1.5 py-0.5 text-rose-700 hover:bg-rose-50 rounded text-[10px] font-bold border border-rose-200 cursor-pointer"
+                        className="flex items-center gap-1 px-1.5 py-0.5 text-primary-light hover:bg-primary-subtle rounded text-[10px] font-bold border border-primary-subtle cursor-pointer"
                     >
                         <Plus size={12} /> Thêm
                     </button>
@@ -97,10 +97,10 @@ export default function PaymentForm({ payments, totalOrderAmount, onChange, avai
                                     <select
                                         value={payment.paymentMethod}
                                         onChange={(e) => updatePayment(index, 'paymentMethod', e.target.value)}
-                                        className="w-full bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-rose-500 rounded p-1.5 text-xs font-medium truncate cursor-pointer"
+                                        className="w-full bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-primary-light rounded p-1.5 text-xs font-medium truncate cursor-pointer"
                                     >
                                         <option value="CASH">💵 Tiền mặt </option>
-                                        <option value="TRANSFER_COMPANY">🏢 Chuyển khoản Công ty (Ohari - Đuôi 6666)</option>
+                                        <option value="TRANSFER_COMPANY">🏢 Chuyển khoản Công ty (Superb AI - Đuôi 6666)</option>
                                         <option value="TRANSFER_PERSONAL">👤 Chuyển khoản Cá nhân (C Hằng - Đuôi 9099)</option>
                                         <option value="CARD">💳 Quẹt thẻ (Mpos)</option>
                                         <option value="INSTALLMENT">🏦 Trả góp (Homecredit)</option>
@@ -108,7 +108,7 @@ export default function PaymentForm({ payments, totalOrderAmount, onChange, avai
                                 </div>
                                 <button
                                     onClick={() => removePayment(index)}
-                                    className="p-1.5 text-slate-300 hover:text-rose-600 transition-colors bg-white border border-slate-100 rounded shadow-sm shrink-0 cursor-pointer"
+                                    className="p-1.5 text-slate-300 hover:text-primary transition-colors bg-white border border-slate-100 rounded shadow-sm shrink-0 cursor-pointer"
                                     title="Xóa thanh toán"
                                 >
                                     <Trash2 size={12} />
@@ -126,7 +126,7 @@ export default function PaymentForm({ payments, totalOrderAmount, onChange, avai
                                     type="text"
                                     value={payment.amount === 0 ? '' : formatNumber(payment.amount)}
                                     onChange={(e) => updatePayment(index, 'amount', parseNumber(e.target.value))}
-                                    className="w-full bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-rose-500 rounded p-1.5 text-xs text-right font-bold"
+                                    className="w-full bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-primary-light rounded p-1.5 text-xs text-right font-bold"
                                     placeholder="Nhập số tiền..."
                                 />
                             </div>
@@ -135,7 +135,7 @@ export default function PaymentForm({ payments, totalOrderAmount, onChange, avai
                             <div className="flex items-center mt-1 px-1">
                                 <button
                                     onClick={() => setActivePaymentModal(index)}
-                                    className="flex items-center justify-center w-full max-w-[140px] py-1.5 border border-dashed border-slate-300 rounded-md text-slate-500 hover:text-rose-600 hover:border-rose-300 hover:bg-rose-50 transition-colors text-[10px] gap-1.5 cursor-pointer"
+                                    className="flex items-center justify-center w-full max-w-[140px] py-1.5 border border-dashed border-slate-300 rounded-md text-slate-500 hover:text-primary hover:border-primary hover:bg-primary-subtle transition-colors text-[10px] gap-1.5 cursor-pointer"
                                     title="Quản lý ảnh giao dịch"
                                 >
                                     <ImageIcon size={12} />
@@ -180,7 +180,7 @@ export default function PaymentForm({ payments, totalOrderAmount, onChange, avai
                     <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50/50">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center">
+                                <div className="w-10 h-10 bg-primary-subtle text-primary rounded-xl flex items-center justify-center">
                                     <ImageIcon size={20} />
                                 </div>
                                 <div>
@@ -188,7 +188,7 @@ export default function PaymentForm({ payments, totalOrderAmount, onChange, avai
                                     <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Thanh toán {activePaymentModal + 1}</p>
                                 </div>
                             </div>
-                            <button onClick={() => setActivePaymentModal(null)} className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer">
+                            <button onClick={() => setActivePaymentModal(null)} className="p-2 text-slate-400 hover:text-primary-light hover:bg-primary-subtle rounded-xl transition-colors cursor-pointer">
                                 <X size={20} />
                             </button>
                         </div>
@@ -220,7 +220,7 @@ export default function PaymentForm({ payments, totalOrderAmount, onChange, avai
                                                     </button>
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); removeExistingFile(activePaymentModal, url); }}
-                                                        className="p-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded transition-colors cursor-pointer"
+                                                        className="p-1.5 bg-primary-light hover:bg-primary text-white rounded transition-colors cursor-pointer"
                                                         title="Xóa ảnh này"
                                                     >
                                                         <Trash2 size={14} />
@@ -256,7 +256,7 @@ export default function PaymentForm({ payments, totalOrderAmount, onChange, avai
                                                     </button>
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); removeFile(activePaymentModal, fIndex); }}
-                                                        className="p-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded transition-colors cursor-pointer"
+                                                        className="p-1.5 bg-primary-light hover:bg-primary text-white rounded transition-colors cursor-pointer"
                                                         title="Xóa ảnh này"
                                                     >
                                                         <Trash2 size={14} />
@@ -271,7 +271,7 @@ export default function PaymentForm({ payments, totalOrderAmount, onChange, avai
                                 <>
                                     {/* Combined Upload Box */}
                                     <div
-                                        className="flex flex-col items-center justify-center gap-2 aspect-[3/4] rounded-xl border-2 border-dashed transition-all cursor-pointer w-full h-full border-rose-200 hover:border-rose-400 hover:bg-rose-50/50 group min-h-[160px]"
+                                        className="flex flex-col items-center justify-center gap-2 aspect-[3/4] rounded-xl border-2 border-dashed transition-all cursor-pointer w-full h-full border-primary-subtle hover:border-primary hover:bg-primary-subtle/50 group min-h-[160px]"
                                         onClick={() => {
                                             if (availableSystemImages !== undefined) {
                                                 setUploadOptionsFor(activePaymentModal);
@@ -280,10 +280,10 @@ export default function PaymentForm({ payments, totalOrderAmount, onChange, avai
                                             }
                                         }}
                                     >
-                                        <div className="w-12 h-12 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center group-hover:scale-110 group-hover:bg-rose-500 group-hover:text-white transition-all shadow-sm">
+                                        <div className="w-12 h-12 bg-primary-subtle text-primary-light rounded-full flex items-center justify-center group-hover:scale-110 group-hover:bg-primary-light group-hover:text-white transition-all shadow-sm">
                                             <Camera size={24} />
                                         </div>
-                                        <span className="text-xs font-black text-slate-400 group-hover:text-rose-600 uppercase tracking-wider text-center px-4">ĐÍNH KÈM ẢNH MỚI</span>
+                                        <span className="text-xs font-black text-slate-400 group-hover:text-primary uppercase tracking-wider text-center px-4">ĐÍNH KÈM ẢNH MỚI</span>
                                     </div>
                                 </>
                             </div>
@@ -320,21 +320,21 @@ export default function PaymentForm({ payments, totalOrderAmount, onChange, avai
                     <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
                         <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                             <h3 className="font-bold text-sm text-slate-800">Tùy chọn tải ảnh</h3>
-                            <button onClick={() => setUploadOptionsFor(null)} className="text-slate-400 hover:text-rose-500 cursor-pointer p-1"><X size={20} /></button>
+                            <button onClick={() => setUploadOptionsFor(null)} className="text-slate-400 hover:text-primary-light cursor-pointer p-1"><X size={20} /></button>
                         </div>
                         <div className="p-4 flex flex-col gap-3">
                             <button
-                                className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 hover:border-rose-400 hover:bg-rose-50 transition-all text-left group cursor-pointer"
+                                className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 hover:border-primary hover:bg-primary-subtle transition-all text-left group cursor-pointer"
                                 onClick={() => {
                                     fileInputRefs.current[uploadOptionsFor]?.click();
                                     setUploadOptionsFor(null);
                                 }}
                             >
-                                <div className="w-10 h-10 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center group-hover:bg-rose-500 group-hover:text-white transition-colors shadow-sm">
+                                <div className="w-10 h-10 bg-primary-subtle text-primary-light rounded-full flex items-center justify-center group-hover:bg-primary-light group-hover:text-white transition-colors shadow-sm">
                                     <Camera size={20} />
                                 </div>
                                 <div className="flex-1">
-                                    <div className="font-bold text-sm text-slate-800 group-hover:text-rose-600 transition-colors">Tải ảnh từ thiết bị</div>
+                                    <div className="font-bold text-sm text-slate-800 group-hover:text-primary transition-colors">Tải ảnh từ thiết bị</div>
                                     <div className="text-[11px] text-slate-500 font-medium mt-0.5">Chọn file hình ảnh từ máy tính hoặc điện thoại</div>
                                 </div>
                             </button>
@@ -374,7 +374,7 @@ export default function PaymentForm({ payments, totalOrderAmount, onChange, avai
                                 </div>
                             ) : (
                                 availableSystemImages.map(url => (
-                                    <div key={url} className="relative group aspect-square rounded-lg overflow-hidden border border-slate-200 cursor-pointer shadow-sm hover:ring-2 hover:ring-rose-500 transition-all"
+                                    <div key={url} className="relative group aspect-square rounded-lg overflow-hidden border border-slate-200 cursor-pointer shadow-sm hover:ring-2 hover:ring-primary-light transition-all"
                                         onClick={() => {
                                             if (onAddSystemImage) {
                                                 onAddSystemImage(systemImageModalFor, url);
@@ -384,7 +384,7 @@ export default function PaymentForm({ payments, totalOrderAmount, onChange, avai
                                         }}>
                                         <img src={getImageUrl(url)} alt="System Image" className="w-full h-full object-cover" />
                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                            <span className="text-white text-xs font-bold px-2 py-1 bg-rose-600 rounded">Chọn</span>
+                                            <span className="text-white text-xs font-bold px-2 py-1 bg-primary rounded">Chọn</span>
                                         </div>
                                     </div>
                                 ))

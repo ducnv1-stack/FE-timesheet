@@ -468,19 +468,19 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
 
                     <div className="flex justify-between items-start mb-8">
                         <div className="space-y-4">
-                            <img src="/logo.png" alt="Ohari Logo" className="h-12 w-auto object-contain" />
+                            <img src="/logo.png" alt="Superb AI Logo" className="h-12 w-auto object-contain" />
                             <div className="space-y-1">
-                                <p className="text-xs font-black text-slate-800 uppercase tracking-tighter">Công ty TNHH Tập đoàn OHARI</p>
+                                <p className="text-xs font-black text-slate-800 uppercase tracking-tighter">Công ty TNHH Tập đoàn Superb AI</p>
                                 <p className="text-[10px] text-slate-500 max-w-[200px] leading-relaxed">
                                     {(() => {
                                         const b = branches.find(b => b.id === order.branchId);
-                                        return b?.address || b?.name || 'Chi nhánh Ohari';
+                                        return b?.address || b?.name || 'Chi nhánh Superb AI';
                                     })()}
                                 </p>
                             </div>
                         </div>
                         <div className="text-right">
-                            <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-1">Ohari</h1>
+                            <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-1">Superb AI</h1>
                             <p className="text-emerald-600 font-black text-sm uppercase tracking-widest">Hệ thống ERP</p>
                         </div>
                     </div>
@@ -752,7 +752,7 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
                                             });
                                         }
                                     }}
-                                    className="bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[10px] font-bold text-slate-700 w-full outline-none focus:ring-1 focus:ring-rose-200 appearance-none print:appearance-none print:bg-transparent print:border-none print:p-0 print:text-[11px] cursor-pointer"
+                                    className="bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[10px] font-bold text-slate-700 w-full outline-none focus:ring-1 focus:ring-primary-subtle appearance-none print:appearance-none print:bg-transparent print:border-none print:p-0 print:text-[11px] cursor-pointer"
                                 >
                                     <option value="none">-- Không --</option>
                                     <option value="external">🚚 Lái xe ngoài (+{(() => {
@@ -920,7 +920,7 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
                             <div>
                                 * Ngày in: {isMounted ? formatDateTime(new Date()) : '...'}
                             </div>
-                            <div className="text-right">Hệ thống quản lý Ohari</div>
+                            <div className="text-right">Hệ thống quản lý Superb AI</div>
                         </div>
                     </div>
                 </div>
@@ -1011,9 +1011,9 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
 
                                 return (
                                     <div className="space-y-3">
-                                        <div className="flex justify-between items-center bg-rose-50 p-1.5 rounded border border-rose-100">
-                                            <span className="text-rose-700 font-black uppercase text-[9px] tracking-tight">Thưởng nóng</span>
-                                            <span className="font-black text-base text-rose-800">{formatCurrency(sharedBonus)}</span>
+                                        <div className="flex justify-between items-center bg-primary-subtle p-1.5 rounded border border-primary-subtle">
+                                            <span className="text-primary-light font-black uppercase text-[9px] tracking-tight">Thưởng nóng</span>
+                                            <span className="font-black text-base text-primary">{formatCurrency(sharedBonus)}</span>
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-2">
@@ -1046,11 +1046,11 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
                         onChange={(payments) => setOrder({ ...order, payments })}
                     />
 
-                    <div className="bg-rose-50 border border-rose-100 rounded-xl p-4">
-                        <h4 className="font-bold text-rose-900 text-sm mb-2 flex items-center gap-2">
+                    <div className="bg-primary-subtle border border-primary-subtle rounded-xl p-4">
+                        <h4 className="font-bold text-primary text-sm mb-2 flex items-center gap-2">
                             <Info size={16} /> Hướng dẫn
                         </h4>
-                        <p className="text-xs text-rose-800 leading-relaxed">
+                        <p className="text-xs text-primary leading-relaxed">
                             Nhập thông tin khách hàng và sản phẩm vào hóa đơn.
                             Sử dụng các mục Chia doanh số và Thanh toán để hoàn tất nghiệp vụ.
                         </p>
@@ -1062,13 +1062,13 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
             {searchModalOpen && (
                 <div className="fixed inset-0 bg-black/50 z-[999] flex items-center justify-center p-4">
                     <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-                        <div className="bg-rose-700 p-4 flex justify-between items-center">
+                        <div className="bg-primary-light p-4 flex justify-between items-center">
                             <h3 className="text-white font-bold flex items-center gap-2">
                                 <ShoppingCart size={20} /> Tìm kiếm đơn hàng cũ
                             </h3>
                             <button 
                                 onClick={() => setSearchModalOpen(false)}
-                                className="text-white hover:bg-rose-800 p-1 rounded-full transition-colors"
+                                className="text-white hover:bg-primary p-1 rounded-full transition-colors"
                             >
                                 <X size={20} />
                             </button>
@@ -1081,11 +1081,11 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
                                     placeholder="Tìm theo tên khách, SĐT, hoặc mã đơn..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full border border-slate-200 rounded-xl pl-11 pr-4 py-3 outline-none focus:ring-2 focus:ring-rose-200 text-sm"
+                                    className="w-full border border-slate-200 rounded-xl pl-11 pr-4 py-3 outline-none focus:ring-2 focus:ring-primary-subtle text-sm"
                                 />
                                 {searching && (
                                     <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                                        <div className="w-4 h-4 border-2 border-rose-700 border-t-transparent rounded-full animate-spin"></div>
+                                        <div className="w-4 h-4 border-2 border-primary-light border-t-transparent rounded-full animate-spin"></div>
                                     </div>
                                 )}
                             </div>
@@ -1096,14 +1096,14 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
                                         <div 
                                             key={res.id}
                                             onClick={() => selectOldOrder(res)}
-                                            className="p-3 border border-slate-100 rounded-xl hover:border-rose-300 hover:bg-rose-50/50 cursor-pointer transition-all group"
+                                            className="p-3 border border-slate-100 rounded-xl hover:border-primary hover:bg-primary-subtle/50 cursor-pointer transition-all group"
                                         >
                                             {/* Dòng 1: Tên khách, Sản phẩm, Tổng tiền, Mã đơn */}
                                             <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 text-sm">
                                                 {/* Mobile top row: Customer & Order info */}
                                                 <div className="flex items-start justify-between md:hidden">
                                                     <div className="flex-1 min-w-0 pr-2">
-                                                        <div className="font-bold text-slate-800 group-hover:text-rose-700 truncate">{res.customerName}</div>
+                                                        <div className="font-bold text-slate-800 group-hover:text-primary-light truncate">{res.customerName}</div>
                                                         <div className="text-[10px] text-slate-500 font-medium">{res.customerPhone}</div>
                                                     </div>
                                                     <div className="text-right shrink-0">
@@ -1114,7 +1114,7 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
 
                                                 {/* Desktop Customer Info */}
                                                 <div className="hidden md:block flex-1 min-w-0">
-                                                    <div className="font-bold text-slate-800 group-hover:text-rose-700 truncate">{res.customerName}</div>
+                                                    <div className="font-bold text-slate-800 group-hover:text-primary-light truncate">{res.customerName}</div>
                                                     <div className="text-[10px] text-slate-500 font-medium">{res.customerPhone}</div>
                                                 </div>
                                                 
@@ -1125,7 +1125,7 @@ export default function OrderForm({ initialIsUpgrade, title, upgradeFromId }: Or
                                                         {res.items?.length > 1 && <span className="text-[10px] text-slate-400 ml-1 font-bold bg-slate-200 px-1 rounded-sm">+{res.items.length - 1}</span>}
                                                     </div>
                                                     <div className="w-auto md:w-28 text-right shrink-0 pl-2">
-                                                        <div className="text-xs font-black text-rose-600">{formatCurrency(res.totalAmount)}</div>
+                                                        <div className="text-xs font-black text-primary">{formatCurrency(res.totalAmount)}</div>
                                                     </div>
                                                 </div>
 

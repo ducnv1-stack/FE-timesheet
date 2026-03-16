@@ -227,7 +227,7 @@ export default function AttendancePage() {
                     <h2 className="text-xl font-bold font-outfit">{currentUser?.employee?.fullName || 'Nhân viên'}</h2>
                     <div className="flex items-center gap-1.5 text-slate-500 text-sm mt-0.5">
                         <Building2 size={14} />
-                        <span>{currentUser?.employee?.branch?.name || 'Chi nhánh Ohari'}</span>
+                        <span>{currentUser?.employee?.branch?.name || 'Chi nhánh Superb AI'}</span>
                     </div>
                 </div>
             </div>

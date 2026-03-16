@@ -67,7 +67,7 @@ export default function SplitManager({ splits, employees, branches, totalOrderAm
 
     return (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-visible">
-            <div className="p-2 border-b border-slate-100 flex justify-between items-center bg-rose-50">
+            <div className="p-2 border-b border-slate-100 flex justify-between items-center bg-primary-subtle">
                 <h3 className="font-bold text-slate-800 text-xs uppercase tracking-tight">
                     Chia doanh số
                 </h3>
@@ -88,7 +88,7 @@ export default function SplitManager({ splits, employees, branches, totalOrderAm
                             <select
                                 value={split.branchId}
                                 onChange={(e) => updateSplit(index, 'branchId', e.target.value)}
-                                className="flex-1 bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-rose-500 rounded p-1.5 text-xs font-medium cursor-pointer"
+                                className="flex-1 bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-primary-light rounded p-1.5 text-xs font-medium cursor-pointer"
                             >
                                 <option value="">Chọn Chi nhánh...</option>
                                 {branches.map(b => (
@@ -97,7 +97,7 @@ export default function SplitManager({ splits, employees, branches, totalOrderAm
                             </select>
                             <button
                                 onClick={() => removeSplit(index)}
-                                className="p-1.5 text-slate-300 hover:text-rose-600 transition-colors bg-white border border-slate-100 rounded shadow-sm shrink-0 cursor-pointer"
+                                className="p-1.5 text-slate-300 hover:text-primary transition-colors bg-white border border-slate-100 rounded shadow-sm shrink-0 cursor-pointer"
                             >
                                 <Trash2 size={12} />
                             </button>
@@ -109,7 +109,7 @@ export default function SplitManager({ splits, employees, branches, totalOrderAm
                             selectedId={split.employeeId}
                             placeholder="Chọn Nhân viên..."
                             showFee={false}
-                            triggerClassName="bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-rose-500 rounded p-1.5 text-xs text-slate-700 font-bold"
+                            triggerClassName="bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-primary-light rounded p-1.5 text-xs text-slate-700 font-bold"
                             onSelect={(empId) => {
                                 const emp = employees.find(e => e.id === empId);
                                 if (emp && emp.branchId) {
@@ -129,7 +129,7 @@ export default function SplitManager({ splits, employees, branches, totalOrderAm
 
                         {/* Row 3: Amount & Percent */}
                         <div className="flex items-center gap-2">
-                            <div className="flex-1 bg-white border border-slate-200 rounded px-2 py-0.5 focus-within:ring-2 focus-within:ring-rose-500 transition-all">
+                            <div className="flex-1 bg-white border border-slate-200 rounded px-2 py-0.5 focus-within:ring-2 focus-within:ring-primary-light transition-all">
                                 <span className="text-[8px] text-slate-400 font-bold block uppercase tracking-wider">Doanh số</span>
                                 <input
                                     type="text"
@@ -139,7 +139,7 @@ export default function SplitManager({ splits, employees, branches, totalOrderAm
                                     placeholder="Số tiền..."
                                 />
                             </div>
-                            <div className="w-16 bg-white border border-slate-200 rounded px-2 py-0.5 focus-within:ring-2 focus-within:ring-rose-500 transition-all">
+                            <div className="w-16 bg-white border border-slate-200 rounded px-2 py-0.5 focus-within:ring-2 focus-within:ring-primary-light transition-all">
                                 <span className="text-[8px] text-slate-400 font-bold block uppercase tracking-wider">Tỷ lệ</span>
                                 <div className="flex items-center">
                                     <input

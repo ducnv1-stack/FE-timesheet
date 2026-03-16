@@ -484,7 +484,7 @@ function PremiumBonusView({ products, onUpdateBonus }: { products: Product[], on
                                                 </div>
                                                 <ChevronRight className="w-2.5 md:w-3 h-2.5 md:h-3 text-slate-300" />
                                                 <div className="flex flex-col">
-                                                    <span className="text-[7px] md:text-[8px] font-black text-rose-400 uppercase tracking-tight">Thưởng</span>
+                                                    <span className="text-[7px] md:text-[8px] font-black text-primary uppercase tracking-tight">Thưởng</span>
                                                     <span className="text-[10px] md:text-xs font-black text-primary">
                                                         {new Intl.NumberFormat('vi-VN').format(rule.bonusAmount)}
                                                     </span>
@@ -560,7 +560,7 @@ function ProductModal({ isOpen, onClose, onSuccess, product }: { isOpen: boolean
                 <form onSubmit={handleSubmit} className="p-6 space-y-5">
                     <div>
                         <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Tên sản phẩm</label>
-                        <input required value={name} onChange={e => setName(e.target.value)} className="w-full px-4 py-3 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-primary-light font-bold text-sm" placeholder="VD: Khóa vân tay Ohari S1" />
+                        <input required value={name} onChange={e => setName(e.target.value)} className="w-full px-4 py-3 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-primary-light font-bold text-sm" placeholder="VD: Khóa vân tay Superb AI S1" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -636,7 +636,7 @@ function GiftModal({ isOpen, onClose, onSuccess, gift }: { isOpen: boolean, onCl
                 <form onSubmit={handleSubmit} className="p-6 space-y-5">
                     <div>
                         <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Tên quà tặng</label>
-                        <input required value={name} onChange={e => setName(e.target.value)} className="w-full px-4 py-3 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-primary-light font-bold text-sm" placeholder="VD: Mũ bảo hiểm Ohari" />
+                        <input required value={name} onChange={e => setName(e.target.value)} className="w-full px-4 py-3 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-primary-light font-bold text-sm" placeholder="VD: Mũ bảo hiểm Superb AI" />
                     </div>
                     <div>
                         <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Giá trị quy đổi</label>
@@ -770,7 +770,7 @@ function BonusModal({ product, onClose, onSuccess }: { product: Product, onClose
                                     {/* Policy Header */}
                                     <div className="flex items-center gap-2 justify-between">
                                         <div className="flex items-center gap-2 flex-1">
-                                            <Calendar className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                                            <Calendar className="w-3.5 h-3.5 text-primary shrink-0" />
                                             <span className="text-[9px] font-black text-slate-500 uppercase tracking-wider">Chính sách #{policies.length - pIdx}</span>
                                         </div>
                                         <button type="button" onClick={() => removePolicy(pIdx)} className="p-1.5 text-slate-300 hover:text-primary-light hover:bg-white rounded-lg transition-all cursor-pointer">
@@ -797,7 +797,7 @@ function BonusModal({ product, onClose, onSuccess }: { product: Product, onClose
                                                     <input type="text" value={formatNumber(rule.minSellPrice)} onChange={e => updateRule(pIdx, rIdx, 'minSellPrice', parseNumber(e.target.value).toString())} className="w-full px-2 py-1.5 bg-slate-50 rounded-lg border-none focus:ring-1 focus:ring-primary-light font-mono text-[11px] font-bold" />
                                                 </div>
                                                 <div className="flex-1">
-                                                    <label className="block text-[7px] font-black text-rose-400 uppercase tracking-widest mb-0.5 ml-1">Mức thưởng (đ)</label>
+                                                    <label className="block text-[7px] font-black text-primary uppercase tracking-widest mb-0.5 ml-1">Mức thưởng (đ)</label>
                                                     <input type="text" value={formatNumber(rule.bonusAmount)} onChange={e => updateRule(pIdx, rIdx, 'bonusAmount', parseNumber(e.target.value).toString())} className="w-full px-2 py-1.5 bg-primary-subtle/30 rounded-lg border-none focus:ring-1 focus:ring-primary-light font-mono text-[11px] font-black text-primary" />
                                                 </div>
                                                 <button type="button" onClick={() => removeRule(pIdx, rIdx)} className="mt-3 p-1 text-slate-300 hover:text-primary-light hover:bg-slate-50 rounded-lg transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 cursor-pointer">

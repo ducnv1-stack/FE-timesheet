@@ -96,7 +96,7 @@ export default function EmployeeSearchSelector({
                     {selectedEmployee ? (
                         <>
                             <span className="truncate">{selectedEmployee.fullName}</span>
-                            {showFee && <span className="text-rose-600 font-bold shrink-0">{getFeeLabel(selectedEmployee)}</span>}
+                            {showFee && <span className="text-primary font-bold shrink-0">{getFeeLabel(selectedEmployee)}</span>}
                         </>
                     ) : (
                         <span className="text-slate-400">-- Không --</span>
@@ -106,7 +106,7 @@ export default function EmployeeSearchSelector({
                     {selectedId && (
                         <X
                             size={12}
-                            className="text-slate-300 hover:text-rose-500 transition-colors"
+                            className="text-slate-300 hover:text-primary-light transition-colors"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 onSelect('', activeTab);
@@ -128,7 +128,7 @@ export default function EmployeeSearchSelector({
                             className={cn(
                                 "flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer",
                                 activeTab === 'staff'
-                                    ? "bg-white text-rose-700 border-b-2 border-rose-600 -mb-[2px]"
+                                    ? "bg-white text-primary-light border-b-2 border-primary -mb-[2px]"
                                     : "text-slate-400 hover:text-slate-600 hover:bg-slate-100"
                             )}
                         >
@@ -186,8 +186,8 @@ export default function EmployeeSearchSelector({
                                         setSearch('');
                                     }}
                                     className={cn(
-                                        "px-3 py-2 text-[11px] hover:bg-rose-50 flex items-center justify-between cursor-pointer transition-colors group",
-                                        selectedId === emp.id ? "bg-rose-50 text-rose-700 font-bold" : "text-slate-700"
+                                        "px-3 py-2 text-[11px] hover:bg-primary-subtle flex items-center justify-between cursor-pointer transition-colors group",
+                                        selectedId === emp.id ? "bg-primary-subtle text-primary-light font-bold" : "text-slate-700"
                                     )}
                                 >
                                     <div className="flex flex-col gap-0.5 min-w-0">
@@ -200,12 +200,12 @@ export default function EmployeeSearchSelector({
                                         {showFee && (
                                             <span className={cn(
                                                 "text-[10px] font-black italic",
-                                                selectedId === emp.id ? "text-rose-600" : "text-slate-400 group-hover:text-rose-500 transition-colors"
+                                                selectedId === emp.id ? "text-primary" : "text-slate-400 group-hover:text-primary-light transition-colors"
                                             )}>
                                                 {getFeeLabel(emp)}
                                             </span>
                                         )}
-                                        {selectedId === emp.id && <Check size={12} className="text-rose-600" />}
+                                        {selectedId === emp.id && <Check size={12} className="text-primary" />}
                                     </div>
                                 </div>
                             ))

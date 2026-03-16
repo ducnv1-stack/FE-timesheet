@@ -156,7 +156,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     label: 'Bảng công tháng',
                     icon: ClipboardList,
                     href: '/employees/timesheet',
-                    active: pathname === '/employees/timesheet',
+                    active: pathname.startsWith('/employees/timesheet'),
                     roleAccess: ['ADMIN', 'TECHNICIAN', 'WAREHOUSE', 'SALE', 'DRIVER', 'MANAGER', 'DIRECTOR', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR']
                 },
                 {
@@ -183,8 +183,8 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     label: 'Quản lý chi nhánh',
                     icon: Building2,
                     href: '/branches',
-                    active: pathname === '/branches',
-                    roleAccess: ['ADMIN', 'DIRECTOR', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER'] //, 'MANAGER', 'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR',
+                    active: pathname.startsWith('/branches'),
+                    roleAccess: ['ADMIN', 'DIRECTOR', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER']
                 },
                 {
                     label: 'Cấu hình phí ship',
@@ -258,7 +258,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
 
                 {!isCollapsed && (
                     <div className="flex-1 flex items-center gap-2 animate-in fade-in duration-500">
-                        <img src="/logo.png" alt="Ohari Logo" className="h-7 w-auto object-contain" />
+                        <img src="/logo.png" alt="Superb AI Logo" className="h-7 w-auto object-contain" />
                     </div>
                 )}
             </div>
@@ -309,13 +309,16 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                                                 className={cn(
                                                     "group flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 cursor-pointer",
                                                     child.active
-                                                        ? "text-primary font-bold bg-primary-subtle"
-                                                        : "text-slate-400 hover:text-slate-700"
+                                                        ? "text-white font-bold bg-primary shadow-md ring-2 ring-primary/20"
+                                                        : cn(
+                                                            "text-slate-500 hover:text-slate-900 hover:bg-slate-50",
+                                                            isAnyChildActive && !child.active ? "text-slate-400" : ""
+                                                        )
                                                 )}
                                             >
                                                 <child.icon size={16} className={cn(
                                                     "shrink-0",
-                                                    child.active ? "text-primary" : "group-hover:text-slate-600"
+                                                    child.active ? "text-white" : "group-hover:text-slate-600"
                                                 )} />
                                                 <span className="text-[13px] whitespace-nowrap overflow-hidden text-ellipsis">
                                                     {child.label}

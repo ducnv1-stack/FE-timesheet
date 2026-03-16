@@ -39,9 +39,9 @@ export default function GiftGrid({ orderGifts, allGifts, onChange }: GiftGridPro
 
     return (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-4">
-            <div className="p-2 border-b border-slate-100 flex justify-between items-center bg-rose-50">
+            <div className="p-2 border-b border-slate-100 flex justify-between items-center bg-primary-subtle">
                 <div className="flex items-center gap-1.5">
-                    <Gift size={14} className="text-rose-600" />
+                    <Gift size={14} className="text-primary" />
                     <h3 className="font-bold text-slate-800 text-xs uppercase tracking-tight">
                         Quà tặng kèm
                     </h3>
@@ -49,7 +49,7 @@ export default function GiftGrid({ orderGifts, allGifts, onChange }: GiftGridPro
                 <button
                     onClick={addGift}
                     type="button"
-                    className="flex items-center gap-1 px-1.5 py-0.5 bg-rose-700 hover:bg-rose-800 text-white rounded text-[10px] font-bold no-print cursor-pointer"
+                    className="flex items-center gap-1 px-1.5 py-0.5 bg-primary-light hover:bg-primary text-white rounded text-[10px] font-bold no-print cursor-pointer"
                 >
                     <Plus size={12} /> Thêm quà
                 </button>
@@ -63,12 +63,12 @@ export default function GiftGrid({ orderGifts, allGifts, onChange }: GiftGridPro
                 )}
 
                 {orderGifts.map((og, index) => (
-                    <div key={index} className="flex items-center gap-2 p-1.5 bg-rose-50/30 rounded-lg border border-rose-100 shadow-sm relative group">
+                    <div key={index} className="flex items-center gap-2 p-1.5 bg-primary-subtle/30 rounded-lg border border-primary-subtle shadow-sm relative group">
                         <div className="flex-1">
                             <select
                                 value={og.giftId}
                                 onChange={(e) => updateGift(index, 'giftId', e.target.value)}
-                                className="w-full bg-white border border-slate-200 focus:ring-2 focus:ring-rose-500 rounded p-1 text-[11px] font-medium appearance-none print:appearance-none print:border-none print:p-0 print:bg-transparent cursor-pointer"
+                                className="w-full bg-white border border-slate-200 focus:ring-2 focus:ring-primary-light rounded p-1 text-[11px] font-medium appearance-none print:appearance-none print:border-none print:p-0 print:bg-transparent cursor-pointer"
                             >
                                 <option value="">Chọn quà tặng...</option>
                                 {allGifts.map(g => (
@@ -77,7 +77,7 @@ export default function GiftGrid({ orderGifts, allGifts, onChange }: GiftGridPro
                             </select>
                         </div>
 
-                        <div className="w-20 bg-white border border-slate-200 rounded px-1.5 py-0.5 focus-within:ring-2 focus:ring-rose-500 transition-all shrink-0">
+                        <div className="w-20 bg-white border border-slate-200 rounded px-1.5 py-0.5 focus-within:ring-2 focus:ring-primary-light transition-all shrink-0">
                             <span className="text-[7px] text-slate-400 font-bold block uppercase tracking-wider leading-none">Số lượng</span>
                             <input
                                 type="number"
@@ -90,14 +90,14 @@ export default function GiftGrid({ orderGifts, allGifts, onChange }: GiftGridPro
 
                         <div className="text-right min-w-[70px] shrink-0">
                             <span className="text-[7px] text-slate-400 font-bold block uppercase tracking-wider leading-none">Trị giá</span>
-                            <span className="text-[11px] font-black text-rose-600">
+                            <span className="text-[11px] font-black text-primary">
                                 {formatCurrency((og.price || 0) * og.quantity)}
                             </span>
                         </div>
 
                         <button
                             onClick={() => removeGift(index)}
-                            className="p-1 text-slate-300 hover:text-rose-600 transition-colors bg-white border border-slate-100 rounded shadow-sm shrink-0 no-print cursor-pointer"
+                            className="p-1 text-slate-300 hover:text-primary transition-colors bg-white border border-slate-100 rounded shadow-sm shrink-0 no-print cursor-pointer"
                         >
                             <Trash2 size={12} />
                         </button>

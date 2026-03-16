@@ -303,7 +303,7 @@ export default function SalarySettingsTab() {
                         </thead>
                         <tbody className="divide-y divide-slate-50">
                             {positions.map(p => (
-                                <tr key={p.id} className="group hover:bg-rose-50/30 transition-all duration-300">
+                                <tr key={p.id} className="group hover:bg-primary-subtle/30 transition-all duration-300">
                                     <td className="px-4 py-1">
                                         <div>
                                             <div className="font-bold text-slate-800 text-[11px] sm:text-xs group-hover:text-primary transition-colors tracking-tight leading-tight">{p.name}</div>
@@ -358,7 +358,7 @@ export default function SalarySettingsTab() {
                                             disabled={savingPosId === p.id}
                                             className={cn(
                                                 "w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 cursor-pointer mx-auto",
-                                                savingPosId === p.id ? "bg-slate-100 text-slate-400" : "bg-white text-rose-500 border border-rose-100 hover:bg-rose-500 hover:text-white hover:shadow-lg hover:shadow-rose-100 hover:-translate-y-0.5 active:translate-y-0"
+                                                savingPosId === p.id ? "bg-slate-100 text-slate-400" : "bg-white text-primary-light border border-primary-subtle hover:bg-primary-light hover:text-white hover:shadow-lg hover:shadow-primary-subtle hover:-translate-y-0.5 active:translate-y-0"
                                             )}
                                         >
                                             {savingPosId === p.id ? <RefreshCw size={18} className="animate-spin" /> : <Save size={18} />}
@@ -425,14 +425,14 @@ export default function SalarySettingsTab() {
                         <tbody className="divide-y divide-slate-50">
                             {filteredEmployees.map(e => {
                                 return (
-                                    <tr key={e.id} className="group transition-all duration-300 bg-rose-50/40 hover:bg-rose-50/60">
+                                    <tr key={e.id} className="group transition-all duration-300 bg-primary-subtle/40 hover:bg-primary-subtle/60">
                                         <td className="px-4 py-1">
                                             <div className="flex items-center gap-2">
                                                 {e.avatarUrl ? (
                                                     <img 
                                                         src={`${API_URL}${e.avatarUrl}`} 
                                                         alt={e.fullName}
-                                                        className="w-6 h-6 rounded-md object-cover border border-rose-100 shadow-sm"
+                                                        className="w-6 h-6 rounded-md object-cover border border-primary-subtle shadow-sm"
                                                         onError={(ev) => {
                                                             (ev.target as HTMLImageElement).style.display = 'none';
                                                             (ev.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
@@ -585,14 +585,14 @@ export default function SalarySettingsTab() {
                                         setShowAddEmployeeList(false);
                                         setEmployeeSearchTerm('');
                                     }}
-                                    className="w-full flex items-center gap-3 p-3 hover:bg-rose-50 rounded-2xl transition-all group border border-transparent hover:border-rose-100 mb-1 text-left cursor-pointer"
+                                    className="w-full flex items-center gap-3 p-3 hover:bg-primary-subtle rounded-2xl transition-all group border border-transparent hover:border-primary-subtle mb-1 text-left cursor-pointer"
                                 >
                                         <div className="relative shrink-0">
                                             {e.avatarUrl ? (
                                                 <img 
                                                     src={`${API_URL}${e.avatarUrl}`} 
                                                     alt={e.fullName}
-                                                    className="w-9 h-9 rounded-xl object-cover border border-slate-200 group-hover:border-rose-200 shadow-sm transition-all"
+                                                    className="w-9 h-9 rounded-xl object-cover border border-slate-200 group-hover:border-primary-subtle shadow-sm transition-all"
                                                     onError={(ev) => {
                                                         (ev.target as HTMLImageElement).style.display = 'none';
                                                         (ev.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');

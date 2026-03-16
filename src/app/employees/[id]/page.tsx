@@ -519,7 +519,7 @@ export default function EmployeeDetailPage() {
             <div className="max-w-5xl mx-auto space-y-6">
                 {/* Profile Header */}
                 <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
-                    <div className="h-32 bg-gradient-to-r from-slate-900 via-slate-800 to-rose-900 relative">
+                    <div className="h-32 bg-gradient-to-r from-slate-900 via-slate-800 to-primary relative">
                         <button
                             onClick={() => router.push('/employees')}
                             className="absolute top-4 left-4 p-2.5 bg-white/10 backdrop-blur-md text-white rounded-xl hover:bg-white/20 transition-all active:scale-90 z-10 cursor-pointer"
@@ -932,7 +932,7 @@ export default function EmployeeDetailPage() {
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
                     <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in zoom-in-95 duration-200 border border-slate-100">
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="w-12 h-12 rounded-xl bg-pink-100 flex items-center justify-center text-primary">
+                            <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-primary">
                                 <UserPlus size={24} />
                             </div>
                             <div>
@@ -1047,7 +1047,7 @@ export default function EmployeeDetailPage() {
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 font-inter">
                     <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in zoom-in-95 duration-200">
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="w-12 h-12 rounded-xl bg-pink-100 flex items-center justify-center text-primary">
+                            <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-primary">
                                 <Save size={24} />
                             </div>
                             <div>

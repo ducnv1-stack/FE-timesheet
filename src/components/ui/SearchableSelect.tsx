@@ -49,15 +49,15 @@ export default function SearchableSelect({
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
                 className={cn(
-                    "w-full pl-8 pr-2 h-full py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none flex items-center justify-between text-[11px] font-medium transition-colors group",
-                    value !== allOption.value ? 'border-rose-300 font-bold bg-white' : 'border-slate-200'
+                    "w-full pl-8 pr-2 h-full py-0 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-subtle focus:border-primary outline-none flex items-center justify-between text-[11px] font-medium transition-colors group",
+                    value !== allOption.value ? 'border-primary font-bold bg-white' : 'border-slate-200'
                 )}
             >
                 <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
                     {icon && React.isValidElement(icon) ? (
                         React.cloneElement(icon as React.ReactElement<any>, {
                             size: 14,
-                            className: cn((icon as React.ReactElement<any>).props.className, value !== allOption.value ? 'text-rose-500' : 'text-slate-400')
+                            className: cn((icon as React.ReactElement<any>).props.className, value !== allOption.value ? 'text-primary-light' : 'text-slate-400')
                         })
                     ) : null}
                 </div>
@@ -91,12 +91,12 @@ export default function SearchableSelect({
                                 setSearch('');
                             }}
                             className={cn(
-                                "px-3 py-1.5 text-[10.5px] hover:bg-rose-50 flex items-center justify-between cursor-pointer transition-colors",
-                                value === allOption.value ? "text-rose-700 font-bold bg-rose-50" : "text-slate-600"
+                                "px-3 py-1.5 text-[10.5px] hover:bg-primary-subtle flex items-center justify-between cursor-pointer transition-colors",
+                                value === allOption.value ? "text-primary-light font-bold bg-primary-subtle" : "text-slate-600"
                             )}
                         >
                             {allOption.label}
-                            {value === allOption.value && <Check size={10} className="text-rose-600" />}
+                            {value === allOption.value && <Check size={10} className="text-primary" />}
                         </div>
                         {filteredOptions.length > 0 ? (
                             filteredOptions.map(opt => (
@@ -108,12 +108,12 @@ export default function SearchableSelect({
                                         setSearch('');
                                     }}
                                     className={cn(
-                                        "px-3 py-1.5 text-[10.5px] hover:bg-rose-50 flex items-center justify-between cursor-pointer transition-colors",
-                                        value === opt.value ? "text-rose-700 font-bold bg-rose-50" : "text-slate-700"
+                                        "px-3 py-1.5 text-[10.5px] hover:bg-primary-subtle flex items-center justify-between cursor-pointer transition-colors",
+                                        value === opt.value ? "text-primary-light font-bold bg-primary-subtle" : "text-slate-700"
                                     )}
                                 >
                                     <span className="truncate">{opt.label}</span>
-                                    {value === opt.value && <Check size={10} className="text-rose-600" />}
+                                    {value === opt.value && <Check size={10} className="text-primary" />}
                                 </div>
                             ))
                         ) : (

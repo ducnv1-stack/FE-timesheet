@@ -63,7 +63,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
                             "flex items-center gap-3 p-4 rounded-2xl shadow-2xl border backdrop-blur-md bg-white/90",
                             {
                                 "border-emerald-500/30 text-emerald-900 shadow-emerald-500/10": toast.type === 'success',
-                                "border-rose-500/30 text-rose-900 shadow-rose-500/10": toast.type === 'error',
+                                "border-primary-light/30 text-primary shadow-primary-light/10": toast.type === 'error',
                                 "border-blue-500/30 text-blue-900 shadow-blue-500/10": toast.type === 'info',
                             }
                         )}
@@ -72,7 +72,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
                             "flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center shadow-inner",
                             {
                                 "bg-emerald-100 text-emerald-600": toast.type === 'success',
-                                "bg-rose-100 text-rose-600": toast.type === 'error',
+                                "bg-primary-subtle text-primary": toast.type === 'error',
                                 "bg-blue-100 text-blue-600": toast.type === 'info',
                             }
                         )}>
