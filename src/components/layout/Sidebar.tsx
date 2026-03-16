@@ -150,7 +150,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     icon: Fingerprint,
                     href: '/employees/attendance',
                     active: pathname === '/employees/attendance',
-                    roleAccess: ['ADMIN', 'TECHNICIAN', 'WAREHOUSE', 'SALE', 'DRIVER', 'MANAGER', 'DIRECTOR']
+                    roleAccess: ['ADMIN', 'TECHNICIAN', 'WAREHOUSE', 'SALE', 'DRIVER', 'MANAGER', 'DIRECTOR', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR']
                 },
                 {
                     label: 'Bảng công tháng',
