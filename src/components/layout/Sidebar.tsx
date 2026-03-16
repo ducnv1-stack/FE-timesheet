@@ -123,14 +123,14 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     icon: LayoutGrid,
                     href: '/warehouse/inventory',
                     active: pathname === '/warehouse/inventory',
-                    roleAccess: ['ADMIN', 'WAREHOUSE', 'DIRECTOR', 'MANAGER']
+                    roleAccess: ['ADMIN']
                 },
                 {
                     label: 'Lịch sử giao dịch',
                     icon: History,
                     href: '/warehouse/transactions',
                     active: pathname === '/warehouse/transactions',
-                    roleAccess: ['ADMIN', 'WAREHOUSE', 'DIRECTOR', 'MANAGER']
+                    roleAccess: ['ADMIN']
                 },
             ]
         },
@@ -157,7 +157,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     icon: ClipboardList,
                     href: '/employees/timesheet',
                     active: pathname === '/employees/timesheet',
-                    roleAccess: ['ADMIN', 'TECHNICIAN', 'WAREHOUSE', 'SALE', 'DRIVER', 'MANAGER', 'DIRECTOR']
+                    roleAccess: ['ADMIN', 'TECHNICIAN', 'WAREHOUSE', 'SALE', 'DRIVER', 'MANAGER', 'DIRECTOR', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR']
                 },
                 {
                     label: 'Cấu hình chấm công',
@@ -184,7 +184,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     icon: Building2,
                     href: '/branches',
                     active: pathname === '/branches',
-                    roleAccess: ['ADMIN'] //, 'MANAGER', 'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR',
+                    roleAccess: ['ADMIN', 'DIRECTOR', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER'] //, 'MANAGER', 'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR',
                 },
                 {
                     label: 'Cấu hình phí ship',

@@ -421,7 +421,7 @@ export default function TimesheetPage() {
 
     const roleCode = currentUser?.role?.code;
     const canViewOthers = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'MANAGER', 'ADMIN'].includes(roleCode);
-    const canManageSettings = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'ADMIN'].includes(roleCode);
+    const canManageSettings = roleCode === 'ADMIN';
     const isManager = roleCode === 'MANAGER';
 
     // ========== SHIFT CRUD ==========

@@ -225,7 +225,8 @@ export default function BranchesPage() {
             return matchSearch && matchBranch;
         });
 
-    const canManage = ['ADMIN', 'DIRECTOR', 'MANAGER'].includes(userRole);
+    const canEdit = ['ADMIN', 'DIRECTOR', 'MANAGER'].includes(userRole);
+    const canCreateDelete = ['ADMIN', 'DIRECTOR'].includes(userRole);
 
     return (
         <div className="p-6 space-y-8 max-w-7xl mx-auto font-outfit">
@@ -253,7 +254,7 @@ export default function BranchesPage() {
                         />
                     </div>
 
-                    {canManage && (
+                    {canCreateDelete && (
                         <button
                             onClick={() => setIsAdding(true)}
                             className="flex items-center justify-center gap-2 px-6 py-4 bg-primary text-white rounded-2xl font-bold tracking-tighter hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 active:scale-95 cursor-pointer"
@@ -472,14 +473,21 @@ export default function BranchesPage() {
 
                                 <button
                                     onClick={() => {
-                                        triggerActionWithPassword((pwd: string) => executeUpdate(branch.id, {
-                                            name: branch.name,
-                                            code: branch.code,
-                                            branchType: branch.branchType,
-                                            latitude: branch.latitude,
-                                            longitude: branch.longitude,
-                                            checkinRadius: branch.checkinRadius
-                                        }, pwd));
+                                        const updates = canCreateDelete
+                                            ? {
+                                                name: branch.name,
+                                                code: branch.code,
+                                                branchType: branch.branchType,
+                                                latitude: branch.latitude,
+                                                longitude: branch.longitude,
+                                                checkinRadius: branch.checkinRadius
+                                            }
+                                            : {
+                                                latitude: branch.latitude,
+                                                longitude: branch.longitude,
+                                                checkinRadius: branch.checkinRadius
+                                            };
+                                        triggerActionWithPassword((pwd: string) => executeUpdate(branch.id, updates, pwd));
                                         setJustFetchedId(null);
                                     }}
                                     disabled={saving === branch.id}
@@ -494,7 +502,7 @@ export default function BranchesPage() {
                                     {justFetchedId === branch.id ? "Xác nhận & Lưu" : "Lưu cấu hình"}
                                 </button>
 
-                                {canManage && branch.id !== userBranchId && (
+                                {canCreateDelete && branch.id !== userBranchId && (
                                     <button
                                         onClick={() => triggerActionWithPassword((pwd: string) => executeDelete(branch.id, pwd))}
                                         className="p-3 bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-600 rounded-xl transition-all active:scale-95 cursor-pointer"
