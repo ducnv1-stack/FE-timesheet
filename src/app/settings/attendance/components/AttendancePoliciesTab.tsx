@@ -231,7 +231,7 @@ export default function AttendancePoliciesTab() {
                     end_time: d.endTime,
                     break_start: (d as any).hasBreak ? ((d as any).breakStartTime || '12:00') : null,
                     break_end: (d as any).hasBreak ? ((d as any).breakEndTime || '13:30') : null,
-                    is_off_day_ot: true // Mặc định đi làm ngày nghỉ là OT
+                    is_off_day_ot: d.allowOT
                 };
             });
 
@@ -549,9 +549,9 @@ export default function AttendancePoliciesTab() {
                                                                theme: mode.id as any,
                                                                attendance_calculation: {
                                                                    ...formData.configData?.attendance_calculation,
-                                                                   ignore_late: isRaw,
-                                                                   ignore_early: isRaw,
-                                                                   always_full_day: !isFixed
+                                                                   ignore_late: formData.configData?.attendance_calculation?.ignore_late ?? isRaw,
+                                                                   ignore_early: formData.configData?.attendance_calculation?.ignore_early ?? isRaw,
+                                                                   always_full_day: formData.configData?.attendance_calculation?.always_full_day ?? !isFixed
                                                                },
                                                                overtime_rules: {
                                                                    ...formData.configData?.overtime_rules,
