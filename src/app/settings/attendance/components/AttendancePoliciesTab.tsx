@@ -450,14 +450,14 @@ export default function AttendancePoliciesTab() {
             {isFormOpen && (
                 <div 
                     onClick={() => setIsFormOpen(false)}
-                    className="fixed inset-0 z-50 flex items-center justify-end bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
+                    className="fixed inset-0 z-[160] flex items-center justify-end bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
                 >
                     <div 
                         onClick={(e) => e.stopPropagation()}
-                        className="bg-slate-50 w-full max-w-4xl h-full shadow-2xl overflow-y-auto animate-in slide-in-from-right duration-500 custom-scrollbar relative"
+                        className="bg-slate-50 w-full max-w-4xl h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-500 relative"
                     >
                         {/* Drawer Header */}
-                        <div className="sticky top-0 z-20 bg-white border-b border-slate-100 px-4 md:px-8 py-4 md:py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div className="shrink-0 z-20 bg-white border-b border-slate-100 px-4 md:px-8 py-4 md:py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                             <div className="flex items-center gap-3 md:gap-4">
                                 <div className="p-2 md:p-3 bg-emerald-50 text-emerald-600 rounded-xl md:rounded-2xl shrink-0">
                                     <Settings className="w-5 h-5 md:w-6 md:h-6" />
@@ -487,7 +487,7 @@ export default function AttendancePoliciesTab() {
                             </div>
                         </div>
 
-                        <div className="p-4 md:p-8 space-y-6 md:space-y-8">
+                        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8 space-y-6 md:space-y-8">
                             {/* General Section */}
                             <section className="bg-white rounded-[1.5rem] md:rounded-[2.5rem] p-5 md:p-8 border border-slate-200 shadow-sm space-y-6">
                                 <h3 className="text-sm font-bold text-slate-800 tracking-tight flex items-center gap-2">
