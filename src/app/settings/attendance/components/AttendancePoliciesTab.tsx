@@ -144,6 +144,15 @@ export default function AttendancePoliciesTab() {
                 days: policy.days.sort((a, b) => {
                     const order = [1, 2, 3, 4, 5, 6, 0];
                     return order.indexOf(a.dayOfWeek) - order.indexOf(b.dayOfWeek);
+                }).map(d => {
+                    const dailyRule = policy.configData?.daily_rules?.[d.dayOfWeek.toString()];
+                    return {
+                        ...d,
+                        // If there is a rule for this day, check if it explicitly has break_start.
+                        hasBreak: dailyRule ? !!dailyRule.break_start : true,
+                        breakStartTime: dailyRule?.break_start || '12:00',
+                        breakEndTime: dailyRule?.break_end || '13:30'
+                    } as any;
                 })
             });
         } else {
@@ -177,7 +186,10 @@ export default function AttendancePoliciesTab() {
                     requireGPS: true,
                     workCount: 1,
                     isFlexible: false,
-                    note: null
+                    note: null,
+                    hasBreak: true,
+                    breakStartTime: '12:00',
+                    breakEndTime: '13:30'
                 }))
             });
         }
@@ -692,6 +704,52 @@ export default function AttendancePoliciesTab() {
                                                             }
                                                         })}
                                                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-sm shadow-sm"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {/* Global Working Hours Config */}
+                                        <div className="space-y-4 pt-4 border-t border-slate-100">
+                                            <div className="flex items-center justify-between pb-2">
+                                                <div className="p-1 px-2 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-bold italic">Giờ làm việc mặc định</div>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex-1 space-y-2">
+                                                    <label className="text-[10px] font-bold text-slate-400 tracking-wider">Bắt đầu làm</label>
+                                                    <input 
+                                                        type="time"
+                                                        value={formData.configData?.schedule?.start_time || '08:00'}
+                                                        onChange={e => {
+                                                            const newTime = e.target.value;
+                                                            setFormData({
+                                                                ...formData,
+                                                                configData: {
+                                                                    ...formData.configData,
+                                                                    schedule: { ...formData.configData?.schedule, start_time: newTime } as any
+                                                                },
+                                                                days: (formData.days || []).map(d => ({ ...d, startTime: newTime }))
+                                                            });
+                                                        }}
+                                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-bold text-xs shadow-sm"
+                                                    />
+                                                </div>
+                                                <div className="flex-1 space-y-2">
+                                                    <label className="text-[10px] font-bold text-slate-400 tracking-wider">Kết thúc làm</label>
+                                                    <input 
+                                                        type="time"
+                                                        value={formData.configData?.schedule?.end_time || '17:30'}
+                                                        onChange={e => {
+                                                            const newTime = e.target.value;
+                                                            setFormData({
+                                                                ...formData,
+                                                                configData: {
+                                                                    ...formData.configData,
+                                                                    schedule: { ...formData.configData?.schedule, end_time: newTime } as any
+                                                                },
+                                                                days: (formData.days || []).map(d => ({ ...d, endTime: newTime }))
+                                                            });
+                                                        }}
+                                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-bold text-xs shadow-sm"
                                                     />
                                                 </div>
                                             </div>
