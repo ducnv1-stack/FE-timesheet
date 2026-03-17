@@ -845,6 +845,7 @@ export default function TimesheetPage() {
                                         <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Muộn</th>
                                         <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Sớm</th>
                                         <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">TC</th>
+                                        <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Công</th>
                                         <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Trạng thái</th>
                                         {['ADMIN', 'DIRECTOR', 'MANAGER', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'].includes(currentUser?.role?.code) && (
                                             <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Thao tác</th>
@@ -900,6 +901,14 @@ export default function TimesheetPage() {
                                                     <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
                                                         <span className={cn("text-xs md:text-[13px] font-bold", row.overtimeMinutes > 0 ? "text-blue-600" : "text-slate-300")}>
                                                             {row.overtimeMinutes || '-'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
+                                                        <span className={cn("text-xs md:text-[13px] font-black", 
+                                                            row.workCount != null && Number(row.workCount) < 1 ? "text-amber-600" : 
+                                                            row.workCount != null ? "text-accent" : "text-slate-300"
+                                                        )}>
+                                                            {row.workCount != null ? Number(row.workCount).toFixed(1) : '-'}
                                                         </span>
                                                     </td>
                                                     <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
@@ -1449,10 +1458,12 @@ function StatCard({ label, value, icon: Icon, color, bg }: any) {
 
 function StatusBadge({ status }: { status: string }) {
     const config: any = {
-        'FULL_DAY': { label: 'Đủ công', class: 'bg-emerald-50 text-accent border-emerald-100' },
-        'HALF_DAY': { label: 'Nửa công', class: 'bg-blue-50 text-blue-600 border-blue-100' },
+        'FULL_DAY': { label: 'Hành chính', class: 'bg-emerald-50 text-accent border-emerald-100' },
+        'HALF_DAY': { label: 'Nửa ngày', class: 'bg-blue-50 text-blue-600 border-blue-100' },
+        'HALF_DAY_MORNING': { label: 'Ca Sáng', class: 'bg-amber-50 text-amber-600 border-amber-100' },
+        'HALF_DAY_AFTERNOON': { label: 'Ca Chiều', class: 'bg-indigo-50 text-indigo-600 border-indigo-100' },
         'INCOMPLETE': { label: 'Thiếu công', class: 'bg-primary-subtle text-primary border-primary-subtle' },
-        'LATE_DAY': { label: 'Đi muộn', class: 'bg-primary-subtle text-primary border-primary-subtle' },
+        'LATE_DAY': { label: 'Hành chính', class: 'bg-emerald-50 text-accent border-emerald-100' },
         'ABSENT_UNAPPROVED': { label: 'Vắng (KP)', class: 'bg-slate-50 text-slate-500 border-slate-100' },
         'ABSENT_APPROVED': { label: 'Vắng (CP)', class: 'bg-amber-50 text-warning border-amber-100' },
         'DEFAULT': { label: status, class: 'bg-slate-50 text-slate-400 border-slate-100' }

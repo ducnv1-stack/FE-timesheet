@@ -78,6 +78,12 @@ export default function AttendancePoliciesTab() {
                 is_allowed: true,
                 min_minutes_to_trigger: 30,
                 coefficient: 1.5
+            },
+            half_day_split: {
+                enabled: true,
+                morning_end: '12:00',
+                afternoon_start: '13:30',
+                spanning_threshold_minutes: 30
             }
         },
         days: DAYS_OF_WEEK.map(d => ({
@@ -139,6 +145,12 @@ export default function AttendancePoliciesTab() {
                         is_allowed: true,
                         min_minutes_to_trigger: 30,
                         coefficient: 1.5
+                    },
+                    half_day_split: {
+                        enabled: true,
+                        morning_end: '12:00',
+                        afternoon_start: '13:30',
+                        spanning_threshold_minutes: 30
                     }
                 },
                 days: policy.days.sort((a, b) => {
@@ -174,6 +186,12 @@ export default function AttendancePoliciesTab() {
                         is_allowed: true,
                         min_minutes_to_trigger: 30,
                         coefficient: 1.5
+                    },
+                    half_day_split: {
+                        enabled: true,
+                        morning_end: '12:00',
+                        afternoon_start: '13:30',
+                        spanning_threshold_minutes: 30
                     }
                 },
                 days: DAYS_OF_WEEK.map(d => ({
@@ -252,6 +270,12 @@ export default function AttendancePoliciesTab() {
                     min_minutes_to_trigger: 30,
                     coefficient: 1.5,
                     all_off_day_is_ot: true
+                },
+                half_day_split: formData.configData?.half_day_split || {
+                    enabled: true,
+                    morning_end: '12:00',
+                    afternoon_start: '13:30',
+                    spanning_threshold_minutes: 30
                 }
             };
 
@@ -837,6 +861,89 @@ export default function AttendancePoliciesTab() {
                                                     />
                                                 </label>
                                             ))}
+                                        </div>
+
+                                        <div className="space-y-4 pt-6 mt-6 border-t border-slate-100">
+                                            <div className="flex items-center justify-between pb-2">
+                                                <div className="p-1 px-2 bg-amber-50 text-warning rounded-lg text-[10px] font-bold italic">Tự động tách ca (Shift Recognition)</div>
+                                                <input 
+                                                    type="checkbox"
+                                                    checked={formData.configData?.half_day_split?.enabled ?? true}
+                                                    onChange={e => setFormData({
+                                                        ...formData,
+                                                        configData: {
+                                                            ...formData.configData,
+                                                            half_day_split: {
+                                                                ...formData.configData?.half_day_split,
+                                                                enabled: e.target.checked
+                                                            }
+                                                        }
+                                                    })}
+                                                    className="w-5 h-5 rounded-lg border-slate-300 text-warning focus:ring-warning-light"
+                                                />
+                                            </div>
+                                            
+                                            {formData.configData?.half_day_split?.enabled && (
+                                                <div className="grid grid-cols-1 gap-4 animate-in fade-in duration-300">
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        <div className="space-y-1">
+                                                            <label className="text-[9px] font-bold text-slate-400 tracking-wider">Hết ca Sáng</label>
+                                                            <input 
+                                                                type="time"
+                                                                value={formData.configData?.half_day_split?.morning_end || '12:00'}
+                                                                onChange={e => setFormData({
+                                                                    ...formData,
+                                                                    configData: {
+                                                                        ...formData.configData,
+                                                                        half_day_split: {
+                                                                            ...formData.configData?.half_day_split,
+                                                                            morning_end: e.target.value
+                                                                        }
+                                                                    }
+                                                                })}
+                                                                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-warning-light transition-all font-bold text-xs"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-1">
+                                                            <label className="text-[9px] font-bold text-slate-400 tracking-wider">Vào ca Chiều</label>
+                                                            <input 
+                                                                type="time"
+                                                                value={formData.configData?.half_day_split?.afternoon_start || '13:30'}
+                                                                onChange={e => setFormData({
+                                                                    ...formData,
+                                                                    configData: {
+                                                                        ...formData.configData,
+                                                                        half_day_split: {
+                                                                            ...formData.configData?.half_day_split,
+                                                                            afternoon_start: e.target.value
+                                                                        }
+                                                                    }
+                                                                })}
+                                                                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-warning-light transition-all font-bold text-xs"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <label className="text-[9px] font-bold text-slate-400 tracking-wider">Ngưỡng lấn ca tối thiểu (Phút)</label>
+                                                        <input 
+                                                            type="number"
+                                                            value={formData.configData?.half_day_split?.spanning_threshold_minutes ?? 30}
+                                                            onChange={e => setFormData({
+                                                                ...formData,
+                                                                configData: {
+                                                                    ...formData.configData,
+                                                                    half_day_split: {
+                                                                        ...formData.configData?.half_day_split,
+                                                                        spanning_threshold_minutes: parseInt(e.target.value) || 0
+                                                                    }
+                                                                }
+                                                            })}
+                                                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-warning-light transition-all font-bold text-xs"
+                                                        />
+                                                        <p className="text-[8px] text-slate-400 italic">Phải làm thêm ít nhất X phút vào ca đối diện mới được tính 1 công hành chính.</p>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>

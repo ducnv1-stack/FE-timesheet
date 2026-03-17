@@ -3,30 +3,39 @@
 :root {
   --background: #ffffff;
   --foreground: #0f172a;
-  
+
   /* Primary - Navy theme */
   --primary: #243247;
   --primary-foreground: #ffffff;
   --primary-light: #3a4d6b;
   --primary-subtle: #f1f5f9;
-  
+
   /* Accent - Emerald theme for success/confirmation */
-  --accent: #059669; /* emerald-600 */
+  --accent: #059669;
+  /* emerald-600 */
   --accent-foreground: #ffffff;
-  --accent-light: #ecfdf5; /* emerald-50 */
+  --accent-light: #ecfdf5;
+  /* emerald-50 */
 
   /* Warning - Amber theme */
-  --warning: #d97706; /* amber-600 */
-  --warning-light: #fffbeb; /* amber-50 */
+  --warning: #d97706;
+  /* amber-600 */
+  --warning-light: #fffbeb;
+  /* amber-50 */
 
   /* Danger/Critical */
-  --danger: #dc2626; /* red-600 */
-  --danger-light: #fef2f2; /* red-50 */
+  --danger: #dc2626;
+  /* red-600 */
+  --danger-light: #fef2f2;
+  /* red-50 */
 
   /* Surface/Secondary */
-  --surface: #f8fafc; /* slate-50 */
-  --secondary: #0f172a; /* slate-900 */
-  --border: #e2e8f0; /* slate-200 */
+  --surface: #f8fafc;
+  /* slate-50 */
+  --secondary: #0f172a;
+  /* slate-900 */
+  --border: #e2e8f0;
+  /* slate-200 */
 }
 
 @theme {
@@ -46,7 +55,7 @@
   --color-surface: var(--surface);
   --color-secondary: var(--secondary);
   --color-border-system: var(--border);
-  
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
