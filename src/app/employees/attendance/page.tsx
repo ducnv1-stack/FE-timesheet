@@ -169,11 +169,11 @@ export default function AttendancePage() {
                             <div className="grid grid-cols-1 gap-3">
                                 <div className="space-y-1">
                                     <p className="font-bold text-primary italic underline uppercase text-[9px]">Dành cho iPhone (Safari):</p>
-                                    <p>Nhấn vào biểu tượng <span className="font-bold px-1 bg-white border border-slate-300 rounded text-[10px]">AA</span> hoặc <RefreshCcw size={10} className="inline" /> trên thanh địa chỉ → <b>Cài đặt trang web</b> → <b>Vị trí</b> → Chọn <b>Cho phép</b>.</p>
+                                    <p>Vào <b>Cài đặt</b> của máy → <b>Quyền riêng tư & Bảo mật</b> → <b>Dịch vụ định vị</b> → Chọn <b>Trang web Safari</b> → Chọn <b>Khi dùng ứng dụng</b>.</p>
                                 </div>
                                 <div className="space-y-1 border-t border-slate-100 pt-2">
                                     <p className="font-bold text-primary italic underline uppercase text-[9px]">Dành cho Android (Chrome):</p>
-                                    <p>Nhấn biểu tượng <b>⋮</b> (3 chấm) → <b>Cài đặt</b> → <b>Cài đặt trang web</b> → <b>Vị trí</b> → Tìm trang này và nhấn <b>Cho phép</b>.</p>
+                                    <p>Nhấn biểu tượng <b>⋮</b> (3 chấm) → <b>Cài đặt</b> → <b>Cài đặt trang web</b> → <b>Vị trí</b> → Tìm trang web này và chọn <b>Cho phép</b>.</p>
                                 </div>
                             </div>
                         </div>
