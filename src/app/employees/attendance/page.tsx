@@ -21,9 +21,9 @@ export default function AttendancePage() {
     const [loading, setLoading] = useState(false);
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [todayData, setTodayData] = useState<any>(null);
-    const [distance, setDistance] = useState<number | null>(null);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [gpsError, setGpsError] = useState(false);
+    const [permissionStatus, setPermissionStatus] = useState<PermissionState | null>(null);
     const [showConfirm, setShowConfirm] = useState(false);
     const [imageError, setImageError] = useState(false);
     const { success, error: toastError } = useToast();
@@ -42,6 +42,14 @@ export default function AttendancePage() {
             const user = JSON.parse(userStr);
             setCurrentUser(user);
             fetchTodayStatus(user.employee?.id);
+        }
+
+        // Kiểm tra quyền GPS khi component mount
+        if (typeof navigator !== 'undefined' && (navigator as any).permissions) {
+            (navigator as any).permissions.query({ name: 'geolocation' }).then((status: any) => {
+                setPermissionStatus(status.state);
+                status.onchange = () => setPermissionStatus(status.state);
+            });
         }
     }, []);
 
@@ -74,7 +82,6 @@ export default function AttendancePage() {
 
         const isCheckIn = state === 'INITIAL' || state === 'RETRY';
 
-        // Xác nhận trước khi Check-out bằng Modal hệ thống
         if (!isCheckIn && !showConfirm) {
             setShowConfirm(true);
             return;
@@ -84,7 +91,6 @@ export default function AttendancePage() {
         setLoading(true);
         setErrorMsg(null);
 
-        // 1. Lấy tọa độ GPS
         if (!navigator.geolocation) {
             toastError('Trình duyệt không hỗ trợ định vị');
             setLoading(false);
@@ -96,9 +102,7 @@ export default function AttendancePage() {
                 const { latitude, longitude } = position.coords;
 
                 try {
-                    const isCheckIn = state === 'INITIAL' || state === 'RETRY';
                     const endpoint = isCheckIn ? 'check-in' : 'check-out';
-
                     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/attendance/${endpoint}?employeeId=${currentUser.employee.id}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -110,13 +114,13 @@ export default function AttendancePage() {
                     if (!res.ok) {
                         setErrorMsg(data.message);
                         if (isCheckIn && data.message.includes('Ngoài phạm vi')) {
-                            // Cập nhật lại trạng thái retry từ server
                             fetchTodayStatus(currentUser.employee.id);
                         }
                         throw new Error(data.message);
                     }
 
                     success(isCheckIn ? 'Check-in thành công!' : 'Check-out thành công!');
+                    setGpsError(false);
                     fetchTodayStatus(currentUser.employee.id);
                 } catch (error: any) {
                     toastError(error.message || 'Có lỗi xảy ra');
@@ -128,6 +132,7 @@ export default function AttendancePage() {
                 let msg = 'Không thể lấy vị trí của bạn';
                 if (error.code === 1) {
                     msg = 'Vui lòng cho phép quyền truy cập vị trí';
+                    setPermissionStatus('denied');
                 } else if (error.code === 3) {
                     msg = 'Thời gian lấy vị trí quá lâu, vui lòng thử lại';
                 }
@@ -142,15 +147,38 @@ export default function AttendancePage() {
     const renderButton = () => {
         const baseClass = "w-full py-6 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all duration-300 shadow-lg active:scale-95 cursor-pointer";
 
-        if (gpsError) {
+        if (gpsError || permissionStatus === 'denied') {
             return (
-                <button onClick={() => { setGpsError(false); handleAction(); }} className={cn(baseClass, "bg-slate-800 hover:bg-slate-900 text-white animate-in zoom-in-95 duration-300")}>
-                    <MapPin className="animate-pulse" size={32} />
-                    <span className="text-xl font-bold text-center px-4">Bật GPS / Thử lại lần nữa</span>
-                    <span className="text-xs opacity-80 text-center px-6 leading-relaxed">
-                        Vui lòng cho phép quyền vị trí trong cài đặt trình duyệt để hệ thống có thể xác thực.
-                    </span>
-                </button>
+                <div className="space-y-4 w-full">
+                    <button onClick={() => { setGpsError(false); handleAction(); }} className={cn(baseClass, "bg-slate-800 hover:bg-slate-900 text-white animate-in zoom-in-95 duration-300")}>
+                        <MapPin className="animate-pulse" size={32} />
+                        <span className="text-xl font-bold text-center px-4 uppercase">Yêu cầu bật GPS</span>
+                        <span className="text-xs opacity-80 text-center px-6 leading-relaxed">
+                            {permissionStatus === 'denied' 
+                                ? "Quyền truy cập vị trí đang bị chặn trong cài đặt." 
+                                : "Vui lòng cho phép quyền vị trí để xác thực."}
+                        </span>
+                    </button>
+                    
+                    {permissionStatus === 'denied' && (
+                        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-[11px] text-slate-600 space-y-2 animate-in fade-in slide-in-from-bottom-2">
+                            <p className="font-bold text-slate-900 flex items-center gap-2 uppercase tracking-tight">
+                                <AlertCircle size={14} className="text-primary" />
+                                Cách mở lại quyền (Hướng dẫn):
+                            </p>
+                            <div className="grid grid-cols-1 gap-3">
+                                <div className="space-y-1">
+                                    <p className="font-bold text-primary italic underline uppercase text-[9px]">Dành cho iPhone (Safari):</p>
+                                    <p>Nhấn vào biểu tượng <span className="font-bold px-1 bg-white border border-slate-300 rounded text-[10px]">AA</span> hoặc <RefreshCcw size={10} className="inline" /> trên thanh địa chỉ → <b>Cài đặt trang web</b> → <b>Vị trí</b> → Chọn <b>Cho phép</b>.</p>
+                                </div>
+                                <div className="space-y-1 border-t border-slate-100 pt-2">
+                                    <p className="font-bold text-primary italic underline uppercase text-[9px]">Dành cho Android (Chrome):</p>
+                                    <p>Nhấn biểu tượng <b>⋮</b> (3 chấm) → <b>Cài đặt</b> → <b>Cài đặt trang web</b> → <b>Vị trí</b> → Tìm trang này và nhấn <b>Cho phép</b>.</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
             );
         }
 
@@ -207,7 +235,6 @@ export default function AttendancePage() {
 
     return (
         <div className="max-w-md mx-auto p-4 space-y-6 pt-10">
-            {/* User Info Header */}
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex items-center gap-4">
                 <div className="w-16 h-16 rounded-2xl bg-primary-light border border-primary/20 overflow-hidden shrink-0 flex items-center justify-center text-primary">
                     {(currentUser?.employee?.avatarUrl && !imageError) ? (
@@ -232,7 +259,6 @@ export default function AttendancePage() {
                 </div>
             </div>
 
-            {/* Main Action Area */}
             <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-slate-50 space-y-8">
                 <div className="text-center space-y-2">
                     <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Chấm công GPS</h1>
@@ -250,7 +276,6 @@ export default function AttendancePage() {
                     </div>
                 )}
 
-                {/* Status Summary */}
                 <div className="grid grid-cols-2 gap-4">
                     <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
                         <div className="flex items-center gap-2 text-slate-400 mb-1">
@@ -291,7 +316,6 @@ export default function AttendancePage() {
                 </div>
             </div>
 
-            {/* Note Section */}
             <div className="bg-warning/10 rounded-2xl p-5 border border-warning/20">
                 <h3 className="text-warning font-bold text-sm mb-2 flex items-center gap-2">
                     <AlertCircle size={16} />
