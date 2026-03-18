@@ -289,16 +289,17 @@ export default function TimesheetPage() {
     const handleAdjust = (record: any) => {
         setAdjustingRecord(record);
         
-        const toLocalISO = (dateStr: string | null, fallbackDate: string) => {
-            const d = dateStr ? new Date(dateStr) : new Date(fallbackDate);
+        const toLocalISO = (dateStr: string | null) => {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
             // Ép về giờ địa phương VN (+7)
             const dateVN = new Date(d.getTime() + 7 * 3600000);
             return dateVN.toISOString().slice(0, 16);
         };
 
         setAdjustForm({
-            checkInTime: toLocalISO(record.checkInTime, record.date),
-            checkOutTime: toLocalISO(record.checkOutTime, record.date),
+            checkInTime: toLocalISO(record.checkInTime),
+            checkOutTime: toLocalISO(record.checkOutTime),
             note: ''
         });
         setShowAdjustModal(true);
@@ -501,10 +502,14 @@ export default function TimesheetPage() {
     };
 
     const currentStats = {
-        totalWorkDays: detailData.filter(d => d.checkInTime).length,
+        totalWorkCount: detailData.reduce((acc, d) => acc + (Number(d.workCount) || 0), 0).toFixed(1),
+        fullDays: detailData.filter(d => Number(d.workCount) >= 1).length,
+        halfDaysCount: detailData.filter(d => Number(d.workCount) > 0 && Number(d.workCount) < 1).length,
+        halfDaysTotal: detailData.filter(d => Number(d.workCount) > 0 && Number(d.workCount) < 1).reduce((acc, d) => acc + (Number(d.workCount) || 0), 0).toFixed(1),
         lateDays: detailData.filter(d => d.checkInStatus === 'LATE' || d.checkInStatus === 'LATE_SERIOUS').length,
         earlyLeaveDays: detailData.filter(d => d.checkOutStatus === 'EARLY_LEAVE').length,
         totalOvertimeHours: (detailData.reduce((acc, d) => acc + (d.overtimeMinutes || 0), 0) / 60).toFixed(1),
+        absentDays: detailData.filter(d => d.dailyStatus?.startsWith('ABSENT')).length,
     };
 
     // Client-side filtering for relative search (accent/case insensitive style)
@@ -745,13 +750,16 @@ export default function TimesheetPage() {
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-slate-50/50 border-b border-slate-100">
-                                    <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none text-center">STT</th>
-                                    <th className="px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Nhân viên</th>
-                                    <th className="px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Ngày công</th>
-                                    <th className="px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Muộn</th>
-                                    <th className="px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Sớm</th>
-                                    <th className="px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">TC (H)</th>
-                                    <th className="px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Thao tác</th>
+                                    <th className="px-2 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none text-center">STT</th>
+                                    <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Nhân viên</th>
+                                    <th className="px-3 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Tổng công</th>
+                                    <th className="px-3 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">HC (1.0)</th>
+                                    <th className="px-3 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Công ½</th>
+                                    <th className="px-3 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Nghỉ</th>
+                                    <th className="px-3 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Muộn</th>
+                                    <th className="px-3 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Sớm</th>
+                                    <th className="px-3 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">TC (H)</th>
+                                    <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">
@@ -772,12 +780,12 @@ export default function TimesheetPage() {
                                 ) : (
                                     filteredSummaryData.map((row, index) => (
                                         <tr key={row.employeeId} className="hover:bg-slate-50/50 transition-colors group">
-                                            <td className="px-4 py-4 text-center">
-                                                <span className="text-[11px] font-bold text-slate-400">{index + 1}</span>
+                                            <td className="px-2 py-3 text-center">
+                                                <span className="text-[10px] font-bold text-slate-400">{index + 1}</span>
                                             </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-full overflow-hidden bg-primary-light border border-slate-100 shrink-0 flex items-center justify-center">
+                                            <td className="px-4 py-3">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-8 h-8 rounded-full overflow-hidden bg-primary-light border border-slate-100 shrink-0 flex items-center justify-center">
                                                         {(row.avatarUrl && !imageErrors[`list-${row.employeeId}`]) ? (
                                                             <img
                                                                 src={getFullImageUrl(row.avatarUrl)!}
@@ -786,33 +794,45 @@ export default function TimesheetPage() {
                                                                 onError={() => handleImageError(`list-${row.employeeId}`)}
                                                             />
                                                         ) : (
-                                                            <div className="w-full h-full flex items-center justify-center text-primary font-black text-sm uppercase">
+                                                            <div className="w-full h-full flex items-center justify-center text-primary font-black text-xs uppercase">
                                                                 {row.fullName.split(' ').pop()?.charAt(0)}
                                                             </div>
                                                         )}
                                                     </div>
-                                                    <div className="flex flex-col">
-                                                        <span className="text-[13px] font-bold text-slate-800 leading-tight group-hover:text-primary transition-colors">{row.fullName}</span>
-                                                        <span className="text-[10px] text-slate-400 font-medium mt-0.5">{row.position} • {row.branchName}</span>
+                                                    <div className="flex flex-col min-w-0">
+                                                        <span className="text-[11px] font-bold text-slate-800 leading-tight group-hover:text-primary transition-colors truncate">{row.fullName}</span>
+                                                        <span className="text-[9px] text-slate-400 font-medium truncate">{row.position}</span>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-center">
-                                                <span className="text-sm font-black text-accent">{row.totalWorkDays}</span>
+                                            <td className="px-3 py-3 text-center">
+                                                <span className="text-[12px] font-black text-accent">{row.totalWorkCount}</span>
                                             </td>
-                                            <td className="px-6 py-4 text-center">
-                                                <span className={cn("text-sm font-black", row.lateDays > 0 ? "text-primary" : "text-slate-300")}>{row.lateDays || '-'}</span>
+                                            <td className="px-3 py-3 text-center">
+                                                <span className="text-[11px] font-bold text-blue-600">{row.fullDays}</span>
                                             </td>
-                                            <td className="px-6 py-4 text-center">
-                                                <span className={cn("text-sm font-black", row.earlyLeaveDays > 0 ? "text-warning" : "text-slate-300")}>{row.earlyLeaveDays || '-'}</span>
+                                            <td className="px-3 py-3 text-center">
+                                                <div className="flex flex-col">
+                                                    <span className="text-[11px] font-bold text-amber-600">{row.halfDaysCount}</span>
+                                                    <span className="text-[8px] text-slate-400">({row.halfDaysTotal})</span>
+                                                </div>
                                             </td>
-                                            <td className="px-6 py-4 text-center">
-                                                <span className={cn("text-sm font-black", row.totalOvertimeHours > 0 ? "text-blue-600" : "text-slate-300")}>{row.totalOvertimeHours || '-'}</span>
+                                            <td className="px-3 py-3 text-center">
+                                                <span className={cn("text-[11px] font-bold", row.absentDaysCount > 0 ? "text-primary" : "text-slate-300")}>{row.absentDaysCount || '-'}</span>
                                             </td>
-                                            <td className="px-6 py-4 text-center">
+                                            <td className="px-3 py-3 text-center">
+                                                <span className={cn("text-[11px] font-bold", row.lateDays > 0 ? "text-primary" : "text-slate-300")}>{row.lateDays || '-'}</span>
+                                            </td>
+                                            <td className="px-3 py-3 text-center">
+                                                <span className={cn("text-[11px] font-bold", row.earlyLeaveDays > 0 ? "text-warning" : "text-slate-300")}>{row.earlyLeaveDays || '-'}</span>
+                                            </td>
+                                            <td className="px-3 py-3 text-center">
+                                                <span className={cn("text-[11px] font-bold", row.totalOvertimeHours > 0 ? "text-blue-600" : "text-slate-300")}>{row.totalOvertimeHours || '-'}</span>
+                                            </td>
+                                            <td className="px-4 py-3 text-center">
                                                 <button
                                                     onClick={() => handleSelectEmployee({ id: row.employeeId, fullName: row.fullName, avatarUrl: row.avatarUrl })}
-                                                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-800 text-white rounded-lg text-[10px] font-bold tracking-wider hover:bg-slate-700 transition-all active:scale-95 shadow-sm cursor-pointer"
+                                                    className="inline-flex items-center gap-1.5 px-2 py-1 bg-slate-800 text-white rounded-md text-[9px] font-bold tracking-wider hover:bg-slate-700 transition-all active:scale-95 shadow-sm cursor-pointer"
                                                 >
                                                     Chi tiết
                                                 </button>
@@ -826,8 +846,11 @@ export default function TimesheetPage() {
                 </div>
             ) : (activeTab === 'MY' || (activeTab === 'EMPLOYEES' && viewMode === 'DETAIL')) ? (
                 <>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-                        <StatCard label="Ngày công" value={currentStats.totalWorkDays} icon={CheckCircle2} color="text-accent" bg="bg-emerald-50" />
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 md:gap-3">
+                        <StatCard label="Tổng công" value={currentStats.totalWorkCount} icon={CheckCircle2} color="text-accent" bg="bg-emerald-50" />
+                        <StatCard label="Hành chính" value={currentStats.fullDays} icon={Briefcase} color="text-blue-600" bg="bg-blue-50" />
+                        <StatCard label="Công ½" value={`${currentStats.halfDaysCount} (${currentStats.halfDaysTotal})`} icon={Clock} color="text-amber-600" bg="bg-amber-50" />
+                        <StatCard label="Ngày nghỉ" value={currentStats.absentDays} icon={X} color="text-primary" bg="bg-primary-light" />
                         <StatCard label="Đi muộn" value={currentStats.lateDays} icon={AlertCircle} color="text-primary" bg="bg-primary-light" />
                         <StatCard label="Về sớm" value={currentStats.earlyLeaveDays} icon={Clock} color="text-warning" bg="bg-amber-50" />
                         <StatCard label="Tăng ca" value={currentStats.totalOvertimeHours} icon={TrendingUp} color="text-blue-600" bg="bg-blue-50" />
@@ -1444,13 +1467,13 @@ export default function TimesheetPage() {
 
 function StatCard({ label, value, icon: Icon, color, bg }: any) {
     return (
-        <div className="bg-white rounded-xl md:rounded-2xl p-3 md:p-4 border border-slate-100 shadow-sm flex items-center gap-3 md:gap-4 transition-all hover:shadow-md">
-            <div className={cn("w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center shrink-0", bg, color)}>
-                <Icon className="w-5 h-5 md:w-6 md:h-6" />
+        <div className="bg-white rounded-xl p-2.5 border border-slate-100 shadow-sm flex items-center gap-2.5 transition-all hover:shadow-md">
+            <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0", bg, color)}>
+                <Icon className="w-4 h-4" />
             </div>
-            <div>
-                <p className="text-slate-400 text-[9px] md:text-[10px] font-black uppercase tracking-widest leading-none">{label}</p>
-                <p className="text-lg md:text-xl font-black text-slate-800 font-outfit mt-1">{value}</p>
+            <div className="flex-1 min-w-0">
+                <p className="text-slate-400 text-[8px] font-black uppercase tracking-widest leading-none truncate">{label}</p>
+                <p className="text-sm font-black text-slate-800 font-outfit mt-0.5 leading-none">{value}</p>
             </div>
         </div>
     );
