@@ -89,28 +89,28 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     icon: PlusCircle,
                     href: '/orders/new',
                     active: pathname === '/orders/new',
-                    roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'SALE', 'ADMIN']
+                    roleAccess: []//'DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'SALE', 'ADMIN'
                 },
                 {
                     label: 'Nâng cấp sản phẩm',
                     icon: ShoppingCart,
                     href: '/orders/upgrade',
                     active: pathname === '/orders/upgrade',
-                    roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'SALE', 'ADMIN']
+                    roleAccess: []//'DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'SALE', 'ADMIN'
                 },
                 {
                     label: 'Lịch sử đơn',
                     icon: History,
                     href: '/orders',
                     active: pathname === '/orders',
-                    roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'SALE', 'DRIVER', 'ADMIN', 'TECHNICIAN', 'WAREHOUSE']
+                    roleAccess: []//'DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'SALE', 'DRIVER', 'ADMIN', 'TECHNICIAN', 'WAREHOUSE'
                 },
                 {
                     label: 'Báo cáo doanh số',
                     icon: BarChart3,
                     href: '/performance',
                     active: pathname === '/performance',
-                    roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER', 'ADMIN']
+                    roleAccess: []//'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER', 'ADMIN'
                 },
             ]
         },
@@ -123,14 +123,14 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     icon: LayoutGrid,
                     href: '/warehouse/inventory',
                     active: pathname === '/warehouse/inventory',
-                    roleAccess: ['ADMIN']
+                    roleAccess: ['ADMIN']//'ADMIN'
                 },
                 {
                     label: 'Lịch sử giao dịch',
                     icon: History,
                     href: '/warehouse/transactions',
                     active: pathname === '/warehouse/transactions',
-                    roleAccess: ['ADMIN']
+                    roleAccess: ['ADMIN']//'ADMIN'
                 },
             ]
         },
@@ -177,21 +177,21 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     icon: ShoppingBag,
                     href: '/products',
                     active: pathname === '/products',
-                    roleAccess: ['ADMIN', 'DIRECTOR', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT']
+                    roleAccess: []//'DIRECTOR', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT'
                 },
                 {
                     label: 'Quản lý chi nhánh',
                     icon: Building2,
                     href: '/branches',
                     active: pathname.startsWith('/branches'),
-                    roleAccess: ['ADMIN', 'DIRECTOR', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER']
+                    roleAccess: []//'ADMIN', 'DIRECTOR', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER'
                 },
                 {
                     label: 'Cấu hình phí ship',
                     icon: Truck,
                     href: '/settings/delivery-fees',
                     active: pathname === '/settings/delivery-fees',
-                    roleAccess: ['ADMIN']
+                    roleAccess: []//'ADMIN'
                 },
             ]
         },
@@ -200,14 +200,14 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             icon: Trophy,
             href: '/leaderboard',
             active: pathname === '/leaderboard',
-            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER', 'ADMIN', 'TELESALE']
+            roleAccess: []//'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER', 'ADMIN', 'TELESALE'
         },
         {
             label: 'Log hệ thống',
             icon: Activity,
             href: '/logs',
             active: pathname === '/logs',
-            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'DRIVER', 'SALE', 'ADMIN']
+            roleAccess: []//'DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'DRIVER', 'SALE', 'ADMIN'
         },
         {
             label: 'Cài đặt',
