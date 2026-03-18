@@ -168,33 +168,33 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                 },
             ]
         },
-        // {
-        //     label: 'Hệ thống',
-        //     icon: LayoutGrid,
-        //     children: [
-        //         {
-        //             label: 'Quản lý sản phẩm',
-        //             icon: ShoppingBag,
-        //             href: '/products',
-        //             active: pathname === '/products',
-        //             roleAccess: []//'DIRECTOR', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT'
-        //         },
-        //         {
-        //             label: 'Quản lý chi nhánh',
-        //             icon: Building2,
-        //             href: '/branches',
-        //             active: pathname.startsWith('/branches'),
-        //             roleAccess: []//'ADMIN', 'DIRECTOR', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER'
-        //         },
-        //         {
-        //             label: 'Cấu hình phí ship',
-        //             icon: Truck,
-        //             href: '/settings/delivery-fees',
-        //             active: pathname === '/settings/delivery-fees',
-        //             roleAccess: []//'ADMIN'
-        //         },
-        //     ]
-        // },
+        {
+            label: 'Hệ thống',
+            icon: LayoutGrid,
+            children: [
+                // {
+                //     label: 'Quản lý sản phẩm',
+                //     icon: ShoppingBag,
+                //     href: '/products',
+                //     active: pathname === '/products',
+                //     roleAccess: []//'DIRECTOR', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT'
+                // },
+                {
+                    label: 'Quản lý chi nhánh',
+                    icon: Building2,
+                    href: '/branches',
+                    active: pathname.startsWith('/branches'),
+                    roleAccess: ['ADMIN']//'ADMIN', 'DIRECTOR', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER'
+                },
+                // {
+                //     label: 'Cấu hình phí ship',
+                //     icon: Truck,
+                //     href: '/settings/delivery-fees',
+                //     active: pathname === '/settings/delivery-fees',
+                //     roleAccess: []//'ADMIN'
+                // },
+            ]
+        },
         // {
         //     label: 'Bảng xếp hạng',
         //     icon: Trophy,

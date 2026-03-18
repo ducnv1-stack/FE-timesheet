@@ -21,6 +21,11 @@ interface AttendancePolicyDay {
     workCount: number;
     isFlexible: boolean;
     note: string | null;
+    hasShifts: boolean;
+    shift1EndTime: string | null;
+    shift2StartTime: string | null;
+    shift1WorkCount: number;
+    shift2WorkCount: number;
 }
 
 interface AttendancePolicy {
@@ -96,7 +101,12 @@ export default function AttendancePoliciesTab() {
             requireGPS: true,
             workCount: 1,
             isFlexible: false,
-            note: null
+            note: null,
+            hasShifts: false,
+            shift1EndTime: '12:00',
+            shift2StartTime: '13:30',
+            shift1WorkCount: 0.5,
+            shift2WorkCount: 0.5
         }))
     });
 
@@ -163,7 +173,12 @@ export default function AttendancePoliciesTab() {
                         // If there is a rule for this day, check if it explicitly has break_start.
                         hasBreak: dailyRule ? !!dailyRule.break_start : true,
                         breakStartTime: dailyRule?.break_start || '12:00',
-                        breakEndTime: dailyRule?.break_end || '13:30'
+                        breakEndTime: dailyRule?.break_end || '13:30',
+                        hasShifts: d.hasShifts ?? false,
+                        shift1EndTime: d.shift1EndTime || '12:00',
+                        shift2StartTime: d.shift2StartTime || '13:30',
+                        shift1WorkCount: d.shift1WorkCount ?? 0.5,
+                        shift2WorkCount: d.shift2WorkCount ?? 0.5
                     } as any;
                 })
             });
@@ -207,7 +222,12 @@ export default function AttendancePoliciesTab() {
                     note: null,
                     hasBreak: true,
                     breakStartTime: '12:00',
-                    breakEndTime: '13:30'
+                    breakEndTime: '13:30',
+                    hasShifts: false,
+                    shift1EndTime: '12:00',
+                    shift2StartTime: '13:30',
+                    shift1WorkCount: 0.5,
+                    shift2WorkCount: 0.5
                 }))
             });
         }
@@ -249,7 +269,13 @@ export default function AttendancePoliciesTab() {
                     end_time: d.endTime,
                     break_start: (d as any).hasBreak ? ((d as any).breakStartTime || '12:00') : null,
                     break_end: (d as any).hasBreak ? ((d as any).breakEndTime || '13:30') : null,
-                    is_off_day_ot: d.allowOT
+                    is_off_day_ot: d.allowOT,
+                    has_shifts: d.hasShifts,
+                    shift1_end_time: d.shift1EndTime,
+                    shift2_start_time: d.shift2StartTime,
+                    shift1_work_count: d.shift1WorkCount,
+                    shift2_work_count: d.shift2WorkCount,
+                    work_count: d.workCount
                 };
             });
 
@@ -301,7 +327,12 @@ export default function AttendancePoliciesTab() {
                     requireGPS: d.requireGPS,
                     workCount: parseFloat(d.workCount?.toString() || '1.0') || 1,
                     isFlexible: d.isFlexible,
-                    note: d.note
+                    note: d.note,
+                    hasShifts: d.hasShifts,
+                    shift1EndTime: d.shift1EndTime,
+                    shift2StartTime: d.shift2StartTime,
+                    shift1WorkCount: parseFloat(d.shift1WorkCount?.toString() || '0.5') || 0.5,
+                    shift2WorkCount: parseFloat(d.shift2WorkCount?.toString() || '0.5') || 0.5
                 };
             })
         };
@@ -869,16 +900,23 @@ export default function AttendancePoliciesTab() {
                                                 <input 
                                                     type="checkbox"
                                                     checked={formData.configData?.half_day_split?.enabled ?? true}
-                                                    onChange={e => setFormData({
-                                                        ...formData,
-                                                        configData: {
-                                                            ...formData.configData,
-                                                            half_day_split: {
-                                                                ...formData.configData?.half_day_split,
-                                                                enabled: e.target.checked
-                                                            }
-                                                        }
-                                                    })}
+                                                    onChange={e => {
+                                                        const isChecked = e.target.checked;
+                                                        setFormData({
+                                                            ...formData,
+                                                            configData: {
+                                                                ...formData.configData,
+                                                                half_day_split: {
+                                                                    ...formData.configData?.half_day_split,
+                                                                    enabled: isChecked
+                                                                }
+                                                            },
+                                                            days: (formData.days || []).map(d => ({ 
+                                                                ...d, 
+                                                                hasShifts: isChecked && !d.isOff // Tự động bật 2 ca cho các ngày đang làm việc
+                                                            }))
+                                                        });
+                                                    }}
                                                     className="w-5 h-5 rounded-lg border-slate-300 text-warning focus:ring-warning-light"
                                                 />
                                             </div>
@@ -891,16 +929,23 @@ export default function AttendancePoliciesTab() {
                                                             <input 
                                                                 type="time"
                                                                 value={formData.configData?.half_day_split?.morning_end || '12:00'}
-                                                                onChange={e => setFormData({
-                                                                    ...formData,
-                                                                    configData: {
-                                                                        ...formData.configData,
-                                                                        half_day_split: {
-                                                                            ...formData.configData?.half_day_split,
-                                                                            morning_end: e.target.value
-                                                                        }
-                                                                    }
-                                                                })}
+                                                                onChange={e => {
+                                                                    const val = e.target.value;
+                                                                    setFormData({
+                                                                        ...formData,
+                                                                        configData: {
+                                                                            ...formData.configData,
+                                                                            half_day_split: {
+                                                                                ...formData.configData?.half_day_split,
+                                                                                morning_end: val
+                                                                            }
+                                                                        },
+                                                                        days: (formData.days || []).map(d => ({ 
+                                                                            ...d, 
+                                                                            shift1EndTime: val 
+                                                                        }))
+                                                                    });
+                                                                }}
                                                                 className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-warning-light transition-all font-bold text-xs"
                                                             />
                                                         </div>
@@ -909,16 +954,23 @@ export default function AttendancePoliciesTab() {
                                                             <input 
                                                                 type="time"
                                                                 value={formData.configData?.half_day_split?.afternoon_start || '13:30'}
-                                                                onChange={e => setFormData({
-                                                                    ...formData,
-                                                                    configData: {
-                                                                        ...formData.configData,
-                                                                        half_day_split: {
-                                                                            ...formData.configData?.half_day_split,
-                                                                            afternoon_start: e.target.value
-                                                                        }
-                                                                    }
-                                                                })}
+                                                                onChange={e => {
+                                                                    const val = e.target.value;
+                                                                    setFormData({
+                                                                        ...formData,
+                                                                        configData: {
+                                                                            ...formData.configData,
+                                                                            half_day_split: {
+                                                                                ...formData.configData?.half_day_split,
+                                                                                afternoon_start: val
+                                                                            }
+                                                                        },
+                                                                        days: (formData.days || []).map(d => ({ 
+                                                                            ...d, 
+                                                                            shift2StartTime: val 
+                                                                        }))
+                                                                    });
+                                                                }}
                                                                 className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-warning-light transition-all font-bold text-xs"
                                                             />
                                                         </div>
@@ -1116,6 +1168,68 @@ export default function AttendancePoliciesTab() {
                                                                 className="w-full px-2 py-1.5 bg-slate-50 border border-slate-100 rounded-xl focus:ring-1 focus:ring-accent-light outline-none font-bold text-xs"
                                                             />
                                                         </div>
+
+                                                        {day.hasShifts ? (
+                                                            <>
+                                                                <div className="space-y-1">
+                                                                    <label className="text-[9px] font-semibold text-slate-400 tracking-tight flex items-center gap-1">
+                                                                        <Clock size={10} className="text-primary-light" /> Ra ca 1
+                                                                    </label>
+                                                                    <input 
+                                                                        type="time" 
+                                                                        value={day.shift1EndTime || '12:00'}
+                                                                        onChange={e => handleDayChange(idx, 'shift1EndTime', e.target.value)}
+                                                                        className="w-full px-2 py-1.5 bg-slate-50 border border-slate-100 rounded-xl focus:ring-1 focus:ring-accent-light outline-none font-bold text-xs text-blue-600"
+                                                                    />
+                                                                </div>
+                                                                <div className="space-y-1">
+                                                                    <label className="text-[9px] font-semibold text-slate-400 tracking-tight flex items-center gap-1">
+                                                                        <Clock size={10} className="text-accent-light" /> Vào ca 2
+                                                                    </label>
+                                                                    <input 
+                                                                        type="time" 
+                                                                        value={day.shift2StartTime || '13:30'}
+                                                                        onChange={e => handleDayChange(idx, 'shift2StartTime', e.target.value)}
+                                                                        className="w-full px-2 py-1.5 bg-slate-50 border border-slate-100 rounded-xl focus:ring-1 focus:ring-accent-light outline-none font-bold text-xs text-amber-600"
+                                                                    />
+                                                                </div>
+                                                            </>
+                                                        ) : (
+                                                            <div className="md:col-span-2 space-y-1">
+                                                                <div className="flex items-center justify-start gap-2">
+                                                                        <label className="text-[9px] font-semibold text-slate-400 tracking-tight flex items-center gap-1 cursor-pointer">
+                                                                            <Zap size={10} className="text-warning-light" /> Nghỉ trưa
+                                                                        <input 
+                                                                            type="checkbox" 
+                                                                            checked={(day as any).hasBreak ?? true}
+                                                                            onChange={e => handleDayChange(idx, 'hasBreak', e.target.checked)}
+                                                                            className="w-3 h-3 rounded ml-1 cursor-pointer"
+                                                                        />
+                                                                    </label>
+                                                                </div>
+                                                                {((day as any).hasBreak ?? true) && (
+                                                                    <div className="flex items-center gap-2">
+                                                                        <input 
+                                                                            type="time" 
+                                                                            value={(day as any).breakStartTime || '12:00'}
+                                                                            onChange={e => handleDayChange(idx, 'breakStartTime', e.target.value)}
+                                                                            className="flex-1 min-w-[85px] px-2 py-1.5 bg-slate-50 border border-slate-100 rounded-lg text-[9px] font-bold outline-none"
+                                                                        />
+                                                                        <span className="text-slate-300 text-[10px] shrink-0">-</span>
+                                                                        <input 
+                                                                            type="time" 
+                                                                            value={(day as any).breakEndTime || '13:30'}
+                                                                            onChange={e => handleDayChange(idx, 'breakEndTime', e.target.value)}
+                                                                            className="flex-1 min-w-[85px] px-2 py-1.5 bg-slate-50 border border-slate-100 rounded-lg text-[9px] font-bold outline-none"
+                                                                        />
+                                                                    </div>
+                                                                )}
+                                                                {!((day as any).hasBreak ?? true) && (
+                                                                    <div className="py-1.5 text-[8px] text-slate-300 italic font-bold">Không nghỉ</div>
+                                                                )}
+                                                            </div>
+                                                        )}
+
                                                         <div className="space-y-1">
                                                             <label className="text-[9px] font-semibold text-slate-400 tracking-tight flex items-center gap-1">
                                                                 <Clock size={10} className="text-primary-light" /> Ra
@@ -1127,69 +1241,73 @@ export default function AttendancePoliciesTab() {
                                                                 className="w-full px-2 py-1.5 bg-slate-50 border border-slate-100 rounded-xl focus:ring-1 focus:ring-accent-light outline-none font-bold text-xs"
                                                             />
                                                         </div>
-                                                        <div className="md:col-span-2 space-y-1">
-                                                            <div className="flex items-center justify-start gap-2">
-                                                                    <label className="text-[9px] font-semibold text-slate-400 tracking-tight flex items-center gap-1 cursor-pointer">
-                                                                        <Zap size={10} className="text-warning-light" /> Nghỉ trưa
-                                                                    <input 
-                                                                        type="checkbox" 
-                                                                        checked={(day as any).hasBreak ?? true}
-                                                                        onChange={e => handleDayChange(idx, 'hasBreak', e.target.checked)}
-                                                                        className="w-3 h-3 rounded ml-1 cursor-pointer"
-                                                                    />
+
+                                                        {day.hasShifts ? (
+                                                            <div className="space-y-1">
+                                                                <label className="text-[9px] font-semibold text-slate-400 tracking-tight flex items-center gap-1">
+                                                                    Công (C1/C2)
                                                                 </label>
-                                                            </div>
-                                                            {((day as any).hasBreak ?? true) && (
-                                                                <div className="flex items-center gap-2">
+                                                                <div className="flex items-center gap-1">
                                                                     <input 
-                                                                        type="time" 
-                                                                        value={(day as any).breakStartTime || '12:00'}
-                                                                        onChange={e => handleDayChange(idx, 'breakStartTime', e.target.value)}
-                                                                        className="flex-1 min-w-[85px] px-2 py-1.5 bg-slate-50 border border-slate-100 rounded-lg text-[9px] font-bold outline-none"
+                                                                        type="number" step="0.1"
+                                                                        value={day.shift1WorkCount}
+                                                                        onChange={e => handleDayChange(idx, 'shift1WorkCount', e.target.value)}
+                                                                        className="w-full px-1 py-1 bg-blue-50 border border-blue-100 rounded-lg focus:ring-1 focus:ring-accent-light outline-none font-bold text-[10px] text-center"
+                                                                        title="Công ca 1"
                                                                     />
-                                                                    <span className="text-slate-300 text-[10px] shrink-0">-</span>
                                                                     <input 
-                                                                        type="time" 
-                                                                        value={(day as any).breakEndTime || '13:30'}
-                                                                        onChange={e => handleDayChange(idx, 'breakEndTime', e.target.value)}
-                                                                        className="flex-1 min-w-[85px] px-2 py-1.5 bg-slate-50 border border-slate-100 rounded-lg text-[9px] font-bold outline-none"
+                                                                        type="number" step="0.1"
+                                                                        value={day.shift2WorkCount}
+                                                                        onChange={e => handleDayChange(idx, 'shift2WorkCount', e.target.value)}
+                                                                        className="w-full px-1 py-1 bg-amber-50 border border-amber-100 rounded-lg focus:ring-1 focus:ring-accent-light outline-none font-bold text-[10px] text-center"
+                                                                        title="Công ca 2"
                                                                     />
                                                                 </div>
-                                                            )}
-                                                            {!((day as any).hasBreak ?? true) && (
-                                                                <div className="py-1.5 text-[8px] text-slate-300 italic font-bold">Không nghỉ</div>
-                                                            )}
-                                                        </div>
-                                                        <div className="space-y-1">
-                                                            <label className="text-[9px] font-semibold text-slate-400 tracking-tight flex items-center gap-1">
-                                                                OT
-                                                            </label>
-                                                            <input 
-                                                                type="number" step="0.1"
-                                                                value={day.otMultiplier}
-                                                                onChange={e => handleDayChange(idx, 'otMultiplier', e.target.value)}
-                                                                className="w-full px-2 py-1.5 bg-slate-50 border border-slate-100 rounded-xl focus:ring-1 focus:ring-accent-light outline-none font-bold text-xs"
-                                                            />
-                                                        </div>
-                                                        <div className="flex items-center lg:items-end justify-start gap-3 flex-wrap h-full lg:col-span-1">
+                                                            </div>
+                                                        ) : (
+                                                            <div className="space-y-1">
+                                                                <label className="text-[9px] font-semibold text-slate-400 tracking-tight flex items-center gap-1">
+                                                                    Công
+                                                                </label>
+                                                                <input 
+                                                                    type="number" step="0.1"
+                                                                    value={day.workCount}
+                                                                    onChange={e => handleDayChange(idx, 'workCount', e.target.value)}
+                                                                    className="w-full px-2 py-1.5 bg-slate-50 border border-slate-100 rounded-xl focus:ring-1 focus:ring-accent-light outline-none font-bold text-xs"
+                                                                />
+                                                            </div>
+                                                        )}
+
+                                                        <div className="flex flex-col lg:items-end justify-center gap-2 h-full lg:col-span-1">
                                                             <label className="flex items-center gap-1.5 cursor-pointer group">
                                                                 <input 
                                                                     type="checkbox" 
-                                                                    checked={day.requireGPS}
-                                                                    onChange={e => handleDayChange(idx, 'requireGPS', e.target.checked)}
-                                                                    className="w-3.5 h-3.5 rounded border-slate-300 text-accent focus:ring-accent-light cursor-pointer"
+                                                                    checked={day.hasShifts}
+                                                                    onChange={e => handleDayChange(idx, 'hasShifts', e.target.checked)}
+                                                                    className="w-3.5 h-3.5 rounded border-slate-300 text-purple-600 focus:ring-purple-400 cursor-pointer"
                                                                 />
-                                                                <span className="text-[9px] font-semibold text-slate-500 tracking-tight group-hover:text-accent">GPS</span>
+                                                                <span className="text-[9px] font-bold text-purple-600 tracking-tight group-hover:text-purple-800">2 Ca</span>
                                                             </label>
-                                                            <label className="flex items-center gap-1.5 cursor-pointer group">
-                                                                <input 
-                                                                    type="checkbox" 
-                                                                    checked={day.allowOT}
-                                                                    onChange={e => handleDayChange(idx, 'allowOT', e.target.checked)}
-                                                                    className="w-3.5 h-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                                                                />
-                                                                <span className="text-[9px] font-semibold text-slate-500 tracking-tight group-hover:text-blue-600">OT</span>
-                                                            </label>
+                                                            <div className="flex items-center gap-2">
+                                                                <label className="flex items-center gap-1 cursor-pointer group">
+                                                                    <input 
+                                                                        type="checkbox" 
+                                                                        checked={day.requireGPS}
+                                                                        onChange={e => handleDayChange(idx, 'requireGPS', e.target.checked)}
+                                                                        className="w-3 h-3 rounded border-slate-300 text-accent focus:ring-accent-light cursor-pointer"
+                                                                    />
+                                                                    <span className="text-[8px] font-semibold text-slate-500 tracking-tight group-hover:text-accent">GPS</span>
+                                                                </label>
+                                                                <label className="flex items-center gap-1 cursor-pointer group">
+                                                                    <input 
+                                                                        type="checkbox" 
+                                                                        checked={day.allowOT}
+                                                                        onChange={e => handleDayChange(idx, 'allowOT', e.target.checked)}
+                                                                        className="w-3 h-3 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                                    />
+                                                                    <span className="text-[8px] font-semibold text-slate-500 tracking-tight group-hover:text-blue-600">OT</span>
+                                                                </label>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 ) : (

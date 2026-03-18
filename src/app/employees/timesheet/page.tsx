@@ -851,7 +851,7 @@ export default function TimesheetPage() {
                         <StatCard label="Hành chính" value={currentStats.fullDays} icon={Briefcase} color="text-blue-600" bg="bg-blue-50" />
                         <StatCard label="Công ½" value={`${currentStats.halfDaysCount} (${currentStats.halfDaysTotal})`} icon={Clock} color="text-amber-600" bg="bg-amber-50" />
                         <StatCard label="Ngày nghỉ" value={currentStats.absentDays} icon={X} color="text-primary" bg="bg-primary-light" />
-                        <StatCard label="Đi muộn" value={currentStats.lateDays} icon={AlertCircle} color="text-primary" bg="bg-primary-light" />
+                        <StatCard label="Đi muộn" value={currentStats.lateDays} icon={AlertCircle} color="text-danger" bg="bg-danger-light" />
                         <StatCard label="Về sớm" value={currentStats.earlyLeaveDays} icon={Clock} color="text-warning" bg="bg-amber-50" />
                         <StatCard label="Tăng ca" value={currentStats.totalOvertimeHours} icon={TrendingUp} color="text-blue-600" bg="bg-blue-50" />
                     </div>
@@ -868,8 +868,9 @@ export default function TimesheetPage() {
                                         <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Muộn</th>
                                         <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Sớm</th>
                                         <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">TC</th>
+                                        <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest">Ca làm</th>
                                         <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Công</th>
-                                        <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Trạng thái</th>
+                                        <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center whitespace-nowrap">Trạng thái</th>
                                         {['ADMIN', 'DIRECTOR', 'MANAGER', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'].includes(currentUser?.role?.code) && (
                                             <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Thao tác</th>
                                         )}
@@ -926,6 +927,9 @@ export default function TimesheetPage() {
                                                             {row.overtimeMinutes || '-'}
                                                         </span>
                                                     </td>
+                                                    <td className="px-3 md:px-6 py-3 whitespace-nowrap">
+                                                        <StatusBadge status={row.dailyStatus} />
+                                                    </td>
                                                     <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
                                                         <span className={cn("text-xs md:text-[13px] font-black", 
                                                             row.workCount != null && Number(row.workCount) < 1 ? "text-amber-600" : 
@@ -935,7 +939,7 @@ export default function TimesheetPage() {
                                                         </span>
                                                     </td>
                                                     <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
-                                                        <StatusBadge status={row.dailyStatus} />
+                                                        <AttendanceStatusBadge row={row} />
                                                     </td>
                                                     {['ADMIN', 'DIRECTOR', 'MANAGER', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'].includes(currentUser?.role?.code) && (
                                                         <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
@@ -1479,6 +1483,40 @@ function StatCard({ label, value, icon: Icon, color, bg }: any) {
     );
 }
 
+function AttendanceStatusBadge({ row }: { row: any }) {
+    const statuses: { label: string, class: string }[] = [];
+
+    if (row.dailyStatus?.startsWith('ABSENT')) {
+        statuses.push({ label: 'Vắng mặt', class: 'bg-slate-100 text-slate-500 border-slate-200' });
+    } else {
+        if (row.checkInStatus === 'LATE' || row.checkInStatus === 'LATE_SERIOUS') {
+            statuses.push({ label: 'Đi muộn', class: 'bg-danger-light text-danger border-danger-light' });
+        }
+        if (row.checkOutStatus === 'EARLY_LEAVE') {
+            statuses.push({ label: 'Về sớm', class: 'bg-warning/10 text-warning border-warning/20' });
+        }
+        if (row.checkOutStatus === 'OVERTIME') {
+            statuses.push({ label: 'Tăng ca', class: 'bg-blue-50 text-blue-600 border-blue-100' });
+        }
+        
+        if (statuses.length === 0 && row.checkInTime) {
+            statuses.push({ label: 'Đúng giờ', class: 'bg-accent/10 text-accent border-accent/20' });
+        }
+    }
+
+    if (statuses.length === 0) return <span className="text-[10px] text-slate-300 font-bold">-</span>;
+
+    return (
+        <div className="flex flex-wrap justify-center gap-1">
+            {statuses.map((s, idx) => (
+                <span key={idx} className={cn("px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-tighter border whitespace-nowrap", s.class)}>
+                    {s.label}
+                </span>
+            ))}
+        </div>
+    );
+}
+
 function StatusBadge({ status }: { status: string }) {
     const config: any = {
         'FULL_DAY': { label: 'Hành chính', class: 'bg-emerald-50 text-accent border-emerald-100' },
@@ -1487,9 +1525,9 @@ function StatusBadge({ status }: { status: string }) {
         'HALF_DAY_AFTERNOON': { label: 'Ca Chiều', class: 'bg-indigo-50 text-indigo-600 border-indigo-100' },
         'INCOMPLETE': { label: 'Thiếu công', class: 'bg-primary-subtle text-primary border-primary-subtle' },
         'LATE_DAY': { label: 'Hành chính', class: 'bg-emerald-50 text-accent border-emerald-100' },
-        'ABSENT_UNAPPROVED': { label: 'Vắng (KP)', class: 'bg-slate-50 text-slate-500 border-slate-100' },
-        'ABSENT_APPROVED': { label: 'Vắng (CP)', class: 'bg-amber-50 text-warning border-amber-100' },
-        'DEFAULT': { label: status, class: 'bg-slate-50 text-slate-400 border-slate-100' }
+        'ABSENT_UNAPPROVED': { label: '---', class: 'bg-slate-50 text-slate-400 border-slate-100' },
+        'ABSENT_APPROVED': { label: '---', class: 'bg-slate-50 text-slate-400 border-slate-100' },
+        'DEFAULT': { label: '---', class: 'bg-slate-50 text-slate-400 border-slate-100' }
     };
 
     const item = config[status] || config['DEFAULT'];
