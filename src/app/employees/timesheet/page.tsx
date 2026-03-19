@@ -32,7 +32,7 @@ import AttendanceAuditLogModal from '@/components/timesheet/AttendanceAuditLogMo
 import AttendanceExceptionRequestDetailModal from '@/components/timesheet/AttendanceExceptionRequestDetailModal';
 import { History, FileText, Eye } from 'lucide-react';
 
-type ActiveTab = 'MY' | 'EMPLOYEES' | 'SETTINGS' | 'SALARY_SETTINGS' | 'EXCEPTION_REQUESTS' | 'AUDIT_LOGS';
+type ActiveTab = 'MY' | 'TODAY' | 'EMPLOYEES' | 'SETTINGS' | 'SALARY_SETTINGS' | 'EXCEPTION_REQUESTS' | 'AUDIT_LOGS';
 type ViewMode = 'LIST' | 'DETAIL'; // LIST is summary, DETAIL is individual daily view
 
 export default function TimesheetPage() {
@@ -41,6 +41,7 @@ export default function TimesheetPage() {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [summaryData, setSummaryData] = useState<any[]>([]);
     const [detailData, setDetailData] = useState<any[]>([]);
+    const [todayData, setTodayData] = useState<any[]>([]);
     const [branches, setBranches] = useState<any[]>([]);
     const [positions, setPositions] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
@@ -198,6 +199,24 @@ export default function TimesheetPage() {
         }
     };
 
+    const fetchTodayAttendance = async () => {
+        setLoading(true);
+        try {
+            const params = new URLSearchParams({
+                ...(selectedBranch ? { branchId: selectedBranch } : {}),
+                ...(selectedPosition ? { position: selectedPosition } : {}),
+                ...(searchTerm ? { search: searchTerm } : {})
+            });
+            const res = await fetch(`${API_URL}/attendance/daily?${params.toString()}`);
+            const data = await res.json();
+            setTodayData(data);
+        } catch (error) {
+            toastError('Không thể tải dữ liệu chấm công hôm nay');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const fetchExceptionRequests = async () => {
         setLoading(true);
         try {
@@ -280,10 +299,12 @@ export default function TimesheetPage() {
             fetchExceptionRequests();
         } else if (activeTab === 'AUDIT_LOGS') {
             fetchAllAuditLogs();
+        } else if (activeTab === 'TODAY') {
+            fetchTodayAttendance();
         } else {
             fetchMyDetail();
         }
-    }, [currentUser, activeTab, viewMode, currentDate, selectedBranch, selectedPosition, selectedEmployee]);
+    }, [currentUser, activeTab, viewMode, currentDate, selectedBranch, selectedPosition, selectedEmployee, searchTerm]);
 
 
     const handleAdjust = (record: any) => {
@@ -355,7 +376,7 @@ export default function TimesheetPage() {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    employeeId: selectedEmployee?.id || currentUser?.employee?.id,
+                    employeeId: adjustingRecord.employeeId,
                     date: adjustingRecord.date,
                     checkInTime: adjustForm.checkInTime || null,
                     checkOutTime: adjustForm.checkOutTime || null,
@@ -366,8 +387,12 @@ export default function TimesheetPage() {
 
             if (!res.ok) throw new Error('Failed to adjust');
             
+            toastSuccess('Đã hiệu chỉnh công thành công');
+            
             // Refresh data
             if (activeTab === 'MY') fetchMyDetail();
+            else if (activeTab === 'TODAY') fetchTodayAttendance();
+            else if (activeTab === 'EMPLOYEES' && viewMode === 'LIST') fetchSummary();
             else fetchDetail();
             
             setShowAdjustModal(false);
@@ -606,6 +631,17 @@ export default function TimesheetPage() {
                             <span className="tracking-wider">Công cá nhân</span>
                         </button>
                         <button
+                            onClick={() => setActiveTab('TODAY')}
+                            className={cn(
+                                "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5 rounded-lg",
+                                activeTab === 'TODAY'
+                                    ? "text-white bg-primary shadow-sm font-black"
+                                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                            )}
+                        >
+                            <span className="tracking-wider">Công hôm nay</span>
+                        </button>
+                        <button
                             onClick={() => { setActiveTab('EMPLOYEES'); setViewMode('LIST'); }}
                             className={cn(
                                 "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5 rounded-lg",
@@ -672,8 +708,8 @@ export default function TimesheetPage() {
                 </div>
             )}
 
-            {/* Filters - EXACT style from Orders Page */}
-            {activeTab === 'EMPLOYEES' && viewMode === 'LIST' && (
+            {/* Filters - ENABLED for TODAY as well */}
+            {(activeTab === 'TODAY' || (activeTab === 'EMPLOYEES' && viewMode === 'LIST')) && (
                 <div className="bg-white p-2.5 rounded-xl shadow-sm border border-slate-100">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-2 items-center">
                         {/* Search */}
@@ -844,6 +880,142 @@ export default function TimesheetPage() {
                         </table>
                     </div>
                 </div>
+            ) : activeTab === 'TODAY' ? (
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr>
+                                    <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none">STT</th>
+                                    <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none text-center">Ngày</th>
+                                    <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Nhân viên</th>
+                                    <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Vào</th>
+                                    <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Ra</th>
+                                    <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Muộn</th>
+                                    <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Sớm</th>
+                                    <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">TC</th>
+                                    <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Ca làm</th>
+                                    <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Công</th>
+                                    <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Trạng thái</th>
+                                    {['ADMIN', 'DIRECTOR', 'MANAGER', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'].includes(currentUser?.role?.code) && (
+                                        <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Thao tác</th>
+                                    )}
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-50">
+                                {loading ? (
+                                    Array.from({ length: 5 }).map((_, i) => (
+                                        <tr key={i} className="animate-pulse">
+                                            {Array.from({ length: 10 }).map((_, j) => (
+                                                <td key={j} className="px-6 py-4"><div className="h-4 bg-slate-100 rounded w-full"></div></td>
+                                            ))}
+                                        </tr>
+                                    ))
+                                ) : todayData.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={10} className="px-6 py-20 text-center text-slate-400 font-medium italic">
+                                            Không tìm thấy dữ liệu chấm công cho hôm nay
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    todayData.map((row, idx) => (
+                                        <tr key={row.id} className="hover:bg-slate-50/50 transition-colors group">
+                                            <td className="px-3 md:px-6 py-3 text-[11px] font-bold text-slate-500 whitespace-nowrap">
+                                                {idx + 1}
+                                            </td>
+                                            <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
+                                                <span className="text-[11px] font-medium text-slate-600">
+                                                    {row.date ? new Date(row.date).toLocaleDateString('vi-VN') : '-'}
+                                                </span>
+                                            </td>
+                                            <td className="px-3 md:px-6 py-3">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-8 h-8 rounded-full overflow-hidden bg-primary-light border border-slate-100 shrink-0 flex items-center justify-center">
+                                                        {(row.employee?.avatarUrl && !imageErrors[`today-${row.employee.id}`]) ? (
+                                                            <img
+                                                                src={getFullImageUrl(row.employee.avatarUrl)!}
+                                                                alt={row.employee.fullName}
+                                                                className="w-full h-full object-cover"
+                                                                onError={() => handleImageError(`today-${row.employee.id}`)}
+                                                            />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center text-primary font-black text-xs uppercase">
+                                                                {row.employee?.fullName?.split(' ').pop()?.charAt(0)}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex flex-col min-w-0">
+                                                        <span className="text-[11px] font-bold text-slate-800 leading-tight truncate">{row.employee?.fullName}</span>
+                                                        <span className="text-[9px] text-slate-400 font-medium truncate">{row.employee?.pos?.name || row.employee?.position || 'Nhân viên'}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-3 md:px-6 py-3 whitespace-nowrap">
+                                                <span className={cn("text-xs md:text-[13px] font-black", row.checkInTime ? "text-slate-900" : "text-slate-300")}>
+                                                    {formatTime(row.checkInTime)}
+                                                </span>
+                                            </td>
+                                            <td className="px-3 md:px-6 py-3 whitespace-nowrap">
+                                                <span className={cn("text-xs md:text-[13px] font-black", row.checkOutTime ? "text-slate-900" : "text-slate-300")}>
+                                                    {formatTime(row.checkOutTime)}
+                                                </span>
+                                            </td>
+                                            <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
+                                                <span className={cn("text-xs md:text-[13px] font-bold", (row.lateMinutes || 0) > 0 ? "text-primary" : "text-slate-300")}>
+                                                    {row.lateMinutes || '-'}
+                                                </span>
+                                            </td>
+                                            <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
+                                                <span className={cn("text-xs md:text-[13px] font-bold", (row.earlyLeaveMinutes || 0) > 0 ? "text-warning" : "text-slate-300")}>
+                                                    {row.earlyLeaveMinutes || '-'}
+                                                </span>
+                                            </td>
+                                            <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
+                                                <span className={cn("text-xs md:text-[13px] font-bold", (row.overtimeMinutes || 0) > 0 ? "text-blue-600" : "text-slate-300")}>
+                                                    {row.overtimeMinutes || '-'}
+                                                </span>
+                                            </td>
+                                            <td className="px-3 md:px-6 py-3 whitespace-nowrap">
+                                                <StatusBadge status={row.dailyStatus} />
+                                            </td>
+                                            <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
+                                                <span className={cn("text-xs md:text-[13px] font-black", 
+                                                    row.workCount != null && Number(row.workCount) < 1 ? "text-amber-600" : 
+                                                    row.workCount != null ? "text-accent" : "text-slate-300"
+                                                )}>
+                                                    {row.workCount != null ? Number(row.workCount).toFixed(1) : '-'}
+                                                </span>
+                                            </td>
+                                            <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
+                                                <AttendanceStatusBadge row={row} />
+                                            </td>
+                                            {['ADMIN', 'DIRECTOR', 'MANAGER', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'].includes(currentUser?.role?.code) && (
+                                                <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
+                                                    <div className="flex items-center justify-center gap-1">
+                                                        <button
+                                                            onClick={() => { setViewingAuditRecord(row); setShowAuditModal(true); }}
+                                                            className="p-1.5 text-slate-400 hover:text-blue-500 transition-all cursor-pointer"
+                                                            title="Xem lịch sử chỉnh sửa"
+                                                        >
+                                                            <History size={14} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleAdjust(row)}
+                                                            className="p-1.5 text-slate-400 hover:text-primary transition-all cursor-pointer"
+                                                            title="Hiệu chỉnh công"
+                                                        >
+                                                            <Pencil size={14} />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            )}
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             ) : (activeTab === 'MY' || (activeTab === 'EMPLOYEES' && viewMode === 'DETAIL')) ? (
                 <>
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 md:gap-3">
@@ -981,87 +1153,7 @@ export default function TimesheetPage() {
                         </div>
                     </div>
 
-                    {/* Adjust Modal */}
-                    {showAdjustModal && (
-                        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" onClick={() => setShowAdjustModal(false)}>
-                            <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-8 space-y-6 animate-in zoom-in-95" onClick={e => e.stopPropagation()}>
-                                <div className="flex items-center justify-between">
-                                    <h3 className="text-xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
-                                        <RotateCcw size={20} className="text-primary" />
-                                        Hiệu chỉnh ngày công
-                                    </h3>
-                                    <button onClick={() => setShowAdjustModal(false)} className="p-2 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"><X size={20} /></button>
-                                </div>
-                                
-                                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Nhân viên & Ngày</p>
-                                    <p className="text-sm font-bold text-slate-700">{selectedEmployee?.fullName || currentUser?.employee?.fullName}</p>
-                                    <p className="text-[11px] font-bold text-slate-500">{new Date(adjustingRecord?.date).toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}</p>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1.5">
-                                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Giờ vào</label>
-                                        <input 
-                                            type="datetime-local" 
-                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
-                                            value={adjustForm.checkInTime}
-                                            onChange={e => setAdjustForm({ ...adjustForm, checkInTime: e.target.value })}
-                                        />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Giờ ra</label>
-                                        <input 
-                                            type="datetime-local" 
-                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
-                                            value={adjustForm.checkOutTime}
-                                            onChange={e => setAdjustForm({ ...adjustForm, checkOutTime: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-1.5">
-                                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Lý do hiệu chỉnh</label>
-                                    <textarea 
-                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all h-20 resize-none"
-                                        placeholder="VD: Quên chấm công, lỗi GPS..."
-                                        value={adjustForm.note}
-                                        onChange={e => setAdjustForm({ ...adjustForm, note: e.target.value })}
-                                    />
-                                </div>
-
-                                {/* Results Preview */}
-                                {preview && (
-                                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-around divide-x divide-slate-200">
-                                        <div className="text-center flex-1">
-                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">Muộn</p>
-                                            <p className={cn("text-sm font-black", preview.late > 0 ? "text-primary" : "text-slate-300")}>{preview.late || '-'}</p>
-                                        </div>
-                                        <div className="text-center flex-1">
-                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">Về sớm</p>
-                                            <p className={cn("text-sm font-black", preview.early > 0 ? "text-warning" : "text-slate-300")}>{preview.early || '-'}</p>
-                                        </div>
-                                        <div className="text-center flex-1">
-                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">Tăng ca</p>
-                                            <p className={cn("text-sm font-black", preview.ot > 0 ? "text-blue-600" : "text-slate-300")}>{preview.ot || '-'}</p>
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="flex gap-3 pt-2">
-                                    <button onClick={() => setShowAdjustModal(false)} className="flex-1 px-6 py-3 text-slate-500 font-bold text-sm tracking-tight hover:bg-slate-50 rounded-xl transition-all cursor-pointer">Hủy</button>
-                                    <button 
-                                        onClick={submitAdjustment}
-                                        disabled={savingAdjust}
-                                        className="flex-[1.5] px-6 py-3 bg-primary text-white font-bold text-sm tracking-tight rounded-xl shadow-lg shadow-primary-light/50 hover:bg-primary/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
-                                    >
-                                        {savingAdjust ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
-                                        Xác nhận thay đổi
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                    {/* Adjust Modal will be placed at the bottom */}
                 </>
             ) : null}
 
@@ -1442,6 +1534,87 @@ export default function TimesheetPage() {
                         </div>
                     </div>
                     <SalarySettingsTab />
+                </div>
+            )}
+            {/* ========== MODALS ========== */}
+            {showAdjustModal && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" onClick={() => setShowAdjustModal(false)}>
+                    <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-8 space-y-6 animate-in zoom-in-95" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
+                                <RotateCcw size={20} className="text-primary" />
+                                Hiệu chỉnh ngày công
+                            </h3>
+                            <button onClick={() => setShowAdjustModal(false)} className="p-2 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"><X size={20} /></button>
+                        </div>
+                        
+                        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Nhân viên & Ngày</p>
+                            <p className="text-sm font-bold text-slate-700">{adjustingRecord?.employee?.fullName || selectedEmployee?.fullName || currentUser?.employee?.fullName}</p>
+                            <p className="text-[11px] font-bold text-slate-500">{adjustingRecord?.date ? new Date(adjustingRecord.date).toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) : '---'}</p>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Giờ vào</label>
+                                <input 
+                                    type="datetime-local" 
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
+                                    value={adjustForm.checkInTime}
+                                    onChange={e => setAdjustForm({ ...adjustForm, checkInTime: e.target.value })}
+                                />
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Giờ ra</label>
+                                <input 
+                                    type="datetime-local" 
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
+                                    value={adjustForm.checkOutTime}
+                                    onChange={e => setAdjustForm({ ...adjustForm, checkOutTime: e.target.value })}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Lý do hiệu chỉnh</label>
+                            <textarea 
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all h-20 resize-none"
+                                placeholder="VD: Quên chấm công, lỗi GPS..."
+                                value={adjustForm.note}
+                                onChange={e => setAdjustForm({ ...adjustForm, note: e.target.value })}
+                            />
+                        </div>
+
+                        {/* Results Preview */}
+                        {preview && (
+                            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-around divide-x divide-slate-200">
+                                <div className="text-center flex-1">
+                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">Muộn</p>
+                                    <p className={cn("text-sm font-black", preview.late > 0 ? "text-primary" : "text-slate-300")}>{preview.late || '-'}</p>
+                                </div>
+                                <div className="text-center flex-1">
+                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">Về sớm</p>
+                                    <p className={cn("text-sm font-black", preview.early > 0 ? "text-warning" : "text-slate-300")}>{preview.early || '-'}</p>
+                                </div>
+                                <div className="text-center flex-1">
+                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">Tăng ca</p>
+                                    <p className={cn("text-sm font-black", preview.ot > 0 ? "text-blue-600" : "text-slate-300")}>{preview.ot || '-'}</p>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="flex gap-3 pt-2">
+                            <button onClick={() => setShowAdjustModal(false)} className="flex-1 px-6 py-3 text-slate-500 font-bold text-sm tracking-tight hover:bg-slate-50 rounded-xl transition-all cursor-pointer">Hủy</button>
+                            <button 
+                                onClick={submitAdjustment}
+                                disabled={savingAdjust}
+                                className="flex-[1.5] px-6 py-3 bg-primary text-white font-bold text-sm tracking-tight rounded-xl shadow-lg shadow-primary-light/50 hover:bg-primary/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                            >
+                                {savingAdjust ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
+                                Xác nhận thay đổi
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
 
