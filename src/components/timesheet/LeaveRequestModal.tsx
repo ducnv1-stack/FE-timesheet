@@ -9,6 +9,7 @@ interface LeaveRequestModalProps {
     onClose: () => void;
     onSuccess: () => void;
     employeeId: string;
+    isAdminView?: boolean;
     initialData?: {
         startDate?: string;
         isRecurring?: boolean;
@@ -34,9 +35,11 @@ const WEEK_DAYS = [
     { label: 'Chủ Nhật', value: 0 },
 ];
 
-export default function LeaveRequestModal({ isOpen, onClose, onSuccess, employeeId, initialData }: LeaveRequestModalProps) {
+export default function LeaveRequestModal({ isOpen, onClose, onSuccess, employeeId, isAdminView, initialData }: LeaveRequestModalProps) {
     const [loading, setLoading] = useState(false);
     const [isRecurring, setIsRecurring] = useState(false);
+    const [employees, setEmployees] = useState<any[]>([]);
+    const [selectedEmpId, setSelectedEmpId] = useState(employeeId);
     const [formData, setFormData] = useState({
         leaveType: LEAVE_TYPES[0],
         startDate: new Date().toISOString().split('T')[0],
@@ -46,8 +49,11 @@ export default function LeaveRequestModal({ isOpen, onClose, onSuccess, employee
         recurringDays: [] as number[],
     });
 
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
     useEffect(() => {
         if (isOpen) {
+            setSelectedEmpId(employeeId);
             if (initialData) {
                 setFormData(prev => ({
                     ...prev,
@@ -70,15 +76,31 @@ export default function LeaveRequestModal({ isOpen, onClose, onSuccess, employee
                 });
                 setIsRecurring(false);
             }
-        }
-    }, [isOpen, initialData]);
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+            if (isAdminView) {
+                fetchEmployees();
+            }
+        }
+    }, [isOpen, initialData, employeeId, isAdminView]);
+
+    const fetchEmployees = async () => {
+        try {
+            const res = await fetch(`${API_URL}/employees`);
+            const data = await res.json();
+            setEmployees(data);
+        } catch (error) {
+            console.error("Failed to fetch employees", error);
+        }
+    };
 
     if (!isOpen) return null;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!selectedEmpId) {
+            alert('Vui lòng chọn nhân viên');
+            return;
+        }
         setLoading(true);
 
         try {
@@ -86,7 +108,7 @@ export default function LeaveRequestModal({ isOpen, onClose, onSuccess, employee
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    employeeId,
+                    employeeId: selectedEmpId,
                     ...formData,
                     isRecurring,
                 }),
@@ -122,7 +144,7 @@ export default function LeaveRequestModal({ isOpen, onClose, onSuccess, employee
                 <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white flex justify-between items-center">
                     <div className="flex items-center gap-2">
                         <Calendar className="w-5 h-5" />
-                        <h3 className="font-semibold">Đăng ký nghỉ</h3>
+                        <h3 className="font-semibold">{isAdminView ? 'Đăng ký nghỉ hộ' : 'Đăng ký nghỉ'}</h3>
                     </div>
                     <button onClick={onClose} className="p-1 hover:bg-white/20 rounded-full transition-colors cursor-pointer">
                         <X className="w-5 h-5" />
@@ -130,6 +152,26 @@ export default function LeaveRequestModal({ isOpen, onClose, onSuccess, employee
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-4 space-y-4 max-h-[80vh] overflow-y-auto">
+                    {/* Chọn nhân viên (chỉ Quản lý) */}
+                    {isAdminView && (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Nhân viên</label>
+                            <select
+                                className="w-full rounded-xl border-gray-200 text-sm focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
+                                value={selectedEmpId}
+                                onChange={(e) => setSelectedEmpId(e.target.value)}
+                                required
+                            >
+                                <option value="">-- Chọn nhân viên --</option>
+                                {employees.map(emp => (
+                                    <option key={emp.id} value={emp.id}>
+                                        {emp.fullName} ({emp.branch?.name || 'Văn phòng'})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
                     {/* Loại nghỉ */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Loại nghỉ</label>

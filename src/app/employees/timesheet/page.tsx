@@ -2035,6 +2035,7 @@ export default function TimesheetPage() {
                 }}
                 onSuccess={() => { if (activeTab === 'LEAVE_REQUESTS') fetchLeaveRequests(); else fetchMyDetail(); }}
                 employeeId={selectedLeaveEmployeeId || currentUser?.employee?.id}
+                isAdminView={canViewOthers}
                 initialData={leaveInitialData}
             />
 
