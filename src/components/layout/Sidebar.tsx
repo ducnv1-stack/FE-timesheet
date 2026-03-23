@@ -277,12 +277,12 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                                     onClick={() => toggleMenu(item.label)}
                                     className={cn(
                                         "group flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all duration-200 cursor-pointer",
-                                        isAnyChildActive ? "bg-primary text-white shadow-lg shadow-primary/20 rounded-l-none -ml-3 pl-6" : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                                        isAnyChildActive ? "bg-active-bg text-active-text border-l-4 border-active-border rounded-l-none -ml-3 pl-[21px]" : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                                     )}
                                 >
                                     <item.icon size={20} className={cn(
                                         "shrink-0",
-                                        isAnyChildActive ? "text-white" : "text-slate-400 group-hover:text-slate-600"
+                                        isAnyChildActive ? "text-active-text" : "text-slate-400 group-hover:text-slate-600"
                                     )} />
                                     {!isCollapsed && (
                                         <>
@@ -309,7 +309,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                                                 className={cn(
                                                     "group flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 cursor-pointer",
                                                     child.active
-                                                        ? "text-white font-bold bg-primary shadow-md ring-2 ring-primary/20"
+                                                        ? "text-active-text font-bold bg-active-bg border-r-4 border-active-border rounded-r-none"
                                                         : cn(
                                                             "text-slate-500 hover:text-slate-900 hover:bg-slate-50",
                                                             isAnyChildActive && !child.active ? "text-slate-400" : ""
@@ -318,7 +318,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                                             >
                                                 <child.icon size={16} className={cn(
                                                     "shrink-0",
-                                                    child.active ? "text-white" : "group-hover:text-slate-600"
+                                                    child.active ? "text-active-text" : "group-hover:text-slate-600"
                                                 )} />
                                                 <span className="text-[13px] whitespace-nowrap overflow-hidden text-ellipsis">
                                                     {child.label}
@@ -338,13 +338,13 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                             className={cn(
                                 "group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 cursor-pointer",
                                 item.active
-                                    ? "bg-primary text-white shadow-lg shadow-primary/20"
+                                    ? "bg-active-bg text-active-text border-l-4 border-active-border rounded-l-none -ml-3 pl-[21px]"
                                     : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                             )}
                         >
                             <item.icon size={20} className={cn(
                                 "shrink-0",
-                                item.active ? "text-white" : "text-slate-400 group-hover:text-slate-600"
+                                item.active ? "text-active-text" : "text-slate-400 group-hover:text-slate-600"
                             )} />
                             {!isCollapsed && (
                                 <span className="font-bold text-sm whitespace-nowrap overflow-hidden text-ellipsis">
@@ -352,7 +352,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                                 </span>
                             )}
                             {item.active && !isCollapsed && (
-                                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-active-border animate-pulse" />
                             )}
                         </Link>
                     );

@@ -34,14 +34,11 @@ export default function ConfirmModal({
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header with Icon */}
-                <div className="p-6 flex flex-col items-center text-center bg-primary-light">
-                    <div className={cn(
-                        "w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-transform hover:scale-110",
-                        isDanger ? "bg-primary-light text-primary border border-primary/20" : "bg-primary-light/80 text-primary/80"
-                    )}>
-                        <AlertTriangle size={32} />
+                <div className="p-6 flex flex-col items-center text-center bg-gradient-to-r from-blue-600 to-indigo-600">
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-white/20 text-white backdrop-blur-sm shadow-xl">
+                        <AlertTriangle size={36} className="animate-pulse" />
                     </div>
-                    <h3 className="text-xl font-black text-slate-900">{title}</h3>
+                    <h3 className="text-xl font-black text-white tracking-tight">{title}</h3>
                 </div>
 
                 {/* Content */}
@@ -52,19 +49,17 @@ export default function ConfirmModal({
                 </div>
 
                 {/* Actions */}
-                <div className="p-6 bg-slate-50 flex gap-3">
+                <div className="p-6 bg-slate-50 flex gap-4">
                     <button
                         onClick={onCancel}
-                        className="flex-1 px-4 py-3 bg-white border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-100 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                        className="flex-1 px-4 py-3 bg-white border border-slate-200 text-slate-500 font-bold rounded-2xl hover:bg-slate-50 hover:text-slate-700 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                     >
                         <X size={18} />
                         {cancelLabel}
                     </button>
                     <button
                         onClick={onConfirm}
-                        className={cn(
-                            "flex-1 px-4 py-3 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 active:translate-y-0 cursor-pointer bg-primary hover:bg-primary/90 shadow-primary-light/50"
-                        )}
+                        className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-wider text-xs rounded-2xl shadow-lg shadow-blue-200 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                     >
                         {confirmLabel}
                     </button>

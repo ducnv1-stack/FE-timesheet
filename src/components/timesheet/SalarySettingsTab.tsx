@@ -304,7 +304,7 @@ export default function SalarySettingsTab() {
                         <tbody className="divide-y divide-slate-50">
                             {positions.map(p => (
                                 <tr key={p.id} className="group hover:bg-primary-subtle/30 transition-all duration-300">
-                                    <td className="px-4 py-1">
+                                    <td className="px-4 py-1 whitespace-nowrap">
                                         <div>
                                             <div className="font-bold text-slate-800 text-[11px] sm:text-xs group-hover:text-primary transition-colors tracking-tight leading-tight">{p.name}</div>
                                             <span className="text-[8px] sm:text-[9px] text-slate-400 font-bold">{p.note || 'Mặc định'}</span>
@@ -426,7 +426,7 @@ export default function SalarySettingsTab() {
                             {filteredEmployees.map(e => {
                                 return (
                                     <tr key={e.id} className="group transition-all duration-300 bg-primary-subtle/40 hover:bg-primary-subtle/60">
-                                        <td className="px-4 py-1">
+                                        <td className="px-4 py-1 whitespace-nowrap">
                                             <div className="flex items-center gap-2">
                                                 {e.avatarUrl ? (
                                                     <img 

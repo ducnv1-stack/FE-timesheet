@@ -30,9 +30,11 @@ import ConfirmModal from '@/components/ui/confirm-modal';
 import AttendanceExceptionRequestModal from '@/components/timesheet/AttendanceExceptionRequestModal';
 import AttendanceAuditLogModal from '@/components/timesheet/AttendanceAuditLogModal';
 import AttendanceExceptionRequestDetailModal from '@/components/timesheet/AttendanceExceptionRequestDetailModal';
-import { History, FileText, Eye } from 'lucide-react';
+import LeaveRequestModal from '@/components/timesheet/LeaveRequestModal';
+import LeaveWeeklyCalendar from '@/components/timesheet/LeaveWeeklyCalendar';
+import { History, FileText, Eye, Download, FileSpreadsheet, PlaneTakeoff } from 'lucide-react';
 
-type ActiveTab = 'MY' | 'TODAY' | 'EMPLOYEES' | 'SETTINGS' | 'SALARY_SETTINGS' | 'EXCEPTION_REQUESTS' | 'AUDIT_LOGS';
+type ActiveTab = 'MY' | 'TODAY' | 'EMPLOYEES' | 'SETTINGS' | 'SALARY_SETTINGS' | 'EXCEPTION_REQUESTS' | 'AUDIT_LOGS' | 'LEAVE_REQUESTS';
 type ViewMode = 'LIST' | 'DETAIL'; // LIST is summary, DETAIL is individual daily view
 
 export default function TimesheetPage() {
@@ -90,9 +92,17 @@ export default function TimesheetPage() {
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [viewingRequestDetail, setViewingRequestDetail] = useState<any>(null);
 
+    // Leave Request State
+    const [showLeaveModal, setShowLeaveModal] = useState(false);
+    const [leaveRequests, setLeaveRequests] = useState<any[]>([]);
+    const [selectedLeaveEmployeeId, setSelectedLeaveEmployeeId] = useState<string>('');
+    const [leaveInitialData, setLeaveInitialData] = useState<any>(null);
+
     // Delete confirmation state
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [shiftToDelete, setShiftToDelete] = useState<string | null>(null);
+
+    const [leaveViewMode, setLeaveViewMode] = useState<'LIST' | 'CALENDAR'>('LIST');
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -112,19 +122,26 @@ export default function TimesheetPage() {
             const user = JSON.parse(userStr);
             setCurrentUser(user);
 
-            const roleCode = user.role?.code;
-            const canViewOthers = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'MANAGER', 'ADMIN'].includes(roleCode);
+            const rCode = user.role?.code;
+            const canView = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'MANAGER', 'ADMIN'].includes(rCode);
 
-            // Default to 'MY' (Công cá nhân) as requested
-            setActiveTab('MY');
+            if (canView) {
+                // Fetch initial leave requests for badge count
+                const params = new URLSearchParams();
+                if (rCode === 'MANAGER') params.append('branchId', user.employee?.branchId || '');
+                fetch(`${API_URL}/leave-requests?${params.toString()}`)
+                    .then(res => res.json())
+                    .then(data => setLeaveRequests(data))
+                    .catch(() => {});
 
-            if (canViewOthers) {
-                if (roleCode === 'MANAGER') {
+                if (rCode === 'MANAGER') {
                     setSelectedBranch(user.employee?.branchId || '');
                 }
             } else {
                 setSelectedEmployee(user.employee);
             }
+
+            setActiveTab('MY');
         }
         fetchBranches();
         fetchPositions();
@@ -226,7 +243,7 @@ export default function TimesheetPage() {
             } else if (selectedBranch) {
                 params.append('branchId', selectedBranch);
             }
-            
+
             const res = await fetch(`${API_URL}/attendance-exception-requests?${params.toString()}`);
             const data = await res.json();
             setExceptionRequests(data);
@@ -234,6 +251,52 @@ export default function TimesheetPage() {
             toastError('Không thể tải danh sách đơn giải trình');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchLeaveRequests = async () => {
+        setLoading(true);
+        try {
+            const params = new URLSearchParams();
+            if (activeTab === 'MY' && currentUser?.employee?.id) {
+                params.append('employeeId', currentUser.employee.id);
+            } else if (selectedBranch) {
+                params.append('branchId', selectedBranch);
+            }
+
+            const res = await fetch(`${API_URL}/leave-requests?${params.toString()}`);
+            const data = await res.json();
+            setLeaveRequests(data);
+        } catch (error) {
+            toastError('Không thể tải danh sách đơn nghỉ');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAddLeaveFromCalendar = (employeeId: string, date: string, suggestedSession?: string) => {
+        setSelectedLeaveEmployeeId(employeeId);
+        setLeaveInitialData({ startDate: date, leaveSession: suggestedSession });
+        setShowLeaveModal(true);
+    };
+
+    const handleUpdateLeaveStatus = async (requestId: string, status: 'APPROVED' | 'REJECTED') => {
+        try {
+            const res = await fetch(`${API_URL}/leave-requests/${requestId}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    status,
+                    approvedById: currentUser?.id
+                })
+            });
+
+            if (!res.ok) throw new Error('Cập nhật thất bại');
+
+            toastSuccess(status === 'APPROVED' ? 'Đã duyệt đơn nghỉ' : 'Đã từ chối đơn nghỉ');
+            fetchLeaveRequests();
+        } catch (error) {
+            toastError('Lỗi cập nhật trạng thái đơn nghỉ');
         }
     };
 
@@ -245,7 +308,7 @@ export default function TimesheetPage() {
             const year = currentDate.getFullYear();
             params.append('month', month.toString());
             params.append('year', year.toString());
-            
+
             if (activeTab === 'AUDIT_LOGS' && selectedBranch) {
                 params.append('branchId', selectedBranch);
             }
@@ -276,7 +339,7 @@ export default function TimesheetPage() {
             });
 
             if (!res.ok) throw new Error('Cập nhật thất bại');
-            
+
             toastSuccess(status === 'APPROVED' ? 'Đã duyệt đơn giải trình' : 'Đã từ chối đơn giải trình');
             fetchExceptionRequests();
         } catch (error) {
@@ -301,6 +364,8 @@ export default function TimesheetPage() {
             fetchAllAuditLogs();
         } else if (activeTab === 'TODAY') {
             fetchTodayAttendance();
+        } else if (activeTab === 'LEAVE_REQUESTS') {
+            fetchLeaveRequests();
         } else {
             fetchMyDetail();
         }
@@ -309,7 +374,7 @@ export default function TimesheetPage() {
 
     const handleAdjust = (record: any) => {
         setAdjustingRecord(record);
-        
+
         const toLocalISO = (dateStr: string | null) => {
             if (!dateStr) return '';
             const d = new Date(dateStr);
@@ -337,7 +402,7 @@ export default function TimesheetPage() {
 
         // Ép tính toán dựa trên Target Date của bản ghi để tránh lệch ngày
         const targetDate = new Date(adjustingRecord.date);
-        
+
         const getMinutesFromStartOfDay = (isoStr: string) => {
             const d = new Date(isoStr + ':00+07:00');
             // Tính số phút từ 0h ngày hôm đó (theo giờ VN)
@@ -386,15 +451,15 @@ export default function TimesheetPage() {
             });
 
             if (!res.ok) throw new Error('Failed to adjust');
-            
+
             toastSuccess('Đã hiệu chỉnh công thành công');
-            
+
             // Refresh data
             if (activeTab === 'MY') fetchMyDetail();
             else if (activeTab === 'TODAY') fetchTodayAttendance();
             else if (activeTab === 'EMPLOYEES' && viewMode === 'LIST') fetchSummary();
             else fetchDetail();
-            
+
             setShowAdjustModal(false);
         } catch (error) {
             toastError('Lỗi khi hiệu chỉnh công');
@@ -422,11 +487,11 @@ export default function TimesheetPage() {
     const formatTime = (dateStr: string | null) => {
         if (!dateStr) return '--:--';
         const date = new Date(dateStr);
-        return date.toLocaleTimeString('vi-VN', { 
-            hour: '2-digit', 
-            minute: '2-digit', 
+        return date.toLocaleTimeString('vi-VN', {
+            hour: '2-digit',
+            minute: '2-digit',
             hour12: false,
-            timeZone: 'Asia/Ho_Chi_Minh' 
+            timeZone: 'Asia/Ho_Chi_Minh'
         });
     };
 
@@ -445,9 +510,42 @@ export default function TimesheetPage() {
         setDetailData([]);
     };
 
+    const handleExportExcel = async () => {
+        setLoading(true);
+        try {
+            const month = currentDate.getMonth() + 1;
+            const year = currentDate.getFullYear();
+            const params = new URLSearchParams({
+                month: month.toString(),
+                year: year.toString(),
+                ...(selectedBranch ? { branchId: selectedBranch } : {}),
+                ...(selectedPosition ? { position: selectedPosition } : {}),
+                ...(searchTerm ? { search: searchTerm } : {})
+            });
+            const res = await fetch(`${API_URL}/attendance/export-timesheet?${params.toString()}`);
+            if (!res.ok) throw new Error('Có lỗi xảy ra khi xuất file');
+
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Bang_cong_Thang_${month.toString().padStart(2, '0')}_${year}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            toastSuccess('Xuất file Excel thành công');
+        } catch (error) {
+            toastError('Không thể xuất file Excel');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const roleCode = currentUser?.role?.code;
     const canViewOthers = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'MANAGER', 'ADMIN'].includes(roleCode);
-    const canManageSettings = roleCode === 'ADMIN';
+    const canManageSettings = ['DIRECTOR', 'ADMIN'].includes(roleCode);
     const isManager = roleCode === 'MANAGER';
 
     // ========== SHIFT CRUD ==========
@@ -511,8 +609,8 @@ export default function TimesheetPage() {
             fetchShifts();
             setShowDeleteConfirm(false);
             setShiftToDelete(null);
-        } catch (error) { 
-            toastError('Lỗi khi xóa'); 
+        } catch (error) {
+            toastError('Lỗi khi xóa');
         }
     };
 
@@ -537,14 +635,15 @@ export default function TimesheetPage() {
         absentDays: detailData.filter(d => d.dailyStatus?.startsWith('ABSENT')).length,
     };
 
-    // Client-side filtering for relative search (accent/case insensitive style)
-    const filteredSummaryData = summaryData.filter(row =>
-        row.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        row.phone?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredSummaryData = summaryData.filter((row: any) => {
+        if (!searchTerm) return true;
+        const searchLower = searchTerm.toLowerCase();
+        return row.fullName?.toLowerCase().includes(searchLower);
+    });
 
+    // Client-side filtering for relative search (accent/case insensitive style)
     return (
-        <div className="p-3 md:p-6 space-y-4 md:space-y-6 animate-in fade-in duration-500">
+        <div className="p-2 md:p-6 space-y-3 md:space-y-6 animate-in fade-in duration-500">
             {/* Header Area */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
                 <div className="flex items-center gap-3">
@@ -557,6 +656,16 @@ export default function TimesheetPage() {
                         </button>
                     )}
                     <div className="flex items-center gap-3">
+                        {activeTab === 'MY' && (
+                            <button
+                                onClick={() => setShowLeaveModal(true)}
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-all shadow-md shadow-amber-100 text-sm font-bold h-[40px] md:h-[48px]"
+                            >
+                                <PlaneTakeoff className="w-5 h-5" />
+                                <span className="hidden sm:inline">Đăng ký nghỉ</span>
+                                <span className="sm:hidden">Xin nghỉ</span>
+                            </button>
+                        )}
                         {(activeTab === 'MY' || (activeTab === 'EMPLOYEES' && viewMode === 'DETAIL')) && (
                             <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl overflow-hidden bg-primary-subtle border border-slate-100 shrink-0 flex items-center justify-center">
                                 {activeTab === 'MY' ? (
@@ -599,6 +708,16 @@ export default function TimesheetPage() {
                 </div>
 
                 <div className="flex items-center gap-3">
+                    {activeTab === 'EMPLOYEES' && viewMode === 'LIST' && (
+                        <button
+                            onClick={handleExportExcel}
+                            className="flex items-center justify-center gap-1.5 px-3 py-0 bg-[#059669] text-white font-bold text-[11px] rounded-xl shadow-sm hover:bg-[#047857] hover:scale-105 transition-all cursor-pointer h-[36px]"
+                            title="Xuất Excel danh sách công nhân viên"
+                        >
+                            <FileSpreadsheet className="w-4 h-4" />
+                            Xuất Excel
+                        </button>
+                    )}
                     <div className="flex items-center bg-white rounded-xl p-1 shadow-sm border border-slate-100 shrink-0 h-[36px]">
                         <button onClick={prevMonth} className="p-1 px-2 hover:bg-primary-light hover:text-primary rounded-lg transition-all cursor-pointer">
                             <ChevronLeft size={16} />
@@ -615,92 +734,111 @@ export default function TimesheetPage() {
                 </div>
             </div>
 
-            {/* Tabs - Now using full navy background for active state */}
+            {/* Tabs - Modern Underline Style */}
             {canViewOthers && (
                 <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                    <div className="flex border-b border-slate-200 w-full p-1 gap-1">
+                    <div className="flex w-full p-1 border-b border-slate-100 overflow-x-auto scrollbar-hide gap-1">
                         <button
                             onClick={() => setActiveTab('MY')}
                             className={cn(
-                                "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5 rounded-lg",
+                                "flex-1 px-4 py-2.5 text-[12px] font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap rounded-lg cursor-pointer",
                                 activeTab === 'MY'
-                                    ? "text-white bg-primary shadow-sm font-black"
-                                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                    ? "bg-slate-100 text-slate-900 border border-slate-200/50 shadow-sm"
+                                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                             )}
                         >
-                            <span className="tracking-wider">Công cá nhân</span>
+                            <span className="tracking-tight">Công cá nhân</span>
                         </button>
                         <button
                             onClick={() => setActiveTab('TODAY')}
                             className={cn(
-                                "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5 rounded-lg",
+                                "flex-1 px-4 py-2.5 text-[12px] font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap rounded-lg cursor-pointer",
                                 activeTab === 'TODAY'
-                                    ? "text-white bg-primary shadow-sm font-black"
-                                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                    ? "bg-slate-100 text-slate-900 border border-slate-200/50 shadow-sm"
+                                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                             )}
                         >
-                            <span className="tracking-wider">Công hôm nay</span>
+                            <span className="tracking-tight">Công hôm nay</span>
                         </button>
                         <button
                             onClick={() => { setActiveTab('EMPLOYEES'); setViewMode('LIST'); }}
                             className={cn(
-                                "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5 rounded-lg",
+                                "flex-1 px-4 py-2.5 text-[12px] font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap rounded-lg cursor-pointer",
                                 activeTab === 'EMPLOYEES'
-                                    ? "text-white bg-primary shadow-sm font-black"
-                                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                    ? "bg-slate-100 text-slate-900 border border-slate-200/50 shadow-sm"
+                                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                             )}
                         >
-                            <span className="tracking-wider">Công nhân viên</span>
+                            <span className="tracking-tight">Công nhân viên</span>
                         </button>
                         <button
                             onClick={() => setActiveTab('EXCEPTION_REQUESTS')}
                             className={cn(
-                                "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5 rounded-lg",
+                                "flex-1 px-4 py-2.5 text-[12px] font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap rounded-lg cursor-pointer",
                                 activeTab === 'EXCEPTION_REQUESTS'
-                                    ? "text-white bg-primary shadow-sm font-black"
-                                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                    ? "bg-slate-100 text-slate-900 border border-slate-200/50 shadow-sm"
+                                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                             )}
                         >
-                            <FileText size={13} />
-                            <span className="tracking-wider">Đơn giải trình</span>
+                            <FileText size={14} />
+                            <span className="tracking-tight">Đơn giải trình</span>
                         </button>
                         <button
                             onClick={() => setActiveTab('AUDIT_LOGS')}
                             className={cn(
-                                "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5 rounded-lg",
+                                "flex-1 px-4 py-2.5 text-[12px] font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap rounded-lg cursor-pointer",
                                 activeTab === 'AUDIT_LOGS'
-                                    ? "text-white bg-primary shadow-sm font-black"
-                                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                    ? "bg-slate-100 text-slate-900 border border-slate-200/50 shadow-sm"
+                                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                             )}
                         >
-                            <History size={13} />
-                            <span className="tracking-wider">Lịch sử sửa</span>
+                            <History size={14} />
+                            <span className="tracking-tight">Lịch sử sửa</span>
                         </button>
+                        {canViewOthers && (
+                                <button
+                                    onClick={() => { setActiveTab('LEAVE_REQUESTS'); setViewMode('LIST'); }}
+                                    className={cn(
+                                        "flex-1 px-4 py-2.5 text-[12px] font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap rounded-lg cursor-pointer relative",
+                                        activeTab === 'LEAVE_REQUESTS'
+                                            ? "bg-slate-100 text-slate-900 border border-slate-200/50 shadow-sm"
+                                            : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                                    )}
+                                >
+                                    <PlaneTakeoff size={14} />
+                                    <span className="tracking-tight">Đơn xin nghỉ</span>
+                                    {leaveRequests.filter(r => r.status === 'PENDING').length > 0 && (
+                                        <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white shadow-sm ring-2 ring-white animate-bounce-subtle">
+                                            {leaveRequests.filter(r => r.status === 'PENDING').length}
+                                        </span>
+                                    )}
+                                </button>
+                        )}
                         {canManageSettings && (
                             <>
                                 <button
                                     onClick={() => setActiveTab('SETTINGS')}
                                     className={cn(
-                                        "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5 rounded-lg",
+                                        "flex-1 px-4 py-2.5 text-[12px] font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap rounded-lg cursor-pointer",
                                         activeTab === 'SETTINGS'
-                                            ? "text-white bg-primary shadow-sm font-black"
-                                            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                            ? "bg-slate-100 text-slate-900 border border-slate-200/50 shadow-sm"
+                                            : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                                     )}
                                 >
-                                    <Settings size={13} />
-                                    <span className="tracking-wider">Cài đặt ca</span>
+                                    <Settings size={14} />
+                                    <span className="tracking-tight">Cài đặt ca</span>
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('SALARY_SETTINGS')}
                                     className={cn(
-                                        "flex-1 px-4 py-2 text-[11px] font-bold transition-all relative flex items-center justify-center gap-1.5 rounded-lg",
+                                        "flex-1 px-4 py-2.5 text-[12px] font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap rounded-lg cursor-pointer",
                                         activeTab === 'SALARY_SETTINGS'
-                                            ? "text-white bg-primary shadow-sm font-black"
-                                            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                            ? "bg-slate-100 text-slate-900 border border-slate-200/50 shadow-sm"
+                                            : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                                     )}
                                 >
-                                    <Banknote size={13} />
-                                    <span className="tracking-wider">Cài đặt lương</span>
+                                    <Banknote size={14} />
+                                    <span className="tracking-tight">Cài đặt lương</span>
                                 </button>
                             </>
                         )}
@@ -708,7 +846,7 @@ export default function TimesheetPage() {
                 </div>
             )}
 
-            {/* Filters - ENABLED for TODAY as well */}
+            {/* Filters */}
             {(activeTab === 'TODAY' || (activeTab === 'EMPLOYEES' && viewMode === 'LIST')) && (
                 <div className="bg-white p-2.5 rounded-xl shadow-sm border border-slate-100">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-2 items-center">
@@ -769,11 +907,70 @@ export default function TimesheetPage() {
                         <div className="relative">
                             <button
                                 onClick={resetFilters}
-                                className="w-full h-[28px] flex items-center justify-center gap-1.5 px-3 py-0 rounded-lg text-[10.5px] font-bold transition-all border bg-primary-light text-white border-primary/20 hover:bg-primary cursor-pointer"
+                                className="w-full h-[28px] flex items-center justify-center gap-1.5 px-3 py-0 rounded-lg text-[10.5px] font-bold transition-all border bg-slate-50 text-slate-600 border-slate-200 hover:bg-white hover:text-active-text hover:border-active-border cursor-pointer shadow-sm"
                                 title="Xoá toàn bộ bộ lọc"
                             >
-                                ✕ Reset
+                                <RotateCcw size={13} /> Làm mới
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Summary Cards Row - Ảnh 2 style */}
+            {(activeTab === 'MY' || (activeTab === 'EMPLOYEES' && viewMode === 'LIST')) && (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                    <div className="bg-[#ecfdf5] p-2 md:p-3 rounded-2xl border border-emerald-100 shadow-sm flex items-center gap-2.5 md:gap-3 group hover:scale-[1.02] transition-all">
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-white flex items-center justify-center shadow-sm shrink-0">
+                            <CheckCircle2 className="text-emerald-500 w-4 h-4 md:w-5 md:h-5" />
+                        </div>
+                        <div className="min-w-0">
+                            <p className="text-[10px] font-bold text-emerald-800 uppercase tracking-tight leading-none mb-1">Tổng công (NV)</p>
+                            <p className="text-base md:text-lg font-black text-emerald-950 leading-none">
+                                {activeTab === 'MY' ? currentStats.totalWorkCount : filteredSummaryData.reduce((acc: number, r: any) => acc + (Number(r.totalWorkCount) || 0), 0).toFixed(1)}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="bg-[#fff1f2] p-2 md:p-3 rounded-2xl border border-rose-100 shadow-sm flex items-center gap-2.5 md:gap-3 group hover:scale-[1.02] transition-all">
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-white flex items-center justify-center shadow-sm shrink-0">
+                            <AlertCircle className="text-rose-500 w-4 h-4 md:w-5 md:h-5" />
+                        </div>
+                        <div className="min-w-0">
+                            <p className="text-[10px] font-bold text-rose-800 uppercase tracking-tight leading-none mb-1">Đi muộn</p>
+                            <p className="text-base md:text-lg font-black text-rose-950 leading-none">
+                                {activeTab === 'MY' ? currentStats.lateDays : filteredSummaryData.reduce((acc: number, r: any) => acc + (r.lateDays || 0), 0)}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="bg-[#fffbeb] p-2 md:p-3 rounded-2xl border border-amber-100 shadow-sm flex items-center gap-2.5 md:gap-3 group hover:scale-[1.02] transition-all">
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-white flex items-center justify-center shadow-sm shrink-0">
+                            <Clock className="text-amber-500 w-4 h-4 md:w-5 md:h-5" />
+                        </div>
+                        <div className="min-w-0">
+                            <p className="text-[10px] font-bold text-amber-800 uppercase tracking-tight leading-none mb-1">Về sớm</p>
+                            <p className="text-base md:text-lg font-black text-amber-950 leading-none">
+                                {activeTab === 'MY' ? currentStats.earlyLeaveDays : filteredSummaryData.reduce((acc: number, r: any) => acc + (r.earlyLeaveDays || 0), 0)}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="bg-[#eff6ff] p-2 md:p-3 rounded-2xl border border-blue-100 shadow-sm flex items-center gap-2.5 md:gap-3 group hover:scale-[1.02] transition-all">
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-white flex items-center justify-center shadow-sm shrink-0">
+                            <TrendingUp className="text-blue-500 w-4 h-4 md:w-5 md:h-5" />
+                        </div>
+                        <div className="min-w-0">
+                            <p className="text-[10px] font-bold text-blue-800 uppercase tracking-tight leading-none mb-1">Tăng ca (H)</p>
+                            <p className="text-base md:text-lg font-black text-blue-950 leading-none">
+                                {activeTab === 'MY' ? currentStats.totalOvertimeHours : filteredSummaryData.reduce((acc: number, r: any) => acc + (Number(r.totalOvertimeHours) || 0), 0).toFixed(1)}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="bg-[#fef2f2] p-2 md:p-3 rounded-2xl border border-red-100 shadow-sm flex items-center gap-2.5 md:gap-3 group hover:scale-[1.02] transition-all">
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-white flex items-center justify-center shadow-sm shrink-0">
+                            <Banknote className="text-red-500 w-4 h-4 md:w-5 md:h-5" />
+                        </div>
+                        <div className="min-w-0">
+                            <p className="text-[10px] font-bold text-red-800 uppercase tracking-tight leading-none mb-1">Tổng phạt lẻ</p>
+                            <p className="text-lg font-black text-red-950 leading-none">0đ</p>
                         </div>
                     </div>
                 </div>
@@ -786,42 +983,42 @@ export default function TimesheetPage() {
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-slate-50/50 border-b border-slate-100">
-                                    <th className="px-2 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none text-center">STT</th>
-                                    <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Nhân viên</th>
-                                    <th className="px-3 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Tổng công</th>
-                                    <th className="px-3 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">HC (1.0)</th>
-                                    <th className="px-3 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Công ½</th>
-                                    <th className="px-3 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Nghỉ</th>
-                                    <th className="px-3 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Muộn</th>
-                                    <th className="px-3 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Sớm</th>
-                                    <th className="px-3 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">TC (H)</th>
-                                    <th className="px-4 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Thao tác</th>
+                                    <th className="px-1.5 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none text-center">STT</th>
+                                    <th className="px-3 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Nhân viên</th>
+                                    <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Tổng công</th>
+                                    <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">HC (1.0)</th>
+                                    <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Công ½</th>
+                                    <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Nghỉ</th>
+                                    <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Muộn</th>
+                                    <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Sớm</th>
+                                    <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">TC (H)</th>
+                                    <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">
                                 {loading ? (
                                     Array.from({ length: 5 }).map((_, i) => (
                                         <tr key={i} className="animate-pulse">
-                                            {Array.from({ length: 6 }).map((_, j) => (
+                                            {Array.from({ length: 10 }).map((_: any, j: number) => (
                                                 <td key={j} className="px-6 py-4 text-center"><div className="h-4 bg-slate-100 rounded w-2/3 mx-auto"></div></td>
                                             ))}
                                         </tr>
                                     ))
                                 ) : filteredSummaryData.length === 0 ? (
                                     <tr>
-                                        <td colSpan={7} className="px-6 py-20 text-center text-slate-400 font-medium italic">
+                                        <td colSpan={10} className="px-6 py-20 text-center text-slate-400 font-medium italic">
                                             Không tìm thấy dữ liệu nhân sự khớp với điều kiện lọc
                                         </td>
                                     </tr>
                                 ) : (
-                                    filteredSummaryData.map((row, index) => (
+                                    filteredSummaryData.map((row: any, index: number) => (
                                         <tr key={row.employeeId} className="hover:bg-slate-50/50 transition-colors group">
-                                            <td className="px-2 py-3 text-center">
+                                            <td className="px-1.5 py-1.5 text-center">
                                                 <span className="text-[10px] font-bold text-slate-400">{index + 1}</span>
                                             </td>
-                                            <td className="px-4 py-3">
+                                            <td className="px-3 py-1.5">
                                                 <div className="flex items-center gap-2">
-                                                    <div className="w-8 h-8 rounded-full overflow-hidden bg-primary-light border border-slate-100 shrink-0 flex items-center justify-center">
+                                                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full overflow-hidden bg-primary-light border border-slate-100 shrink-0 flex items-center justify-center">
                                                         {(row.avatarUrl && !imageErrors[`list-${row.employeeId}`]) ? (
                                                             <img
                                                                 src={getFullImageUrl(row.avatarUrl)!}
@@ -854,7 +1051,7 @@ export default function TimesheetPage() {
                                                 </div>
                                             </td>
                                             <td className="px-3 py-3 text-center">
-                                                <span className={cn("text-[11px] font-bold", row.absentDaysCount > 0 ? "text-primary" : "text-slate-300")}>{row.absentDaysCount || '-'}</span>
+                                                <span className={cn("text-[11px] font-bold", (row.absentDaysCount || 0) > 0 ? "text-primary" : "text-slate-300")}>{row.absentDaysCount || '-'}</span>
                                             </td>
                                             <td className="px-3 py-3 text-center">
                                                 <span className={cn("text-[11px] font-bold", row.lateDays > 0 ? "text-primary" : "text-slate-300")}>{row.lateDays || '-'}</span>
@@ -886,19 +1083,19 @@ export default function TimesheetPage() {
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr>
-                                    <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none">STT</th>
-                                    <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none text-center">Ngày</th>
-                                    <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Nhân viên</th>
-                                    <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Vào</th>
-                                    <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Ra</th>
-                                    <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Muộn</th>
-                                    <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Sớm</th>
-                                    <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">TC</th>
-                                    <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Ca làm</th>
-                                    <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Công</th>
-                                    <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Trạng thái</th>
+                                    <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">STT</th>
+                                    <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none text-center">Ngày</th>
+                                    <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Nhân viên</th>
+                                    <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Vào</th>
+                                    <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Ra</th>
+                                    <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Muộn</th>
+                                    <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Sớm</th>
+                                    <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">TC</th>
+                                    <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Ca làm</th>
+                                    <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Công</th>
+                                    <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Trạng thái</th>
                                     {['ADMIN', 'DIRECTOR', 'MANAGER', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'].includes(currentUser?.role?.code) && (
-                                        <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Thao tác</th>
+                                        <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center">Thao tác</th>
                                     )}
                                 </tr>
                             </thead>
@@ -906,7 +1103,7 @@ export default function TimesheetPage() {
                                 {loading ? (
                                     Array.from({ length: 5 }).map((_, i) => (
                                         <tr key={i} className="animate-pulse">
-                                            {Array.from({ length: 10 }).map((_, j) => (
+                                            {Array.from({ length: 10 }).map((_: any, j: number) => (
                                                 <td key={j} className="px-6 py-4"><div className="h-4 bg-slate-100 rounded w-full"></div></td>
                                             ))}
                                         </tr>
@@ -918,19 +1115,19 @@ export default function TimesheetPage() {
                                         </td>
                                     </tr>
                                 ) : (
-                                    todayData.map((row, idx) => (
+                                    todayData.map((row: any, idx: number) => (
                                         <tr key={row.id} className="hover:bg-slate-50/50 transition-colors group">
-                                            <td className="px-3 md:px-6 py-3 text-[11px] font-bold text-slate-500 whitespace-nowrap">
+                                            <td className="px-2 md:px-6 py-1.5 text-[11px] font-bold text-slate-500 whitespace-nowrap">
                                                 {idx + 1}
                                             </td>
-                                            <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
+                                            <td className="px-2 md:px-6 py-1.5 whitespace-nowrap text-center">
                                                 <span className="text-[11px] font-medium text-slate-600">
                                                     {row.date ? new Date(row.date).toLocaleDateString('vi-VN') : '-'}
                                                 </span>
                                             </td>
-                                            <td className="px-3 md:px-6 py-3">
+                                            <td className="px-2 md:px-6 py-1.5">
                                                 <div className="flex items-center gap-2">
-                                                    <div className="w-8 h-8 rounded-full overflow-hidden bg-primary-light border border-slate-100 shrink-0 flex items-center justify-center">
+                                                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full overflow-hidden bg-primary-light border border-slate-100 shrink-0 flex items-center justify-center">
                                                         {(row.employee?.avatarUrl && !imageErrors[`today-${row.employee.id}`]) ? (
                                                             <img
                                                                 src={getFullImageUrl(row.employee.avatarUrl)!}
@@ -950,47 +1147,47 @@ export default function TimesheetPage() {
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-3 md:px-6 py-3 whitespace-nowrap">
+                                            <td className="px-2 md:px-6 py-1.5 whitespace-nowrap">
                                                 <span className={cn("text-xs md:text-[13px] font-black", row.checkInTime ? "text-slate-900" : "text-slate-300")}>
                                                     {formatTime(row.checkInTime)}
                                                 </span>
                                             </td>
-                                            <td className="px-3 md:px-6 py-3 whitespace-nowrap">
+                                            <td className="px-2 md:px-6 py-1.5 whitespace-nowrap">
                                                 <span className={cn("text-xs md:text-[13px] font-black", row.checkOutTime ? "text-slate-900" : "text-slate-300")}>
                                                     {formatTime(row.checkOutTime)}
                                                 </span>
                                             </td>
-                                            <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
+                                            <td className="px-2 md:px-6 py-1.5 whitespace-nowrap text-center">
                                                 <span className={cn("text-xs md:text-[13px] font-bold", (row.lateMinutes || 0) > 0 ? "text-primary" : "text-slate-300")}>
                                                     {row.lateMinutes || '-'}
                                                 </span>
                                             </td>
-                                            <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
+                                            <td className="px-2 md:px-6 py-1.5 whitespace-nowrap text-center">
                                                 <span className={cn("text-xs md:text-[13px] font-bold", (row.earlyLeaveMinutes || 0) > 0 ? "text-warning" : "text-slate-300")}>
                                                     {row.earlyLeaveMinutes || '-'}
                                                 </span>
                                             </td>
-                                            <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
+                                            <td className="px-2 md:px-6 py-1.5 whitespace-nowrap text-center">
                                                 <span className={cn("text-xs md:text-[13px] font-bold", (row.overtimeMinutes || 0) > 0 ? "text-blue-600" : "text-slate-300")}>
                                                     {row.overtimeMinutes || '-'}
                                                 </span>
                                             </td>
-                                            <td className="px-3 md:px-6 py-3 whitespace-nowrap">
+                                            <td className="px-2 md:px-6 py-1.5 whitespace-nowrap">
                                                 <StatusBadge status={row.dailyStatus} />
                                             </td>
-                                            <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
-                                                <span className={cn("text-xs md:text-[13px] font-black", 
-                                                    row.workCount != null && Number(row.workCount) < 1 ? "text-amber-600" : 
-                                                    row.workCount != null ? "text-accent" : "text-slate-300"
+                                            <td className="px-2 md:px-6 py-1.5 whitespace-nowrap text-center">
+                                                <span className={cn("text-xs md:text-[13px] font-black",
+                                                    row.workCount != null && Number(row.workCount) < 1 ? "text-amber-600" :
+                                                        row.workCount != null ? "text-accent" : "text-slate-300"
                                                 )}>
                                                     {row.workCount != null ? Number(row.workCount).toFixed(1) : '-'}
                                                 </span>
                                             </td>
-                                            <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
+                                            <td className="px-2 md:px-6 py-1.5 whitespace-nowrap text-center">
                                                 <AttendanceStatusBadge row={row} />
                                             </td>
                                             {['ADMIN', 'DIRECTOR', 'MANAGER', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'].includes(currentUser?.role?.code) && (
-                                                <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
+                                                <td className="px-2 md:px-6 py-1.5 whitespace-nowrap text-center">
                                                     <div className="flex items-center justify-center gap-1">
                                                         <button
                                                             onClick={() => { setViewingAuditRecord(row); setShowAuditModal(true); }}
@@ -1033,24 +1230,24 @@ export default function TimesheetPage() {
                             <table className="w-full text-left border-collapse">
                                 <thead>
                                     <tr className="bg-slate-50/50 border-b border-slate-100">
-                                        <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest">Ngày</th>
-                                        <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest">Thứ</th>
-                                        <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest">Vào</th>
-                                        <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest">Ra</th>
-                                        <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Muộn</th>
-                                        <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Sớm</th>
-                                        <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">TC</th>
-                                        <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest">Ca làm</th>
-                                        <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Công</th>
-                                        <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center whitespace-nowrap">Trạng thái</th>
+                                        <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Ngày</th>
+                                        <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Thứ</th>
+                                        <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Vào</th>
+                                        <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Ra</th>
+                                        <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Muộn</th>
+                                        <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Sớm</th>
+                                        <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">TC</th>
+                                        <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Ca làm</th>
+                                        <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Công</th>
+                                        <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center whitespace-nowrap leading-none">Trạng thái</th>
                                         {['ADMIN', 'DIRECTOR', 'MANAGER', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'].includes(currentUser?.role?.code) && (
-                                            <th className="px-3 md:px-6 py-3 text-[9px] font-bold text-slate-400 tracking-widest text-center">Thao tác</th>
+                                            <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Thao tác</th>
                                         )}
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-50">
                                     {loading ? (
-                                        Array.from({ length: 5 }).map((_, i) => (
+                                        Array.from({ length: 5 }).map((_: any, i: number) => (
                                             <tr key={i} className="animate-pulse">
                                                 {Array.from({ length: 8 }).map((_, j) => (
                                                     <td key={j} className="px-6 py-4"><div className="h-4 bg-slate-100 rounded w-full"></div></td>
@@ -1064,27 +1261,27 @@ export default function TimesheetPage() {
                                             </td>
                                         </tr>
                                     ) : (
-                                        detailData.map((row) => {
+                                        detailData.map((row: any) => {
                                             const date = new Date(row.date);
                                             return (
                                                 <tr key={row.id} className="hover:bg-slate-50/50 transition-colors group">
-                                                    <td className="px-3 md:px-6 py-3 whitespace-nowrap">
+                                                    <td className="px-2 md:px-6 py-1.5 whitespace-nowrap">
                                                         <span className="text-[12px] font-black text-slate-700">{date.getDate().toString().padStart(2, '0')}/{(date.getMonth() + 1).toString().padStart(2, '0')}</span>
                                                     </td>
-                                                    <td className="px-3 md:px-6 py-3 whitespace-nowrap">
+                                                    <td className="px-2 md:px-6 py-1.5 whitespace-nowrap">
                                                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{getDayName(date)}</span>
                                                     </td>
-                                                    <td className="px-3 md:px-6 py-3 whitespace-nowrap">
+                                                    <td className="px-2 md:px-6 py-1.5 whitespace-nowrap">
                                                         <span className={cn("text-xs md:text-[13px] font-black", row.checkInTime ? "text-slate-900" : "text-slate-300")}>
                                                             {formatTime(row.checkInTime)}
                                                         </span>
                                                     </td>
-                                                    <td className="px-3 md:px-6 py-3 whitespace-nowrap">
+                                                    <td className="px-2 md:px-6 py-1.5 whitespace-nowrap">
                                                         <span className={cn("text-xs md:text-[13px] font-black", row.checkOutTime ? "text-slate-900" : "text-slate-300")}>
                                                             {formatTime(row.checkOutTime)}
                                                         </span>
                                                     </td>
-                                                    <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
+                                                    <td className="px-2 md:px-6 py-1.5 whitespace-nowrap text-center">
                                                         <span className={cn("text-xs md:text-[13px] font-bold", row.lateMinutes > 0 ? "text-primary" : "text-slate-300")}>
                                                             {row.lateMinutes || '-'}
                                                         </span>
@@ -1103,9 +1300,9 @@ export default function TimesheetPage() {
                                                         <StatusBadge status={row.dailyStatus} />
                                                     </td>
                                                     <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">
-                                                        <span className={cn("text-xs md:text-[13px] font-black", 
-                                                            row.workCount != null && Number(row.workCount) < 1 ? "text-amber-600" : 
-                                                            row.workCount != null ? "text-accent" : "text-slate-300"
+                                                        <span className={cn("text-xs md:text-[13px] font-black",
+                                                            row.workCount != null && Number(row.workCount) < 1 ? "text-amber-600" :
+                                                                row.workCount != null ? "text-accent" : "text-slate-300"
                                                         )}>
                                                             {row.workCount != null ? Number(row.workCount).toFixed(1) : '-'}
                                                         </span>
@@ -1187,7 +1384,7 @@ export default function TimesheetPage() {
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Chi nhánh *</label>
-                                    <select value={shiftForm.branchId} onChange={e => setShiftForm({...shiftForm, branchId: e.target.value})}
+                                    <select value={shiftForm.branchId} onChange={e => setShiftForm({ ...shiftForm, branchId: e.target.value })}
                                         className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-primary focus:ring-2 focus:ring-primary/10">
                                         <option value="">Chọn chi nhánh</option>
                                         {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
@@ -1195,37 +1392,37 @@ export default function TimesheetPage() {
                                 </div>
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Tên ca *</label>
-                                    <input value={shiftForm.name} onChange={e => setShiftForm({...shiftForm, name: e.target.value})}
+                                    <input value={shiftForm.name} onChange={e => setShiftForm({ ...shiftForm, name: e.target.value })}
                                         placeholder="VD: Ca hành chính" className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-primary focus:ring-2 focus:ring-primary-subtle" />
                                 </div>
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Giờ vào</label>
-                                    <input type="time" value={shiftForm.startTime} onChange={e => setShiftForm({...shiftForm, startTime: e.target.value})}
+                                    <input type="time" value={shiftForm.startTime} onChange={e => setShiftForm({ ...shiftForm, startTime: e.target.value })}
                                         className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-primary focus:ring-2 focus:ring-primary-subtle" />
                                 </div>
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Giờ ra</label>
-                                    <input type="time" value={shiftForm.endTime} onChange={e => setShiftForm({...shiftForm, endTime: e.target.value})}
+                                    <input type="time" value={shiftForm.endTime} onChange={e => setShiftForm({ ...shiftForm, endTime: e.target.value })}
                                         className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-primary focus:ring-2 focus:ring-primary-subtle" />
                                 </div>
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Nghỉ giữa ca (phút)</label>
-                                    <input type="number" value={shiftForm.breakMinutes} onChange={e => setShiftForm({...shiftForm, breakMinutes: parseInt(e.target.value) || 0})}
+                                    <input type="number" value={shiftForm.breakMinutes} onChange={e => setShiftForm({ ...shiftForm, breakMinutes: parseInt(e.target.value) || 0 })}
                                         className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-primary focus:ring-2 focus:ring-primary-subtle" />
                                 </div>
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Muộn (phút)</label>
-                                    <input type="number" value={shiftForm.lateThreshold} onChange={e => setShiftForm({...shiftForm, lateThreshold: parseInt(e.target.value) || 0})}
+                                    <input type="number" value={shiftForm.lateThreshold} onChange={e => setShiftForm({ ...shiftForm, lateThreshold: parseInt(e.target.value) || 0 })}
                                         className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-primary focus:ring-2 focus:ring-primary-subtle" />
                                 </div>
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Muộn nghiêm trọng (phút)</label>
-                                    <input type="number" value={shiftForm.lateSeriousThreshold} onChange={e => setShiftForm({...shiftForm, lateSeriousThreshold: parseInt(e.target.value) || 0})}
+                                    <input type="number" value={shiftForm.lateSeriousThreshold} onChange={e => setShiftForm({ ...shiftForm, lateSeriousThreshold: parseInt(e.target.value) || 0 })}
                                         className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-primary focus:ring-2 focus:ring-primary-subtle" />
                                 </div>
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Về sớm (phút)</label>
-                                    <input type="number" value={shiftForm.earlyLeaveThreshold} onChange={e => setShiftForm({...shiftForm, earlyLeaveThreshold: parseInt(e.target.value) || 0})}
+                                    <input type="number" value={shiftForm.earlyLeaveThreshold} onChange={e => setShiftForm({ ...shiftForm, earlyLeaveThreshold: parseInt(e.target.value) || 0 })}
                                         className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold outline-none focus:border-primary focus:ring-2 focus:ring-primary-subtle" />
                                 </div>
                             </div>
@@ -1319,6 +1516,170 @@ export default function TimesheetPage() {
                 }}
             />
 
+            {activeTab === 'LEAVE_REQUESTS' && (
+                <div className="space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-amber-50 rounded-xl">
+                                <PlaneTakeoff className="text-amber-600 w-5 h-5" />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-bold text-slate-900">Quản lý Đơn xin nghỉ {canViewOthers ? '' : 'của bạn'}</h2>
+                                <p className="text-xs text-gray-500">Danh sách đơn từ toàn hệ thống</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="flex bg-slate-100 p-1 rounded-xl mr-2">
+                                <button 
+                                    onClick={() => setLeaveViewMode('LIST')}
+                                    className={cn("px-3 py-1.5 text-[10px] font-bold rounded-lg transition-all cursor-pointer", leaveViewMode === 'LIST' ? "bg-white text-blue-600 shadow-sm" : "text-slate-500")}
+                                >
+                                    Danh sách
+                                </button>
+                                <button 
+                                    onClick={() => setLeaveViewMode('CALENDAR')}
+                                    className={cn("px-3 py-1.5 text-[10px] font-bold rounded-lg transition-all cursor-pointer", leaveViewMode === 'CALENDAR' ? "bg-white text-blue-600 shadow-sm" : "text-slate-500")}
+                                >
+                                    Lịch tuần
+                                </button>
+                            </div>
+                            <button
+                                onClick={() => setShowLeaveModal(true)}
+                                className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-md shadow-blue-100 text-sm font-bold cursor-pointer"
+                            >
+                                <Plus className="w-4 h-4" />
+                                Tạo đơn mới
+                            </button>
+                        </div>
+                    </div>
+
+                    {leaveViewMode === 'LIST' ? (
+
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-slate-50/50 border-b border-slate-100">
+                                        <th className="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">Nhân viên</th>
+                                        <th className="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">Loại & Hình thức</th>
+                                        <th className="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">Thời gian</th>
+                                        <th className="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">Lý do</th>
+                                        <th className="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap text-center">Trạng thái</th>
+                                        <th className="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap text-center">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50">
+                                    {leaveRequests.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={6} className="px-4 py-12 text-center text-slate-400 italic text-sm">Chưa có dữ liệu đơn nghỉ</td>
+                                        </tr>
+                                    ) : (
+                                        leaveRequests.map((req) => (
+                                            <tr key={req.id} className="hover:bg-slate-50/50 transition-colors">
+                                                <td className="px-4 py-3 whitespace-nowrap">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center overflow-hidden border border-blue-100">
+                                                            {req.employee?.avatarUrl ? (
+                                                                <img src={getFullImageUrl(req.employee.avatarUrl)!} alt="" className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <span className="text-[10px] font-bold text-blue-600">{req.employee?.fullName?.charAt(0)}</span>
+                                                            )}
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[12px] font-bold text-slate-900">{req.employee?.fullName}</p>
+                                                            <p className="text-[10px] text-slate-500">{req.employee?.pos?.name} • {req.employee?.branch?.name}</p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[12px] font-bold text-slate-900">{req.leaveType}</span>
+                                                        <div className="flex items-center gap-1 mt-0.5">
+                                                            {req.isRecurring ? (
+                                                                <span className="px-1.5 py-0.5 bg-purple-50 text-purple-600 rounded text-[9px] font-black border border-purple-100 uppercase">Cố định</span>
+                                                            ) : (
+                                                                <span className="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded text-[9px] font-black border border-blue-100 uppercase">Đột xuất</span>
+                                                            )}
+                                                            <span className="px-1.5 py-0.5 bg-slate-50 text-slate-500 rounded text-[9px] font-black border border-slate-100 uppercase">
+                                                                {req.leaveSession === 'ALL_DAY' ? 'Cả ngày' : req.leaveSession === 'MORNING' ? 'Sáng' : 'Chiều'}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3 whitespace-nowrap">
+                                                    <div className="text-[11px] text-slate-600 space-y-0.5">
+                                                        {req.isRecurring ? (
+                                                            <>
+                                                                <p className="font-bold text-slate-900">
+                                                                    Thứ: {req.recurringDays.map((d: number) => d === 0 ? 'CN' : `T${d + 1}`).join(', ')}
+                                                                </p>
+                                                                <p>Từ: {new Date(req.startDate).toLocaleDateString('vi-VN')}</p>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <p className="font-bold text-slate-900">{new Date(req.startDate).toLocaleDateString('vi-VN')}</p>
+                                                                {req.endDate !== req.startDate && (
+                                                                    <p>Đến: {new Date(req.endDate).toLocaleDateString('vi-VN')}</p>
+                                                                )}
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3 max-w-xs">
+                                                    <p className="text-[11px] text-slate-600 truncate italic" title={req.reason}>{req.reason || '-'}</p>
+                                                </td>
+                                                <td className="px-4 py-3 text-center whitespace-nowrap">
+                                                    <span className={cn(
+                                                        "px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-tighter border",
+                                                        req.status === 'APPROVED' ? "bg-emerald-50 text-accent border-emerald-100" :
+                                                        req.status === 'REJECTED' ? "bg-rose-50 text-rose-600 border-rose-100" :
+                                                        req.status === 'CANCELLED' ? "bg-slate-50 text-slate-400 border-slate-100 italic" :
+                                                        "bg-amber-50 text-warning border-amber-100"
+                                                    )}>
+                                                        {req.status === 'APPROVED' ? 'Đã duyệt' : req.status === 'REJECTED' ? 'Từ chối' : req.status === 'CANCELLED' ? 'Đã hủy' : 'Chờ duyệt'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3 text-center whitespace-nowrap">
+                                                    {req.status === 'PENDING' && canViewOthers ? (
+                                                        <div className="flex items-center justify-center gap-1.5">
+                                                            <button
+                                                                onClick={() => handleUpdateLeaveStatus(req.id, 'APPROVED')}
+                                                                className="p-1.5 bg-emerald-50 text-accent rounded-lg hover:bg-emerald-100 transition-colors"
+                                                                title="Phê duyệt"
+                                                            >
+                                                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleUpdateLeaveStatus(req.id, 'REJECTED')}
+                                                                className="p-1.5 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100 transition-colors"
+                                                                title="Từ chối"
+                                                            >
+                                                                <X className="w-3.5 h-3.5" />
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex items-center justify-center gap-1 text-[10px] text-slate-400">
+                                                            <span>{req.status === 'CANCELLED' ? 'Đã hủy' : 'Đã xử lý'}</span>
+                                                        </div>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    ) : (
+                        <LeaveWeeklyCalendar 
+                            branchId={selectedBranch} 
+                            onAddLeave={handleAddLeaveFromCalendar}
+                            onRefresh={fetchLeaveRequests}
+                        />
+                    )}
+                </div>
+            )}
+            
             {activeTab === 'EXCEPTION_REQUESTS' && (
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
@@ -1362,7 +1723,7 @@ export default function TimesheetPage() {
                                     ) : (
                                         exceptionRequests.map((req) => (
                                             <tr key={req.id} className="hover:bg-slate-50/50 transition-colors">
-                                                <td className="px-4 py-3">
+                                                <td className="px-4 py-3 whitespace-nowrap">
                                                     <div className="flex flex-col">
                                                         <span className="text-[12px] font-bold text-slate-800">{req.employee?.fullName}</span>
                                                         <span className="text-[9px] text-slate-400">{req.employee?.branch?.name}</span>
@@ -1375,10 +1736,10 @@ export default function TimesheetPage() {
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <span className="text-[10px] font-bold text-slate-500">
-                                                        {req.type === 'GO_LATE' ? 'Báo muộn' : 
-                                                         req.type === 'LEAVE_EARLY' ? 'Về sớm' : 
-                                                         req.type === 'GPS_ERROR' ? 'Lỗi GPS' : 
-                                                         req.type === 'FORGOT_CHECKIN' ? 'Quên vào' : 'Quên ra'}
+                                                        {req.type === 'GO_LATE' ? 'Báo muộn' :
+                                                            req.type === 'LEAVE_EARLY' ? 'Về sớm' :
+                                                                req.type === 'GPS_ERROR' ? 'Lỗi GPS' :
+                                                                    req.type === 'FORGOT_CHECKIN' ? 'Quên vào' : 'Quên ra'}
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-3 px-6 max-w-xs">
@@ -1388,16 +1749,16 @@ export default function TimesheetPage() {
                                                     <span className={cn(
                                                         "px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-tighter border",
                                                         req.status === 'PENDING' ? "bg-amber-50 text-warning border-amber-100" :
-                                                        req.status === 'APPROVED' ? "bg-emerald-50 text-accent border-emerald-100" :
-                                                        "bg-primary-subtle text-primary border-primary-subtle"
+                                                            req.status === 'APPROVED' ? "bg-emerald-50 text-accent border-emerald-100" :
+                                                                "bg-primary-subtle text-primary border-primary-subtle"
                                                     )}>
-                                                        {req.status === 'PENDING' ? 'Chờ duyệt' : 
-                                                         req.status === 'APPROVED' ? 'Đã duyệt' : 'Từ chối'}
+                                                        {req.status === 'PENDING' ? 'Chờ duyệt' :
+                                                            req.status === 'APPROVED' ? 'Đã duyệt' : 'Từ chối'}
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-3 text-center">
                                                     <div className="flex items-center justify-center gap-1">
-                                                        <button 
+                                                        <button
                                                             onClick={() => { setViewingRequestDetail(req); setShowDetailModal(true); }}
                                                             className="p-1.5 hover:bg-slate-100 text-slate-500 rounded-lg transition-all cursor-pointer" title="Xem chi tiết"
                                                         >
@@ -1405,11 +1766,11 @@ export default function TimesheetPage() {
                                                         </button>
                                                         {req.status === 'PENDING' && canViewOthers && (
                                                             <>
-                                                                <button 
+                                                                <button
                                                                     onClick={() => handleUpdateStatus(req.id, 'APPROVED')}
                                                                     className="px-2 py-1 bg-accent text-white rounded text-[9px] font-bold hover:bg-emerald-700 transition-all cursor-pointer"
                                                                 >Duyệt</button>
-                                                                <button 
+                                                                <button
                                                                     onClick={() => handleUpdateStatus(req.id, 'REJECTED')}
                                                                     className="px-2 py-1 bg-primary text-white rounded text-[9px] font-bold hover:bg-primary-light transition-all cursor-pointer"
                                                                 >Từ chối</button>
@@ -1468,8 +1829,8 @@ export default function TimesheetPage() {
                                         </tr>
                                     ) : (
                                         allAuditLogs.map((log) => (
-                                            <tr key={log.id} className="hover:bg-slate-50/50 transition-colors cursor-pointer" onClick={() => { setViewingAuditRecord({id: log.attendanceId, date: log.attendance?.date}); setShowAuditModal(true); }}>
-                                                <td className="px-4 py-3">
+                                            <tr key={log.id} className="hover:bg-slate-50/50 transition-colors cursor-pointer" onClick={() => { setViewingAuditRecord({ id: log.attendanceId, date: log.attendance?.date }); setShowAuditModal(true); }}>
+                                                <td className="px-4 py-3 whitespace-nowrap">
                                                     <div className="flex flex-col">
                                                         <span className="text-[12px] font-bold text-slate-800">{log.user?.employee?.fullName || log.user?.username}</span>
                                                     </div>
@@ -1478,33 +1839,33 @@ export default function TimesheetPage() {
                                                     <span className={cn(
                                                         "text-[11px] font-medium px-2.5 py-1 rounded-md",
                                                         log.action === 'MANUAL_ADJUST' ? "bg-blue-50 text-blue-700" :
-                                                        log.action === 'EXCEPTION_APPROVED_GO_LATE' ? "bg-amber-50 text-amber-700" :
-                                                        log.action === 'EXCEPTION_APPROVED_LEAVE_EARLY' ? "bg-orange-50 text-orange-700" :
-                                                        log.action === 'EXCEPTION_APPROVED_GPS_ERROR' ? "bg-primary-subtle text-primary-light" :
-                                                        log.action === 'EXCEPTION_APPROVED_FORGOT_CHECKIN' ? "bg-indigo-50 text-indigo-700" :
-                                                        log.action === 'EXCEPTION_APPROVED_FORGOT_CHECKOUT' ? "bg-violet-50 text-violet-700" :
-                                                        "bg-slate-50 text-slate-700"
+                                                            log.action === 'EXCEPTION_APPROVED_GO_LATE' ? "bg-amber-50 text-amber-700" :
+                                                                log.action === 'EXCEPTION_APPROVED_LEAVE_EARLY' ? "bg-orange-50 text-orange-700" :
+                                                                    log.action === 'EXCEPTION_APPROVED_GPS_ERROR' ? "bg-primary-subtle text-primary-light" :
+                                                                        log.action === 'EXCEPTION_APPROVED_FORGOT_CHECKIN' ? "bg-indigo-50 text-indigo-700" :
+                                                                            log.action === 'EXCEPTION_APPROVED_FORGOT_CHECKOUT' ? "bg-violet-50 text-violet-700" :
+                                                                                "bg-slate-50 text-slate-700"
                                                     )}>
-                                                        {log.action === 'MANUAL_ADJUST' ? 'Hiệu chỉnh thủ công' : 
-                                                         log.action === 'EXCEPTION_APPROVED_GO_LATE' ? 'Phê duyệt đi muộn' :
-                                                         log.action === 'EXCEPTION_APPROVED_LEAVE_EARLY' ? 'Phê duyệt về sớm' :
-                                                         log.action === 'EXCEPTION_APPROVED_GPS_ERROR' ? 'Phê duyệt lỗi GPS' :
-                                                         log.action === 'EXCEPTION_APPROVED_FORGOT_CHECKIN' ? 'Phê duyệt quên check-in' :
-                                                         log.action === 'EXCEPTION_APPROVED_FORGOT_CHECKOUT' ? 'Phê duyệt quên check-out' :
-                                                         log.action.replace('EXCEPTION_APPROVED_', 'Phê duyệt ')}
+                                                        {log.action === 'MANUAL_ADJUST' ? 'Hiệu chỉnh thủ công' :
+                                                            log.action === 'EXCEPTION_APPROVED_GO_LATE' ? 'Phê duyệt đi muộn' :
+                                                                log.action === 'EXCEPTION_APPROVED_LEAVE_EARLY' ? 'Phê duyệt về sớm' :
+                                                                    log.action === 'EXCEPTION_APPROVED_GPS_ERROR' ? 'Phê duyệt lỗi GPS' :
+                                                                        log.action === 'EXCEPTION_APPROVED_FORGOT_CHECKIN' ? 'Phê duyệt quên check-in' :
+                                                                            log.action === 'EXCEPTION_APPROVED_FORGOT_CHECKOUT' ? 'Phê duyệt quên check-out' :
+                                                                                log.action.replace('EXCEPTION_APPROVED_', 'Phê duyệt ')}
                                                     </span>
                                                 </td>
-                                                <td className="px-4 py-3">
+                                                <td className="px-4 py-3 whitespace-nowrap">
                                                     <div className="flex flex-col">
                                                         <span className="text-[11px] font-bold text-slate-700">{log.attendance?.employee?.fullName}</span>
                                                         <span className="text-[9px] text-slate-400">Ngày công: {new Date(log.attendance?.date).toLocaleDateString('vi-VN')}</span>
                                                     </div>
                                                 </td>
-                                                <td className="px-4 py-3 px-6 max-w-sm">
+                                                <td className="px-4 py-3 whitespace-nowrap max-w-sm">
                                                     <p className="text-[10px] text-slate-600 truncate italic" title={log.reason}>{log.reason || '-'}</p>
                                                     <p className="text-[9px] text-accent font-medium truncate mt-0.5">
-                                                        {log.newData?.checkInTime && `Vào: ${new Date(log.newData.checkInTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})} `}
-                                                        {log.newData?.checkOutTime && `Ra: ${new Date(log.newData.checkOutTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}`}
+                                                        {log.newData?.checkInTime && `Vào: ${new Date(log.newData.checkInTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} `}
+                                                        {log.newData?.checkOutTime && `Ra: ${new Date(log.newData.checkOutTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`}
                                                     </p>
                                                 </td>
                                                 <td className="px-4 py-3 text-right">
@@ -1547,7 +1908,7 @@ export default function TimesheetPage() {
                             </h3>
                             <button onClick={() => setShowAdjustModal(false)} className="p-2 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"><X size={20} /></button>
                         </div>
-                        
+
                         <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
                             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Nhân viên & Ngày</p>
                             <p className="text-sm font-bold text-slate-700">{adjustingRecord?.employee?.fullName || selectedEmployee?.fullName || currentUser?.employee?.fullName}</p>
@@ -1557,8 +1918,8 @@ export default function TimesheetPage() {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1.5">
                                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Giờ vào</label>
-                                <input 
-                                    type="datetime-local" 
+                                <input
+                                    type="datetime-local"
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
                                     value={adjustForm.checkInTime}
                                     onChange={e => setAdjustForm({ ...adjustForm, checkInTime: e.target.value })}
@@ -1566,8 +1927,8 @@ export default function TimesheetPage() {
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Giờ ra</label>
-                                <input 
-                                    type="datetime-local" 
+                                <input
+                                    type="datetime-local"
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
                                     value={adjustForm.checkOutTime}
                                     onChange={e => setAdjustForm({ ...adjustForm, checkOutTime: e.target.value })}
@@ -1577,7 +1938,7 @@ export default function TimesheetPage() {
 
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Lý do hiệu chỉnh</label>
-                            <textarea 
+                            <textarea
                                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all h-20 resize-none"
                                 placeholder="VD: Quên chấm công, lỗi GPS..."
                                 value={adjustForm.note}
@@ -1605,7 +1966,7 @@ export default function TimesheetPage() {
 
                         <div className="flex gap-3 pt-2">
                             <button onClick={() => setShowAdjustModal(false)} className="flex-1 px-6 py-3 text-slate-500 font-bold text-sm tracking-tight hover:bg-slate-50 rounded-xl transition-all cursor-pointer">Hủy</button>
-                            <button 
+                            <button
                                 onClick={submitAdjustment}
                                 disabled={savingAdjust}
                                 className="flex-[1.5] px-6 py-3 bg-primary text-white font-bold text-sm tracking-tight rounded-xl shadow-lg shadow-primary-light/50 hover:bg-primary/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
@@ -1619,18 +1980,30 @@ export default function TimesheetPage() {
             )}
 
             {/* Modals */}
-            <AttendanceExceptionRequestModal 
+            <AttendanceExceptionRequestModal
                 isOpen={showExceptionModal}
                 onClose={() => { setShowExceptionModal(false); setRequestingRecord(null); }}
                 record={requestingRecord}
                 employeeId={currentUser?.employee?.id}
-                onSuccess={() => {}}
+                onSuccess={() => { }}
             />
 
-            <AttendanceAuditLogModal 
+            <AttendanceAuditLogModal
                 isOpen={showAuditModal}
                 onClose={() => { setShowAuditModal(false); setViewingAuditRecord(null); }}
                 record={viewingAuditRecord}
+            />
+
+            <LeaveRequestModal
+                isOpen={showLeaveModal}
+                onClose={() => {
+                    setShowLeaveModal(false);
+                    setLeaveInitialData(null);
+                    setSelectedLeaveEmployeeId('');
+                }}
+                onSuccess={() => { if (activeTab === 'LEAVE_REQUESTS') fetchLeaveRequests(); else fetchMyDetail(); }}
+                employeeId={selectedLeaveEmployeeId || currentUser?.employee?.id}
+                initialData={leaveInitialData}
             />
 
             <AttendanceExceptionRequestDetailModal
@@ -1640,6 +2013,19 @@ export default function TimesheetPage() {
             />
         </div>
     );
+}
+
+function formatTime(timeStr: string | null) {
+    if (!timeStr) return '-';
+    try {
+        const date = new Date(timeStr);
+        return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    } catch (e) { return '-'; }
+}
+
+function getDayName(date: Date) {
+    const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+    return days[date.getDay()];
 }
 
 function StatCard({ label, value, icon: Icon, color, bg }: any) {
@@ -1659,8 +2045,10 @@ function StatCard({ label, value, icon: Icon, color, bg }: any) {
 function AttendanceStatusBadge({ row }: { row: any }) {
     const statuses: { label: string, class: string }[] = [];
 
-    if (row.dailyStatus?.startsWith('ABSENT')) {
-        statuses.push({ label: 'Vắng mặt', class: 'bg-slate-100 text-slate-500 border-slate-200' });
+    if (row.dailyStatus === 'ABSENT_APPROVED') {
+        statuses.push({ label: 'Đã xin nghỉ', class: 'bg-emerald-50 text-accent border-emerald-100' });
+    } else if (row.dailyStatus === 'ABSENT_UNAPPROVED') {
+        statuses.push({ label: 'Vắng mặt', class: 'bg-slate-50 text-slate-400 border-slate-100' });
     } else {
         if (row.checkInStatus === 'LATE' || row.checkInStatus === 'LATE_SERIOUS') {
             statuses.push({ label: 'Đi muộn', class: 'bg-danger-light text-danger border-danger-light' });
@@ -1671,7 +2059,7 @@ function AttendanceStatusBadge({ row }: { row: any }) {
         if (row.checkOutStatus === 'OVERTIME') {
             statuses.push({ label: 'Tăng ca', class: 'bg-blue-50 text-blue-600 border-blue-100' });
         }
-        
+
         if (statuses.length === 0 && row.checkInTime) {
             statuses.push({ label: 'Đúng giờ', class: 'bg-accent/10 text-accent border-accent/20' });
         }
@@ -1698,8 +2086,8 @@ function StatusBadge({ status }: { status: string }) {
         'HALF_DAY_AFTERNOON': { label: 'Ca Chiều', class: 'bg-indigo-50 text-indigo-600 border-indigo-100' },
         'INCOMPLETE': { label: 'Thiếu công', class: 'bg-primary-subtle text-primary border-primary-subtle' },
         'LATE_DAY': { label: 'Hành chính', class: 'bg-emerald-50 text-accent border-emerald-100' },
-        'ABSENT_UNAPPROVED': { label: '---', class: 'bg-slate-50 text-slate-400 border-slate-100' },
-        'ABSENT_APPROVED': { label: '---', class: 'bg-slate-50 text-slate-400 border-slate-100' },
+        'ABSENT_UNAPPROVED': { label: 'Vắng mặt', class: 'bg-slate-50 text-slate-400 border-slate-100' },
+        'ABSENT_APPROVED': { label: 'Xin nghỉ', class: 'bg-emerald-50 text-accent border-emerald-100' },
         'DEFAULT': { label: '---', class: 'bg-slate-50 text-slate-400 border-slate-100' }
     };
 

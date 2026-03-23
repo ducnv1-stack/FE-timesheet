@@ -491,10 +491,10 @@ export default function AttendancePoliciesTab() {
                                     const label = d.label.includes('Chủ nhật') ? 'CN' : d.label.split(' ')[1];
                                     return (
                                         <div key={d.value} className="flex-1 flex flex-col items-center gap-1">
-                                            <span className="text-[8px] md:text-[10px] font-bold text-slate-400">{label}</span>
+                                            <span className="text-[8px] md:text-[10px] font-bold text-slate-500">{label}</span>
                                             <div className={cn(
-                                                "w-full h-1 md:h-1.5 rounded-full",
-                                                dayData?.isOff ? "bg-slate-200" : "bg-accent-light shadow-[0_0_8px_rgba(16,185,129,0.3)]"
+                                                "w-full h-1 md:h-1.5 rounded-full transition-all duration-300",
+                                                dayData?.isOff ? "bg-slate-200" : "bg-emerald-500 shadow-[0_2px_4px_rgba(16,185,129,0.2)]"
                                             )} />
                                         </div>
                                     )
@@ -563,7 +563,7 @@ export default function AttendancePoliciesTab() {
                                 </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-semibold text-slate-400 tracking-tight ml-1">Tên chính sách</label>
+                                        <label className="text-[10px] font-bold text-slate-500 tracking-tight ml-1">Tên chính sách</label>
                                         <input 
                                             type="text" 
                                             value={formData.name}
@@ -573,7 +573,7 @@ export default function AttendancePoliciesTab() {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-semibold text-slate-400 tracking-tight ml-1">Mô tả ngắn</label>
+                                        <label className="text-[10px] font-bold text-slate-500 tracking-tight ml-1">Mô tả ngắn</label>
                                         <input 
                                             type="text" 
                                             value={formData.note || ''}
@@ -583,7 +583,7 @@ export default function AttendancePoliciesTab() {
                                         />
                                     </div>
                                     <div className="md:col-span-2 space-y-2">
-                                        <label className="text-[10px] font-semibold text-slate-400 tracking-tight ml-1">Loại hình làm việc (Engine Mode)</label>
+                                        <label className="text-[10px] font-bold text-slate-500 tracking-tight ml-1">Loại hình làm việc (Engine Mode)</label>
                                         <div className="grid grid-cols-3 gap-3">
                                             {[
                                                 { id: 'FIXED_TIME', label: 'Hành chính (Cố định)', desc: 'Tính muộn/sớm/OT' },
@@ -658,9 +658,9 @@ export default function AttendancePoliciesTab() {
                                                         days: (formData.days || []).map(d => ({ ...d, requireGPS: e.target.checked }))
                                                     })}
                                                 />
-                                                <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-accent-light"></div>
+                                                <div className="w-10 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500 shadow-sm"></div>
                                             </div>
-                                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider group-hover:text-accent">Bắt buộc GPS</span>
+                                            <span className="text-[10px] font-black text-slate-700 uppercase tracking-wider group-hover:text-accent">Bắt buộc GPS</span>
                                         </label>
                                         <button 
                                             onClick={getCurrentLocation}
@@ -672,7 +672,7 @@ export default function AttendancePoliciesTab() {
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-semibold text-slate-400 tracking-tight ml-1">Vĩ độ (Latitude)</label>
+                                        <label className="text-[10px] font-bold text-slate-500 tracking-tight ml-1">Vĩ độ (Latitude)</label>
                                         <input 
                                             type="number" step="any"
                                             value={formData.latitude || ''}
@@ -682,7 +682,7 @@ export default function AttendancePoliciesTab() {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-semibold text-slate-400 tracking-tight ml-1">Kinh độ (Longitude)</label>
+                                        <label className="text-[10px] font-bold text-slate-500 tracking-tight ml-1">Kinh độ (Longitude)</label>
                                         <input 
                                             type="number" step="any"
                                             value={formData.longitude || ''}
@@ -692,7 +692,7 @@ export default function AttendancePoliciesTab() {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-semibold text-slate-400 tracking-tight ml-1">Bán kính (Meters)</label>
+                                        <label className="text-[10px] font-bold text-slate-500 tracking-tight ml-1">Bán kính (Meters)</label>
                                         <input 
                                             type="number"
                                             value={formData.radius || ''}
@@ -726,7 +726,7 @@ export default function AttendancePoliciesTab() {
                                             </div>
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div className="space-y-2">
-                                                    <label className="text-[10px] font-bold text-slate-400 tracking-wider">Ân hạn trễ (Phút)</label>
+                                                    <label className="text-[10px] font-bold text-slate-500 tracking-wider">Ân hạn trễ (Phút)</label>
                                                     <input 
                                                         type="number"
                                                         value={formData.configData?.attendance_calculation?.late_rules?.grace_minutes ?? 15}
@@ -744,7 +744,7 @@ export default function AttendancePoliciesTab() {
                                                     />
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <label className="text-[10px] font-bold text-slate-400 tracking-wider">Ân hạn sớm (Phút)</label>
+                                                    <label className="text-[10px] font-bold text-slate-500 tracking-wider">Ân hạn sớm (Phút)</label>
                                                     <input 
                                                         type="number"
                                                         value={formData.configData?.attendance_calculation?.early_leave_rules?.grace_minutes ?? 15}
@@ -770,7 +770,7 @@ export default function AttendancePoliciesTab() {
                                             </div>
                                             <div className="flex items-center gap-3">
                                                 <div className="flex-1 space-y-2">
-                                                    <label className="text-[10px] font-bold text-slate-400 tracking-wider">Bắt đầu làm</label>
+                                                    <label className="text-[10px] font-bold text-slate-500 tracking-wider">Bắt đầu làm</label>
                                                     <input 
                                                         type="time"
                                                         value={formData.configData?.schedule?.start_time || '08:00'}
@@ -789,7 +789,7 @@ export default function AttendancePoliciesTab() {
                                                     />
                                                 </div>
                                                 <div className="flex-1 space-y-2">
-                                                    <label className="text-[10px] font-bold text-slate-400 tracking-wider">Kết thúc làm</label>
+                                                    <label className="text-[10px] font-bold text-slate-500 tracking-wider">Kết thúc làm</label>
                                                     <input 
                                                         type="time"
                                                         value={formData.configData?.schedule?.end_time || '17:30'}

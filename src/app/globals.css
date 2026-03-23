@@ -4,7 +4,7 @@
   --background: #ffffff;
   --foreground: #0f172a;
 
-  /* Primary - Navy theme */
+  /* Primary - Navy theme (Original) */
   --primary: #243247;
   --primary-foreground: #ffffff;
   --primary-light: #3a4d6b;
@@ -29,13 +29,10 @@
   --danger-light: #fef2f2;
   /* red-50 */
 
-  /* Surface/Secondary */
-  --surface: #f8fafc;
-  /* slate-50 */
-  --secondary: #0f172a;
-  /* slate-900 */
-  --border: #e2e8f0;
-  /* slate-200 */
+  /* Interaction States */
+  --active-bg: var(--primary-subtle);
+  --active-text: var(--primary);
+  --active-border: var(--primary);
 }
 
 @theme {
@@ -45,6 +42,9 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-light: var(--primary-light);
   --color-primary-subtle: var(--primary-subtle);
+  --color-active-bg: var(--active-bg);
+  --color-active-text: var(--active-text);
+  --color-active-border: var(--active-border);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent-light: var(--accent-light);

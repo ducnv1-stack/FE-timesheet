@@ -209,7 +209,7 @@ export default function BranchesPage() {
                 if (error.code === 1) msg = 'Bạn đã từ chối quyền truy cập GPS trên trình duyệt.';
                 else if (error.code === 2) msg = 'Không thể xác định vị trí (Sóng yếu hoặc lỗi mạng).';
                 else if (error.code === 3) msg = 'Quá thời gian phản hồi định vị (Timeout).';
-                
+
                 toastError(msg);
                 setFetchingGpsId(null);
             },
@@ -324,13 +324,13 @@ export default function BranchesPage() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                         <div className="space-y-2">
                             <label className="text-xs font-bold text-slate-400 tracking-widest px-1">Vĩ độ</label>
                             <input
                                 type="number"
                                 className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
-                                placeholder="Tự động hoặc nhập tay"
+                                placeholder="Vĩ độ"
                                 value={newBranch.latitude || ''}
                                 onChange={e => {
                                     const val = parseFloat(e.target.value);
@@ -343,7 +343,7 @@ export default function BranchesPage() {
                             <input
                                 type="number"
                                 className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
-                                placeholder="Tự động hoặc nhập tay"
+                                placeholder="Kinh độ"
                                 value={newBranch.longitude || ''}
                                 onChange={e => {
                                     const val = parseFloat(e.target.value);
@@ -351,11 +351,21 @@ export default function BranchesPage() {
                                 }}
                             />
                         </div>
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-slate-400 tracking-widest px-1">Bán kính (m)</label>
+                            <input
+                                type="number"
+                                className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+                                placeholder="50"
+                                value={newBranch.checkinRadius}
+                                onChange={e => setNewBranch({ ...newBranch, checkinRadius: parseInt(e.target.value) || 0 })}
+                            />
+                        </div>
                         <div className="flex items-end">
                             <button
                                 onClick={() => getCurrentLocation(null)}
                                 disabled={fetchingGpsId === 'NEW'}
-                                className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-primary-light text-primary rounded-2xl font-bold hover:bg-primary-subtle transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                                className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-primary text-white rounded-2xl font-bold hover:bg-slate-800 transition-all active:scale-95 disabled:opacity-50 cursor-pointer shadow-lg shadow-primary/20"
                             >
                                 {fetchingGpsId === 'NEW' ? <Loader2 size={20} className="animate-spin" /> : <LocateFixed size={20} />}
                                 Lấy tọa độ GPS
@@ -373,10 +383,10 @@ export default function BranchesPage() {
                         <button
                             onClick={() => triggerActionWithPassword(executeCreate)}
                             disabled={!newBranch.name || !newBranch.code}
-                            className="flex-1 px-8 py-4 bg-primary-light text-primary font-bold tracking-tighter rounded-2xl shadow-sm hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                            className="flex-1 px-8 py-4 bg-accent text-white font-bold tracking-tighter rounded-2xl shadow-xl shadow-accent/20 hover:bg-emerald-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none cursor-pointer"
                         >
                             <Save size={20} />
-                            Xác nhận và Lưu
+                            Xác nhận và Lưu chi nhánh
                         </button>
                     </div>
                 </div>
@@ -424,12 +434,12 @@ export default function BranchesPage() {
                             </div>
 
                             <div className="space-y-5">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-bold text-slate-400 tracking-widest px-1">Vĩ độ</label>
+                                <div className="grid grid-cols-3 gap-3">
+                                    <div className="space-y-1">
+                                        <label className="text-[9px] font-bold text-slate-400 tracking-widest px-1 uppercase">Vĩ độ</label>
                                         <input
                                             type="number"
-                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
+                                            className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
                                             value={branch.latitude || ''}
                                             onChange={(e) => {
                                                 const val = parseFloat(e.target.value);
@@ -438,15 +448,28 @@ export default function BranchesPage() {
                                             }}
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-bold text-slate-400 tracking-widest px-1">Kinh độ</label>
+                                    <div className="space-y-1">
+                                        <label className="text-[9px] font-bold text-slate-400 tracking-widest px-1 uppercase">Kinh độ</label>
                                         <input
                                             type="number"
-                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
+                                            className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
                                             value={branch.longitude || ''}
                                             onChange={(e) => {
                                                 const val = parseFloat(e.target.value);
                                                 setBranches(branches.map(b => b.id === branch.id ? { ...b, longitude: isNaN(val) ? null : val } : b));
+                                                setJustFetchedId(null);
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[9px] font-bold text-slate-400 tracking-widest px-1 uppercase">Bán kính (m)</label>
+                                        <input
+                                            type="number"
+                                            className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
+                                            value={branch.checkinRadius || 0}
+                                            onChange={(e) => {
+                                                const val = parseInt(e.target.value);
+                                                setBranches(branches.map(b => b.id === branch.id ? { ...b, checkinRadius: isNaN(val) ? 0 : val } : b));
                                                 setJustFetchedId(null);
                                             }}
                                         />
@@ -493,8 +516,8 @@ export default function BranchesPage() {
                                     disabled={saving === branch.id}
                                     className={cn(
                                         "flex-1 flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl text-xs font-bold tracking-widest transition-all shadow-sm active:scale-95 disabled:opacity-50 cursor-pointer",
-                                        justFetchedId === branch.id 
-                                            ? "bg-accent text-white hover:bg-accent/90 animate-bounce shadow-accent/20" 
+                                        justFetchedId === branch.id
+                                            ? "bg-accent text-white hover:bg-accent/90 animate-bounce shadow-accent/20"
                                             : "bg-primary text-white hover:bg-primary/90"
                                     )}
                                 >
