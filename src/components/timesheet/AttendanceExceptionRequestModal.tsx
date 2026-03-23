@@ -108,7 +108,7 @@ export default function AttendanceExceptionRequestModal({
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     employeeId,
-                    attendanceId: record.id,
+                    attendanceId: (record.id && !record.id.startsWith('temp') && !record.id.startsWith('today')) ? record.id : undefined,
                     date: record.date,
                     type: form.type,
                     reason: form.reason,

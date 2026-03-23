@@ -17,11 +17,10 @@ interface LeaveRequestModalProps {
 }
 
 const LEAVE_TYPES = [
-    'Nghỉ phép năm',
     'Nghỉ việc riêng',
     'Nghỉ ốm',
     'Nghỉ thai sản',
-    'Nghỉ không lương',
+    'Nghỉ phép năm',
     'Khác'
 ];
 

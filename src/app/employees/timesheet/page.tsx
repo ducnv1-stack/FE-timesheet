@@ -134,11 +134,30 @@ export default function TimesheetPage() {
                     .then(data => setLeaveRequests(data))
                     .catch(() => {});
 
+                // Fetch initial exception requests for badge count
+                fetch(`${API_URL}/attendance-exception-requests?${params.toString()}`)
+                    .then(res => res.json())
+                    .then(data => setExceptionRequests(data))
+                    .catch(() => {});
+
                 if (rCode === 'MANAGER') {
                     setSelectedBranch(user.employee?.branchId || '');
                 }
             } else {
                 setSelectedEmployee(user.employee);
+                // Fetch leave requests for regular employees (badge count)
+                if (user.employee?.id) {
+                    fetch(`${API_URL}/leave-requests?employeeId=${user.employee.id}`)
+                        .then(res => res.json())
+                        .then(data => setLeaveRequests(data))
+                        .catch(() => {});
+                    
+                    // Fetch exception requests for regular employees (badge count)
+                    fetch(`${API_URL}/attendance-exception-requests?employeeId=${user.employee.id}`)
+                        .then(res => res.json())
+                        .then(data => setExceptionRequests(data))
+                        .catch(() => {});
+                }
             }
 
             setActiveTab('MY');
@@ -238,7 +257,9 @@ export default function TimesheetPage() {
         setLoading(true);
         try {
             const params = new URLSearchParams();
-            if (activeTab === 'MY' && currentUser?.employee?.id) {
+            if (!canViewOthers && currentUser?.employee?.id) {
+                params.append('employeeId', currentUser.employee.id);
+            } else if (activeTab === 'MY' && currentUser?.employee?.id) {
                 params.append('employeeId', currentUser.employee.id);
             } else if (selectedBranch) {
                 params.append('branchId', selectedBranch);
@@ -258,7 +279,10 @@ export default function TimesheetPage() {
         setLoading(true);
         try {
             const params = new URLSearchParams();
-            if (activeTab === 'MY' && currentUser?.employee?.id) {
+            if (!canViewOthers && currentUser?.employee?.id) {
+                // Regular employees always see only their own leave requests
+                params.append('employeeId', currentUser.employee.id);
+            } else if (activeTab === 'MY' && currentUser?.employee?.id) {
                 params.append('employeeId', currentUser.employee.id);
             } else if (selectedBranch) {
                 params.append('branchId', selectedBranch);
@@ -735,116 +759,121 @@ export default function TimesheetPage() {
             </div>
 
             {/* Tabs - Modern Underline Style */}
-            {canViewOthers && (
-                <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                    <div className="flex w-full p-1 border-b border-slate-100 overflow-x-auto scrollbar-hide gap-1">
-                        <button
-                            onClick={() => setActiveTab('MY')}
-                            className={cn(
-                                "flex-1 px-4 py-2.5 text-[12px] font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap rounded-lg cursor-pointer",
-                                activeTab === 'MY'
-                                    ? "bg-slate-100 text-slate-900 border border-slate-200/50 shadow-sm"
-                                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
-                            )}
-                        >
-                            <span className="tracking-tight">Công cá nhân</span>
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('TODAY')}
-                            className={cn(
-                                "flex-1 px-4 py-2.5 text-[12px] font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap rounded-lg cursor-pointer",
-                                activeTab === 'TODAY'
-                                    ? "bg-slate-100 text-slate-900 border border-slate-200/50 shadow-sm"
-                                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
-                            )}
-                        >
-                            <span className="tracking-tight">Công hôm nay</span>
-                        </button>
-                        <button
-                            onClick={() => { setActiveTab('EMPLOYEES'); setViewMode('LIST'); }}
-                            className={cn(
-                                "flex-1 px-4 py-2.5 text-[12px] font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap rounded-lg cursor-pointer",
-                                activeTab === 'EMPLOYEES'
-                                    ? "bg-slate-100 text-slate-900 border border-slate-200/50 shadow-sm"
-                                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
-                            )}
-                        >
-                            <span className="tracking-tight">Công nhân viên</span>
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('EXCEPTION_REQUESTS')}
-                            className={cn(
-                                "flex-1 px-4 py-2.5 text-[12px] font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap rounded-lg cursor-pointer",
-                                activeTab === 'EXCEPTION_REQUESTS'
-                                    ? "bg-slate-100 text-slate-900 border border-slate-200/50 shadow-sm"
-                                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
-                            )}
-                        >
-                            <FileText size={14} />
-                            <span className="tracking-tight">Đơn giải trình</span>
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('AUDIT_LOGS')}
-                            className={cn(
-                                "flex-1 px-4 py-2.5 text-[12px] font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap rounded-lg cursor-pointer",
-                                activeTab === 'AUDIT_LOGS'
-                                    ? "bg-slate-100 text-slate-900 border border-slate-200/50 shadow-sm"
-                                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
-                            )}
-                        >
-                            <History size={14} />
-                            <span className="tracking-tight">Lịch sử sửa</span>
-                        </button>
-                        {canViewOthers && (
-                                <button
-                                    onClick={() => { setActiveTab('LEAVE_REQUESTS'); setViewMode('LIST'); }}
-                                    className={cn(
-                                        "flex-1 px-4 py-2.5 text-[12px] font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap rounded-lg cursor-pointer relative",
-                                        activeTab === 'LEAVE_REQUESTS'
-                                            ? "bg-slate-100 text-slate-900 border border-slate-200/50 shadow-sm"
-                                            : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
-                                    )}
-                                >
-                                    <PlaneTakeoff size={14} />
-                                    <span className="tracking-tight">Đơn xin nghỉ</span>
-                                    {leaveRequests.filter(r => r.status === 'PENDING').length > 0 && (
-                                        <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white shadow-sm ring-2 ring-white animate-bounce-subtle">
-                                            {leaveRequests.filter(r => r.status === 'PENDING').length}
-                                        </span>
-                                    )}
-                                </button>
+            <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                <div className="flex w-full p-1 border-b border-slate-100 overflow-x-auto scrollbar-hide gap-1">
+                    <button
+                        onClick={() => setActiveTab('MY')}
+                        className={cn(
+                            "flex-1 px-4 py-2.5 text-[12px] font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap rounded-lg cursor-pointer",
+                            activeTab === 'MY'
+                                ? "bg-slate-100 text-slate-900 border border-slate-200/50 shadow-sm"
+                                : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                         )}
-                        {canManageSettings && (
-                            <>
-                                <button
-                                    onClick={() => setActiveTab('SETTINGS')}
-                                    className={cn(
-                                        "flex-1 px-4 py-2.5 text-[12px] font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap rounded-lg cursor-pointer",
-                                        activeTab === 'SETTINGS'
-                                            ? "bg-slate-100 text-slate-900 border border-slate-200/50 shadow-sm"
-                                            : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
-                                    )}
-                                >
-                                    <Settings size={14} />
-                                    <span className="tracking-tight">Cài đặt ca</span>
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('SALARY_SETTINGS')}
-                                    className={cn(
-                                        "flex-1 px-4 py-2.5 text-[12px] font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap rounded-lg cursor-pointer",
-                                        activeTab === 'SALARY_SETTINGS'
-                                            ? "bg-slate-100 text-slate-900 border border-slate-200/50 shadow-sm"
-                                            : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
-                                    )}
-                                >
-                                    <Banknote size={14} />
-                                    <span className="tracking-tight">Cài đặt lương</span>
-                                </button>
-                            </>
+                    >
+                        <span className="tracking-tight">Công cá nhân</span>
+                    </button>
+                    {canViewOthers && (
+                        <>
+                            <button
+                                onClick={() => setActiveTab('TODAY')}
+                                className={cn(
+                                    "flex-1 px-4 py-2.5 text-[12px] font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap rounded-lg cursor-pointer",
+                                    activeTab === 'TODAY'
+                                        ? "bg-slate-100 text-slate-900 border border-slate-200/50 shadow-sm"
+                                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                                )}
+                            >
+                                <span className="tracking-tight">Công hôm nay</span>
+                            </button>
+                            <button
+                                onClick={() => { setActiveTab('EMPLOYEES'); setViewMode('LIST'); }}
+                                className={cn(
+                                    "flex-1 px-4 py-2.5 text-[12px] font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap rounded-lg cursor-pointer",
+                                    activeTab === 'EMPLOYEES'
+                                        ? "bg-slate-100 text-slate-900 border border-slate-200/50 shadow-sm"
+                                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                                )}
+                            >
+                                <span className="tracking-tight">Công nhân viên</span>
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('AUDIT_LOGS')}
+                                className={cn(
+                                    "flex-1 px-4 py-2.5 text-[12px] font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap rounded-lg cursor-pointer",
+                                    activeTab === 'AUDIT_LOGS'
+                                        ? "bg-slate-100 text-slate-900 border border-slate-200/50 shadow-sm"
+                                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                                )}
+                            >
+                                <History size={14} />
+                                <span className="tracking-tight">Lịch sử sửa</span>
+                            </button>
+                        </>
+                    )}
+                    <button
+                        onClick={() => setActiveTab('EXCEPTION_REQUESTS')}
+                        className={cn(
+                            "flex-1 px-4 py-2.5 text-[12px] font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap rounded-lg cursor-pointer relative",
+                            activeTab === 'EXCEPTION_REQUESTS'
+                                ? "bg-slate-100 text-slate-900 border border-slate-200/50 shadow-sm"
+                                : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                         )}
-                    </div>
+                    >
+                        <FileText size={14} />
+                        <span className="tracking-tight">Đơn giải trình</span>
+                        {exceptionRequests.filter(r => r.status === 'PENDING').length > 0 && (
+                            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white shadow-sm ring-2 ring-white animate-bounce-subtle">
+                                {exceptionRequests.filter(r => r.status === 'PENDING').length}
+                            </span>
+                        )}
+                    </button>
+                    <button
+                        onClick={() => { setActiveTab('LEAVE_REQUESTS'); setViewMode('LIST'); }}
+                        className={cn(
+                            "flex-1 px-4 py-2.5 text-[12px] font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap rounded-lg cursor-pointer relative",
+                            activeTab === 'LEAVE_REQUESTS'
+                                ? "bg-slate-100 text-slate-900 border border-slate-200/50 shadow-sm"
+                                : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                        )}
+                    >
+                        <PlaneTakeoff size={14} />
+                        <span className="tracking-tight">Đơn xin nghỉ</span>
+                        {leaveRequests.filter(r => r.status === 'PENDING').length > 0 && (
+                            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white shadow-sm ring-2 ring-white animate-bounce-subtle">
+                                {leaveRequests.filter(r => r.status === 'PENDING').length}
+                            </span>
+                        )}
+                    </button>
+                    {canManageSettings && (
+                        <>
+                            <button
+                                onClick={() => setActiveTab('SETTINGS')}
+                                className={cn(
+                                    "flex-1 px-4 py-2.5 text-[12px] font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap rounded-lg cursor-pointer",
+                                    activeTab === 'SETTINGS'
+                                        ? "bg-slate-100 text-slate-900 border border-slate-200/50 shadow-sm"
+                                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                                )}
+                            >
+                                <Settings size={14} />
+                                <span className="tracking-tight">Cài đặt ca</span>
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('SALARY_SETTINGS')}
+                                className={cn(
+                                    "flex-1 px-4 py-2.5 text-[12px] font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap rounded-lg cursor-pointer",
+                                    activeTab === 'SALARY_SETTINGS'
+                                        ? "bg-slate-100 text-slate-900 border border-slate-200/50 shadow-sm"
+                                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                                )}
+                            >
+                                <Banknote size={14} />
+                                <span className="tracking-tight">Cài đặt lương</span>
+                            </button>
+                        </>
+                    )}
                 </div>
-            )}
+            </div>
 
             {/* Filters */}
             {(activeTab === 'TODAY' || (activeTab === 'EMPLOYEES' && viewMode === 'LIST')) && (
@@ -1524,8 +1553,8 @@ export default function TimesheetPage() {
                                 <PlaneTakeoff className="text-amber-600 w-5 h-5" />
                             </div>
                             <div>
-                                <h2 className="text-lg font-bold text-slate-900">Quản lý Đơn xin nghỉ {canViewOthers ? '' : 'của bạn'}</h2>
-                                <p className="text-xs text-gray-500">Danh sách đơn từ toàn hệ thống</p>
+                                <h2 className="text-lg font-bold text-slate-900">{canViewOthers ? 'Quản lý Đơn xin nghỉ' : 'Đơn xin nghỉ của bạn'}</h2>
+                                <p className="text-xs text-gray-500">{canViewOthers ? 'Danh sách đơn từ toàn hệ thống' : 'Theo dõi trạng thái các đơn xin nghỉ'}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
@@ -1673,6 +1702,7 @@ export default function TimesheetPage() {
                     ) : (
                         <LeaveWeeklyCalendar 
                             branchId={selectedBranch} 
+                            employeeId={!canViewOthers ? currentUser?.employee?.id : undefined}
                             onAddLeave={handleAddLeaveFromCalendar}
                             onRefresh={fetchLeaveRequests}
                         />
@@ -1686,9 +1716,11 @@ export default function TimesheetPage() {
                         <div>
                             <h2 className="text-lg font-bold text-slate-800 tracking-tight flex items-center gap-2">
                                 <FileText size={18} className="text-primary" />
-                                Danh sách Đơn giải trình
+                                {canViewOthers ? 'Danh sách Đơn giải trình' : 'Đơn giải trình của bạn'}
                             </h2>
-                            <p className="text-[10px] text-slate-500 font-medium mt-0.5">Theo dõi và phê duyệt các yêu cầu hiệu chỉnh công</p>
+                            <p className="text-[10px] text-slate-500 font-medium mt-0.5">
+                                {canViewOthers ? 'Theo dõi và phê duyệt các yêu cầu hiệu chỉnh công' : 'Theo dõi trạng thái các yêu cầu hiệu chỉnh công của bạn'}
+                            </p>
                         </div>
                     </div>
 

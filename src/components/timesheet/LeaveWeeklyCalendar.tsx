@@ -7,19 +7,27 @@ import ConfirmModal from '@/components/ui/confirm-modal';
 
 interface LeaveWeeklyCalendarProps {
     branchId?: string;
+    employeeId?: string;
     onAddLeave?: (employeeId: string, date: string, suggestedSession?: string) => void;
     onRefresh?: () => void;
 }
 
-export default function LeaveWeeklyCalendar({ branchId, onAddLeave, onRefresh }: LeaveWeeklyCalendarProps) {
+export default function LeaveWeeklyCalendar({ branchId, employeeId, onAddLeave, onRefresh }: LeaveWeeklyCalendarProps) {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [loading, setLoading] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [deletingDate, setDeletingDate] = useState<string | null>(null);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [weeklyLeaves, setWeeklyLeaves] = useState<any[]>([]);
+    const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
     
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+    const getFullImageUrl = (path: string | null) => {
+        if (!path) return null;
+        if (path.startsWith('http')) return path;
+        return `${API_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+    };
 
     // Get Monday of the current week
     const getStartOfWeek = (date: Date) => {
@@ -54,7 +62,8 @@ export default function LeaveWeeklyCalendar({ branchId, onAddLeave, onRefresh }:
             const params = new URLSearchParams({
                 startDate: startStr,
                 endDate: endStr,
-                ...(branchId ? { branchId } : {})
+                ...(branchId ? { branchId } : {}),
+                ...(employeeId ? { employeeId } : {})
             });
             const res = await fetch(`${API_URL}/leave-requests/weekly?${params.toString()}`);
             const data = await res.json();
@@ -68,7 +77,7 @@ export default function LeaveWeeklyCalendar({ branchId, onAddLeave, onRefresh }:
 
     useEffect(() => {
         fetchWeeklySummary();
-    }, [currentDate, branchId]);
+    }, [currentDate, branchId, employeeId]);
 
     const nextWeek = () => {
         const d = new Date(currentDate);
@@ -224,8 +233,17 @@ export default function LeaveWeeklyCalendar({ branchId, onAddLeave, onRefresh }:
                                     <tr key={emp.id} className="hover:bg-slate-50/30 transition-colors">
                                         <td className="px-4 py-4 border-r border-slate-100">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs ring-2 ring-white">
-                                                    {emp.fullName.charAt(0)}
+                                                <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs ring-2 ring-white overflow-hidden">
+                                                    {emp.avatarUrl && !imageErrors[emp.id] ? (
+                                                        <img 
+                                                            src={getFullImageUrl(emp.avatarUrl)!} 
+                                                            alt="" 
+                                                            className="w-full h-full object-cover"
+                                                            onError={() => setImageErrors(prev => ({ ...prev, [emp.id]: true }))}
+                                                        />
+                                                    ) : (
+                                                        emp.fullName.charAt(0)
+                                                    )}
                                                 </div>
                                                 <div className="flex flex-col min-w-0">
                                                     <span className="text-[11px] font-bold text-slate-700 truncate">{emp.fullName}</span>
@@ -269,16 +287,18 @@ export default function LeaveWeeklyCalendar({ branchId, onAddLeave, onRefresh }:
                                                                 {l.leaveType.split(' ').map((w: string) => w[0]).join('')}
                                                                 {l.isRecurring && <span className="ml-0.5">•</span>}
 
-                                                                {/* Delete button shown on hover */}
-                                                                <button 
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        handleDeleteLeave(l.id, targetDateStr);
-                                                                    }}
-                                                                    className="absolute inset-y-0 right-0 bg-rose-600 text-white px-1 opacity-0 group-hover/bar:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
-                                                                >
-                                                                    <Trash2 size={10} className="cursor-pointer" />
-                                                                </button>
+                                                                {/* Delete button shown on hover (admin only) */}
+                                                                {!employeeId && (
+                                                                    <button 
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            handleDeleteLeave(l.id, targetDateStr);
+                                                                        }}
+                                                                        className="absolute inset-y-0 right-0 bg-rose-600 text-white px-1 opacity-0 group-hover/bar:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                                                                    >
+                                                                        <Trash2 size={10} className="cursor-pointer" />
+                                                                    </button>
+                                                                )}
                                                             </div>
                                                         ))}
                                                     </div>
@@ -297,9 +317,11 @@ export default function LeaveWeeklyCalendar({ branchId, onAddLeave, onRefresh }:
                 <Info size={14} className="text-slate-400" />
                 <p className="text-[10px] text-slate-500 font-medium">
                     <span className="text-indigo-600 font-bold mr-2">• Nghỉ cố định</span>
-                    <span className="mr-2">NP: Nghỉ phép năm</span>
-                    <span className="mr-2">VR: Việc riêng</span>
-                    <span>O: Nghỉ ốm / Khác</span>
+                    <span className="mr-2">NVR: Việc riêng</span>
+                    <span className="mr-2">NO: Nghỉ ốm</span>
+                    <span className="mr-2">NTS: Thai sản</span>
+                    <span className="mr-2">NPN: Phép năm</span>
+                    <span>K: Khác</span>
                 </p>
             </div>
 
