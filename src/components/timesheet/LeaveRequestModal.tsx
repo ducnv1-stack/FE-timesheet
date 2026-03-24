@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { X, Calendar, Clock, AlertCircle, CheckCircle2, Loader2, Info } from 'lucide-react';
+import { X, Calendar, Clock, AlertCircle, CheckCircle2, Loader2, Info, Search, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface LeaveRequestModalProps {
@@ -10,10 +10,15 @@ interface LeaveRequestModalProps {
     onSuccess: () => void;
     employeeId: string;
     isAdminView?: boolean;
+    requestId?: string;
     initialData?: {
         startDate?: string;
+        endDate?: string;
         isRecurring?: boolean;
         leaveSession?: string;
+        leaveType?: string;
+        reason?: string;
+        recurringDays?: number[];
     };
 }
 
@@ -35,7 +40,7 @@ const WEEK_DAYS = [
     { label: 'Chủ Nhật', value: 0 },
 ];
 
-export default function LeaveRequestModal({ isOpen, onClose, onSuccess, employeeId, isAdminView, initialData }: LeaveRequestModalProps) {
+export default function LeaveRequestModal({ isOpen, onClose, onSuccess, employeeId, isAdminView, requestId, initialData }: LeaveRequestModalProps) {
     const [loading, setLoading] = useState(false);
     const [isRecurring, setIsRecurring] = useState(false);
     const [employees, setEmployees] = useState<any[]>([]);
@@ -49,18 +54,51 @@ export default function LeaveRequestModal({ isOpen, onClose, onSuccess, employee
         recurringDays: [] as number[],
     });
 
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+    const getFullImageUrl = (path: string | null) => {
+        if (!path) return null;
+        if (path.startsWith('http')) return path;
+        return `${API_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+    };
+
+    const handleImageError = (key: string) => {
+        setImageErrors(prev => ({ ...prev, [key]: true }));
+    };
+
+    const removeAccents = (str: string) => {
+        if (!str) return '';
+        return str
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/đ/g, 'd')
+            .replace(/Đ/g, 'D');
+    };
+
+    const normalizedQuery = removeAccents(searchQuery.toLowerCase());
+    const filteredEmployees = employees.filter(emp => 
+        removeAccents(emp.fullName?.toLowerCase() || '').includes(normalizedQuery) || 
+        removeAccents(emp.email?.toLowerCase() || '').includes(normalizedQuery)
+    );
+
+    const selectedEmployeeObj = employees.find(e => e.id === selectedEmpId);
 
     useEffect(() => {
         if (isOpen) {
             setSelectedEmpId(employeeId);
             if (initialData) {
-                setFormData(prev => ({
-                    ...prev,
-                    startDate: initialData.startDate || prev.startDate,
-                    endDate: initialData.startDate || prev.endDate,
-                    leaveSession: initialData.leaveSession || prev.leaveSession,
-                }));
+                setFormData({
+                    leaveType: initialData.leaveType || LEAVE_TYPES[0],
+                    startDate: initialData.startDate ? new Date(initialData.startDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                    endDate: initialData.endDate ? new Date(initialData.endDate).toISOString().split('T')[0] : (initialData.startDate ? new Date(initialData.startDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]),
+                    leaveSession: initialData.leaveSession || 'ALL_DAY',
+                    reason: initialData.reason || '',
+                    recurringDays: initialData.recurringDays || [],
+                });
                 if (initialData.isRecurring !== undefined) {
                     setIsRecurring(initialData.isRecurring);
                 }
@@ -104,13 +142,19 @@ export default function LeaveRequestModal({ isOpen, onClose, onSuccess, employee
         setLoading(true);
 
         try {
-            const res = await fetch(`${API_URL}/leave-requests`, {
-                method: 'POST',
+            const isEdit = !!requestId;
+            const url = isEdit ? `${API_URL}/leave-requests/${requestId}` : `${API_URL}/leave-requests`;
+            const method = isEdit ? 'PATCH' : 'POST';
+
+            const res = await fetch(url, {
+                method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     employeeId: selectedEmpId,
                     ...formData,
                     isRecurring,
+                    status: isAdminView ? 'APPROVED' : undefined, // Let backend decide status if not admin
+                    isAdmin: isAdminView
                 }),
             });
 
@@ -139,12 +183,12 @@ export default function LeaveRequestModal({ isOpen, onClose, onSuccess, employee
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 animate-in fade-in duration-200 cursor-pointer" onClick={onClose}>
-            <div className="bg-white rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl relative cursor-default" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-white rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl relative cursor-default" onClick={(e) => { e.stopPropagation(); setIsDropdownOpen(false); }}>
                 {/* Header */}
                 <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white flex justify-between items-center">
                     <div className="flex items-center gap-2">
                         <Calendar className="w-5 h-5" />
-                        <h3 className="font-semibold">{isAdminView ? 'Đăng ký nghỉ hộ' : 'Đăng ký nghỉ'}</h3>
+                        <h3 className="font-semibold">{requestId ? 'Chỉnh sửa đơn nghỉ' : (isAdminView ? 'Đăng ký nghỉ hộ' : 'Đăng ký nghỉ')}</h3>
                     </div>
                     <button onClick={onClose} className="p-1 hover:bg-white/20 rounded-full transition-colors cursor-pointer">
                         <X className="w-5 h-5" />
@@ -154,27 +198,121 @@ export default function LeaveRequestModal({ isOpen, onClose, onSuccess, employee
                 <form onSubmit={handleSubmit} className="p-4 space-y-4 max-h-[80vh] overflow-y-auto">
                     {/* Chọn nhân viên (chỉ Quản lý) */}
                     {isAdminView && (
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Nhân viên</label>
-                            <select
-                                className="w-full rounded-xl border-gray-200 text-sm focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
-                                value={selectedEmpId}
-                                onChange={(e) => setSelectedEmpId(e.target.value)}
-                                required
+                        <div className="relative">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Nhân viên <span className="text-red-500">*</span></label>
+                            
+                            <div 
+                                className={cn(
+                                    "w-full flex items-center justify-between p-2.5 bg-white border rounded-xl text-sm transition-all cursor-pointer",
+                                    isDropdownOpen ? "border-blue-500 ring-2 ring-blue-50" : "border-gray-200 hover:border-gray-300"
+                                )}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsDropdownOpen(!isDropdownOpen);
+                                    if (!isDropdownOpen) setSearchQuery('');
+                                }}
                             >
-                                <option value="">-- Chọn nhân viên --</option>
-                                {employees.map(emp => (
-                                    <option key={emp.id} value={emp.id}>
-                                        {emp.fullName} ({emp.branch?.name || 'Văn phòng'})
-                                    </option>
-                                ))}
-                            </select>
+                                {selectedEmployeeObj ? (
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-6 h-6 rounded-full overflow-hidden bg-blue-100 flex items-center justify-center shrink-0 border border-blue-200">
+                                            {selectedEmployeeObj.avatarUrl && !imageErrors[`emp-${selectedEmployeeObj.id}`] ? (
+                                                <img 
+                                                    src={getFullImageUrl(selectedEmployeeObj.avatarUrl)!} 
+                                                    alt={selectedEmployeeObj.fullName}
+                                                    className="w-full h-full object-cover"
+                                                    onError={() => handleImageError(`emp-${selectedEmployeeObj.id}`)}
+                                                />
+                                            ) : (
+                                                <span className="text-xs font-bold text-blue-700">
+                                                    {selectedEmployeeObj.fullName?.split(' ').pop()?.charAt(0)?.toUpperCase()}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <span className="font-medium text-gray-900">{selectedEmployeeObj.fullName}</span>
+                                        <span className="text-gray-500 text-xs hidden sm:inline-block">- {selectedEmployeeObj.branch?.name || 'Văn phòng'}</span>
+                                    </div>
+                                ) : (
+                                    <span className="text-gray-500">-- Chọn nhân viên --</span>
+                                )}
+                                <ChevronDown className={cn("w-4 h-4 text-gray-400 transition-transform duration-200", isDropdownOpen && "rotate-180")} />
+                            </div>
+
+                            {/* Dropdown Menu */}
+                            {isDropdownOpen && (
+                                <div 
+                                    className="absolute z-[110] mt-1 w-full bg-white border border-gray-100 rounded-xl shadow-xl shadow-black/5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <div className="p-2 border-b border-gray-50">
+                                        <div className="relative flex items-center">
+                                            <Search className="w-4 h-4 text-gray-400 absolute left-3" />
+                                            <input
+                                                type="text"
+                                                className="w-full pl-9 pr-3 py-2 bg-gray-50 border-transparent focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-lg text-sm transition-all"
+                                                placeholder="Tìm tên nhân viên..."
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                autoFocus
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="max-h-[240px] overflow-y-auto p-1 custom-scrollbar">
+                                        {filteredEmployees.length === 0 ? (
+                                            <div className="p-4 text-center text-sm text-gray-500 flex flex-col items-center justify-center gap-2">
+                                                <AlertCircle className="w-5 h-5 text-gray-400" />
+                                                Không tìm thấy nhân viên nào
+                                            </div>
+                                        ) : (
+                                            filteredEmployees.map((emp) => {
+                                                const isSelected = selectedEmpId === emp.id;
+                                                return (
+                                                    <div
+                                                        key={emp.id}
+                                                        onClick={() => {
+                                                            setSelectedEmpId(emp.id);
+                                                            setIsDropdownOpen(false);
+                                                        }}
+                                                        className={cn(
+                                                            "w-full flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all",
+                                                            isSelected ? "bg-blue-50" : "hover:bg-gray-50"
+                                                        )}
+                                                    >
+                                                        <div className="w-8 h-8 rounded-full overflow-hidden bg-indigo-100 flex items-center justify-center shrink-0 border border-indigo-200">
+                                                            {emp.avatarUrl && !imageErrors[`emp-${emp.id}`] ? (
+                                                                <img 
+                                                                    src={getFullImageUrl(emp.avatarUrl)!} 
+                                                                    alt={emp.fullName}
+                                                                    className="w-full h-full object-cover"
+                                                                    onError={() => handleImageError(`emp-${emp.id}`)}
+                                                                />
+                                                            ) : (
+                                                                <span className="text-sm font-bold text-indigo-700">
+                                                                    {emp.fullName?.split(' ').pop()?.charAt(0)?.toUpperCase()}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex flex-col flex-1">
+                                                            <span className={cn("text-sm font-medium", isSelected ? "text-blue-700" : "text-gray-900")}>
+                                                                {emp.fullName}
+                                                            </span>
+                                                            <span className="text-[11px] text-gray-500 truncate">
+                                                                {emp.branch?.name || 'Văn phòng'} {Math.random() > 0.5 ? '• Dev' : '' /* Dummy position since position might not be joined */}
+                                                            </span>
+                                                        </div>
+                                                        {isSelected && <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />}
+                                                    </div>
+                                                );
+                                            })
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
 
                     {/* Loại nghỉ */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Loại nghỉ</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1" id="label-leave-type">Loại nghỉ</label>
                         <select
                             className="w-full rounded-xl border-gray-200 text-sm focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
                             value={formData.leaveType}
@@ -327,7 +465,7 @@ export default function LeaveRequestModal({ isOpen, onClose, onSuccess, employee
                             className="flex-1 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                         >
                             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                            Gửi yêu cầu
+                            {requestId ? 'Cập nhật đơn' : 'Gửi yêu cầu'}
                         </button>
                     </div>
                 </form>

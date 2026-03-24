@@ -16,7 +16,11 @@ import {
     Warehouse,
     LayoutGrid,
     AlertCircle,
-    X
+    X,
+    Eye,
+    EyeOff,
+    Pencil,
+    Edit3
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/components/ui/toast';
@@ -33,6 +37,8 @@ export default function BranchesPage() {
     const [userBranchId, setUserBranchId] = useState<string>('');
     const [userBranchName, setUserBranchName] = useState<string>('');
     const [userId, setUserId] = useState<string>('');
+    const [activeTab, setActiveTab] = useState<'ACTIVE' | 'HIDDEN'>('ACTIVE');
+    const [editingBranchId, setEditingBranchId] = useState<string | null>(null);
 
     // Auth Modal State
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -219,6 +225,7 @@ export default function BranchesPage() {
 
     const filteredBranches = branches
         .filter(b => b.branchType === 'CHI_NHANH')
+        .filter(b => activeTab === 'ACTIVE' ? b.isActive !== false : b.isActive === false)
         .filter(b => {
             const matchSearch = (b.name + ' ' + b.code).toLowerCase().includes(searchTerm.toLowerCase());
             const matchBranch = selectedBranch ? b.id === selectedBranch : true;
@@ -279,9 +286,44 @@ export default function BranchesPage() {
                     <div className="p-3 bg-primary text-white rounded-2xl shadow-sm"><Building2 size={24} /></div>
                     <div>
                         <p className="text-xs font-bold text-slate-400 tracking-widest">Đang hoạt động</p>
-                        <p className="text-2xl font-bold text-slate-900">{branches.filter(b => b.branchType === 'CHI_NHANH').length}</p>
+                        <p className="text-2xl font-bold text-slate-900">{branches.filter(b => b.branchType === 'CHI_NHANH' && b.isActive !== false).length}</p>
                     </div>
                 </div>
+                <div className="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4">
+                    <div className="p-3 bg-slate-400 text-white rounded-2xl shadow-sm"><EyeOff size={24} /></div>
+                    <div>
+                        <p className="text-xs font-bold text-slate-400 tracking-widest">Đã ẩn</p>
+                        <p className="text-2xl font-bold text-slate-900">{branches.filter(b => b.branchType === 'CHI_NHANH' && b.isActive === false).length}</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Tab Switcher */}
+            <div className="flex p-1.5 bg-slate-100/50 rounded-2xl w-fit border border-slate-200/50">
+                <button
+                    onClick={() => setActiveTab('ACTIVE')}
+                    className={cn(
+                        "px-8 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2",
+                        activeTab === 'ACTIVE'
+                            ? "bg-white text-primary shadow-lg shadow-primary/5 border border-slate-100"
+                            : "text-slate-500 hover:text-slate-700"
+                    )}
+                >
+                    <Building2 size={18} />
+                    Chi nhánh hoạt động
+                </button>
+                <button
+                    onClick={() => setActiveTab('HIDDEN')}
+                    className={cn(
+                        "px-8 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2",
+                        activeTab === 'HIDDEN'
+                            ? "bg-white text-slate-700 shadow-lg shadow-slate-200 border border-slate-100"
+                            : "text-slate-500 hover:text-slate-700"
+                    )}
+                >
+                    <EyeOff size={18} />
+                    Chi nhánh đã ẩn
+                </button>
             </div>
 
             {/* Add New Branch Panel */}
@@ -420,13 +462,38 @@ export default function BranchesPage() {
                                     )}>
                                         {branch.branchType === 'KHO_TONG' ? <Warehouse size={28} /> : <Building2 size={28} />}
                                     </div>
-                                    <div>
-                                        <h3 className="text-2xl font-bold text-slate-900 leading-tight tracking-tight">{branch.name}</h3>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <span className="px-2 py-0.5 bg-slate-100 text-slate-500 rounded text-[10px] font-bold tracking-widest">{branch.code}</span>
+                                    <div className="flex-1 space-y-2">
+                                        <div className="space-y-1">
+                                            <label className="text-[9px] font-bold text-slate-400 tracking-widest px-1 uppercase">Tên chi nhánh</label>
+                                            {editingBranchId === branch.id ? (
+                                                <input
+                                                    className="w-full text-lg font-bold text-slate-700 leading-tight tracking-tight bg-white border-2 border-primary/20 rounded-xl px-3 py-1 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
+                                                    value={branch.name}
+                                                    onChange={(e) => setBranches(branches.map(b => b.id === branch.id ? { ...b, name: e.target.value } : b))}
+                                                    autoFocus
+                                                />
+                                            ) : (
+                                                <h3 className="text-xl font-black text-slate-900 leading-tight tracking-tight px-1">{branch.name}</h3>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="space-y-1 flex-1">
+                                                <label className="text-[9px] font-bold text-slate-400 tracking-widest px-1 uppercase">Mã (Code)</label>
+                                                {editingBranchId === branch.id ? (
+                                                    <input
+                                                        className="w-full px-2 py-0.5 bg-white text-slate-600 rounded text-[10px] font-bold tracking-widest border-2 border-primary/20 focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all outline-none uppercase"
+                                                        value={branch.code}
+                                                        onChange={(e) => setBranches(branches.map(b => b.id === branch.id ? { ...b, code: e.target.value.toUpperCase() } : b))}
+                                                    />
+                                                ) : (
+                                                    <div className="px-2 py-0.5 bg-slate-100 text-slate-500 rounded text-[10px] font-black tracking-widest w-fit border border-slate-200 uppercase">
+                                                        {branch.code}
+                                                    </div>
+                                                )}
+                                            </div>
                                             {branch.branchType === 'KHO_TONG' ?
-                                                <span className="flex items-center gap-1 text-[10px] font-bold text-blue-600 tracking-widest"><Warehouse size={12} /> Kho tổng</span> :
-                                                <span className="flex items-center gap-1 text-[10px] font-bold text-primary tracking-widest"><Building2 size={12} /> Chi nhánh</span>
+                                                <span className="flex items-center gap-1 text-[10px] font-bold text-blue-600 tracking-widest self-end pb-1"><Warehouse size={12} /> Kho tổng</span> :
+                                                <span className="flex items-center gap-1 text-[10px] font-bold text-primary tracking-widest self-end pb-1"><Building2 size={12} /> Chi nhánh</span>
                                             }
                                         </div>
                                     </div>
@@ -437,45 +504,80 @@ export default function BranchesPage() {
                                 <div className="grid grid-cols-3 gap-3">
                                     <div className="space-y-1">
                                         <label className="text-[9px] font-bold text-slate-400 tracking-widest px-1 uppercase">Vĩ độ</label>
-                                        <input
-                                            type="number"
-                                            className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
-                                            value={branch.latitude || ''}
-                                            onChange={(e) => {
-                                                const val = parseFloat(e.target.value);
-                                                setBranches(branches.map(b => b.id === branch.id ? { ...b, latitude: isNaN(val) ? null : val } : b));
-                                                setJustFetchedId(null);
-                                            }}
-                                        />
+                                        {editingBranchId === branch.id ? (
+                                            <input
+                                                type="number"
+                                                className="w-full px-3 py-2 bg-white border-2 border-primary/20 rounded-xl text-xs font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
+                                                value={branch.latitude || ''}
+                                                onChange={(e) => {
+                                                    const val = parseFloat(e.target.value);
+                                                    setBranches(branches.map(b => b.id === branch.id ? { ...b, latitude: isNaN(val) ? null : val } : b));
+                                                    setJustFetchedId(null);
+                                                }}
+                                            />
+                                        ) : (
+                                            <div className="px-3 py-2 bg-slate-50 text-slate-600 rounded-xl text-xs font-bold border border-slate-100 min-h-[34px] flex items-center">
+                                                {branch.latitude || 'N/A'}
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="space-y-1">
                                         <label className="text-[9px] font-bold text-slate-400 tracking-widest px-1 uppercase">Kinh độ</label>
-                                        <input
-                                            type="number"
-                                            className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
-                                            value={branch.longitude || ''}
-                                            onChange={(e) => {
-                                                const val = parseFloat(e.target.value);
-                                                setBranches(branches.map(b => b.id === branch.id ? { ...b, longitude: isNaN(val) ? null : val } : b));
-                                                setJustFetchedId(null);
-                                            }}
-                                        />
+                                        {editingBranchId === branch.id ? (
+                                            <input
+                                                type="number"
+                                                className="w-full px-3 py-2 bg-white border-2 border-primary/20 rounded-xl text-xs font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
+                                                value={branch.longitude || ''}
+                                                onChange={(e) => {
+                                                    const val = parseFloat(e.target.value);
+                                                    setBranches(branches.map(b => b.id === branch.id ? { ...b, longitude: isNaN(val) ? null : val } : b));
+                                                    setJustFetchedId(null);
+                                                }}
+                                            />
+                                        ) : (
+                                            <div className="px-3 py-2 bg-slate-50 text-slate-600 rounded-xl text-xs font-bold border border-slate-100 min-h-[34px] flex items-center">
+                                                {branch.longitude || 'N/A'}
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="space-y-1">
                                         <label className="text-[9px] font-bold text-slate-400 tracking-widest px-1 uppercase">Bán kính (m)</label>
-                                        <input
-                                            type="number"
-                                            className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
-                                            value={branch.checkinRadius || 0}
-                                            onChange={(e) => {
-                                                const val = parseInt(e.target.value);
-                                                setBranches(branches.map(b => b.id === branch.id ? { ...b, checkinRadius: isNaN(val) ? 0 : val } : b));
-                                                setJustFetchedId(null);
-                                            }}
-                                        />
+                                        {editingBranchId === branch.id ? (
+                                            <input
+                                                type="number"
+                                                className="w-full px-3 py-2 bg-white border-2 border-primary/20 rounded-xl text-xs font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
+                                                value={branch.checkinRadius || 0}
+                                                onChange={(e) => {
+                                                    const val = parseInt(e.target.value);
+                                                    setBranches(branches.map(b => b.id === branch.id ? { ...b, checkinRadius: isNaN(val) ? 0 : val } : b));
+                                                    setJustFetchedId(null);
+                                                }}
+                                            />
+                                        ) : (
+                                            <div className="px-3 py-2 bg-slate-50 text-slate-600 rounded-xl text-xs font-bold border border-slate-100 min-h-[34px] flex items-center">
+                                                {branch.checkinRadius || '0'}m
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold text-slate-400 tracking-widest px-1 uppercase">Địa chỉ chi nhánh</label>
+                                    {editingBranchId === branch.id ? (
+                                        <textarea
+                                            rows={2}
+                                            className="w-full px-4 py-3 bg-white border-2 border-primary/20 rounded-xl text-sm font-bold text-slate-700 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none resize-none"
+                                            placeholder="Nhập địa chỉ chi nhánh..."
+                                            value={branch.address || ''}
+                                            onChange={(e) => setBranches(branches.map(b => b.id === branch.id ? { ...b, address: e.target.value } : b))}
+                                        />
+                                    ) : (
+                                        <div className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium text-slate-500 min-h-[72px]">
+                                            {branch.address || 'Chưa cập nhật địa chỉ'}
+                                        </div>
+                                    )}
+                                </div>
+                                
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-bold text-slate-400 tracking-widest px-1">Loại chi nhánh / Phân quyền</label>
                                     <div className="w-full px-4 py-3 bg-slate-100 border border-slate-100 rounded-xl text-sm font-bold text-slate-500">
@@ -494,36 +596,66 @@ export default function BranchesPage() {
                                     {fetchingGpsId === branch.id ? <Loader2 size={20} className="animate-spin" /> : <LocateFixed size={20} />}
                                 </button>
 
-                                <button
-                                    onClick={() => {
-                                        const updates = canCreateDelete
-                                            ? {
-                                                name: branch.name,
-                                                code: branch.code,
-                                                branchType: branch.branchType,
-                                                latitude: branch.latitude,
-                                                longitude: branch.longitude,
-                                                checkinRadius: branch.checkinRadius
+                                    <button
+                                        onClick={() => {
+                                            if (editingBranchId === branch.id) {
+                                                const updates = {
+                                                    name: branch.name,
+                                                    code: branch.code,
+                                                    address: branch.address,
+                                                    branchType: branch.branchType,
+                                                    latitude: branch.latitude,
+                                                    longitude: branch.longitude,
+                                                    checkinRadius: branch.checkinRadius
+                                                };
+                                                triggerActionWithPassword(async (pwd: string) => {
+                                                    await executeUpdate(branch.id, updates, pwd);
+                                                    setEditingBranchId(null);
+                                                });
+                                                setJustFetchedId(null);
+                                            } else {
+                                                setEditingBranchId(branch.id);
                                             }
-                                            : {
-                                                latitude: branch.latitude,
-                                                longitude: branch.longitude,
-                                                checkinRadius: branch.checkinRadius
-                                            };
-                                        triggerActionWithPassword((pwd: string) => executeUpdate(branch.id, updates, pwd));
-                                        setJustFetchedId(null);
-                                    }}
-                                    disabled={saving === branch.id}
-                                    className={cn(
-                                        "flex-1 flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl text-xs font-bold tracking-widest transition-all shadow-sm active:scale-95 disabled:opacity-50 cursor-pointer",
-                                        justFetchedId === branch.id
-                                            ? "bg-accent text-white hover:bg-accent/90 animate-bounce shadow-accent/20"
-                                            : "bg-primary text-white hover:bg-primary/90"
+                                        }}
+                                        disabled={saving === branch.id}
+                                        className={cn(
+                                            "flex-1 flex items-center justify-center gap-2 px-3 py-3.5 rounded-xl text-xs font-bold tracking-widest transition-all shadow-sm active:scale-95 disabled:opacity-50 cursor-pointer whitespace-nowrap",
+                                            editingBranchId === branch.id
+                                                ? "bg-accent text-white hover:bg-emerald-700 shadow-accent/20"
+                                                : justFetchedId === branch.id
+                                                    ? "bg-accent text-white hover:bg-accent/90 animate-bounce shadow-accent/20"
+                                                    : "bg-primary text-white hover:bg-primary/90"
+                                        )}
+                                    >
+                                        {saving === branch.id ? <Loader2 className="animate-spin" size={16} /> : editingBranchId === branch.id ? <Save size={16} /> : <Pencil size={16} />}
+                                        {editingBranchId === branch.id ? "Xác nhận & Lưu" : justFetchedId === branch.id ? "Xác nhận & Lưu" : "Chỉnh sửa"}
+                                    </button>
+
+                                    {editingBranchId === branch.id && (
+                                        <button
+                                            onClick={() => {
+                                                setEditingBranchId(null);
+                                                fetchBranches(); // Revert changes
+                                            }}
+                                            className="p-3 bg-red-50 text-red-500 hover:bg-red-100 rounded-xl transition-all active:scale-95 cursor-pointer"
+                                            title="Hủy bỏ"
+                                        >
+                                            <X size={20} />
+                                        </button>
                                     )}
-                                >
-                                    {saving === branch.id ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
-                                    {justFetchedId === branch.id ? "Xác nhận & Lưu" : "Lưu cấu hình"}
-                                </button>
+
+                                {canCreateDelete && (
+                                    <button
+                                        onClick={() => {
+                                            const updates = { isActive: branch.isActive === false };
+                                            triggerActionWithPassword((pwd: string) => executeUpdate(branch.id, updates, pwd));
+                                        }}
+                                        className="p-3 bg-slate-50 text-slate-400 hover:bg-primary-subtle hover:text-primary rounded-xl transition-all active:scale-95 cursor-pointer"
+                                        title={branch.isActive === false ? "Hiện chi nhánh" : "Ẩn chi nhánh"}
+                                    >
+                                        {branch.isActive === false ? <Eye size={20} /> : <EyeOff size={20} />}
+                                    </button>
+                                )}
 
                                 {canCreateDelete && branch.id !== userBranchId && (
                                     <button

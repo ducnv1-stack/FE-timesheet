@@ -26,7 +26,8 @@ import {
     Activity,
     BarChart3,
     LayoutGrid,
-    Warehouse
+    Warehouse,
+    Gift
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -40,6 +41,10 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
     const isLoginPage = pathname === '/login';
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [openMenus, setOpenMenus] = useState<string[]>([]);
+    const [birthdayCount, setBirthdayCount] = useState(0);
+    const [pendingTimesheetCount, setPendingTimesheetCount] = useState(0);
+
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
     useEffect(() => {
         const user = localStorage.getItem('user');
@@ -47,6 +52,36 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             setCurrentUser(JSON.parse(user));
         }
     }, []);
+
+    useEffect(() => {
+        const fetchCounts = async () => {
+            try {
+                // Fetch birthdays
+                const birthdayRes = await fetch(`${API_URL}/employees/upcoming-birthdays`);
+                const birthdayData = await birthdayRes.json();
+                setBirthdayCount(birthdayData.length);
+
+                // Fetch pending timesheet requests
+                if (currentUser) {
+                    const params = new URLSearchParams({
+                        ...(currentUser.employee?.id ? { employeeId: currentUser.employee.id } : {}),
+                        ...(currentUser.employee?.branchId ? { branchId: currentUser.employee.branchId } : {}),
+                        roleCode: currentUser.role?.code || ''
+                    });
+                    const pendingRes = await fetch(`${API_URL}/attendance/pending-counts?${params.toString()}`);
+                    const pendingData = await pendingRes.json();
+                    setPendingTimesheetCount(pendingData.totalCount || 0);
+                }
+            } catch (error) {
+                console.error('Error fetching sidebar counts:', error);
+            }
+        };
+
+        fetchCounts();
+        // Refresh counts every 2 minutes or on pathname change
+        const interval = setInterval(fetchCounts, 120000);
+        return () => clearInterval(interval);
+    }, [pathname, currentUser]);
 
     // Auto open parent menu if child is active
     useEffect(() => {
@@ -142,7 +177,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     label: 'Quản lý nhân viên',
                     icon: Users,
                     href: '/employees',
-                    active: pathname.startsWith('/employees') && !pathname.includes('/attendance') && !pathname.includes('/timesheet'),
+                    active: pathname.startsWith('/employees') && !pathname.includes('/attendance') && !pathname.includes('/timesheet') && !pathname.includes('/benefits'),
                     roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR', 'ADMIN']
                 },
                 {
@@ -157,7 +192,8 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     icon: ClipboardList,
                     href: '/employees/timesheet',
                     active: pathname.startsWith('/employees/timesheet'),
-                    roleAccess: ['ADMIN', 'TECHNICIAN', 'WAREHOUSE', 'SALE', 'DRIVER', 'MANAGER', 'DIRECTOR', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR']
+                    roleAccess: ['ADMIN', 'TECHNICIAN', 'WAREHOUSE', 'SALE', 'DRIVER', 'MANAGER', 'DIRECTOR', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'HR'],
+                    badge: pendingTimesheetCount > 0 ? pendingTimesheetCount : undefined,
                 },
                 {
                     label: 'Cấu hình chấm công',
@@ -166,8 +202,17 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     active: pathname === '/settings/attendance',
                     roleAccess: ['ADMIN']//, 'HR', 'DIRECTOR'
                 },
+                {
+                    label: 'Phúc lợi',
+                    icon: Gift,
+                    href: '/employees/benefits',
+                    active: pathname.startsWith('/employees/benefits'),
+                    badge: birthdayCount > 0 ? birthdayCount : undefined,
+                    roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'HR', 'ADMIN']
+                },
             ]
         },
+
         {
             label: 'Hệ thống',
             icon: LayoutGrid,
@@ -320,9 +365,14 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                                                     "shrink-0",
                                                     child.active ? "text-active-text" : "group-hover:text-slate-600"
                                                 )} />
-                                                <span className="text-[13px] whitespace-nowrap overflow-hidden text-ellipsis">
+                                                <span className="text-[13px] whitespace-nowrap overflow-hidden text-ellipsis flex-1">
                                                     {child.label}
                                                 </span>
+                                                {child.badge && !isCollapsed && (
+                                                    <span className="bg-rose-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold min-w-[18px] text-center">
+                                                        {child.badge}
+                                                    </span>
+                                                )}
                                             </Link>
                                         ))}
                                     </div>
@@ -347,11 +397,18 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                                 item.active ? "text-active-text" : "text-slate-400 group-hover:text-slate-600"
                             )} />
                             {!isCollapsed && (
-                                <span className="font-bold text-sm whitespace-nowrap overflow-hidden text-ellipsis">
-                                    {item.label}
-                                </span>
+                                <>
+                                    <span className="font-bold text-sm whitespace-nowrap overflow-hidden text-ellipsis flex-1">
+                                        {item.label}
+                                    </span>
+                                    {item.badge && (
+                                        <span className="bg-rose-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold min-w-[18px] text-center">
+                                            {item.badge}
+                                        </span>
+                                    )}
+                                </>
                             )}
-                            {item.active && !isCollapsed && (
+                            {item.active && !isCollapsed && !item.badge && (
                                 <div className="ml-auto w-1.5 h-1.5 rounded-full bg-active-border animate-pulse" />
                             )}
                         </Link>

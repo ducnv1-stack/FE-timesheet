@@ -16,39 +16,24 @@ const FixedDatePicker: React.FC<FixedDatePickerProps> = ({
     value,
     onChange,
     className = "",
-    placeholder = "Chọn ngày",
     disabled = false
 }) => {
-    const displayValue = value ? formatDate(value) : "";
-
     return (
-        <div 
-            className={cn(
-                "relative group flex items-center justify-between bg-white border border-slate-200 rounded px-2 py-0.5 font-medium text-slate-900 hover:border-primary transition-all",
-                disabled && "opacity-60 cursor-not-allowed",
-                className
-            )}
-        >
-            {/* Lớp hiển thị (UI layer) */}
-            <span className={cn(
-                "whitespace-nowrap overflow-hidden text-ellipsis flex-1 leading-relaxed",
-                !displayValue ? "text-slate-400 font-normal" : "font-semibold"
-            )}>
-                {displayValue || placeholder}
-            </span>
-            <Calendar size={14} className="ml-2 text-slate-400 group-hover:text-primary-light transition-colors shrink-0" />
-
-            {/* Input gốc (Logic layer - Nằm đè lên trên để nhận click trực tiếp) */}
+        <div className={cn("relative group flex items-center", className)}>
             <input
                 type="date"
                 value={value || ""}
                 onChange={(e) => onChange(e.target.value)}
                 disabled={disabled}
                 className={cn(
-                    "absolute inset-0 opacity-0 w-full h-full appearance-none cursor-pointer z-10",
-                    disabled && "cursor-not-allowed"
+                    "w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-100 rounded-xl focus:bg-white focus:border-primary-light outline-none transition-all font-bold text-slate-900 text-xs",
+                    "date-input-icon-fix pr-10",
+                    disabled && "opacity-60 cursor-not-allowed bg-slate-100"
                 )}
             />
+            <div className="absolute right-3 pointer-events-none text-slate-400 group-focus-within:text-primary-light transition-colors">
+                <Calendar size={14} />
+            </div>
         </div>
     );
 };

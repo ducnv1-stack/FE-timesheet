@@ -97,6 +97,8 @@ export default function TimesheetPage() {
     const [leaveRequests, setLeaveRequests] = useState<any[]>([]);
     const [selectedLeaveEmployeeId, setSelectedLeaveEmployeeId] = useState<string>('');
     const [leaveInitialData, setLeaveInitialData] = useState<any>(null);
+    const [editingLeaveId, setEditingLeaveId] = useState<string | null>(null);
+    const [leaveRefreshTrigger, setLeaveRefreshTrigger] = useState(0);
 
     // Delete confirmation state
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -298,29 +300,50 @@ export default function TimesheetPage() {
         }
     };
 
-    const handleAddLeaveFromCalendar = (employeeId: string, date: string, suggestedSession?: string) => {
-        setSelectedLeaveEmployeeId(employeeId);
-        setLeaveInitialData({ startDate: date, leaveSession: suggestedSession });
+    const handleAddLeaveFromCalendar = (data: { date: string, session: string }) => {
+        setEditingLeaveId(null);
+        setLeaveInitialData({ startDate: data.date, leaveSession: data.session });
         setShowLeaveModal(true);
     };
 
-    const handleUpdateLeaveStatus = async (requestId: string, status: 'APPROVED' | 'REJECTED') => {
+    const handleEditLeaveFromCalendar = (leave: any) => {
+        setEditingLeaveId(leave.id);
+        setSelectedLeaveEmployeeId(leave.employeeId);
+        setLeaveInitialData({
+            startDate: leave.startDate,
+            endDate: leave.endDate,
+            isRecurring: leave.isRecurring,
+            leaveSession: leave.leaveSession,
+            leaveType: leave.leaveType,
+            reason: leave.reason,
+            recurringDays: leave.recurringDays
+        });
+        setShowLeaveModal(true);
+    };
+
+    const handleUpdateLeaveStatus = async (requestId: string, status: 'APPROVED' | 'REJECTED' | 'CANCELLED') => {
         try {
-            const res = await fetch(`${API_URL}/leave-requests/${requestId}/status`, {
-                method: 'PATCH',
+            const isCancellation = status === 'CANCELLED';
+            const url = isCancellation ? `${API_URL}/leave-requests/${requestId}` : `${API_URL}/leave-requests/${requestId}/status`;
+            const method = isCancellation ? 'DELETE' : 'PATCH';
+            const body = isCancellation ? { isAdmin: false } : { status, approvedById: currentUser?.id };
+
+            const res = await fetch(url, {
+                method,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    status,
-                    approvedById: currentUser?.id
-                })
+                body: JSON.stringify(body)
             });
 
-            if (!res.ok) throw new Error('Cập nhật thất bại');
+            if (!res.ok) throw new Error('Thao tác thất bại');
 
-            toastSuccess(status === 'APPROVED' ? 'Đã duyệt đơn nghỉ' : 'Đã từ chối đơn nghỉ');
+            toastSuccess(
+                status === 'APPROVED' ? 'Đã duyệt đơn nghỉ' : 
+                status === 'REJECTED' ? 'Đã từ chối đơn nghỉ' : 'Đã hủy đơn nghỉ'
+            );
             fetchLeaveRequests();
+            setLeaveRefreshTrigger(prev => prev + 1);
         } catch (error) {
-            toastError('Lỗi cập nhật trạng thái đơn nghỉ');
+            toastError('Lỗi khi cập nhật đơn nghỉ');
         }
     };
 
@@ -1669,28 +1692,49 @@ export default function TimesheetPage() {
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-3 text-center whitespace-nowrap">
-                                                    {req.status === 'PENDING' && canViewOthers ? (
-                                                        <div className="flex items-center justify-center gap-1.5">
-                                                            <button
-                                                                onClick={() => handleUpdateLeaveStatus(req.id, 'APPROVED')}
-                                                                className="p-1.5 bg-emerald-50 text-accent rounded-lg hover:bg-emerald-100 transition-colors"
-                                                                title="Phê duyệt"
-                                                            >
-                                                                <CheckCircle2 className="w-3.5 h-3.5" />
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleUpdateLeaveStatus(req.id, 'REJECTED')}
-                                                                className="p-1.5 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100 transition-colors"
-                                                                title="Từ chối"
-                                                            >
-                                                                <X className="w-3.5 h-3.5" />
-                                                            </button>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="flex items-center justify-center gap-1 text-[10px] text-slate-400">
-                                                            <span>{req.status === 'CANCELLED' ? 'Đã hủy' : 'Đã xử lý'}</span>
-                                                        </div>
-                                                    )}
+                                                    <div className="flex items-center justify-center gap-1.5">
+                                                        {req.status === 'PENDING' && canViewOthers && (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => handleUpdateLeaveStatus(req.id, 'APPROVED')}
+                                                                    className="p-1.5 bg-emerald-50 text-accent rounded-lg hover:bg-emerald-100 transition-colors cursor-pointer"
+                                                                    title="Phê duyệt"
+                                                                >
+                                                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleUpdateLeaveStatus(req.id, 'REJECTED')}
+                                                                    className="p-1.5 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100 transition-colors cursor-pointer"
+                                                                    title="Từ chối"
+                                                                >
+                                                                    <X className="w-3.5 h-3.5" />
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                        {req.status === 'PENDING' && req.employeeId === currentUser?.employee?.id && (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => handleEditLeaveFromCalendar(req)}
+                                                                    className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors cursor-pointer"
+                                                                    title="Chỉnh sửa"
+                                                                >
+                                                                    <Pencil className="w-3.5 h-3.5" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleUpdateLeaveStatus(req.id, 'CANCELLED')}
+                                                                    className="p-1.5 bg-slate-50 text-slate-500 rounded-lg hover:bg-slate-200 transition-colors cursor-pointer"
+                                                                    title="Hủy đơn"
+                                                                >
+                                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                        {req.status !== 'PENDING' && (
+                                                            <span className="text-[10px] text-slate-400">
+                                                                {req.status === 'CANCELLED' ? 'Đã hủy' : 'Đã xử lý'}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))
@@ -1703,8 +1747,11 @@ export default function TimesheetPage() {
                         <LeaveWeeklyCalendar 
                             branchId={selectedBranch} 
                             employeeId={!canViewOthers ? currentUser?.employee?.id : undefined}
+                            currentEmployeeId={currentUser?.employee?.id}
                             onAddLeave={handleAddLeaveFromCalendar}
+                            onEditLeave={handleEditLeaveFromCalendar}
                             onRefresh={fetchLeaveRequests}
+                            refreshTrigger={leaveRefreshTrigger}
                         />
                     )}
                 </div>
@@ -2031,9 +2078,15 @@ export default function TimesheetPage() {
                 onClose={() => {
                     setShowLeaveModal(false);
                     setLeaveInitialData(null);
+                    setEditingLeaveId(null);
                     setSelectedLeaveEmployeeId('');
                 }}
-                onSuccess={() => { if (activeTab === 'LEAVE_REQUESTS') fetchLeaveRequests(); else fetchMyDetail(); }}
+                onSuccess={() => { 
+                    setLeaveRefreshTrigger(prev => prev + 1);
+                    if (activeTab === 'LEAVE_REQUESTS') fetchLeaveRequests(); 
+                    else fetchMyDetail(); 
+                }}
+                requestId={editingLeaveId ?? undefined}
                 employeeId={selectedLeaveEmployeeId || currentUser?.employee?.id}
                 isAdminView={canViewOthers}
                 initialData={leaveInitialData}

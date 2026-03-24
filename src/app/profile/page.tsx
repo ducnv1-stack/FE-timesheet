@@ -11,6 +11,7 @@ import { useToast } from '@/components/ui/toast';
 import { cn, formatDate } from '@/lib/utils';
 import imageCompression from 'browser-image-compression';
 import ConfirmModal from '@/components/ui/confirm-modal';
+import FixedDatePicker from '@/components/ui/FixedDatePicker';
 
 interface UserProfile {
     id: string;
@@ -23,7 +24,7 @@ interface UserProfile {
         phone: string | null;
         email: string | null;
         avatarUrl: string | null;
-        dateOfBirth: string | null;
+        birthday: string | null;
         gender: string | null;
         idCardNumber: string | null;
         permanentAddress: string | null;
@@ -60,6 +61,10 @@ export default function ProfilePage() {
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [savingPassword, setSavingPassword] = useState(false);
+    
+    const [isEditingProfile, setIsEditingProfile] = useState(false);
+    const [profileEditForm, setProfileEditForm] = useState<any>({});
+    const [savingProfile, setSavingProfile] = useState(false);
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -232,6 +237,39 @@ export default function ProfilePage() {
             toastError(err.message);
         } finally {
             setSavingPassword(false);
+        }
+    };
+
+    const handleStartEditProfile = () => {
+        if (!emp) return;
+        setProfileEditForm({
+            phone: emp.phone || '',
+            email: emp.email || '',
+            birthday: emp.birthday ? new Date(emp.birthday).toISOString().split('T')[0] : '',
+            gender: emp.gender || '',
+            permanentAddress: emp.permanentAddress || '',
+            idCardNumber: emp.idCardNumber || '',
+        });
+        setIsEditingProfile(true);
+    };
+
+    const handleSaveProfile = async () => {
+        setSavingProfile(true);
+        try {
+            const res = await fetch(`${apiUrl}/auth/profile/${profile!.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(profileEditForm),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Lỗi cập nhật');
+            success('Cập nhật thông tin cá nhân thành công!');
+            setIsEditingProfile(false);
+            fetchProfile();
+        } catch (err: any) {
+            toastError(err.message);
+        } finally {
+            setSavingProfile(false);
         }
     };
 
@@ -528,22 +566,65 @@ export default function ProfilePage() {
 
                             {/* Personal Info */}
                             <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-                                <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
-                                    <div className="w-8 h-8 rounded-xl bg-teal-50 flex items-center justify-center">
-                                        <User size={14} className="text-teal-600" />
+                                <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-8 h-8 rounded-xl bg-teal-50 flex items-center justify-center">
+                                            <User size={14} className="text-teal-600" />
+                                        </div>
+                                        <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider">Thông tin cá nhân</h3>
                                     </div>
-                                    <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider">Thông tin cá nhân</h3>
+                                    {!isEditingProfile ? (
+                                        <button
+                                            onClick={handleStartEditProfile}
+                                            className="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-wider rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
+                                        >
+                                            <Pencil size={12} />
+                                            Chỉnh sửa
+                                        </button>
+                                    ) : (
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={handleSaveProfile}
+                                                disabled={savingProfile}
+                                                className="px-3 py-1.5 bg-primary text-white text-[10px] font-black uppercase tracking-wider rounded-lg shadow-md hover:shadow-lg disabled:opacity-50 transition-all cursor-pointer flex items-center gap-1.5"
+                                            >
+                                                <Save size={12} />
+                                                {savingProfile ? 'Đang lưu...' : 'Lưu'}
+                                            </button>
+                                            <button
+                                                onClick={() => setIsEditingProfile(false)}
+                                                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-black uppercase tracking-wider rounded-lg transition-colors cursor-pointer"
+                                            >
+                                                Hủy
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
-                                    <InfoItem label="Số điện thoại" value={emp.phone} icon={<Phone size={13} />} />
-                                    <InfoItem label="Ngày sinh" value={emp.dateOfBirth ? formatDate(emp.dateOfBirth) : null} icon={<Calendar size={13} />} />
-                                    <InfoItem label="Giới tính" value={emp.gender} icon={<User size={13} />} />
-                                    <InfoItem label="CMND/CCCD" value={emp.idCardNumber} icon={<CreditCard size={13} />} />
-                                    <InfoItem label="Email" value={emp.email} icon={<Mail size={13} />} />
-                                    <InfoItem label="Số sổ BHXH" value={emp.socialInsuranceNumber} icon={<Heart size={13} />} />
-                                    <div className="sm:col-span-2">
-                                        <InfoItem label="Địa chỉ thường trú" value={emp.permanentAddress} icon={<MapPin size={13} />} />
-                                    </div>
+                                    {isEditingProfile ? (
+                                        <>
+                                            <EditField label="Số điện thoại" value={profileEditForm.phone} onChange={(val) => setProfileEditForm({ ...profileEditForm, phone: val })} icon={<Phone size={13} />} />
+                                            <EditField label="Ngày sinh" type="date" value={profileEditForm.birthday} onChange={(val) => setProfileEditForm({ ...profileEditForm, birthday: val })} icon={<Calendar size={13} />} />
+                                            <EditField label="Giới tính" type="select" options={[{ label: 'Nam', value: 'Nam' }, { label: 'Nữ', value: 'Nữ' }]} value={profileEditForm.gender} onChange={(val) => setProfileEditForm({ ...profileEditForm, gender: val })} icon={<User size={13} />} />
+                                            <EditField label="CMND/CCCD" value={profileEditForm.idCardNumber} onChange={(val) => setProfileEditForm({ ...profileEditForm, idCardNumber: val })} icon={<CreditCard size={13} />} />
+                                            <EditField label="Email" value={profileEditForm.email} onChange={(val) => setProfileEditForm({ ...profileEditForm, email: val })} icon={<Mail size={13} />} />
+                                            <div className="sm:col-span-2">
+                                                <EditField label="Địa chỉ thường trú" value={profileEditForm.permanentAddress} onChange={(val) => setProfileEditForm({ ...profileEditForm, permanentAddress: val })} icon={<MapPin size={13} />} />
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <InfoItem label="Số điện thoại" value={emp.phone} icon={<Phone size={13} />} />
+                                            <InfoItem label="Ngày sinh" value={emp.birthday ? formatDate(emp.birthday) : null} icon={<Calendar size={13} />} />
+                                            <InfoItem label="Giới tính" value={emp.gender} icon={<User size={13} />} />
+                                            <InfoItem label="CMND/CCCD" value={emp.idCardNumber} icon={<CreditCard size={13} />} />
+                                            <InfoItem label="Email" value={emp.email} icon={<Mail size={13} />} />
+                                            <InfoItem label="Số sổ BHXH" value={emp.socialInsuranceNumber} icon={<Heart size={13} />} />
+                                            <div className="sm:col-span-2">
+                                                <InfoItem label="Địa chỉ thường trú" value={emp.permanentAddress} icon={<MapPin size={13} />} />
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </>
@@ -561,6 +642,52 @@ export default function ProfilePage() {
                 cancelLabel="Hủy"
                 isDanger={true}
             />
+        </div>
+    );
+}
+
+function EditField({ label, value, icon, onChange, type = 'text', options = [] }: {
+    label: string,
+    value: string,
+    icon?: React.ReactNode,
+    onChange: (val: string) => void,
+    type?: 'text' | 'date' | 'select',
+    options?: { label: string, value: string }[]
+}) {
+    return (
+        <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-1.5">
+                {icon && <span className="text-slate-400">{icon}</span>}
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</label>
+            </div>
+            {type === 'text' && (
+                <input
+                    type="text"
+                    value={value || ''}
+                    onChange={(e) => onChange(e.target.value)}
+                    className="w-full px-4 py-2 bg-slate-50 border-2 border-slate-100 rounded-xl focus:bg-white focus:border-primary-light outline-none transition-all font-bold text-slate-900 text-xs"
+                />
+            )}
+            {type === 'date' && (
+                <FixedDatePicker
+                    value={value}
+                    onChange={onChange}
+                    className="h-[38px] !rounded-xl text-xs font-bold"
+                />
+            )}
+            {type === 'select' && (
+                <select
+                    value={value || ''}
+                    onChange={(e) => onChange(e.target.value)}
+                    className="w-full px-4 py-2 bg-slate-50 border-2 border-slate-100 rounded-xl focus:bg-white focus:border-primary-light outline-none transition-all font-bold text-slate-900 text-xs appearance-none bg-no-repeat bg-[right_1rem_center]"
+                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7' /%3E%3C/svg%3E")`, backgroundSize: '1.2em' }}
+                >
+                    <option value="">- Chọn -</option>
+                    {options.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                </select>
+            )}
         </div>
     );
 }
