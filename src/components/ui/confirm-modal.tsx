@@ -1,7 +1,6 @@
 "use client";
 
-import React from 'react';
-import { AlertTriangle, X } from 'lucide-react';
+import { AlertTriangle, X, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ConfirmModalProps {
@@ -13,6 +12,7 @@ interface ConfirmModalProps {
     onConfirm: () => void;
     onCancel: () => void;
     isDanger?: boolean;
+    isLoading?: boolean;
 }
 
 export default function ConfirmModal({
@@ -23,45 +23,61 @@ export default function ConfirmModal({
     cancelLabel = 'Hủy',
     onConfirm,
     onCancel,
-    isDanger = false
+    isDanger = false,
+    isLoading = false
 }: ConfirmModalProps) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" onClick={!isLoading ? onCancel : undefined}>
             <div
                 className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header with Icon */}
-                <div className="p-6 flex flex-col items-center text-center bg-gradient-to-r from-blue-600 to-indigo-600">
+                <div className={cn(
+                    "p-6 flex flex-col items-center text-center bg-gradient-to-r",
+                    isDanger ? "from-rose-600 to-rose-700" : "from-blue-600 to-indigo-600"
+                )}>
                     <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-white/20 text-white backdrop-blur-sm shadow-xl">
-                        <AlertTriangle size={36} className="animate-pulse" />
+                        {isLoading ? (
+                            <Loader2 size={36} className="animate-spin text-white" />
+                        ) : (
+                            <AlertTriangle size={36} className="animate-pulse" />
+                        )}
                     </div>
                     <h3 className="text-xl font-black text-white tracking-tight">{title}</h3>
                 </div>
 
                 {/* Content */}
                 <div className="p-6">
-                    <p className="text-slate-600 text-center leading-relaxed">
+                    <div className="text-slate-600 text-center leading-relaxed">
                         {message}
-                    </p>
+                    </div>
                 </div>
 
                 {/* Actions */}
                 <div className="p-6 bg-slate-50 flex gap-4">
                     <button
                         onClick={onCancel}
-                        className="flex-1 px-4 py-3 bg-white border border-slate-200 text-slate-500 font-bold rounded-2xl hover:bg-slate-50 hover:text-slate-700 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                        disabled={isLoading}
+                        className="flex-1 px-4 py-3 bg-white border border-slate-200 text-slate-500 font-bold rounded-2xl hover:bg-slate-50 hover:text-slate-700 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <X size={18} />
                         {cancelLabel}
                     </button>
                     <button
                         onClick={onConfirm}
-                        className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-wider text-xs rounded-2xl shadow-lg shadow-blue-200 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                        disabled={isLoading}
+                        className={cn(
+                            "flex-1 px-4 py-3 text-white font-black uppercase tracking-wider text-xs rounded-2xl shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed",
+                            isDanger 
+                                ? "bg-rose-600 hover:bg-rose-700 shadow-rose-200" 
+                                : "bg-blue-600 hover:bg-blue-700 shadow-blue-200"
+                        )}
                     >
-                        {confirmLabel}
+                        {isLoading && <Loader2 size={16} className="animate-spin" />}
+                        {isLoading ? 'Đang xử lý...' : confirmLabel}
                     </button>
                 </div>
             </div>

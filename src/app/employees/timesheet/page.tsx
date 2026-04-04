@@ -32,7 +32,7 @@ import AttendanceAuditLogModal from '@/components/timesheet/AttendanceAuditLogMo
 import AttendanceExceptionRequestDetailModal from '@/components/timesheet/AttendanceExceptionRequestDetailModal';
 import LeaveRequestModal from '@/components/timesheet/LeaveRequestModal';
 import LeaveWeeklyCalendar from '@/components/timesheet/LeaveWeeklyCalendar';
-import { History, FileText, Eye, Download, FileSpreadsheet, PlaneTakeoff } from 'lucide-react';
+import { History, FileText, Eye, Download, FileSpreadsheet, PlaneTakeoff, Database } from 'lucide-react';
 
 type ActiveTab = 'MY' | 'TODAY' | 'EMPLOYEES' | 'SETTINGS' | 'SALARY_SETTINGS' | 'EXCEPTION_REQUESTS' | 'AUDIT_LOGS' | 'LEAVE_REQUESTS';
 type ViewMode = 'LIST' | 'DETAIL'; // LIST is summary, DETAIL is individual daily view
@@ -105,6 +105,8 @@ export default function TimesheetPage() {
     const [shiftToDelete, setShiftToDelete] = useState<string | null>(null);
 
     const [leaveViewMode, setLeaveViewMode] = useState<'LIST' | 'CALENDAR'>('LIST');
+    const [isSeeding, setIsSeeding] = useState(false);
+    const [showSeedConfirm, setShowSeedConfirm] = useState(false);
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -590,6 +592,29 @@ export default function TimesheetPage() {
         }
     };
 
+    const handleSeedRevenue = async () => {
+        setIsSeeding(true);
+        try {
+            const res = await fetch(`${API_URL}/attendance/seed-heavy-revenue`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            
+            if (!res.ok) throw new Error('Có lỗi xảy ra khi seed dữ liệu');
+            
+            const result = await res.json();
+            toastSuccess(result.message || 'Seed doanh số thành công!');
+            
+            // Refresh data if in summary view
+            if (activeTab === 'EMPLOYEES' && viewMode === 'LIST') fetchSummary();
+            setShowSeedConfirm(false);
+        } catch (error) {
+            toastError('Không thể seed dữ liệu doanh số');
+        } finally {
+            setIsSeeding(false);
+        }
+    };
+
     const roleCode = currentUser?.role?.code;
     const canViewOthers = ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'MANAGER', 'ADMIN'].includes(roleCode);
     const canManageSettings = ['DIRECTOR', 'ADMIN'].includes(roleCode);
@@ -756,14 +781,30 @@ export default function TimesheetPage() {
 
                 <div className="flex items-center gap-3">
                     {activeTab === 'EMPLOYEES' && viewMode === 'LIST' && (
-                        <button
-                            onClick={handleExportExcel}
-                            className="flex items-center justify-center gap-1.5 px-3 py-0 bg-[#059669] text-white font-bold text-[11px] rounded-xl shadow-sm hover:bg-[#047857] hover:scale-105 transition-all cursor-pointer h-[36px]"
-                            title="Xuất Excel danh sách công nhân viên"
-                        >
-                            <FileSpreadsheet className="w-4 h-4" />
-                            Xuất Excel
-                        </button>
+                        <div className="flex items-center gap-2">
+                            {(roleCode === 'ADMIN' || roleCode === 'DIRECTOR') && (
+                                <button
+                                    onClick={() => setShowSeedConfirm(true)}
+                                    disabled={isSeeding}
+                                    className={cn(
+                                        "flex items-center justify-center gap-1.5 px-3 py-0 bg-rose-600 text-white font-bold text-[11px] rounded-xl shadow-sm hover:bg-rose-700 hover:scale-105 transition-all cursor-pointer h-[36px]",
+                                        isSeeding && "opacity-70 cursor-not-allowed"
+                                    )}
+                                    title="Dọn dẹp và nạp 500 tỷ doanh số cho 3 tháng qua"
+                                >
+                                    {isSeeding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
+                                    {isSeeding ? 'Đang nạp...' : 'Seed 500 Tỷ'}
+                                </button>
+                            )}
+                            <button
+                                onClick={handleExportExcel}
+                                className="flex items-center justify-center gap-1.5 px-3 py-0 bg-[#059669] text-white font-bold text-[11px] rounded-xl shadow-sm hover:bg-[#047857] hover:scale-105 transition-all cursor-pointer h-[36px]"
+                                title="Xuất Excel danh sách công nhân viên"
+                            >
+                                <FileSpreadsheet className="w-4 h-4" />
+                                Xuất Excel
+                            </button>
+                        </div>
                     )}
                     <div className="flex items-center bg-white rounded-xl p-1 shadow-sm border border-slate-100 shrink-0 h-[36px]">
                         <button onClick={prevMonth} className="p-1 px-2 hover:bg-primary-light hover:text-primary rounded-lg transition-all cursor-pointer">
@@ -2096,6 +2137,17 @@ export default function TimesheetPage() {
                 isOpen={showDetailModal}
                 onClose={() => { setShowDetailModal(false); setViewingRequestDetail(null); }}
                 request={viewingRequestDetail}
+            />
+
+            <ConfirmModal
+                isOpen={showSeedConfirm}
+                onCancel={() => { setShowSeedConfirm(false); }}
+                onConfirm={handleSeedRevenue}
+                title="Xác nhận Seed dữ liệu doanh số"
+                message="Hành động này sẽ XÓA TOÀN BỘ đơn hàng hiện có để nạp 500 tỷ dữ liệu mẫu trong 3 tháng qua. Bạn có chắc chắn muốn thực hiện không?"
+                confirmLabel="Đồng ý, chạy Seed"
+                isDanger={true}
+                isLoading={isSeeding}
             />
         </div>
     );

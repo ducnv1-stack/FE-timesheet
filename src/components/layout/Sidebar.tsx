@@ -115,60 +115,60 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             href: '/dashboard',
             active: pathname === '/dashboard'
         },
-        // {
-        //     label: 'Kinh doanh',
-        //     icon: ShoppingBag,
-        //     children: [
-        //         {
-        //             label: 'Tạo đơn mới',
-        //             icon: PlusCircle,
-        //             href: '/orders/new',
-        //             active: pathname === '/orders/new',
-        //             roleAccess: ['']//'DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'SALE', 'ADMIN'
-        //         },
-        //         {
-        //             label: 'Nâng cấp sản phẩm',
-        //             icon: ShoppingCart,
-        //             href: '/orders/upgrade',
-        //             active: pathname === '/orders/upgrade',
-        //             roleAccess: []//'DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'SALE', 'ADMIN'
-        //         },
-        //         {
-        //             label: 'Lịch sử đơn',
-        //             icon: History,
-        //             href: '/orders',
-        //             active: pathname === '/orders',
-        //             roleAccess: []//'DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'SALE', 'DRIVER', 'ADMIN', 'TECHNICIAN', 'WAREHOUSE'
-        //         },
-        //         {
-        //             label: 'Báo cáo doanh số',
-        //             icon: BarChart3,
-        //             href: '/performance',
-        //             active: pathname === '/performance',
-        //             roleAccess: []//'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER', 'ADMIN'
-        //         },
-        //     ]
-        // },
-        // {
-        //     label: 'Quản lý Kho',
-        //     icon: Warehouse,
-        //     children: [
-        //         {
-        //             label: 'Tồn kho chi tiết',
-        //             icon: LayoutGrid,
-        //             href: '/warehouse/inventory',
-        //             active: pathname === '/warehouse/inventory',
-        //             roleAccess: ['']//'ADMIN'
-        //         },
-        //         {
-        //             label: 'Lịch sử giao dịch',
-        //             icon: History,
-        //             href: '/warehouse/transactions',
-        //             active: pathname === '/warehouse/transactions',
-        //             roleAccess: ['']//'ADMIN'
-        //         },
-        //     ]
-        // },
+        {
+            label: 'Kinh doanh',
+            icon: ShoppingBag,
+            children: [
+                {
+                    label: 'Tạo đơn mới',
+                    icon: PlusCircle,
+                    href: '/orders/new',
+                    active: pathname === '/orders/new',
+                    roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'ADMIN']
+                },
+                {
+                    label: 'Nâng cấp sản phẩm',
+                    icon: ShoppingCart,
+                    href: '/orders/upgrade',
+                    active: pathname === '/orders/upgrade',
+                    roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'ADMIN']
+                },
+                {
+                    label: 'Lịch sử đơn',
+                    icon: History,
+                    href: '/orders',
+                    active: pathname === '/orders',
+                    roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'DRIVER', 'ADMIN', 'TECHNICIAN', 'WAREHOUSE']
+                },
+                {
+                    label: 'Báo cáo doanh số',
+                    icon: BarChart3,
+                    href: '/performance',
+                    active: pathname === '/performance',
+                    roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER', 'ADMIN']
+                },
+            ]
+        },
+        {
+            label: 'Quản lý Kho',
+            icon: Warehouse,
+            children: [
+                {
+                    label: 'Tồn kho chi tiết',
+                    icon: LayoutGrid,
+                    href: '/warehouse/inventory',
+                    active: pathname === '/warehouse/inventory',
+                    roleAccess: ['ADMIN', 'WAREHOUSE', 'DIRECTOR']
+                },
+                {
+                    label: 'Lịch sử giao dịch',
+                    icon: History,
+                    href: '/warehouse/transactions',
+                    active: pathname === '/warehouse/transactions',
+                    roleAccess: ['ADMIN', 'WAREHOUSE', 'DIRECTOR']
+                },
+            ]
+        },
         {
             label: 'Nhân sự',
             icon: Users,
@@ -217,43 +217,43 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             label: 'Hệ thống',
             icon: LayoutGrid,
             children: [
-                // {
-                //     label: 'Quản lý sản phẩm',
-                //     icon: ShoppingBag,
-                //     href: '/products',
-                //     active: pathname === '/products',
-                //     roleAccess: []//'DIRECTOR', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT'
-                // },
+                {
+                    label: 'Quản lý sản phẩm',
+                    icon: ShoppingBag,
+                    href: '/products',
+                    active: pathname === '/products',
+                    roleAccess: ['DIRECTOR', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT', 'ADMIN']
+                },
                 {
                     label: 'Quản lý chi nhánh',
                     icon: Building2,
                     href: '/branches',
                     active: pathname.startsWith('/branches'),
-                    roleAccess: ['ADMIN']//'ADMIN', 'DIRECTOR', 'ACCOUNTANT', 'CHIEF_ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER'
+                    roleAccess: ['ADMIN', 'DIRECTOR']
                 },
-                // {
-                //     label: 'Cấu hình phí ship',
-                //     icon: Truck,
-                //     href: '/settings/delivery-fees',
-                //     active: pathname === '/settings/delivery-fees',
-                //     roleAccess: []//'ADMIN'
-                // },
+                {
+                    label: 'Cấu hình phí ship',
+                    icon: Truck,
+                    href: '/settings/delivery-fees',
+                    active: pathname === '/settings/delivery-fees',
+                    roleAccess: ['ADMIN', 'DIRECTOR']
+                },
             ]
         },
-        // {
-        //     label: 'Bảng xếp hạng',
-        //     icon: Trophy,
-        //     href: '/leaderboard',
-        //     active: pathname === '/leaderboard',
-        //     roleAccess: []//'DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER', 'ADMIN', 'TELESALE'
-        // },
-        // {
-        //     label: 'Log hệ thống',
-        //     icon: Activity,
-        //     href: '/logs',
-        //     active: pathname === '/logs',
-        //     roleAccess: []//'DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'DRIVER', 'SALE', 'ADMIN'
-        // },
+        {
+            label: 'Bảng xếp hạng',
+            icon: Trophy,
+            href: '/leaderboard',
+            active: pathname === '/leaderboard',
+            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'MANAGER', 'ADMIN', 'TELESALE']
+        },
+        {
+            label: 'Log hệ thống',
+            icon: Activity,
+            href: '/logs',
+            active: pathname === '/logs',
+            roleAccess: ['DIRECTOR', 'CHIEF_ACCOUNTANT', 'MANAGER', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT', 'DRIVER', 'SALE', 'ADMIN']
+        },
         {
             label: 'Cài đặt',
             icon: Settings,
@@ -266,7 +266,8 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
     const checkAccess = (item: any) => {
         if (!item.roleAccess) return true;
         if (!currentUser?.role?.code) return false;
-        if (currentUser.role.code === 'ADMIN') return true;
+        // Admin và Giám đốc được xem toàn bộ
+        if (currentUser.role.code === 'ADMIN' || currentUser.role.code === 'DIRECTOR') return true;
         return item.roleAccess.includes(currentUser.role.code);
     };
 
