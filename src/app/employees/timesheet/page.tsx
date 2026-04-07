@@ -39,6 +39,7 @@ type ViewMode = 'LIST' | 'DETAIL'; // LIST is summary, DETAIL is individual dail
 
 export default function TimesheetPage() {
     const [activeTab, setActiveTab] = useState<ActiveTab>('MY');
+    const [empSubTab, setEmpSubTab] = useState<'OVERVIEW' | 'DETAIL'>('OVERVIEW');
     const [viewMode, setViewMode] = useState<ViewMode>('LIST');
     const [currentDate, setCurrentDate] = useState(new Date());
     const [summaryData, setSummaryData] = useState<any[]>([]);
@@ -1069,108 +1070,312 @@ export default function TimesheetPage() {
                 </div>
             )}
 
-            {/* Content Area */}
-            {activeTab === 'EMPLOYEES' && viewMode === 'LIST' ? (
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-slate-50/50 border-b border-slate-100">
-                                    <th className="px-1.5 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none text-center">STT</th>
-                                    <th className="px-3 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Nhân viên</th>
-                                    <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Tổng công</th>
-                                    <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">HC (1.0)</th>
-                                    <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Công ½</th>
-                                    <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Nghỉ</th>
-                                    <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Muộn</th>
-                                    <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Sớm</th>
-                                    <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">TC (H)</th>
-                                    <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-50">
-                                {loading ? (
-                                    Array.from({ length: 5 }).map((_, i) => (
-                                        <tr key={i} className="animate-pulse">
-                                            {Array.from({ length: 10 }).map((_: any, j: number) => (
-                                                <td key={j} className="px-6 py-4 text-center"><div className="h-4 bg-slate-100 rounded w-2/3 mx-auto"></div></td>
-                                            ))}
-                                        </tr>
-                                    ))
-                                ) : filteredSummaryData.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={10} className="px-6 py-20 text-center text-slate-400 font-medium italic">
-                                            Không tìm thấy dữ liệu nhân sự khớp với điều kiện lọc
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    filteredSummaryData.map((row: any, index: number) => (
-                                        <tr key={row.employeeId} className="hover:bg-slate-50/50 transition-colors group">
-                                            <td className="px-1.5 py-1.5 text-center">
-                                                <span className="text-[10px] font-bold text-slate-400">{index + 1}</span>
-                                            </td>
-                                            <td className="px-3 py-1.5">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full overflow-hidden bg-primary-light border border-slate-100 shrink-0 flex items-center justify-center">
-                                                        {(row.avatarUrl && !imageErrors[`list-${row.employeeId}`]) ? (
-                                                            <img
-                                                                src={getFullImageUrl(row.avatarUrl)!}
-                                                                alt={row.fullName}
-                                                                className="w-full h-full object-cover"
-                                                                onError={() => handleImageError(`list-${row.employeeId}`)}
-                                                            />
-                                                        ) : (
-                                                            <div className="w-full h-full flex items-center justify-center text-primary font-black text-xs uppercase">
-                                                                {row.fullName.split(' ').pop()?.charAt(0)}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex flex-col min-w-0">
-                                                        <span className="text-[11px] font-bold text-slate-800 leading-tight group-hover:text-primary transition-colors truncate">{row.fullName}</span>
-                                                        <span className="text-[9px] text-slate-400 font-medium truncate">{row.position}</span>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-3 py-3 text-center">
-                                                <span className="text-[12px] font-black text-accent">{row.totalWorkCount}</span>
-                                            </td>
-                                            <td className="px-3 py-3 text-center">
-                                                <span className="text-[11px] font-bold text-blue-600">{row.fullDays}</span>
-                                            </td>
-                                            <td className="px-3 py-3 text-center">
-                                                <div className="flex flex-col">
-                                                    <span className="text-[11px] font-bold text-amber-600">{row.halfDaysCount}</span>
-                                                    <span className="text-[8px] text-slate-400">({row.halfDaysTotal})</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-3 py-3 text-center">
-                                                <span className={cn("text-[11px] font-bold", (row.absentDaysCount || 0) > 0 ? "text-primary" : "text-slate-300")}>{row.absentDaysCount || '-'}</span>
-                                            </td>
-                                            <td className="px-3 py-3 text-center">
-                                                <span className={cn("text-[11px] font-bold", row.lateDays > 0 ? "text-primary" : "text-slate-300")}>{row.lateDays || '-'}</span>
-                                            </td>
-                                            <td className="px-3 py-3 text-center">
-                                                <span className={cn("text-[11px] font-bold", row.earlyLeaveDays > 0 ? "text-warning" : "text-slate-300")}>{row.earlyLeaveDays || '-'}</span>
-                                            </td>
-                                            <td className="px-3 py-3 text-center">
-                                                <span className={cn("text-[11px] font-bold", row.totalOvertimeHours > 0 ? "text-blue-600" : "text-slate-300")}>{row.totalOvertimeHours || '-'}</span>
-                                            </td>
-                                            <td className="px-4 py-3 text-center">
-                                                <button
-                                                    onClick={() => handleSelectEmployee({ id: row.employeeId, fullName: row.fullName, avatarUrl: row.avatarUrl })}
-                                                    className="inline-flex items-center gap-1.5 px-2 py-1 bg-slate-800 text-white rounded-md text-[9px] font-bold tracking-wider hover:bg-slate-700 transition-all active:scale-95 shadow-sm cursor-pointer"
-                                                >
-                                                    Chi tiết
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+            {activeTab === 'EMPLOYEES' && (
+                <div className="flex items-center gap-1 bg-slate-100/50 p-1 rounded-xl w-fit mb-4">
+                    <button
+                        onClick={() => setEmpSubTab('OVERVIEW')}
+                        className={cn(
+                            "px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2",
+                            empSubTab === 'OVERVIEW' 
+                                ? "bg-white text-primary shadow-sm" 
+                                : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
+                        )}
+                    >
+                        <Building2 size={14} />
+                        Tổng quan
+                    </button>
+                    <button
+                        onClick={() => setEmpSubTab('DETAIL')}
+                        className={cn(
+                            "px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2",
+                            empSubTab === 'DETAIL' 
+                                ? "bg-white text-primary shadow-sm" 
+                                : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
+                        )}
+                    >
+                        <Search size={14} />
+                        Chi tiết
+                    </button>
                 </div>
+            )}
+
+            {activeTab === 'EMPLOYEES' ? (
+                empSubTab === 'OVERVIEW' ? (
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col max-h-[calc(100vh-280px)]">
+                        <div className="p-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                            <h3 className="text-[11px] font-black uppercase tracking-widest text-slate-700">Bảng tổng hợp công nhân viên</h3>
+                        </div>
+                        <div className="overflow-x-auto overflow-y-auto flex-1">
+                            <table className="w-full text-left border-collapse min-w-[1200px]">
+                                <thead className="sticky top-0 z-10 bg-slate-50 shadow-sm">
+                                    <tr>
+                                        <th className="px-1.5 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none text-center">STT</th>
+                                        <th className="px-3 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Chi nhánh</th>
+                                        <th className="px-3 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Nhân viên</th>
+                                        <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Tổng công</th>
+                                        <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">HC (1.0)</th>
+                                        <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Công ½</th>
+                                        <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Nghỉ</th>
+                                        <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Muộn</th>
+                                        <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Sớm</th>
+                                        <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">TC (H)</th>
+                                        <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none bg-emerald-50/50">Phụ cấp ăn trưa</th>
+                                        <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">PC Xăng xe</th>
+                                        <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">PC Kỹ thuật</th>
+                                        <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">PC Khác</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50">
+                                    {loading ? (
+                                        Array.from({ length: 5 }).map((_: any, i: number) => (
+                                            <tr key={i} className="animate-pulse">
+                                                {Array.from({ length: 14 }).map((_: any, j: number) => (
+                                                    <td key={j} className="px-6 py-4 text-center"><div className="h-4 bg-slate-100 rounded w-2/3 mx-auto"></div></td>
+                                                ))}
+                                            </tr>
+                                        ))
+                                    ) : filteredSummaryData.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={14} className="px-6 py-20 text-center text-slate-400 font-medium italic">
+                                                Không tìm thấy dữ liệu nhân sự khớp với điều kiện lọc
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        filteredSummaryData.map((row: any, index: number) => (
+                                            <tr key={row.employeeId} className="hover:bg-slate-50/50 transition-colors group">
+                                                <td className="px-1.5 py-1.5 text-center">
+                                                    <span className="text-[10px] font-bold text-slate-400">{index + 1}</span>
+                                                </td>
+                                                <td className="px-3 py-1.5">
+                                                    <span className="text-[10px] font-bold text-slate-600 block line-clamp-1">{row.branchName}</span>
+                                                </td>
+                                                <td className="px-3 py-1.5 min-w-[140px]">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-7 h-7 rounded-full overflow-hidden bg-primary-light border border-slate-100 shrink-0 flex items-center justify-center">
+                                                            {row.avatarUrl ? (
+                                                                <img
+                                                                    src={getFullImageUrl(row.avatarUrl)!}
+                                                                    alt={row.fullName}
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            ) : (
+                                                                <div className="w-full h-full flex items-center justify-center text-primary font-black text-xs uppercase">
+                                                                    {row.fullName.split(' ').pop()?.charAt(0)}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex flex-col min-w-0">
+                                                            <span className="text-[11px] font-bold leading-tight truncate text-slate-800 group-hover:text-primary transition-colors">{row.fullName}</span>
+                                                            <span className="text-[9px] text-slate-400 font-medium truncate">{row.position}</span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-2 py-3 text-center">
+                                                    <span className="text-[12px] font-black text-accent">{row.totalWorkCount}</span>
+                                                </td>
+                                                <td className="px-2 py-3 text-center">
+                                                    <span className="text-[11px] font-bold text-blue-600">{row.fullDays}</span>
+                                                </td>
+                                                <td className="px-2 py-3 text-center">
+                                                    <span className="text-[11px] font-bold text-amber-600">{row.halfDaysCount}</span>
+                                                </td>
+                                                <td className="px-2 py-3 text-center">
+                                                    <span className={cn("text-[11px] font-bold", (row.absentDaysCount || 0) > 0 ? "text-primary" : "text-slate-300")}>{row.absentDaysCount || '-'}</span>
+                                                </td>
+                                                <td className="px-2 py-3 text-center">
+                                                    <span className={cn("text-[11px] font-bold", row.lateDays > 0 ? "text-primary" : "text-slate-300")}>{row.lateDays || '-'}</span>
+                                                </td>
+                                                <td className="px-2 py-3 text-center">
+                                                    <span className={cn("text-[11px] font-bold", row.earlyLeaveDays > 0 ? "text-warning" : "text-slate-300")}>{row.earlyLeaveDays || '-'}</span>
+                                                </td>
+                                                <td className="px-2 py-3 text-center">
+                                                    <span className={cn("text-[11px] font-bold", row.totalOvertimeHours > 0 ? "text-blue-600" : "text-slate-300")}>{row.totalOvertimeHours || '-'}</span>
+                                                </td>
+                                                <td className="px-2 py-3 text-center bg-emerald-50/30">
+                                                    <span className="text-[11px] font-black text-emerald-700">{(row.lunchAllowance || 0).toLocaleString('vi-VN')}</span>
+                                                </td>
+                                                <td className="px-2 py-3 text-center">
+                                                    <span className="text-[11px] font-bold text-slate-700">{(row.travelAllowance || 0).toLocaleString('vi-VN')}</span>
+                                                </td>
+                                                <td className="px-2 py-3 text-center">
+                                                    <span className="text-[11px] font-bold text-slate-700">{(row.technicalAllowance || 0).toLocaleString('vi-VN')}</span>
+                                                </td>
+                                                <td className="px-2 py-3 text-center">
+                                                    <span className="text-[11px] font-bold text-slate-700">{(row.otherAllowance || 0).toLocaleString('vi-VN')}</span>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 max-h-[calc(100vh-280px)]">
+                        <div className={cn("transition-all duration-300", selectedEmployee ? "xl:col-span-4" : "xl:col-span-12")}>
+                            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col max-h-[calc(100vh-280px)]">
+                                <div className="p-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                                    <h3 className="text-[11px] font-black uppercase tracking-widest text-slate-700">Danh sách nhân sự</h3>
+                                </div>
+                                <div className="overflow-x-auto overflow-y-auto flex-1">
+                                    <table className="w-full text-left border-collapse min-w-[400px]">
+                                        <thead className="sticky top-0 z-10 bg-slate-50 shadow-sm">
+                                            <tr>
+                                                <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none text-center">STT</th>
+                                                <th className="px-3 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Nhân viên</th>
+                                                <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Công</th>
+                                                <th className="px-2 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Muộn/Sớm</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-50">
+                                            {loading ? (
+                                                Array.from({ length: 5 }).map((_: any, i: number) => (
+                                                    <tr key={i} className="animate-pulse">
+                                                        {Array.from({ length: 4 }).map((_: any, j: number) => (
+                                                            <td key={j} className="px-4 py-3"><div className="h-4 bg-slate-100 rounded w-full"></div></td>
+                                                        ))}
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                filteredSummaryData.map((row: any, idx: number) => {
+                                                    const isSelected = selectedEmployee?.id === row.employeeId;
+                                                    return (
+                                                        <tr 
+                                                            key={row.employeeId} 
+                                                            onClick={() => handleSelectEmployee({ id: row.employeeId, fullName: row.fullName, avatarUrl: row.avatarUrl, pos: { name: row.position } })}
+                                                            className={cn(
+                                                                "transition-colors group cursor-pointer",
+                                                                isSelected ? "bg-primary-light/30 border-l-2 border-l-primary" : "hover:bg-slate-50/50 border-l-2 border-l-transparent"
+                                                            )}
+                                                        >
+                                                            <td className="px-2 py-2 text-center text-[10px] font-bold text-slate-400">{idx + 1}</td>
+                                                            <td className="px-3 py-2">
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="w-7 h-7 rounded-full overflow-hidden bg-primary-light flex items-center justify-center shrink-0">
+                                                                        {row.avatarUrl ? (
+                                                                            <img src={getFullImageUrl(row.avatarUrl)!} alt="" className="w-full h-full object-cover" />
+                                                                        ) : (
+                                                                            <span className="text-[10px] font-bold text-primary">{row.fullName.split(' ').pop()?.charAt(0)}</span>
+                                                                        )}
+                                                                    </div>
+                                                                    <div className="flex flex-col min-w-0">
+                                                                        <span className={cn("text-[11px] font-bold truncate", isSelected ? "text-primary" : "text-slate-800")}>{row.fullName}</span>
+                                                                        <span className="text-[8px] text-slate-400 font-bold truncate uppercase tracking-tight">{row.branchName}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-2 py-2 text-center">
+                                                                <span className="text-[11px] font-black text-accent">{row.totalWorkCount}</span>
+                                                            </td>
+                                                            <td className="px-2 py-2 text-center">
+                                                                <div className="flex flex-col items-center">
+                                                                    <span className={cn("text-[9px] font-bold", row.lateDays > 0 ? "text-primary" : "text-slate-300")}>{row.lateDays || 0}M</span>
+                                                                    <span className={cn("text-[9px] font-bold", row.earlyLeaveDays > 0 ? "text-warning" : "text-slate-300")}>{row.earlyLeaveDays || 0}S</span>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className={cn("transition-all duration-300 xl:block", selectedEmployee ? "xl:col-span-8 block" : "hidden")}>
+                            {selectedEmployee ? (
+                                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col max-h-[calc(100vh-280px)] animate-in fade-in slide-in-from-right-4">
+                                    <div className="p-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 sticky top-0 z-10">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-9 h-9 rounded-full bg-primary-light border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
+                                                {selectedEmployee.avatarUrl ? (
+                                                    <img src={getFullImageUrl(selectedEmployee.avatarUrl)!} alt="" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <span className="text-sm font-black text-primary">{selectedEmployee.fullName.split(' ').pop()?.charAt(0)}</span>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <h3 className="text-[12px] font-black text-slate-800 leading-tight">{selectedEmployee.fullName}</h3>
+                                                <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">{selectedEmployee.pos?.name || 'Chi tiết chấm công'}</p>
+                                            </div>
+                                        </div>
+                                        <button onClick={() => setSelectedEmployee(null)} className="p-2 hover:bg-slate-200 text-slate-400 hover:text-slate-600 rounded-xl transition-all cursor-pointer">
+                                            <X size={16} />
+                                        </button>
+                                    </div>
+                                    <div className="overflow-x-auto overflow-y-auto flex-1">
+                                        <table className="w-full text-left border-collapse min-w-[600px]">
+                                            <thead className="sticky top-0 z-10 bg-slate-50 shadow-sm border-b border-slate-100">
+                                                <tr>
+                                                    <th className="px-3 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Ngày</th>
+                                                    <th className="px-3 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Thứ</th>
+                                                    <th className="px-3 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Vào</th>
+                                                    <th className="px-3 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Ra</th>
+                                                    <th className="px-3 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">TC (H)</th>
+                                                    <th className="px-3 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Công</th>
+                                                    <th className="px-3 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Trạng thái</th>
+                                                    {['ADMIN', 'DIRECTOR', 'MANAGER', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'].includes(currentUser?.role?.code) && (
+                                                        <th className="px-3 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Tác vụ</th>
+                                                    )}
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-50">
+                                                {loading ? (
+                                                    Array.from({ length: 5 }).map((_: any, i: number) => (
+                                                        <tr key={i} className="animate-pulse">
+                                                            {Array.from({ length: 8 }).map((_: any, j: number) => (
+                                                                <td key={j} className="px-4 py-3"><div className="h-4 bg-slate-100 rounded w-full"></div></td>
+                                                            ))}
+                                                        </tr>
+                                                    ))
+                                                ) : detailData.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan={8} className="px-6 py-20 text-center text-slate-400 font-medium italic">Chưa có dữ liệu tháng này</td>
+                                                    </tr>
+                                                ) : (
+                                                    detailData.map((row: any) => {
+                                                        const date = new Date(row.date);
+                                                        return (
+                                                            <tr key={row.id} className="hover:bg-slate-50/50 transition-colors group">
+                                                                <td className="px-3 py-2 text-[11px] font-bold text-slate-700">{date.getDate().toString().padStart(2, '0')}/{(date.getMonth() + 1).toString().padStart(2, '0')}</td>
+                                                                <td className="px-3 py-2 text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{getDayName(date)}</td>
+                                                                <td className={cn("px-3 py-2 text-[11px] font-black", row.checkInTime ? "text-slate-900" : "text-slate-300")}>{formatTime(row.checkInTime)}</td>
+                                                                <td className={cn("px-3 py-2 text-[11px] font-black", row.checkOutTime ? "text-slate-900" : "text-slate-300")}>{formatTime(row.checkOutTime)}</td>
+                                                                <td className="px-3 py-2 text-center text-[11px] font-bold text-blue-600">{(row.overtimeMinutes / 60).toFixed(1)}</td>
+                                                                <td className="px-3 py-2 text-center text-[11px] font-black text-accent">{row.workCount != null ? Number(row.workCount).toFixed(1) : '-'}</td>
+                                                                <td className="px-3 py-2 text-center"><AttendanceStatusBadge row={row} /></td>
+                                                                {['ADMIN', 'DIRECTOR', 'MANAGER', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'].includes(currentUser?.role?.code) && (
+                                                                    <td className="px-3 py-2 text-center">
+                                                                        <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                            <button onClick={(e) => { e.stopPropagation(); setViewingAuditRecord(row); setShowAuditModal(true); }} className="p-1.5 hover:bg-blue-50 text-slate-400 hover:text-blue-500 rounded-lg transition-all cursor-pointer" title="Lịch sử"><History size={14} /></button>
+                                                                            <button onClick={(e) => { e.stopPropagation(); handleAdjust(row); }} className="p-1.5 hover:bg-primary-subtle text-slate-400 hover:text-primary rounded-lg transition-all cursor-pointer" title="Sửa"><Pencil size={14} /></button>
+                                                                        </div>
+                                                                    </td>
+                                                                )}
+                                                            </tr>
+                                                        );
+                                                    })
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="bg-slate-50 border border-slate-100 border-dashed rounded-3xl flex flex-col items-center justify-center max-h-[calc(100vh-280px)] h-full min-h-[300px] p-10 text-center">
+                                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm mb-6 animate-bounce duration-[3000ms]">
+                                        <Eye size={32} className="text-slate-200" />
+                                    </div>
+                                    <h3 className="text-[14px] font-black text-slate-600 mb-2">Chưa chọn nhân viên</h3>
+                                    <p className="text-[11px] font-medium text-slate-400 max-w-[220px] leading-relaxed">Vui lòng chọn một nhân sự từ danh sách bên trái để xem bảng công chi tiết.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )
             ) : activeTab === 'TODAY' ? (
+                // --- TODAY VIEW LOGIC RE-INSERTION ---
+
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
@@ -1306,7 +1511,7 @@ export default function TimesheetPage() {
                         </table>
                     </div>
                 </div>
-            ) : (activeTab === 'MY' || (activeTab === 'EMPLOYEES' && viewMode === 'DETAIL')) ? (
+            ) : activeTab === 'MY' ? (
                 <>
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 md:gap-3">
                         <StatCard label="Tổng công" value={currentStats.totalWorkCount} icon={CheckCircle2} color="text-accent" bg="bg-emerald-50" />

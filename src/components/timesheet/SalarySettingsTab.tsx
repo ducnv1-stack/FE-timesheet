@@ -1,24 +1,27 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useToast } from '@/components/ui/toast';
-import { Save, AlertCircle, RefreshCw, Search, User, Building2, Banknote as BanknoteIcon, CheckCircle2, Trash2 } from 'lucide-react';
+import { Save, RefreshCw, Search, User, BanknoteIcon, CheckCircle2, CloudUpload } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import ConfirmModal from '@/components/ui/confirm-modal';
 
 export default function SalarySettingsTab() {
-    const [positions, setPositions] = useState<any[]>([]);
     const [employees, setEmployees] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const { error: toastError } = useToast();
     
-    // Manage local edits before saving
-    const [posEdits, setPosEdits] = useState<Record<string, any>>({});
     const [empEdits, setEmpEdits] = useState<Record<string, any>>({});
-    const [savingPosId, setSavingPosId] = useState<string | null>(null);
+    const [bulkEdits, setBulkEdits] = useState<any>({
+        customBaseSalary: '',
+        customDiligentSalary: '',
+        customLunchAllowance: '',
+        customLunchAllowanceType: 'DAILY',
+        customTravelAllowance: '',
+        customTechnicalAllowance: '',
+        customAllowance: '',
+        customStandardWorkingDays: ''
+    });
     const [savingId, setSavingId] = useState<string | null>(null);
+    const [isSavingAll, setIsSavingAll] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
-    const [showAddEmployeeList, setShowAddEmployeeList] = useState(false);
-    const [employeeSearchTerm, setEmployeeSearchTerm] = useState('');
-    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -43,35 +46,22 @@ export default function SalarySettingsTab() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [posRes, empsRes] = await Promise.all([
-                fetch(`${API_URL}/positions`),
-                fetch(`${API_URL}/employees`)
-            ]);
-            
-            const posData = await posRes.json();
+            const empsRes = await fetch(`${API_URL}/employees`);
             const empsData = await empsRes.json();
             
             const empsList = Array.isArray(empsData) ? empsData : (empsData?.data || []);
             
-            setPositions(posData);
             setEmployees(empsList.filter((e: any) => e.status !== 'QUITTING'));
-            
-            const pEdits: any = {};
-            posData.forEach((p: any) => {
-                pEdits[p.id] = { 
-                    baseSalary: p.baseSalary || 0, 
-                    diligentSalary: p.diligentSalary || 0,
-                    allowance: p.allowance || 0,
-                    standardWorkingDays: p.standardWorkingDays || 27 
-                };
-            });
-            setPosEdits(pEdits);
             
             const eEdits: any = {};
             empsList.forEach((e: any) => {
                 eEdits[e.id] = { 
                     customBaseSalary: e.customBaseSalary ?? '', 
                     customDiligentSalary: e.customDiligentSalary ?? '',
+                    customLunchAllowance: e.customLunchAllowance ?? '',
+                    customLunchAllowanceType: e.customLunchAllowanceType ?? 'DAILY',
+                    customTravelAllowance: e.customTravelAllowance ?? '',
+                    customTechnicalAllowance: e.customTechnicalAllowance ?? '',
                     customAllowance: e.customAllowance ?? '',
                     customStandardWorkingDays: e.customStandardWorkingDays ?? '' 
                 };
@@ -90,47 +80,14 @@ export default function SalarySettingsTab() {
             const matchesSearch = e.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 e.branch?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 e.position?.toLowerCase().includes(searchTerm.toLowerCase());
-            
-            const hasException = empEdits[e.id] && (
-                empEdits[e.id].customBaseSalary !== '' || 
-                empEdits[e.id].customDiligentSalary !== '' ||
-                empEdits[e.id].customAllowance !== '' ||
-                empEdits[e.id].customStandardWorkingDays !== ''
-            );
 
-            return matchesSearch && hasException;
+            return matchesSearch;
         });
-    }, [employees, searchTerm, empEdits]);
+    }, [employees, searchTerm]);
 
-    const availableEmployeesForException = useMemo(() => {
-        return employees.filter(e => {
-            const hasException = empEdits[e.id] && (
-                empEdits[e.id].customBaseSalary !== '' || 
-                empEdits[e.id].customDiligentSalary !== '' ||
-                empEdits[e.id].customAllowance !== '' ||
-                empEdits[e.id].customStandardWorkingDays !== ''
-            );
-            
-            const matchesSearch = e.fullName.toLowerCase().includes(employeeSearchTerm.toLowerCase());
-
-            return !hasException && matchesSearch;
-        });
-    }, [employees, empEdits, employeeSearchTerm]);
-
-    const handlePosChange = (id: string, field: string, value: string) => {
+    const handleEmpChange = (id: string, field: string, value: any) => {
         let finalValue: any = value;
-        if (['baseSalary', 'diligentSalary', 'allowance'].includes(field)) {
-            finalValue = parseCurrency(value);
-        }
-        setPosEdits(prev => ({
-            ...prev,
-            [id]: { ...prev[id], [field]: finalValue }
-        }));
-    };
-
-    const handleEmpChange = (id: string, field: string, value: string) => {
-        let finalValue: any = value;
-        if (['customBaseSalary', 'customDiligentSalary', 'customAllowance'].includes(field)) {
+        if (['customBaseSalary', 'customDiligentSalary', 'customAllowance', 'customLunchAllowance', 'customTravelAllowance', 'customTechnicalAllowance'].includes(field)) {
             finalValue = parseCurrency(value);
         }
         setEmpEdits(prev => ({
@@ -139,51 +96,26 @@ export default function SalarySettingsTab() {
         }));
     };
 
-    const savePosition = async (posId: string) => {
-        setSavingPosId(posId);
-        try {
-            const edit = posEdits[posId];
-            const res = await fetch(`${API_URL}/positions/${posId}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    baseSalary: Number(edit.baseSalary) || 0,
-                    diligentSalary: Number(edit.diligentSalary) || 0,
-                    allowance: Number(edit.allowance) || 0,
-                    standardWorkingDays: Number(edit.standardWorkingDays) || 27,
-                })
-            });
-            
-            if (res.ok) {
-                const pIcon = document.getElementById(`p-icon-${posId}`);
-                if (pIcon) {
-                    pIcon.style.opacity = '1';
-                    setTimeout(() => { pIcon.style.opacity = '0'; }, 2000);
-                }
-            }
-        } catch (error) {
-            toastError("Lỗi khi lưu lương Chức vụ");
-        } finally {
-            setSavingPosId(null);
-        }
+    const toggleLunchType = (id: string) => {
+        const currentType = empEdits[id]?.customLunchAllowanceType || 'DAILY';
+        const nextType = currentType === 'DAILY' ? 'MONTHLY' : 'DAILY';
+        handleEmpChange(id, 'customLunchAllowanceType', nextType);
     };
 
-    const saveEmployee = async (empId: string) => {
-        setSavingId(empId);
+    const saveEmployee = async (empId: string, silent = false) => {
+        if (!silent) setSavingId(empId);
         try {
             const edit = empEdits[empId];
             const payload: any = {};
-            if (edit.customBaseSalary === '') payload.customBaseSalary = null;
-            else payload.customBaseSalary = Number(edit.customBaseSalary) || 0;
-
-            if (edit.customDiligentSalary === '') payload.customDiligentSalary = null;
-            else payload.customDiligentSalary = Number(edit.customDiligentSalary) || 0;
-
-            if (edit.customAllowance === '') payload.customAllowance = null;
-            else payload.customAllowance = Number(edit.customAllowance) || 0;
             
-            if (edit.customStandardWorkingDays === '') payload.customStandardWorkingDays = null;
-            else payload.customStandardWorkingDays = Number(edit.customStandardWorkingDays) || 27;
+            payload.customBaseSalary = edit.customBaseSalary === '' ? null : Number(edit.customBaseSalary);
+            payload.customDiligentSalary = edit.customDiligentSalary === '' ? null : Number(edit.customDiligentSalary);
+            payload.customLunchAllowance = edit.customLunchAllowance === '' ? null : Number(edit.customLunchAllowance);
+            payload.customLunchAllowanceType = edit.customLunchAllowanceType;
+            payload.customTravelAllowance = edit.customTravelAllowance === '' ? null : Number(edit.customTravelAllowance);
+            payload.customTechnicalAllowance = edit.customTechnicalAllowance === '' ? null : Number(edit.customTechnicalAllowance);
+            payload.customAllowance = edit.customAllowance === '' ? null : Number(edit.customAllowance);
+            payload.customStandardWorkingDays = edit.customStandardWorkingDays === '' ? null : Number(edit.customStandardWorkingDays);
 
             const res = await fetch(`${API_URL}/employees/${empId}`, {
                 method: 'PATCH',
@@ -195,53 +127,53 @@ export default function SalarySettingsTab() {
                 const eIcon = document.getElementById(`e-icon-${empId}`);
                 if (eIcon) {
                     eIcon.style.opacity = '1';
-                    setTimeout(() => { eIcon.style.opacity = '0'; }, 2000);
+                    setTimeout(() => { if (eIcon) eIcon.style.opacity = '0'; }, 2000);
                 }
+                return true;
             }
+            return false;
         } catch (error) {
-            toastError("Lỗi khi lưu lương Cá nhân");
+            if (!silent) toastError(`Lỗi khi lưu: ${empId}`);
+            return false;
         } finally {
-            setSavingId(null);
+            if (!silent) setSavingId(null);
         }
     };
-    const removeException = async (empId: string) => {
-        setSavingId(empId);
-        try {
-            const payload = {
-                customBaseSalary: null,
-                customDiligentSalary: null,
-                customAllowance: null,
-                customStandardWorkingDays: null
-            };
 
-            const res = await fetch(`${API_URL}/employees/${empId}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+    const handleBulkChange = (field: string, value: any) => {
+        let finalValue: any = value;
+        if (['customBaseSalary', 'customDiligentSalary', 'customAllowance', 'customLunchAllowance', 'customTravelAllowance', 'customTechnicalAllowance'].includes(field)) {
+            finalValue = parseCurrency(value);
+        }
+        setBulkEdits((prev: any) => ({ ...prev, [field]: finalValue }));
+    };
 
-            if (res.ok) {
-                // Update local state to hide from exception list
-                setEmpEdits(prev => ({
-                    ...prev,
-                    [empId]: {
-                        customBaseSalary: '',
-                        customDiligentSalary: '',
-                        customAllowance: '',
-                        customStandardWorkingDays: ''
-                    }
-                }));
-                const eIcon = document.getElementById(`e-icon-${empId}`);
-                if (eIcon) {
-                    eIcon.style.opacity = '1';
-                    setTimeout(() => { eIcon.style.opacity = '0'; }, 2000);
+    const applyBulkToAll = () => {
+        const newEdits = { ...empEdits };
+        filteredEmployees.forEach(e => {
+            const currentEdit = { ...newEdits[e.id] };
+            // Chỉ áp dụng các trường có giá trị trong bulkEdits
+            Object.keys(bulkEdits).forEach(key => {
+                const val = bulkEdits[key];
+                if (val !== '' && val !== null) {
+                    currentEdit[key] = val;
                 }
-            }
+            });
+            newEdits[e.id] = currentEdit;
+        });
+        setEmpEdits(newEdits);
+    };
+
+    const saveAllEmployees = async () => {
+        if (filteredEmployees.length === 0) return;
+        setIsSavingAll(true);
+        try {
+            const promises = filteredEmployees.map(e => saveEmployee(e.id, true));
+            await Promise.all(promises);
         } catch (error) {
-            toastError("Lỗi khi xóa cấu hình ngoại lệ");
+            toastError("Có lỗi xảy ra khi lưu tất cả");
         } finally {
-            setSavingId(null);
-            setConfirmDeleteId(null);
+            setIsSavingAll(false);
         }
     };
 
@@ -256,125 +188,7 @@ export default function SalarySettingsTab() {
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {/* Warning Section */}
-            <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-5 border border-amber-200/60 shadow-sm relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
-                    <AlertCircle size={80} className="text-amber-500" />
-                </div>
-                <div className="relative z-10 flex gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center shrink-0 border border-amber-200">
-                        <AlertCircle size={20} className="text-amber-600" />
-                    </div>
-                    <div className="space-y-1">
-                        <h3 className="text-amber-900 font-bold text-xs tracking-wider">Lưu ý quan trọng về chính sách lương</h3>
-                        <div className="text-[11px] text-amber-800/80 font-medium leading-relaxed max-w-3xl">
-                            Các thiết lập này sẽ ảnh hưởng trực tiếp đến kết quả tính lương trong <span className="font-bold underline">Báo cáo Doanh số</span>. 
-                            Hệ thống ưu tiên <span className="text-primary font-bold">Mức lương Ngoại lệ</span> trước, nếu không có sẽ lấy theo <span className="font-bold">Mức lương Chức vụ</span>.
-                            Mọi thay đổi sẽ được áp dụng ngay lập tức cho các chu kỳ lương chưa chốt.
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Mức lương theo Chức Vụ */}
-            <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden transition-all hover:shadow-2xl hover:shadow-slate-200/60">
-                <div className="border-b border-slate-100 bg-slate-50/40 px-6 py-5 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary-light">
-                            <BanknoteIcon size={20} />
-                        </div>
-                        <div>
-                            <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight leading-none">Mức lương theo Chức vụ</h2>
-                            <p className="text-[9px] sm:text-[10px] text-slate-500 font-semibold mt-1">Cấu hình lương gốc mặc định cho từng bộ phận</p>
-                        </div>
-                    </div>
-                </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-slate-100/80 border-b border-slate-200">
-                                <th className="px-4 py-3 text-[10px] font-bold text-slate-600 tracking-wider">Chức vụ/Hợp đồng</th>
-                                <th className="px-4 py-3 text-[10px] font-bold text-slate-600 tracking-wider w-[180px]">Lương Cơ Bản</th>
-                                <th className="px-4 py-3 text-[10px] font-bold text-slate-600 tracking-wider w-[130px]">Chuyên cần</th>
-                                <th className="px-4 py-3 text-[10px] font-bold text-slate-600 tracking-wider w-[130px]">Phụ cấp</th>
-                                <th className="px-4 py-3 text-[10px] font-bold text-slate-600 tracking-wider w-[100px]">Công chuẩn</th>
-                                <th className="px-4 py-3 text-[10px] font-bold text-slate-600 tracking-wider w-[80px] text-center">Lưu</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-50">
-                            {positions.map(p => (
-                                <tr key={p.id} className="group hover:bg-primary-subtle/30 transition-all duration-300">
-                                    <td className="px-4 py-1 whitespace-nowrap">
-                                        <div>
-                                            <div className="font-bold text-slate-800 text-[11px] sm:text-xs group-hover:text-primary transition-colors tracking-tight leading-tight">{p.name}</div>
-                                            <span className="text-[8px] sm:text-[9px] text-slate-400 font-bold">{p.note || 'Mặc định'}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-1">
-                                        <div className="relative group/input">
-                                            <input 
-                                                type="text" 
-                                                value={formatCurrency(posEdits[p.id]?.baseSalary)}
-                                                onChange={(e) => handlePosChange(p.id, 'baseSalary', e.target.value)}
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[11px] sm:text-xs font-bold text-primary outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-[9px] shadow-inner group-hover:bg-white"
-                                                placeholder="Nhập..."
-                                            />
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-1">
-                                        <div className="relative group/input">
-                                            <input 
-                                                type="text" 
-                                                value={formatCurrency(posEdits[p.id]?.diligentSalary)}
-                                                onChange={(e) => handlePosChange(p.id, 'diligentSalary', e.target.value)}
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[11px] sm:text-xs font-bold text-warning outline-none focus:border-warning focus:ring-4 focus:ring-warning/10 transition-all placeholder:text-[9px] shadow-inner group-hover:bg-white"
-                                                placeholder="Nhập..."
-                                            />
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-1">
-                                        <div className="relative group/input">
-                                            <input 
-                                                type="text" 
-                                                value={formatCurrency(posEdits[p.id]?.allowance)}
-                                                onChange={(e) => handlePosChange(p.id, 'allowance', e.target.value)}
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[11px] sm:text-xs font-bold text-accent outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all placeholder:text-[9px] shadow-inner group-hover:bg-white"
-                                                placeholder="Nhập..."
-                                            />
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-1">
-                                        <input 
-                                            type="number" 
-                                            value={posEdits[p.id]?.standardWorkingDays || ''}
-                                            onChange={(e) => handlePosChange(p.id, 'standardWorkingDays', e.target.value)}
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[11px] sm:text-xs font-bold text-slate-800 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50 transition-all group-hover:bg-white shadow-inner"
-                                            placeholder="27"
-                                        />
-                                    </td>
-                                    <td className="px-4 sm:px-6 py-1 text-center relative">
-                                        <button 
-                                            onClick={() => savePosition(p.id)}
-                                            disabled={savingPosId === p.id}
-                                            className={cn(
-                                                "w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 cursor-pointer mx-auto",
-                                                savingPosId === p.id ? "bg-slate-100 text-slate-400" : "bg-white text-primary-light border border-primary-subtle hover:bg-primary-light hover:text-white hover:shadow-lg hover:shadow-primary-subtle hover:-translate-y-0.5 active:translate-y-0"
-                                            )}
-                                        >
-                                            {savingPosId === p.id ? <RefreshCw size={18} className="animate-spin" /> : <Save size={18} />}
-                                        </button>
-                                        <div id={`p-icon-${p.id}`} className="absolute top-1/2 -right-2 -translate-y-1/2 opacity-0 transition-opacity text-emerald-500">
-                                            <CheckCircle2 size={16} />
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            {/* Mức lương Ngoại lệ theo Cá nhân */}
+            {/* Mức lương Cá nhân */}
             <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden transition-all hover:shadow-2xl hover:shadow-slate-200/60">
                 <div className="border-b border-slate-100 bg-slate-50/40 px-6 py-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
@@ -382,12 +196,27 @@ export default function SalarySettingsTab() {
                             <User size={20} />
                         </div>
                         <div>
-                            <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight leading-none">Mức lương Ngoại lệ (Cá nhân)</h2>
-                            <p className="text-[9px] sm:text-[10px] text-slate-500 font-semibold mt-1">Cài đặt lương riêng biệt cho nhân sự cơ chế ngoại lệ</p>
+                            <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight leading-none">Cấu hình Lương Cá nhân</h2>
+                            <p className="text-[9px] sm:text-[10px] text-slate-500 font-semibold mt-1">Cài đặt lương cho từng nhân sự trong hệ thống</p>
                         </div>
                     </div>
                     
                     <div className="flex items-center gap-3 flex-wrap">
+                        {/* Save All Button */}
+                        <button 
+                            onClick={saveAllEmployees}
+                            disabled={isSavingAll || filteredEmployees.length === 0}
+                            className={cn(
+                                "flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-black uppercase transition-all shadow-md active:scale-95",
+                                isSavingAll 
+                                    ? "bg-slate-100 text-slate-400" 
+                                    : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-200/50"
+                            )}
+                        >
+                            {isSavingAll ? <RefreshCw size={14} className="animate-spin" /> : <CloudUpload size={14} />}
+                            {isSavingAll ? "Đang lưu..." : "Lưu tất cả"}
+                        </button>
+
                         {/* Search bar */}
                         <div className="relative group w-full md:w-60">
                             <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
@@ -399,40 +228,128 @@ export default function SalarySettingsTab() {
                                 className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-[11px] sm:text-xs font-bold outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all shadow-sm"
                             />
                         </div>
+                    </div>
+                </div>
 
-                        {/* ADD BUTTON */}
-                        <button 
-                            onClick={() => setShowAddEmployeeList(true)}
-                            className="bg-primary text-white px-4 py-2 rounded-xl text-[10px] font-bold shadow-lg shadow-primary-light/50 hover:bg-primary/90 transition-all active:scale-95 flex items-center gap-2 shrink-0 cursor-pointer"
-                        >
-                            + Thêm nhân sự ngoại lệ
-                        </button>
+                {/* Bulk Setup Panel */}
+                <div className="bg-slate-50/80 border-b border-slate-100 px-6 py-4">
+                    <div className="flex flex-wrap items-end gap-3">
+                        <div className="flex-1 min-w-[200px]">
+                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1">
+                                <RefreshCw size={10} /> Thiết lập nhanh cho danh sách
+                            </p>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2">
+                                <div className="space-y-1">
+                                    <label className="text-[9px] font-bold text-slate-400 ml-1">Lương cơ bản</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Tất cả..."
+                                        value={formatCurrency(bulkEdits.customBaseSalary)}
+                                        onChange={(e) => handleBulkChange('customBaseSalary', e.target.value)}
+                                        className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold outline-none focus:border-primary transition-all shadow-sm"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[9px] font-bold text-slate-400 ml-1">Chuyên cần</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Tất cả..."
+                                        value={formatCurrency(bulkEdits.customDiligentSalary)}
+                                        onChange={(e) => handleBulkChange('customDiligentSalary', e.target.value)}
+                                        className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold outline-none focus:border-warning transition-all shadow-sm"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[9px] font-bold text-slate-400 ml-1">Ăn trưa</label>
+                                    <div className="flex gap-1">
+                                        <button 
+                                            onClick={() => handleBulkChange('customLunchAllowanceType', bulkEdits.customLunchAllowanceType === 'DAILY' ? 'MONTHLY' : 'DAILY')}
+                                            className={cn(
+                                                "px-1.5 py-1 rounded text-[8px] font-black uppercase transition-all",
+                                                bulkEdits.customLunchAllowanceType === 'DAILY' ? "bg-teal-500 text-white" : "bg-cyan-600 text-white"
+                                            )}
+                                        >
+                                            {bulkEdits.customLunchAllowanceType === 'DAILY' ? 'N' : 'T'}
+                                        </button>
+                                        <input 
+                                            type="text" 
+                                            placeholder="Tất cả..."
+                                            value={formatCurrency(bulkEdits.customLunchAllowance)}
+                                            onChange={(e) => handleBulkChange('customLunchAllowance', e.target.value)}
+                                            className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold outline-none focus:border-teal-400 transition-all shadow-sm"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[9px] font-bold text-slate-400 ml-1">Xăng xe</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Tất cả..."
+                                        value={formatCurrency(bulkEdits.customTravelAllowance)}
+                                        onChange={(e) => handleBulkChange('customTravelAllowance', e.target.value)}
+                                        className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold outline-none focus:border-blue-400 transition-all shadow-sm"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[9px] font-bold text-slate-400 ml-1">Kỹ thuật</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Tất cả..."
+                                        value={formatCurrency(bulkEdits.customTechnicalAllowance)}
+                                        onChange={(e) => handleBulkChange('customTechnicalAllowance', e.target.value)}
+                                        className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold outline-none focus:border-emerald-400 transition-all shadow-sm"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[9px] font-bold text-slate-400 ml-1">C.Chuẩn</label>
+                                    <input 
+                                        type="number" 
+                                        placeholder="Công..."
+                                        value={bulkEdits.customStandardWorkingDays}
+                                        onChange={(e) => handleBulkChange('customStandardWorkingDays', e.target.value)}
+                                        className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-black outline-none focus:border-indigo-400 transition-all shadow-sm"
+                                    />
+                                </div>
+                                <div className="flex items-end">
+                                    <button 
+                                        onClick={applyBulkToAll}
+                                        className="w-full bg-primary text-white text-[10px] font-black uppercase py-2 rounded-lg hover:bg-primary/90 transition-all shadow-md active:scale-95 flex items-center justify-center gap-1"
+                                    >
+                                        <CloudUpload size={12} /> Áp dụng
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <div className="overflow-x-auto border-t border-slate-50">
-                    <table className="w-full text-left border-collapse">
+                    <table className="w-full text-left border-collapse min-w-[1250px]">
                         <thead>
                             <tr className="bg-slate-100/80 border-b border-slate-200">
-                                <th className="px-4 py-2 text-[10px] font-black text-slate-700 uppercase tracking-wider">Nhân sự</th>
-                                <th className="px-4 py-2 text-[10px] font-black text-slate-700 uppercase tracking-wider w-[180px]">Lương Thỏa Thuận</th>
-                                <th className="px-4 py-2 text-[10px] font-black text-slate-700 uppercase tracking-wider w-[130px]">Chuyên cần</th>
-                                <th className="px-4 py-2 text-[10px] font-black text-slate-700 uppercase tracking-wider w-[130px]">Phụ cấp</th>
-                                <th className="px-4 py-2 text-[10px] font-black text-slate-700 uppercase tracking-wider w-[100px]">Công chuẩn</th>
-                                <th className="px-4 py-2 text-[10px] font-black text-slate-700 uppercase tracking-wider w-[80px] text-center">Lưu</th>
+                                <th className="px-4 py-2 text-[10px] font-black text-slate-700 uppercase tracking-wider sticky left-0 bg-slate-100/80 z-20 shadow-sm border-r border-slate-200">Nhân sự</th>
+                                <th className="px-4 py-2 text-[10px] font-black text-slate-700 uppercase tracking-wider w-[140px]">Lương Cơ Bản</th>
+                                <th className="px-4 py-2 text-[10px] font-black text-slate-700 uppercase tracking-wider w-[120px]">Chuyên cần</th>
+                                <th className="px-4 py-2 text-[10px] font-black text-slate-700 uppercase tracking-wider w-[170px] text-teal-600 bg-teal-50/20">Ăn trưa</th>
+                                <th className="px-4 py-2 text-[10px] font-black text-slate-700 uppercase tracking-wider w-[120px]">Xăng xe</th>
+                                <th className="px-4 py-2 text-[10px] font-black text-slate-700 uppercase tracking-wider w-[120px]">Kỹ thuật</th>
+                                <th className="px-4 py-2 text-[10px] font-black text-slate-700 uppercase tracking-wider w-[120px]">PC Khác</th>
+                                <th className="px-4 py-2 text-[10px] font-black text-slate-700 uppercase tracking-wider w-[80px]">C.Chuẩn</th>
+                                <th className="px-4 py-2 text-[10px] font-black text-slate-700 uppercase tracking-wider w-[60px] text-center">Lưu</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
                             {filteredEmployees.map(e => {
+                                const lType = empEdits[e.id]?.customLunchAllowanceType || 'DAILY';
                                 return (
-                                    <tr key={e.id} className="group transition-all duration-300 bg-primary-subtle/40 hover:bg-primary-subtle/60">
-                                        <td className="px-4 py-1 whitespace-nowrap">
+                                    <tr key={e.id} className="group transition-all duration-300 hover:bg-slate-50/50">
+                                        <td className="px-4 py-1 whitespace-nowrap sticky left-0 bg-white group-hover:bg-slate-50 transition-colors z-10 border-r border-slate-100">
                                             <div className="flex items-center gap-2">
                                                 {e.avatarUrl ? (
                                                     <img 
                                                         src={`${API_URL}${e.avatarUrl}`} 
                                                         alt={e.fullName}
-                                                        className="w-6 h-6 rounded-md object-cover border border-primary-subtle shadow-sm"
+                                                        className="w-8 h-8 rounded-full object-cover border border-slate-200 shadow-sm"
                                                         onError={(ev) => {
                                                             (ev.target as HTMLImageElement).style.display = 'none';
                                                             (ev.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
@@ -440,81 +357,99 @@ export default function SalarySettingsTab() {
                                                     />
                                                 ) : null}
                                                 <div className={cn(
-                                                    "w-6 h-6 rounded-md bg-primary text-white flex items-center justify-center font-bold text-[8px] border border-primary/20 shadow-md shadow-primary-light",
+                                                    "w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs border border-primary/20",
                                                     e.avatarUrl ? "hidden" : ""
                                                 )}>
                                                     {e.fullName.charAt(0).toUpperCase()}
                                                 </div>
                                                 <div>
-                                                    <div className="font-bold text-slate-800 text-[10px] sm:text-[11px] tracking-tight truncate max-w-[120px]">{e.fullName}</div>
-                                                    <div className="text-[8px] text-slate-400 font-semibold truncate max-w-[120px]">{e.branch?.name || '-'}</div>
+                                                    <div className="font-bold text-slate-800 text-[11px] sm:text-xs tracking-tight truncate max-w-[120px]">{e.fullName}</div>
+                                                    <div className="text-[9px] text-slate-500 font-medium truncate max-w-[120px]">{e.position || '-'}</div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-4 py-1">
-                                            <div className="relative group/input">
+                                            <input 
+                                                type="text" 
+                                                value={formatCurrency(empEdits[e.id]?.customBaseSalary)}
+                                                onChange={(ev) => handleEmpChange(e.id, 'customBaseSalary', ev.target.value)}
+                                                className="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-[11px] font-bold text-slate-800 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all shadow-sm"
+                                            />
+                                        </td>
+                                        <td className="px-4 py-1">
+                                            <input 
+                                                type="text" 
+                                                value={formatCurrency(empEdits[e.id]?.customDiligentSalary)}
+                                                onChange={(ev) => handleEmpChange(e.id, 'customDiligentSalary', ev.target.value)}
+                                                className="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-[11px] font-bold text-slate-800 outline-none focus:border-warning focus:ring-4 focus:ring-warning/10 transition-all shadow-sm"
+                                            />
+                                        </td>
+                                        <td className="px-4 py-1 bg-teal-50/10">
+                                            <div className="flex items-center gap-1">
+                                                <button 
+                                                    onClick={() => toggleLunchType(e.id)}
+                                                    className={cn(
+                                                        "px-2 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all shadow-sm whitespace-nowrap",
+                                                        lType === 'DAILY' ? "bg-teal-500 text-white shadow-teal-100" : "bg-cyan-600 text-white shadow-cyan-100"
+                                                    )}
+                                                >
+                                                    {lType === 'DAILY' ? 'Ngày' : 'Tháng'}
+                                                </button>
                                                 <input 
                                                     type="text" 
-                                                    placeholder="Tự động..."
-                                                    value={formatCurrency(empEdits[e.id]?.customBaseSalary)}
-                                                    onChange={(ev) => handleEmpChange(e.id, 'customBaseSalary', ev.target.value)}
-                                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[11px] sm:text-xs font-bold text-primary outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-[9px] shadow-inner group-hover:bg-white"
+                                                    placeholder={lType === 'DAILY' ? "VD: 35.000" : "VD: 1.000.000"}
+                                                    value={formatCurrency(empEdits[e.id]?.customLunchAllowance)}
+                                                    onChange={(ev) => handleEmpChange(e.id, 'customLunchAllowance', ev.target.value)}
+                                                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-[11px] font-bold text-slate-800 outline-none focus:border-teal-400 focus:ring-4 focus:ring-teal-50 transition-all shadow-sm"
                                                 />
                                             </div>
                                         </td>
                                         <td className="px-4 py-1">
                                             <input 
                                                 type="text" 
-                                                placeholder="Tự động..."
-                                                value={formatCurrency(empEdits[e.id]?.customDiligentSalary)}
-                                                onChange={(ev) => handleEmpChange(e.id, 'customDiligentSalary', ev.target.value)}
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[11px] sm:text-xs font-bold text-warning outline-none focus:border-warning focus:ring-4 focus:ring-warning/10 transition-all placeholder:text-[9px] shadow-inner group-hover:bg-white"
+                                                value={formatCurrency(empEdits[e.id]?.customTravelAllowance)}
+                                                onChange={(ev) => handleEmpChange(e.id, 'customTravelAllowance', ev.target.value)}
+                                                className="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-[11px] font-bold text-slate-800 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50 transition-all shadow-sm"
                                             />
                                         </td>
                                         <td className="px-4 py-1">
                                             <input 
                                                 type="text" 
-                                                placeholder="Tự động..."
+                                                value={formatCurrency(empEdits[e.id]?.customTechnicalAllowance)}
+                                                onChange={(ev) => handleEmpChange(e.id, 'customTechnicalAllowance', ev.target.value)}
+                                                className="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-[11px] font-bold text-slate-800 outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-50 transition-all shadow-sm"
+                                            />
+                                        </td>
+                                        <td className="px-4 py-1">
+                                            <input 
+                                                type="text" 
                                                 value={formatCurrency(empEdits[e.id]?.customAllowance)}
                                                 onChange={(ev) => handleEmpChange(e.id, 'customAllowance', ev.target.value)}
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[11px] sm:text-xs font-bold text-accent outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all placeholder:text-[9px] shadow-inner group-hover:bg-white"
+                                                className="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-[11px] font-bold text-slate-800 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 transition-all shadow-sm"
                                             />
                                         </td>
                                         <td className="px-4 py-1">
                                             <input 
                                                 type="number" 
-                                                placeholder="VD: 27"
                                                 value={empEdits[e.id]?.customStandardWorkingDays || ''}
                                                 onChange={(ev) => handleEmpChange(e.id, 'customStandardWorkingDays', ev.target.value)}
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1 text-[10px] sm:text-[11px] font-bold text-slate-800 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50 transition-all group-hover:bg-white shadow-inner"
+                                                className="w-full bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-[11px] font-black text-slate-800 outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-50 transition-all shadow-sm"
                                             />
                                         </td>
-                                        <td className="px-4 py-1 text-center relative flex items-center justify-center gap-2">
+                                        <td className="px-4 py-1 text-center relative">
                                             <button 
                                                 onClick={() => saveEmployee(e.id)}
                                                 disabled={savingId === e.id}
                                                 className={cn(
-                                                    "w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-300 cursor-pointer",
-                                                    savingId === e.id ? "bg-slate-100 text-slate-400" : "bg-white text-accent border border-accent/20 hover:bg-accent hover:text-white hover:shadow-lg hover:shadow-accent/10 hover:-translate-y-0.5 active:translate-y-0"
+                                                    "w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-300 cursor-pointer mx-auto",
+                                                    savingId === e.id ? "bg-slate-100 text-slate-400" : "bg-primary/10 text-primary border border-transparent hover:bg-primary hover:text-white shadow-md shadow-primary/5"
                                                 )}
                                                 title="Lưu cấu hình"
                                             >
                                                 {savingId === e.id ? <RefreshCw size={16} className="animate-spin" /> : <Save size={16} />}
                                             </button>
-                                            
-                                            <button 
-                                                onClick={() => setConfirmDeleteId(e.id)}
-                                                disabled={savingId === e.id}
-                                                className={cn(
-                                                    "w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-300 cursor-pointer",
-                                                    savingId === e.id ? "bg-slate-100 text-slate-400" : "bg-white text-primary border border-primary/20 hover:bg-primary hover:text-white hover:shadow-lg hover:shadow-primary-light/50 hover:-translate-y-0.5 active:translate-y-0"
-                                                )}
-                                                title="Xóa ngoại lệ"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
 
-                                            <div id={`e-icon-${e.id}`} className="absolute top-1/2 -right-2 -translate-y-1/2 opacity-0 transition-opacity text-accent">
+                                            <div id={`e-icon-${e.id}`} className="absolute top-1/2 left-0 -translate-y-1/2 opacity-0 transition-opacity text-emerald-500 pointer-events-none">
                                                 <CheckCircle2 size={16} />
                                             </div>
                                         </td>
@@ -524,16 +459,10 @@ export default function SalarySettingsTab() {
                             
                             {filteredEmployees.length === 0 && (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-20 text-center">
+                                    <td colSpan={9} className="px-6 py-20 text-center">
                                         <div className="flex flex-col items-center gap-2 text-slate-300">
                                             <BanknoteIcon size={40} className="mb-2 opacity-20" />
-                                            <p className="text-sm font-bold tracking-wider">Không có nhân sự ngoại lệ nào</p>
-                                            <button 
-                                                onClick={() => setShowAddEmployeeList(true)}
-                                                className="text-[10px] font-bold text-primary underline transition-colors cursor-pointer"
-                                            >
-                                                Thêm nhân sự ngay
-                                            </button>
+                                            <p className="text-sm font-bold tracking-wider">Không có nhân sự nào khớp với tìm kiếm</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -542,94 +471,6 @@ export default function SalarySettingsTab() {
                     </table>
                 </div>
             </div>
-
-            {/* Confirmation Modal */}
-            <ConfirmModal 
-                isOpen={!!confirmDeleteId}
-                title="Xác nhận xóa"
-                message="Bạn có chắc chắn muốn xóa cấu hình lương ngoại lệ này? Nhân viên sẽ quay lại áp dụng mức lương mặc định theo Chức vụ."
-                confirmLabel="Xóa ngoại lệ"
-                cancelLabel="Hủy"
-                isDanger={true}
-                onConfirm={() => confirmDeleteId && removeException(confirmDeleteId)}
-                onCancel={() => setConfirmDeleteId(null)}
-            />
-
-            {/* SELECTION MODAL/DROPDOWN */}
-            {showAddEmployeeList && (
-                <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in duration-300">
-                        <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-                            <h3 className="text-sm font-bold text-slate-900">Chọn nhân sự thêm ngoại lệ</h3>
-                            <button onClick={() => setShowAddEmployeeList(false)} className="text-slate-400 hover:text-primary font-bold cursor-pointer">✕</button>
-                        </div>
-                        <div className="p-4 bg-slate-50/50">
-                            <div className="relative group">
-                                <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                                <input 
-                                    type="text" 
-                                    autoFocus
-                                    placeholder="Tìm tên nhân viên..."
-                                    value={employeeSearchTerm}
-                                    onChange={(e) => setEmployeeSearchTerm(e.target.value)}
-                                    className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs font-bold outline-none focus:border-primary shadow-sm transition-all"
-                                />
-                            </div>
-                        </div>
-                        <div className="max-h-80 overflow-y-auto custom-scrollbar p-2">
-                            {availableEmployeesForException.map(e => (
-                                <button 
-                                    key={e.id}
-                                    onClick={() => {
-                                        handleEmpChange(e.id, 'customBaseSalary', '0');
-                                        setShowAddEmployeeList(false);
-                                        setEmployeeSearchTerm('');
-                                    }}
-                                    className="w-full flex items-center gap-3 p-3 hover:bg-primary-subtle rounded-2xl transition-all group border border-transparent hover:border-primary-subtle mb-1 text-left cursor-pointer"
-                                >
-                                        <div className="relative shrink-0">
-                                            {e.avatarUrl ? (
-                                                <img 
-                                                    src={`${API_URL}${e.avatarUrl}`} 
-                                                    alt={e.fullName}
-                                                    className="w-9 h-9 rounded-xl object-cover border border-slate-200 group-hover:border-primary-subtle shadow-sm transition-all"
-                                                    onError={(ev) => {
-                                                        (ev.target as HTMLImageElement).style.display = 'none';
-                                                        (ev.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                                                    }}
-                                                />
-                                            ) : null}
-                                            <div className={cn(
-                                                "w-9 h-9 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center font-bold group-hover:bg-white group-hover:text-primary transition-all border border-slate-200",
-                                                e.avatarUrl ? "hidden" : ""
-                                            )}>
-                                                {e.fullName.charAt(0).toUpperCase()}
-                                            </div>
-                                        </div>
-                                    <div>
-                                        <div className="text-xs font-bold text-slate-800 group-hover:text-primary transition-colors tracking-tight">{e.fullName}</div>
-                                        <div className="text-[9px] text-slate-400 font-semibold group-hover:text-primary/70">{e.position} • {e.branch?.name}</div>
-                                    </div>
-                                </button>
-                            ))}
-                            {availableEmployeesForException.length === 0 && (
-                                <div className="py-12 text-center text-slate-300 text-xs font-bold tracking-wider">
-                                    Không tìm thấy nhân viên phù hợp
-                                </div>
-                            )}
-                        </div>
-                        <div className="p-4 bg-slate-50 border-t border-slate-100">
-                            <button 
-                                onClick={() => setShowAddEmployeeList(false)}
-                                className="w-full py-3 rounded-xl text-slate-500 font-bold text-[10px] hover:bg-white transition-all border border-transparent hover:border-slate-200 cursor-pointer"
-                            >
-                                Đóng
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
-
