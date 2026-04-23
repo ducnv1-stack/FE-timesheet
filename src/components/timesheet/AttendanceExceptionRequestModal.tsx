@@ -27,6 +27,7 @@ export default function AttendanceExceptionRequestModal({
     const [form, setForm] = useState({
         type: 'GO_LATE',
         reason: '',
+        actualTime: '',
         images: [] as string[]
     });
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -112,6 +113,7 @@ export default function AttendanceExceptionRequestModal({
                     date: record.date,
                     type: form.type,
                     reason: form.reason,
+                    actualTime: form.actualTime,
                     images: form.images
                 })
             });
@@ -122,7 +124,7 @@ export default function AttendanceExceptionRequestModal({
             }
 
             success('Gửi đơn giải trình thành công! Vui lòng chờ phê duyệt.');
-            setForm({ type: 'GO_LATE', reason: '', images: [] });
+            setForm({ type: 'GO_LATE', reason: '', actualTime: '', images: [] });
             onSuccess();
             onClose();
         } catch (err: any) {
@@ -175,6 +177,21 @@ export default function AttendanceExceptionRequestModal({
                             {types.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                         </select>
                     </div>
+
+                    {(form.type === 'FORGOT_CHECKIN' || form.type === 'FORGOT_CHECKOUT') && (
+                        <div className="space-y-1.5 animate-in slide-in-from-top-2 duration-200">
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">
+                                {form.type === 'FORGOT_CHECKIN' ? 'Giờ vào thực tế' : 'Giờ ra thực tế'} (HH:mm)
+                            </label>
+                            <input 
+                                type="time"
+                                className="w-full px-4 py-3 bg-primary/5 border border-primary/20 rounded-xl text-sm font-black text-primary focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
+                                value={form.actualTime}
+                                onChange={e => setForm({ ...form, actualTime: e.target.value })}
+                            />
+                            <p className="text-[10px] text-primary/60 font-medium px-1 italic">* Vui lòng điền giờ bạn thực tế đã đến hoặc về để hệ thống tính công.</p>
+                        </div>
+                    )}
 
                     <div className="space-y-1.5">
                         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Lý do chi tiết</label>

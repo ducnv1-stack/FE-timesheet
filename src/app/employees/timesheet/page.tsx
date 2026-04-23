@@ -1312,6 +1312,7 @@ export default function TimesheetPage() {
                                                     <th className="px-3 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Thứ</th>
                                                     <th className="px-3 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Vào</th>
                                                     <th className="px-3 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Ra</th>
+                                                    <th className="px-3 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none whitespace-nowrap">Số giờ</th>
                                                     <th className="px-3 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">TC (H)</th>
                                                     <th className="px-3 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Công</th>
                                                     <th className="px-3 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Trạng thái</th>
@@ -1342,8 +1343,11 @@ export default function TimesheetPage() {
                                                                 <td className="px-3 py-2 text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{getDayName(date)}</td>
                                                                 <td className={cn("px-3 py-2 text-[11px] font-black", row.checkInTime ? "text-slate-900" : "text-slate-300")}>{formatTime(row.checkInTime)}</td>
                                                                 <td className={cn("px-3 py-2 text-[11px] font-black", row.checkOutTime ? "text-slate-900" : "text-slate-300")}>{formatTime(row.checkOutTime)}</td>
+                                                                <td className="px-3 py-2 text-center text-xs md:text-[13px] font-black text-slate-900">
+                                                                    {row.totalWorkMinutes != null ? (row.totalWorkMinutes / 60).toFixed(1) : '-'}
+                                                                </td>
                                                                 <td className="px-3 py-2 text-center text-[11px] font-bold text-blue-600">{(row.overtimeMinutes / 60).toFixed(1)}</td>
-                                                                <td className="px-3 py-2 text-center text-[11px] font-black text-accent">{row.workCount != null ? Number(row.workCount).toFixed(1) : '-'}</td>
+                                                                <td className="px-3 py-2 text-center text-[11px] font-black text-accent">{row.workCount != null ? Number(row.workCount).toFixed(2) : '-'}</td>
                                                                 <td className="px-3 py-2 text-center"><AttendanceStatusBadge row={row} /></td>
                                                                 {['ADMIN', 'DIRECTOR', 'MANAGER', 'CHIEF_ACCOUNTANT', 'ACCOUNTANT', 'BRANCH_ACCOUNTANT'].includes(currentUser?.role?.code) && (
                                                                     <td className="px-3 py-2 text-center">
@@ -1386,6 +1390,7 @@ export default function TimesheetPage() {
                                     <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Nhân viên</th>
                                     <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Vào</th>
                                     <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Ra</th>
+                                    <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none whitespace-nowrap">Số giờ</th>
                                     <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Muộn</th>
                                     <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Sớm</th>
                                     <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">TC</th>
@@ -1456,6 +1461,11 @@ export default function TimesheetPage() {
                                                 </span>
                                             </td>
                                             <td className="px-2 md:px-6 py-1.5 whitespace-nowrap text-center">
+                                                <span className="text-xs md:text-[13px] font-black text-slate-900">
+                                                    {row.totalWorkMinutes != null ? (row.totalWorkMinutes / 60).toFixed(1) : '-'}
+                                                </span>
+                                            </td>
+                                            <td className="px-2 md:px-6 py-1.5 whitespace-nowrap text-center">
                                                 <span className={cn("text-xs md:text-[13px] font-bold", (row.lateMinutes || 0) > 0 ? "text-primary" : "text-slate-300")}>
                                                     {row.lateMinutes || '-'}
                                                 </span>
@@ -1478,7 +1488,7 @@ export default function TimesheetPage() {
                                                     row.workCount != null && Number(row.workCount) < 1 ? "text-amber-600" :
                                                         row.workCount != null ? "text-accent" : "text-slate-300"
                                                 )}>
-                                                    {row.workCount != null ? Number(row.workCount).toFixed(1) : '-'}
+                                                    {row.workCount != null ? Number(row.workCount).toFixed(2) : '-'}
                                                 </span>
                                             </td>
                                             <td className="px-2 md:px-6 py-1.5 whitespace-nowrap text-center">
@@ -1532,6 +1542,7 @@ export default function TimesheetPage() {
                                         <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Thứ</th>
                                         <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Vào</th>
                                         <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest leading-none">Ra</th>
+                                        <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none whitespace-nowrap">Số giờ</th>
                                         <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Muộn</th>
                                         <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">Sớm</th>
                                         <th className="px-2 md:px-6 py-2 text-[9px] font-bold text-slate-400 tracking-widest text-center leading-none">TC</th>
@@ -1580,6 +1591,11 @@ export default function TimesheetPage() {
                                                         </span>
                                                     </td>
                                                     <td className="px-2 md:px-6 py-1.5 whitespace-nowrap text-center">
+                                                        <span className="text-xs md:text-[13px] font-black text-slate-900">
+                                                            {row.totalWorkMinutes != null ? (row.totalWorkMinutes / 60).toFixed(1) : '-'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-2 md:px-6 py-1.5 whitespace-nowrap text-center">
                                                         <span className={cn("text-xs md:text-[13px] font-bold", row.lateMinutes > 0 ? "text-primary" : "text-slate-300")}>
                                                             {row.lateMinutes || '-'}
                                                         </span>
@@ -1602,7 +1618,7 @@ export default function TimesheetPage() {
                                                             row.workCount != null && Number(row.workCount) < 1 ? "text-amber-600" :
                                                                 row.workCount != null ? "text-accent" : "text-slate-300"
                                                         )}>
-                                                            {row.workCount != null ? Number(row.workCount).toFixed(1) : '-'}
+                                                            {row.workCount != null ? Number(row.workCount).toFixed(2) : '-'}
                                                         </span>
                                                     </td>
                                                     <td className="px-3 md:px-6 py-3 whitespace-nowrap text-center">

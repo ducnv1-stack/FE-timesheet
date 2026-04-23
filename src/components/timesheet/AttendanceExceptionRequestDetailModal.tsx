@@ -67,22 +67,54 @@ export default function AttendanceExceptionRequestDetailModal({
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="p-4 border border-slate-100 rounded-2xl space-y-1">
-                            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold flex items-center gap-1"><CalendarDays size={12} /> Ngày công</p>
-                            <p className="text-sm font-bold text-slate-700">
-                                {new Date(request.date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
-                            </p>
+                    <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="p-4 bg-slate-50/50 border border-slate-100 rounded-2xl flex items-center gap-3">
+                                <div className="h-9 w-9 bg-white shadow-sm rounded-xl flex items-center justify-center text-slate-400">
+                                    <CalendarDays size={18} />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Ngày công</p>
+                                    <p className="text-sm font-black text-slate-700">
+                                        {new Date(request.date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="p-4 bg-slate-50/50 border border-slate-100 rounded-2xl flex items-center gap-3">
+                                <div className="h-9 w-9 bg-white shadow-sm rounded-xl flex items-center justify-center text-slate-400">
+                                    <AlertCircle size={18} />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Loại giải trình</p>
+                                    <p className="text-sm font-black text-slate-700">{getTypeInfo(request.type)}</p>
+                                </div>
+                            </div>
                         </div>
-                        <div className="p-4 border border-slate-100 rounded-2xl space-y-1">
-                            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold flex items-center gap-1"><AlertCircle size={12} /> Loại giải trình</p>
-                            <p className="text-sm font-bold text-slate-700">{getTypeInfo(request.type)}</p>
-                        </div>
-                    </div>
 
-                    <div className="p-4 border border-slate-100 rounded-2xl space-y-2">
-                        <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Lý do chi tiết</p>
-                        <p className="text-sm text-slate-600 whitespace-pre-wrap">{request.reason}</p>
+                        {request.actualTime && (
+                            <div className="p-4 bg-primary/5 border border-primary/20 rounded-2xl flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="h-10 w-10 bg-white shadow-sm rounded-xl flex items-center justify-center text-primary">
+                                        <Clock size={20} strokeWidth={2.5} />
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] uppercase tracking-wider text-primary/60 font-black">Giờ nhân sự khai báo</p>
+                                        <p className="text-lg font-black text-primary">{request.actualTime}</p>
+                                    </div>
+                                </div>
+                                <div className="text-right hidden sm:block">
+                                    <p className="text-[9px] font-bold text-primary/30 uppercase leading-tight italic">Hệ thống sẽ dùng giờ này<br/>để tính lại công</p>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="p-5 bg-slate-50/30 border border-slate-100 rounded-3xl space-y-2">
+                            <div className="flex items-center gap-2 mb-1">
+                                <div className="w-1 h-4 bg-slate-200 rounded-full"></div>
+                                <p className="text-[11px] uppercase tracking-widest text-slate-400 font-black">Lý do chi tiết từ nhân sự</p>
+                            </div>
+                            <p className="text-[13px] leading-relaxed text-slate-600 font-medium italic pl-3">"{request.reason || 'Không có lý do chi tiết'}"</p>
+                        </div>
                     </div>
 
                     {request.images && request.images.length > 0 && (
